@@ -2,61 +2,59 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E108C433F5
-	for <linux-sparse@archiver.kernel.org>; Tue, 25 Jan 2022 04:56:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9F82CC433EF
+	for <linux-sparse@archiver.kernel.org>; Tue, 25 Jan 2022 07:26:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1343604AbiAYE4M (ORCPT
+        id S1359695AbiAYHZ5 (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Mon, 24 Jan 2022 23:56:12 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56436 "EHLO
+        Tue, 25 Jan 2022 02:25:57 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53060 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S246209AbiAYDqL (ORCPT
+        with ESMTP id S1324854AbiAYDeQ (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 24 Jan 2022 22:46:11 -0500
-Received: from mail-lj1-x235.google.com (mail-lj1-x235.google.com [IPv6:2a00:1450:4864:20::235])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 54A21C075943
-        for <linux-sparse@vger.kernel.org>; Mon, 24 Jan 2022 15:38:53 -0800 (PST)
-Received: by mail-lj1-x235.google.com with SMTP id z7so9884810ljj.4
-        for <linux-sparse@vger.kernel.org>; Mon, 24 Jan 2022 15:38:53 -0800 (PST)
+        Mon, 24 Jan 2022 22:34:16 -0500
+Received: from mail-lf1-x131.google.com (mail-lf1-x131.google.com [IPv6:2a00:1450:4864:20::131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 607C3C0604E7
+        for <linux-sparse@vger.kernel.org>; Mon, 24 Jan 2022 15:26:51 -0800 (PST)
+Received: by mail-lf1-x131.google.com with SMTP id b9so4138154lfq.6
+        for <linux-sparse@vger.kernel.org>; Mon, 24 Jan 2022 15:26:51 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=google.com; s=20210112;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=FIP6niwFiCcE5eTqnTDWmb/wrXropuAeXBH8bjmRfkM=;
-        b=VrwRqbW7mgBywTPgKBmLBf5J1mchIOr7JqxAATJJaO2MOs9YuCVpjjVNXEzsBml+wp
-         ado8O/B5hhh9+WaOXej80757SD6Mzhj0G7C9BhHFXNvvFWjgiuy15dPxWN9LkKSG3U+6
-         gpE+me8Rw51avTJbIfG4JbHAU8GoEKfJyjejlkHSYuh6vLn6mpXNjFiANAPJrwEoxGwG
-         4pZ3FS3eS7llLKrv/WOiSSLxAyUYewvLJ1UbGnehniTPMJrS/per8DLCYHyAVFn10Dcp
-         0zR68towoUo99m4ogkP8Pl1ssg2Dnq6HhdFZ0vu0iKYz6Qr7WmpUyHrojf5yKD7d03V8
-         fGqw==
+        bh=NBgHMhsHYb5HXQ+O8PZoHkhiHxJIdU56DUjgeOw50ZM=;
+        b=amUCdiSL0m5afYkcJvlv6B+YX00vtkco0vuOXEaVXqw8zkY6/J8k55JTY1gMXpWQeG
+         MrOUANHGnVZRZ4OEMRv34hVbAYiMOwcKvbuqGSPtBP/feL8rTOa1KGauoWc3GNbRoifL
+         cEzuwMIVnp9s2HgdLfDn96sAidkeqIMJdiTlzcAewubkaT+1ZP53h+cN5JiSrEzKx2Sz
+         ZO3UtZHAa5HlATWKb6J7doDopJXGZE+SejbRNdrtXmG2Csx5sjuxXJWSJkK1A6Inri+x
+         TO6AhcwPqTGciG/mvJgThVqQMLYEAr4hIvzI0/r6dDxL+GVgmnjD9rYU2aQ8ASQd/M2k
+         xXlA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=FIP6niwFiCcE5eTqnTDWmb/wrXropuAeXBH8bjmRfkM=;
-        b=qkwDTUVf+k9kzHTWNNIuAOi8lKmdtu3M6o8a5qE6rkG4p4cT2KaZ6I/ZFnLuyPTaOD
-         ndRCZPrNTGOnlMm1tDjLZsA4OIFe0v+P/1DTLvCgASX7ox2Rau2dQWPVTDBkCDzMaAZx
-         zoVlEAkUJLGhcnU8jre+cFrAw7A9p9vONUQ7YWel163S/R6EB78GcKMXwPnz0UCBj4vZ
-         J2eNCdceMj5U65qUVPIwOxVKNaiWrCLn4TUCniZnlldCSb6Re7e2V6ih2iBbsdxGRCxv
-         xBvOqzpEUXUslZSjh2GnhRJ4WVtvKBlHAGjINnwwF54ZnVWdlLYgkD25g9wuJJrJ/7Ru
-         IJ9w==
-X-Gm-Message-State: AOAM533x0P7pYO034bMbJp+3gLKbZTp0JYuYcJgafdFndUD2Ev7H2P38
-        ESYC6PbXrk55kwXcICJYETOx2oDLUvfYELwNUOt7yA==
-X-Google-Smtp-Source: ABdhPJxzHN2oG34NI+OLkIh9cUsniM7MENh8SCt8InminhPjzFucnqpWLiy0Rn4gHwCa+ALqvnw7k5IqoQt/rLjLGHg=
-X-Received: by 2002:a2e:9654:: with SMTP id z20mr12950862ljh.526.1643067531477;
- Mon, 24 Jan 2022 15:38:51 -0800 (PST)
+        bh=NBgHMhsHYb5HXQ+O8PZoHkhiHxJIdU56DUjgeOw50ZM=;
+        b=EIx1fvSVpt8QtuG9r2EM34IypT81uN0NBw2oY9QQ5KuW5YvaaG+NjZLQ7cTXzzcjA8
+         7gIAJ3bF0tvj+NByrlI7Vt/Ls1OTkMQCFzTeNx8fMHKfp3RasaQ4hDf3CRkZcygt7wcE
+         nAtwz4LnQ778TktAsNi3VayjU22jDkzaQNw5A+S5Iy3jAkGI85BVy6PyCAuH2ngolJsd
+         NpJeE9UHjCtc+Cg9s2kmI2H9Psp0HpB5R0eKZS1l6uXbKK5qQQo7q3U/IJfNPVFuYcFQ
+         UuVblU8qnh7Vfm7tqUEITDxTzzrHVFreVngOia3qOd2mL3TLWbXWu1LS5p/oExUSGCQv
+         /zwg==
+X-Gm-Message-State: AOAM532YJjobKoebIkPTwcUrGkJuZMlfceOOj6MHPxJmEUYdOgz0wRTB
+        F8uhsjyDXHQY6t+cXFQ8tZ8mp/4aAJIB2Wmby8URQg==
+X-Google-Smtp-Source: ABdhPJwUjjq3BajrUcauIDw0MehhyBj1lXL0Gg39gSWaRyznsw8JT0rhyYaGKjQ3ShI7Cz2veBCs3/Z/0CCm81swu50=
+X-Received: by 2002:a05:6512:1506:: with SMTP id bq6mr15184153lfb.444.1643066809514;
+ Mon, 24 Jan 2022 15:26:49 -0800 (PST)
 MIME-Version: 1.0
 References: <20220114010526.1776605-1-ndesaulniers@google.com>
- <YeQei0xNzMq7bFdg@zn.tnic> <20220118192256.jzk5dnceeusq7x7u@treble>
- <20220118230120.pivvson7qekfiqic@treble> <CAKwvOdmLzwz=02ypt0_1324_5-7i3Az7HizFaDMqZv__-D99uA@mail.gmail.com>
-In-Reply-To: <CAKwvOdmLzwz=02ypt0_1324_5-7i3Az7HizFaDMqZv__-D99uA@mail.gmail.com>
+ <YeQei0xNzMq7bFdg@zn.tnic> <20220118192256.jzk5dnceeusq7x7u@treble> <20220118230120.pivvson7qekfiqic@treble>
+In-Reply-To: <20220118230120.pivvson7qekfiqic@treble>
 From:   Nick Desaulniers <ndesaulniers@google.com>
-Date:   Mon, 24 Jan 2022 15:38:38 -0800
-Message-ID: <CAKwvOdm+pnKb2PU7H5W1ks8eFd3DPEtN5kzjhnz5TLLwpBLOsA@mail.gmail.com>
+Date:   Mon, 24 Jan 2022 15:26:36 -0800
+Message-ID: <CAKwvOdmLzwz=02ypt0_1324_5-7i3Az7HizFaDMqZv__-D99uA@mail.gmail.com>
 Subject: Re: [PATCH] objtool: prefer memory clobber & %= to volatile & __COUNTER__
-To:     Josh Poimboeuf <jpoimboe@redhat.com>,
-        Borislav Petkov <bp@alien8.de>
-Cc:     Vasily Gorbik <gor@linux.ibm.com>,
+To:     Josh Poimboeuf <jpoimboe@redhat.com>
+Cc:     Borislav Petkov <bp@alien8.de>, Vasily Gorbik <gor@linux.ibm.com>,
         Linus Torvalds <torvalds@linux-foundation.org>,
         Ingo Molnar <mingo@kernel.org>,
         Dave Hansen <dave.hansen@linux.intel.com>,
@@ -72,42 +70,99 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Mon, Jan 24, 2022 at 3:26 PM Nick Desaulniers
-<ndesaulniers@google.com> wrote:
+(sorry for the delay responding, took a week off last week; spent a
+lot of it thinking about this case though)
+
+On Tue, Jan 18, 2022 at 3:01 PM Josh Poimboeuf <jpoimboe@redhat.com> wrote:
 >
-> On Tue, Jan 18, 2022 at 3:01 PM Josh Poimboeuf <jpoimboe@redhat.com> wrote:
+> On Tue, Jan 18, 2022 at 11:22:59AM -0800, Josh Poimboeuf wrote:
+> > On Sun, Jan 16, 2022 at 02:32:59PM +0100, Borislav Petkov wrote:
+> > > so I like the local label and how it is more readable this way.
+> > >
+> > > So, provided the memory clobber works (I wonder here if Josh has some
+> > > concrete failing cases which could be tested with your version) and
+> > > after the nitpicks have been addressed
+> > >
+> > > Acked-by: Borislav Petkov <bp@suse.de>
 > >
-> > Apparently this patch isn't going to work after all :-(
+> > I think Nick was already able to recreate the original issue.  I'll run
+> > it through some more testing.
 > >
-> >   https://lkml.kernel.org/r/202201190632.lhlaiCBk-lkp@intel.com
+> > I wanted to make this change years ago, but couldn't because of legacy
+> > toolchains.  Here's hoping this is the final solution for those @#$%^
+> > macros.
+> >
+> > Boris, thanks for looping Nick in, I should have done so to begin with.
+
+No worries, we'll get all this sorted.  There's also
+linux-toolchains@vger.kernel.org that can help with spooky toolchain
+behavior.
+
+I suspect this is what's causing a flood of objtool warnings when we
+specify different instruction schedules via -march= (such as via
+CONFIG_MATOM), which are hiding some of the actual codegen bugs
+objtool has found in LLVM that we still need to fix.
+
+I was looking at the HAVE_ARCH_BUG implementation in
+arch/x86/include/asm/bug.h 2 weeks ago, and got the sinking feeling
+that we'll probably need labels in C code, then asm goto to ensure
+that control flow doesn't get folded in an unexpected way and which
+I'd imagine might help avoid the costs of a full compiler barrier
+(i.e. reloading all pointed-to values across it).
+
+I'll follow up more with Josh on IRC on some ideas for different
+approaches.  Having 0day bot test Josh's branches is very much
+appreciated.
+
+> Apparently this patch isn't going to work after all :-(
 >
-> I noticed in that report and
-> https://lore.kernel.org/lkml/202201190702.XNSXrMTK-lkp@intel.com/
-> that gcc-9 was used.  I wonder if %= has been fixed in gcc-10+? Have
-> there been other reports with gcc-10+ for my patch?
+>   https://lkml.kernel.org/r/202201190632.lhlaiCBk-lkp@intel.com
+
+I noticed in that report and
+https://lore.kernel.org/lkml/202201190702.XNSXrMTK-lkp@intel.com/
+that gcc-9 was used.  I wonder if %= has been fixed in gcc-10+? Have
+there been other reports with gcc-10+ for my patch?
+
+Boris' case of xfrm_output_resume is yet a third case; Boris, what
+version of gcc did you spot that with?
+
+If this is fixed in gcc-10, then we can probably add a comment with a
+FIXME link to the issue or commit to replace __COUNTER__ with %= one
+day.  If not, then we can probably come up with a reduced test case
+for the GCC devs to take a look at, then add the FIXME comment to
+kernel sources.
+
+I'm more confident that we can remove the `volatile` keyword (I was
+thinking about adding a new diagnostic to clang to warn that volatile
+is redundate+implied for asm goto or inline asm that doesn't have
+outputs) though that's not the problem here and will probably generate
+some kernel wide cleanup before we could enable such a flag.  Perhaps
+there are known compiler versions that still require the keyword for
+those cases for some reason.
+
 >
-> Boris' case of xfrm_output_resume is yet a third case; Boris, what
-> version of gcc did you spot that with?
+> With the two WARN_ONs in media_request_object_complete(), GCC apparently
+> considers the two reachable() asm statements as duplicates, and it
+> removes the second one.
+
+On Fri, Jan 14, 2022 at 1:58 PM Nathan Chancellor <nathan@kernel.org> wrote:
 >
-> If this is fixed in gcc-10, then we can probably add a comment with a
-> FIXME link to the issue or commit to replace __COUNTER__ with %= one
-> day.  If not, then we can probably come up with a reduced test case
-> for the GCC devs to take a look at, then add the FIXME comment to
-> kernel sources.
+> Perhaps it is worth mentioning in the next paragraph that this does not
+> contradict GCC's own documentation that you link to below, which
+> mentions that asm volatile statements can be reordered.
+>
+> "Note that the compiler can move even volatile asm instructions relative
+> to other code, including across jump instructions."
 
+On Sun, Jan 16, 2022 at 5:33 AM Borislav Petkov <bp@alien8.de> wrote:
+>
+> Yah, Nathan's note about talking about gcc reordering volatile inline
+> asms might make sense here as, apparently, that could have failed on gcc
+> too but it didn't for whatever reason and the most important thing is
+> that the memory clobber will prevent such reordering.
 
-$ wget https://download.01.org/0day-ci/archive/20220119/202201190702.XNSXrMTK-lkp@intel.com/config
--O .config
-$ make -j72 -s olddefconfig drivers/net/wireless/mac80211_hwsim.o
-drivers/net/wireless/mac80211_hwsim.o: warning: objtool:
-mac80211_hwsim_tx()+0x9aa: unreachable instruction
-$ gcc --version
-gcc (Debian 11.2.0-12) 11.2.0
-
-:(
-
-Let me see if I can come up with a reduced test case that I will
-report upstream to https://gcc.gnu.org/bugzilla/.
+Very much YES to both points.  Will include those in the commit
+message for whatever we come up with for the final solution.
 -- 
 Thanks,
 ~Nick Desaulniers
