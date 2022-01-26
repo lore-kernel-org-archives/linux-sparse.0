@@ -2,25 +2,59 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4B7B6C63682
-	for <linux-sparse@archiver.kernel.org>; Tue, 25 Jan 2022 23:39:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E673DC5DF62
+	for <linux-sparse@archiver.kernel.org>; Wed, 26 Jan 2022 00:59:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234920AbiAYXjc (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Tue, 25 Jan 2022 18:39:32 -0500
-Received: from gate.crashing.org ([63.228.1.57]:54754 "EHLO gate.crashing.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S234898AbiAYXjb (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 25 Jan 2022 18:39:31 -0500
-Received: from gate.crashing.org (localhost.localdomain [127.0.0.1])
-        by gate.crashing.org (8.14.1/8.14.1) with ESMTP id 20PNVUiB032739;
-        Tue, 25 Jan 2022 17:31:30 -0600
-Received: (from segher@localhost)
-        by gate.crashing.org (8.14.1/8.14.1/Submit) id 20PNVSKH032738;
-        Tue, 25 Jan 2022 17:31:28 -0600
-X-Authentication-Warning: gate.crashing.org: segher set sender to segher@kernel.crashing.org using -f
-Date:   Tue, 25 Jan 2022 17:31:28 -0600
-From:   Segher Boessenkool <segher@kernel.crashing.org>
-To:     Nick Desaulniers <ndesaulniers@google.com>
+        id S235474AbiAZA72 (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Tue, 25 Jan 2022 19:59:28 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41702 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S235473AbiAZA71 (ORCPT
+        <rfc822;linux-sparse@vger.kernel.org>);
+        Tue, 25 Jan 2022 19:59:27 -0500
+Received: from mail-lf1-x136.google.com (mail-lf1-x136.google.com [IPv6:2a00:1450:4864:20::136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 09C5FC061744
+        for <linux-sparse@vger.kernel.org>; Tue, 25 Jan 2022 16:59:27 -0800 (PST)
+Received: by mail-lf1-x136.google.com with SMTP id a28so29915228lfl.7
+        for <linux-sparse@vger.kernel.org>; Tue, 25 Jan 2022 16:59:26 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=z71P7Xp5dv6WjZqQ3zBgUE6e/dyCl8Gv6LZSgzhmEF0=;
+        b=YxkcuAon8bS+2bQjPPNAgxM2rDMFd6aoPVQ/fcKh0AkzpcJfXxuJ4rLkJlfnjnRB8f
+         jeHfmu0k5gmyMY/n9jdN0eW2fAudKR/84WqEBH2x69Bzcicm6s3a6JsQMK6w8lHb1Lps
+         ZxHzEpYXnARrogT72+tdrulFexJ0VbmbUZZJrSH10PQQ+t0/rka4hI0pksA5MwDYyDgj
+         /hzjVQmpPB+HbOh4PC+WQdi+1bMfs8etFyRfSdt6hag3sGL8Ls1pIETUseevlo0mMyNb
+         7MM7CcMS9skmdB687IiPvJNhetJiCiKab2IxnqwgGL9/qONMIm8qYYbGKF5r3ZO1fZgq
+         QiQQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=z71P7Xp5dv6WjZqQ3zBgUE6e/dyCl8Gv6LZSgzhmEF0=;
+        b=riEhLpvXi8DZTGCyDt+Jlq2PYuK4VqFmuZEzXtT0b+95o/vAu4KSWSvaSbYSnLNTvZ
+         r5trln+J3SIFse1Y6HJRdemjwywbBmSt+4Wetl+C8qUArdCVEE3ogxL0W/NcUeh80Dst
+         65A0rblTuantpsqwTxEzPCdzsP5Rfbo+epL7n5CoHBaWxoJll0uAqyarXWrEERBwVUzw
+         RnQhTz/mfesH4k/moco5V8eVwvxHHcYIHtR2WfnrWw1CdXUfFuMO9NfCK7S5M/NvkKRC
+         IgBAoioXnIjBMJ/caSP2HCl/zDGxM3drdRCd8rjf7jelO8RcG+7yucOthsiC8aogDpzY
+         7DVQ==
+X-Gm-Message-State: AOAM530DsT8TgjT+nPmY0TT9xfOLA6Ku4M5a0Ori0qxDt7t2OZqfkuGu
+        yXCnqPQOnFhgPg758Al4Rtdjbd4OQKCXnMro9704Pg==
+X-Google-Smtp-Source: ABdhPJwy4V88GdNrO9tRchz5OfI8p/bCHIpaK5dAlNpQA1JPyiTKreaA0cOPcwZEMFUN2L3ofZuzU/IpAj8pZtAGgN0=
+X-Received: by 2002:a05:6512:b0d:: with SMTP id w13mr18623372lfu.240.1643158765067;
+ Tue, 25 Jan 2022 16:59:25 -0800 (PST)
+MIME-Version: 1.0
+References: <20220114010526.1776605-1-ndesaulniers@google.com>
+ <YeQei0xNzMq7bFdg@zn.tnic> <20220118192256.jzk5dnceeusq7x7u@treble>
+ <20220118230120.pivvson7qekfiqic@treble> <CAKwvOdmLzwz=02ypt0_1324_5-7i3Az7HizFaDMqZv__-D99uA@mail.gmail.com>
+ <20220125233128.GT614@gate.crashing.org>
+In-Reply-To: <20220125233128.GT614@gate.crashing.org>
+From:   Nick Desaulniers <ndesaulniers@google.com>
+Date:   Tue, 25 Jan 2022 16:59:12 -0800
+Message-ID: <CAKwvOd=P0VAFrrUXV0z5dES9hYP2b8-KwTzyG5=ezeUve=K3QA@mail.gmail.com>
+Subject: Re: [PATCH] objtool: prefer memory clobber & %= to volatile & __COUNTER__
+To:     Segher Boessenkool <segher@kernel.crashing.org>
 Cc:     Josh Poimboeuf <jpoimboe@redhat.com>,
         Borislav Petkov <bp@alien8.de>,
         Vasily Gorbik <gor@linux.ibm.com>,
@@ -34,51 +68,65 @@ Cc:     Josh Poimboeuf <jpoimboe@redhat.com>,
         linux-kernel@vger.kernel.org, kernel test robot <lkp@intel.com>,
         Nathan Chancellor <nathan@kernel.org>,
         linux-toolchains@vger.kernel.org
-Subject: Re: [PATCH] objtool: prefer memory clobber & %= to volatile & __COUNTER__
-Message-ID: <20220125233128.GT614@gate.crashing.org>
-References: <20220114010526.1776605-1-ndesaulniers@google.com> <YeQei0xNzMq7bFdg@zn.tnic> <20220118192256.jzk5dnceeusq7x7u@treble> <20220118230120.pivvson7qekfiqic@treble> <CAKwvOdmLzwz=02ypt0_1324_5-7i3Az7HizFaDMqZv__-D99uA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAKwvOdmLzwz=02ypt0_1324_5-7i3Az7HizFaDMqZv__-D99uA@mail.gmail.com>
-User-Agent: Mutt/1.4.2.3i
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Hi!
+On Tue, Jan 25, 2022 at 3:34 PM Segher Boessenkool
+<segher@kernel.crashing.org> wrote:
+>
+> Hi!
+>
+> On Mon, Jan 24, 2022 at 03:26:36PM -0800, Nick Desaulniers wrote:
+>
+> > If this is fixed in gcc-10, then we can probably add a comment with a
+> > FIXME link to the issue or commit to replace __COUNTER__ with %= one
+> > day.  If not, then we can probably come up with a reduced test case
+> > for the GCC devs to take a look at, then add the FIXME comment to
+> > kernel sources.
+>
+> Please open a PR?
 
-On Mon, Jan 24, 2022 at 03:26:36PM -0800, Nick Desaulniers wrote:
-> I noticed in that report and
-> https://lore.kernel.org/lkml/202201190702.XNSXrMTK-lkp@intel.com/
-> that gcc-9 was used.  I wonder if %= has been fixed in gcc-10+? Have
-> there been other reports with gcc-10+ for my patch?
+https://gcc.gnu.org/bugzilla/show_bug.cgi?id=104236
 
-None of the %= code (which is trivial) has been changed since 1992.
+> > I'm more confident that we can remove the `volatile` keyword (I was
+> > thinking about adding a new diagnostic to clang to warn that volatile
+> > is redundate+implied for asm goto or inline asm that doesn't have
+> > outputs) though that's not the problem here and will probably generate
+> > some kernel wide cleanup before we could enable such a flag.
+>
+> Its main value is that it would discourage users from thinking volatile
+> is magic.  Seriously worth some pain!
 
-> If this is fixed in gcc-10, then we can probably add a comment with a
-> FIXME link to the issue or commit to replace __COUNTER__ with %= one
-> day.  If not, then we can probably come up with a reduced test case
-> for the GCC devs to take a look at, then add the FIXME comment to
-> kernel sources.
+Yeah, SGTM.
 
-Please open a PR?
+>
+> > Perhaps
+> > there are known compiler versions that still require the keyword for
+> > those cases for some reason.
+>
+> It was removed from compiler-gcc.h in 3347acc6fcd4 (which changed the
+> minimum required GCC version to GCC 5).
 
-> I'm more confident that we can remove the `volatile` keyword (I was
-> thinking about adding a new diagnostic to clang to warn that volatile
-> is redundate+implied for asm goto or inline asm that doesn't have
-> outputs) though that's not the problem here and will probably generate
-> some kernel wide cleanup before we could enable such a flag.
+```
+diff --git a/include/linux/compiler.h b/include/linux/compiler.h
+index e512f5505dad..b8fe0c23cfff 100644
+--- a/include/linux/compiler.h
++++ b/include/linux/compiler.h
+@@ -80,11 +80,25 @@ void ftrace_likely_update(struct
+ftrace_likely_data *f, int val,
 
-Its main value is that it would discourage users from thinking volatile
-is magic.  Seriously worth some pain!
+ /* Optimization barrier */
+ #ifndef barrier
+-# define barrier() __memory_barrier()
++/* The "volatile" is due to gcc bugs */
++# define barrier() __asm__ __volatile__("": : :"memory")
+```
 
-> Perhaps
-> there are known compiler versions that still require the keyword for
-> those cases for some reason.
-
-It was removed from compiler-gcc.h in 3347acc6fcd4 (which changed the
-minimum required GCC version to GCC 5).
-
-
-Segher
+I definitely wish there was a comment with a link to what "gcc bugs"
+they were referring to; otherwise who knows if it's been fixed...if
+they have been...
+-- 
+Thanks,
+~Nick Desaulniers
