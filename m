@@ -2,53 +2,78 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7201AC2BA4C
-	for <linux-sparse@archiver.kernel.org>; Wed, 26 Jan 2022 09:02:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 57AD8C63684
+	for <linux-sparse@archiver.kernel.org>; Wed, 26 Jan 2022 11:21:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238717AbiAZJCd (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Wed, 26 Jan 2022 04:02:33 -0500
-Received: from mail.neweas.com ([80.211.187.56]:41908 "EHLO mail.neweas.com"
+        id S240603AbiAZLVi (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Wed, 26 Jan 2022 06:21:38 -0500
+Received: from gate.crashing.org ([63.228.1.57]:60260 "EHLO gate.crashing.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S237684AbiAZJCc (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 26 Jan 2022 04:02:32 -0500
-Received: by mail.neweas.com (Postfix, from userid 1001)
-        id E86CEA2E60; Wed, 26 Jan 2022 09:02:17 +0000 (GMT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=neweas.com; s=mail;
-        t=1643187757; bh=344ka1ykJ0mvfujTlqCYPtTosUKgQHFWZmLJzFrWq60=;
-        h=Date:From:To:Subject:From;
-        b=IBeEUj29SvUtxGiapqFxxMqnF01XURcboO1KFaUjlDFfuWY60eWURG25ZT+bDMkw8
-         9K4FzrAJOBFo9SiKVxMdrqIrQsm/cfo0jFPVbFzEsVKh9owwHg4lvMqMWThX6RBLua
-         42c4jMvHLTCikkh3v9CBScWJb23EEjTY8do9hpT08KgDisMNtOsUxTq78abzF4CLuO
-         XvpQrSG18ceTGVRcUszYbBPxepJWUq6SZ0mMsNdeRttjIT+ei236PIzO5nHhAZvn1S
-         ikjf3N/Nl3FEYTgoXyLBtrnoT+ZBvjEKPn2BChP/5WUGi3fRJ0Wpfk9Yi1jpZFpkzA
-         vFaIRhjWgdKKw==
-Received: by mail.neweas.com for <linux-sparse@vger.kernel.org>; Wed, 26 Jan 2022 09:01:20 GMT
-Message-ID: <20220126074500-0.1.3p.oyb1.0.9c3od1v1hu@neweas.com>
-Date:   Wed, 26 Jan 2022 09:01:20 GMT
-From:   =?UTF-8?Q? "Miguel_Rodr=C3=ADguez_Garc=C3=ADa" ?= 
-        <miguel.garcia@neweas.com>
-To:     <linux-sparse@vger.kernel.org>
-Subject: Servicio de la flota
-X-Mailer: mail.neweas.com
-MIME-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+        id S233637AbiAZLVh (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Wed, 26 Jan 2022 06:21:37 -0500
+Received: from gate.crashing.org (localhost.localdomain [127.0.0.1])
+        by gate.crashing.org (8.14.1/8.14.1) with ESMTP id 20QBDv5f023172;
+        Wed, 26 Jan 2022 05:13:57 -0600
+Received: (from segher@localhost)
+        by gate.crashing.org (8.14.1/8.14.1/Submit) id 20QBDtdZ023171;
+        Wed, 26 Jan 2022 05:13:55 -0600
+X-Authentication-Warning: gate.crashing.org: segher set sender to segher@kernel.crashing.org using -f
+Date:   Wed, 26 Jan 2022 05:13:55 -0600
+From:   Segher Boessenkool <segher@kernel.crashing.org>
+To:     Nick Desaulniers <ndesaulniers@google.com>
+Cc:     Josh Poimboeuf <jpoimboe@redhat.com>,
+        Borislav Petkov <bp@alien8.de>,
+        Vasily Gorbik <gor@linux.ibm.com>,
+        Linus Torvalds <torvalds@linux-foundation.org>,
+        Ingo Molnar <mingo@kernel.org>,
+        Dave Hansen <dave.hansen@linux.intel.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
+        x86@kernel.org, llvm@lists.linux.dev, linux-sparse@vger.kernel.org,
+        linux-kernel@vger.kernel.org, kernel test robot <lkp@intel.com>,
+        Nathan Chancellor <nathan@kernel.org>,
+        linux-toolchains@vger.kernel.org, apinski@marvell.com
+Subject: Re: [PATCH] objtool: prefer memory clobber & %= to volatile & __COUNTER__
+Message-ID: <20220126111355.GU614@gate.crashing.org>
+References: <20220114010526.1776605-1-ndesaulniers@google.com> <YeQei0xNzMq7bFdg@zn.tnic> <20220118192256.jzk5dnceeusq7x7u@treble> <20220118230120.pivvson7qekfiqic@treble> <CAKwvOdmLzwz=02ypt0_1324_5-7i3Az7HizFaDMqZv__-D99uA@mail.gmail.com> <20220125233128.GT614@gate.crashing.org> <CAKwvOd=P0VAFrrUXV0z5dES9hYP2b8-KwTzyG5=ezeUve=K3QA@mail.gmail.com> <CAKwvOdnBT74081nCw2hcm2dxCacV0ume_noZ0=Q6e0UiBDF7wg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAKwvOdnBT74081nCw2hcm2dxCacV0ume_noZ0=Q6e0UiBDF7wg@mail.gmail.com>
+User-Agent: Mutt/1.4.2.3i
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Buenos d=C3=ADas:
+Hi!
 
-Le escribo para hablarle sobre una de las mejores herramientas GPS en el =
-mercado.
+On Tue, Jan 25, 2022 at 06:12:20PM -0800, Nick Desaulniers wrote:
+> Andrew clarified (thanks Andrew!) that %= can't be used as I imagined
+> https://gcc.gnu.org/bugzilla/show_bug.cgi?id=104236#c4
+> and that I think was alluded to in
+> commit 3d1e236022cc ("objtool: Prevent GCC from merging annotate_unreachable()")
+> which is fine, so I'll just need to keep usage of __COUNTER__.
 
-La herramienta, que me gustar=C3=ADa presentarle brevemente, dispone de m=
-uchas funciones =C3=BAtiles para su trabajo, que optimizan los procesos d=
-e transporte y le ayudan a realizar tareas de campo de manera m=C3=A1s ef=
-iciente.
+Aha.  Yes, %= *outputs* a unique number.  Before the assembler output
+is written %= is just a string (like any other piece of output
+template).  The output template is used for three things:
 
-=C2=BFQuiere conocer los detalles?
+1) Inline assembler statements with different output templates are not
+considered identical;
+2) Newlines and assembler statement separators (semicolons for most
+assembler dialects) are used to estimate the size of the machine code
+generated.  This is a pessimistic estimate, but within reason: for
+example you can write a million byte output with just a few characters
+of input, if you want to sabotage yourself;
+3) The output template is used at output time.
+
+The mentioned commit's message says "unfortunately older versions of GCC
+don't support it" which is mistaken.
+
+If you want two identical inline asm statements to not be considered
+identical by the compiler, you have to make them not identical.  Like by
+using __COUNTER__ for example, yes :-)
 
 
-Atentamente,
-Miguel Rodr=C3=ADguez Garc=C3=ADa
+Segher
