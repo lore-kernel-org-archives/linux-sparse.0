@@ -2,36 +2,36 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3504DC433EF
-	for <linux-sparse@archiver.kernel.org>; Tue, 15 Feb 2022 15:27:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DC0D2C43217
+	for <linux-sparse@archiver.kernel.org>; Tue, 15 Feb 2022 15:31:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239851AbiBOP1h (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Tue, 15 Feb 2022 10:27:37 -0500
-Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:46280 "EHLO
+        id S240526AbiBOPb1 (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Tue, 15 Feb 2022 10:31:27 -0500
+Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:46294 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239827AbiBOP1g (ORCPT
+        with ESMTP id S233381AbiBOPaV (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 15 Feb 2022 10:27:36 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5C3B1A644E;
-        Tue, 15 Feb 2022 07:27:18 -0800 (PST)
+        Tue, 15 Feb 2022 10:30:21 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 62915B12D0;
+        Tue, 15 Feb 2022 07:28:51 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id ECEC2615F0;
-        Tue, 15 Feb 2022 15:27:17 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 16948C340ED;
-        Tue, 15 Feb 2022 15:27:16 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 22029B81AF2;
+        Tue, 15 Feb 2022 15:28:50 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9ADCEC340ED;
+        Tue, 15 Feb 2022 15:28:47 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1644938837;
+        s=k20201202; t=1644938928;
         bh=4evH3cNV/TecPqqgb9DUIrLL/d4lvxxzjc2yTb+ALNM=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=ZBnnB51kHY+ljkmUpSjqrkjAB8t6unZ8oszdE7Aie3VSl3kHr/GnfoGYHJx4KrjWi
-         rzG+Ubb5Jg9LpU48IwMPHOQb01RddO1h2JoyxqrZyZXH6xiN6jzLNoORsqYhs5ARRQ
-         ypvd+in4Zq8yJ4McCqikRjOOhuYSl7sBh4f7yU3Vce3gKmVlKq8bzzjqv84sVHQNqc
-         /sWpjXUsXdZiPm7Lg/e8RUCsuySV0NSdhZz3dMl4lPCJP4h9HqaxZFUGmlFIBOsmaa
-         /6pG37++g1/bijn0g8ZZk5U41nzJylqFnsr15P2iSITj6aAH3xO79r+TS2fPn79tb6
-         Zg7TUn8vTUSLg==
+        b=LUaQzzKQVIrCmdHlANzQI1zD8c8VRLrdvOLbOLJycu5eDhON+VcdLthfYgBeG9BO8
+         y+TwIUOrmaFb9d57uvgOrbOQnDYqs6Jbro07BAOsWbcFuW4tHx1XaHyiAg+31a0KOu
+         Zy9c7Mi78lsXbFYMcRKTKUQdgBPwkTSXjZ5lChFq+2Kt1lnV3cq4VbcGD4+i+3aALn
+         XzXaQhgi1JGziq0RyOQVCHFd2O6yjHn91IYNOwJnlm4w7JktMk7whID2BCucEReX97
+         wkr95GCzb9AMqLY1yaD5ou1jGWSc3XNLPvwZKVCxYjsTLe74iK94GkkSVwomUYPcJC
+         +mu3LkfX/xGuA==
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Nick Desaulniers <ndesaulniers@google.com>,
@@ -40,12 +40,12 @@ Cc:     Nick Desaulniers <ndesaulniers@google.com>,
         mingo@redhat.com, bp@alien8.de, dave.hansen@linux.intel.com,
         x86@kernel.org, luc.vanoostenryck@gmail.com, adobriyan@gmail.com,
         linux-sparse@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.16 08/34] x86/bug: Merge annotate_reachable() into _BUG_FLAGS() asm
-Date:   Tue, 15 Feb 2022 10:26:31 -0500
-Message-Id: <20220215152657.580200-8-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.15 08/33] x86/bug: Merge annotate_reachable() into _BUG_FLAGS() asm
+Date:   Tue, 15 Feb 2022 10:28:06 -0500
+Message-Id: <20220215152831.580780-8-sashal@kernel.org>
 X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20220215152657.580200-1-sashal@kernel.org>
-References: <20220215152657.580200-1-sashal@kernel.org>
+In-Reply-To: <20220215152831.580780-1-sashal@kernel.org>
+References: <20220215152831.580780-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
