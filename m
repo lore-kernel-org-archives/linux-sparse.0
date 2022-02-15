@@ -2,86 +2,73 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B7CAFC433F5
-	for <linux-sparse@archiver.kernel.org>; Wed,  2 Feb 2022 20:56:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3504DC433EF
+	for <linux-sparse@archiver.kernel.org>; Tue, 15 Feb 2022 15:27:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1347346AbiBBU4J (ORCPT
-        <rfc822;linux-sparse@archiver.kernel.org>);
-        Wed, 2 Feb 2022 15:56:09 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46550 "EHLO
+        id S239851AbiBOP1h (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Tue, 15 Feb 2022 10:27:37 -0500
+Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:46280 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235461AbiBBU4H (ORCPT
+        with ESMTP id S239827AbiBOP1g (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 2 Feb 2022 15:56:07 -0500
-Received: from mail-yb1-xb49.google.com (mail-yb1-xb49.google.com [IPv6:2607:f8b0:4864:20::b49])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9F140C061714
-        for <linux-sparse@vger.kernel.org>; Wed,  2 Feb 2022 12:56:07 -0800 (PST)
-Received: by mail-yb1-xb49.google.com with SMTP id y4-20020a5b0f44000000b00611862e546dso1680843ybr.7
-        for <linux-sparse@vger.kernel.org>; Wed, 02 Feb 2022 12:56:07 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20210112;
-        h=date:message-id:mime-version:subject:from:to:cc;
-        bh=cx1XGJFOM9vV+ujVLRyBYr3s7YbuCuxv2q/Mj2t/VXY=;
-        b=Miom91qjEDgMZF68by2WdOphaXYlYcjxGQCKPhn3uKhvERmOjZvoPwNxb0+h2fk/pR
-         /5JTthMz96Wx5EzgrHxTPnfeAYcp3ZCDmX/P7/7TKMVjy7x09fASzF9wsB3LeYkmF4FA
-         aVbBg0/LEZC14qFUQReiphE+Wdiw7ZeareTm3wneA5hgdJeyyV6m7bZ/0LwWn/5aVhoJ
-         sscipcIXxHyQD3lnMykkRBE9k836RawsQ7ulT2UXzIRRdovonwz8e1HSAeUSTHPn8xMq
-         rvgx/jmtNUguHlpJqgQGCdWvqg2Jc6BgNOiiltVBeRi9HZ3ztGPPsL8g4gSqZcee9cY2
-         0r4Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:message-id:mime-version:subject:from:to:cc;
-        bh=cx1XGJFOM9vV+ujVLRyBYr3s7YbuCuxv2q/Mj2t/VXY=;
-        b=YzXN3Fvn/+8P6dk8K+ZYAMpsvTL3OqTw/UmScVmq6FXM80VWTzOkGUkjKzZcaCna6L
-         wN8O16oe7NNz8Zn6F3USgCc6Au4HhnIPDqOeJ3AQ5vVh7mkOl9Fu37omTfroqUFOdyzz
-         fWQHmWz1xQ/HWJnijLwqDZOYGb/NXUAd/RaYi2x4D5Sq4fM8VYTB2vVIlvvekS/kRdLg
-         dNmyT9KtCfcEuR9teAUtuVSfoUXC/CeYLEtahPupcylsAqJbY77HilnNR+gHFX2ANJSi
-         MdM+g9n8Vg1p/deKcuKrLV+jo1EIg04hCk2VUTAwrJ2+0/7czlYT9xt1ZpFOh6SeJR9j
-         /lBg==
-X-Gm-Message-State: AOAM531W3Tq8k9MULOoX2CMoIvr7vrHNaG1jPgtS5K8baS4av/nIpzxY
-        GjVLR63czSAWun6BDJbTNkPC/1fp/QFJvKa34X4=
-X-Google-Smtp-Source: ABdhPJzjOIdXwdMxzPKt+BAnyHps+zRIsPRjzOHXQtDzfFRtgjc/T/6/kRcAWunw6snKE7Ar13SGEnGpgafrtTQ7whk=
-X-Received: from ndesaulniers1.mtv.corp.google.com ([2620:15c:211:202:90a:a2a6:ce25:fda2])
- (user=ndesaulniers job=sendgmr) by 2002:a05:6902:1028:: with SMTP id
- x8mr41613379ybt.583.1643835366769; Wed, 02 Feb 2022 12:56:06 -0800 (PST)
-Date:   Wed,  2 Feb 2022 12:55:53 -0800
-Message-Id: <20220202205557.2260694-1-ndesaulniers@google.com>
-Mime-Version: 1.0
-X-Developer-Key: i=ndesaulniers@google.com; a=ed25519; pk=lvO/pmg+aaCb6dPhyGC1GyOCvPueDrrc8Zeso5CaGKE=
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1643835353; l=6651;
- s=20211004; h=from:subject; bh=XnpkEF4H4ongVqCF0+NLNSyetMQoOyby61mBk4p47DY=;
- b=SdUMlOeS7d9udoAwDdc3bdAJFGNhDRUrkTCaq1swi9UcYcxwZq13ZSbgwzWQokVLje1gGGZrmlzJ
- bOKCNeh/CJBE7uIqSjfgY0FkI5mTRG2wL/5cT7zW53BvZK4dB9qC
-X-Mailer: git-send-email 2.35.0.rc2.247.g8bbb082509-goog
-Subject: [PATCH] x86: bug.h: merge annotate_reachable into _BUG_FLAGS for __WARN_FLAGS
-From:   Nick Desaulniers <ndesaulniers@google.com>
-To:     Borislav Petkov <bp@alien8.de>,
-        Josh Poimboeuf <jpoimboe@redhat.com>
-Cc:     Peter Zijlstra <peterz@infradead.org>, llvm@lists.linux.dev,
-        Nick Desaulniers <ndesaulniers@google.com>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Ingo Molnar <mingo@redhat.com>,
-        Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org,
-        "H. Peter Anvin" <hpa@zytor.com>,
-        Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
-        Nathan Chancellor <nathan@kernel.org>,
-        Alexey Dobriyan <adobriyan@gmail.com>,
-        linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+        Tue, 15 Feb 2022 10:27:36 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5C3B1A644E;
+        Tue, 15 Feb 2022 07:27:18 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id ECEC2615F0;
+        Tue, 15 Feb 2022 15:27:17 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 16948C340ED;
+        Tue, 15 Feb 2022 15:27:16 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1644938837;
+        bh=4evH3cNV/TecPqqgb9DUIrLL/d4lvxxzjc2yTb+ALNM=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=ZBnnB51kHY+ljkmUpSjqrkjAB8t6unZ8oszdE7Aie3VSl3kHr/GnfoGYHJx4KrjWi
+         rzG+Ubb5Jg9LpU48IwMPHOQb01RddO1h2JoyxqrZyZXH6xiN6jzLNoORsqYhs5ARRQ
+         ypvd+in4Zq8yJ4McCqikRjOOhuYSl7sBh4f7yU3Vce3gKmVlKq8bzzjqv84sVHQNqc
+         /sWpjXUsXdZiPm7Lg/e8RUCsuySV0NSdhZz3dMl4lPCJP4h9HqaxZFUGmlFIBOsmaa
+         /6pG37++g1/bijn0g8ZZk5U41nzJylqFnsr15P2iSITj6aAH3xO79r+TS2fPn79tb6
+         Zg7TUn8vTUSLg==
+From:   Sasha Levin <sashal@kernel.org>
+To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc:     Nick Desaulniers <ndesaulniers@google.com>,
+        Josh Poimboeuf <jpoimboe@redhat.com>,
+        Sasha Levin <sashal@kernel.org>, tglx@linutronix.de,
+        mingo@redhat.com, bp@alien8.de, dave.hansen@linux.intel.com,
+        x86@kernel.org, luc.vanoostenryck@gmail.com, adobriyan@gmail.com,
+        linux-sparse@vger.kernel.org
+Subject: [PATCH AUTOSEL 5.16 08/34] x86/bug: Merge annotate_reachable() into _BUG_FLAGS() asm
+Date:   Tue, 15 Feb 2022 10:26:31 -0500
+Message-Id: <20220215152657.580200-8-sashal@kernel.org>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20220215152657.580200-1-sashal@kernel.org>
+References: <20220215152657.580200-1-sashal@kernel.org>
+MIME-Version: 1.0
+X-stable: review
+X-Patchwork-Hint: Ignore
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-In __WARN_FLAGS, we had two asm statements (abbreviated):
-asm volatile("ud2");
-asm volatile(".pushsection .discard.reachable");
+From: Nick Desaulniers <ndesaulniers@google.com>
+
+[ Upstream commit bfb1a7c91fb7758273b4a8d735313d9cc388b502 ]
+
+In __WARN_FLAGS(), we had two asm statements (abbreviated):
+
+  asm volatile("ud2");
+  asm volatile(".pushsection .discard.reachable");
 
 These pair of statements are used to trigger an exception, but then help
 objtool understand that for warnings, control flow will be restored
 immediately afterwards.
 
 The problem is that volatile is not a compiler barrier. GCC explicitly
-documents this.
+documents this:
 
 > Note that the compiler can move even volatile asm instructions
 > relative to other code, including across jump instructions.
@@ -103,35 +90,23 @@ a warning.
 To prevent instructions from being scheduled in between the two asm
 statements, merge them.
 
-This change also removes an unnecessary unreachable() asm annotation
-from BUG() in favor of __builtin_unreachable(). objtool is able to track
-that the ud2 from BUG() terminates control flow within the function.
+Also remove an unnecessary unreachable() asm annotation from BUG() in
+favor of __builtin_unreachable(). objtool is able to track that the ud2
+from BUG() terminates control flow within the function.
 
 Link: https://gcc.gnu.org/onlinedocs/gcc/Extended-Asm.html#Volatile
 Link: https://github.com/ClangBuiltLinux/linux/issues/1483
 Signed-off-by: Nick Desaulniers <ndesaulniers@google.com>
+Signed-off-by: Josh Poimboeuf <jpoimboe@redhat.com>
+Link: https://lore.kernel.org/r/20220202205557.2260694-1-ndesaulniers@google.com
+Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
-Note to reviewers:
-This patch is related but somewhat orthogonal to
-https://lore.kernel.org/llvm/20220114010526.1776605-1-ndesaulniers@google.com/.
-We're still discussing in
-https://lore.kernel.org/llvm/20220131225250.409564-1-ndesaulniers@google.com/
-whether such a barrier exists to salvage instrumentation_{begin|end}. I
-may have follow up patches based on the result of that discussion.
-Regardless of the outcome, I think this patch stands on its own merit,
-and any changes to instrumentation_{begin|end} would not undo the
-merging of asm statements done in this patch. Finally, I tried adding a
-diagnostic to clang to warn when volatile is being used in a way that's
-suspicious (https://goto.google.com/llvm-cr/D118297), but I don't think
-that will land. Thanks to Nathan for the relevant citiation of the GCC
-docs.
-
  arch/x86/include/asm/bug.h | 20 +++++++++++---------
  include/linux/compiler.h   | 21 +++++----------------
  2 files changed, 16 insertions(+), 25 deletions(-)
 
 diff --git a/arch/x86/include/asm/bug.h b/arch/x86/include/asm/bug.h
-index 84b87538a15d..f98db09bffd4 100644
+index 84b87538a15de..bab883c0b6fee 100644
 --- a/arch/x86/include/asm/bug.h
 +++ b/arch/x86/include/asm/bug.h
 @@ -22,7 +22,7 @@
@@ -149,7 +124,7 @@ index 84b87538a15d..f98db09bffd4 100644
  		     "\t.org 2b+%c3\n"					\
 -		     ".popsection"					\
 +		     ".popsection\n"					\
-+		     extra \
++		     extra						\
  		     : : "i" (__FILE__), "i" (__LINE__),		\
  			 "i" (flags),					\
  			 "i" (sizeof(struct bug_entry)));		\
@@ -167,7 +142,7 @@ index 84b87538a15d..f98db09bffd4 100644
  		     "\t.org 2b+%c1\n"					\
 -		     ".popsection"					\
 +		     ".popsection\n"					\
-+		     extra \
++		     extra						\
  		     : : "i" (flags),					\
  			 "i" (sizeof(struct bug_entry)));		\
  } while (0)
@@ -204,7 +179,7 @@ index 84b87538a15d..f98db09bffd4 100644
  } while (0)
  
 diff --git a/include/linux/compiler.h b/include/linux/compiler.h
-index 429dcebe2b99..0f7fd205ab7e 100644
+index 429dcebe2b992..0f7fd205ab7ea 100644
 --- a/include/linux/compiler.h
 +++ b/include/linux/compiler.h
 @@ -117,14 +117,6 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
@@ -252,8 +227,6 @@ index 429dcebe2b99..0f7fd205ab7e 100644
  #ifndef unreachable
  # define unreachable() do {		\
  	annotate_unreachable();		\
-
-base-commit: 26291c54e111ff6ba87a164d85d4a4e134b7315c
 -- 
-2.35.0.rc2.247.g8bbb082509-goog
+2.34.1
 
