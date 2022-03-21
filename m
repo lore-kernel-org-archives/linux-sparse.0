@@ -2,59 +2,67 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 483C1C433F5
-	for <linux-sparse@archiver.kernel.org>; Thu, 24 Feb 2022 09:10:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3ED3DC433F5
+	for <linux-sparse@archiver.kernel.org>; Mon, 21 Mar 2022 11:22:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232695AbiBXJKh (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Thu, 24 Feb 2022 04:10:37 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56704 "EHLO
+        id S1346730AbiCULXZ (ORCPT
+        <rfc822;linux-sparse@archiver.kernel.org>);
+        Mon, 21 Mar 2022 07:23:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33654 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232654AbiBXJKX (ORCPT
+        with ESMTP id S1346740AbiCULXW (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 24 Feb 2022 04:10:23 -0500
-X-Greylist: delayed 444 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Thu, 24 Feb 2022 01:09:14 PST
-Received: from mail.bizonlinellc.com (mail.bizonlinellc.com [86.105.55.245])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 84BB627AA3B
-        for <linux-sparse@vger.kernel.org>; Thu, 24 Feb 2022 01:09:14 -0800 (PST)
-Received: by mail.bizonlinellc.com (Postfix, from userid 1001)
-        id AF542A39A4; Thu, 24 Feb 2022 09:00:53 +0000 (GMT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=bizonlinellc.com;
-        s=mail; t=1645693308;
-        bh=344ka1ykJ0mvfujTlqCYPtTosUKgQHFWZmLJzFrWq60=;
-        h=Date:From:To:Subject:From;
-        b=j/3M8avR2c5g/KxVjrOzrG8n+NMmyWiTkt8WqzZk7tEyzZF52kxQ3z5aEO+ELJobK
-         EU2WIWCVyEHxrQZhq2CdGyb25d99K/e2j9iv7ifeSEJJyIYv57pxx5eXhEsZEEdAlL
-         4tIKZq6aJqcYKNYa83xaD4EJLP1o55sQo1AV16jaQ68hDklrloyPGzOw3PkstN+HqJ
-         hHkm5cJ7UviOhafrLxENPkDgMTb2Qi3AUPdwdMl/3V5cOPvf5saLy/RPeAMCgwsKop
-         MOC8ZgSssVeasnaigu+ISu1fdCHtlp0Hh4gM22mD2rU7UJMwqC3UNmFZzgH+ce4dn1
-         Jqo00sYrb3xqA==
-Received: by mail.bizonlinellc.com for <linux-sparse@vger.kernel.org>; Thu, 24 Feb 2022 09:00:07 GMT
-Message-ID: <20220224074501-0.1.3x.hgnq.0.oq9fe35pl2@bizonlinellc.com>
-Date:   Thu, 24 Feb 2022 09:00:07 GMT
-From:   =?UTF-8?Q? "Miguel_Rodr=C3=ADguez_Garc=C3=ADa" ?= 
-        <miguel.garcia@bizonlinellc.com>
-To:     <linux-sparse@vger.kernel.org>
-Subject: Servicio de la flota
-X-Mailer: mail.bizonlinellc.com
+        Mon, 21 Mar 2022 07:23:22 -0400
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 628368AE65
+        for <linux-sparse@vger.kernel.org>; Mon, 21 Mar 2022 04:21:56 -0700 (PDT)
+Received: from relay2.suse.de (relay2.suse.de [149.44.160.134])
+        by smtp-out2.suse.de (Postfix) with ESMTP id 1AA091F37F;
+        Mon, 21 Mar 2022 11:21:55 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1647861715; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+        bh=Br6sLaT5hGw1ctl289im1QR6EBomudm69hXVIWl9VR0=;
+        b=FQuOTwQqrXbKNnMlbJ+0biOJPgxmC/LaiSDLTUU+mR4ZXMtFN/7jIXkOQhEToDiYNLArCu
+        9GjdkN9u20eygbG53wzBh5U/2YFUBijIo0LFmcMI8dsR1SbQb13xoG6nG4tHqzqkj40xbx
+        T0RDt21RAJnYJYIYcRjKDisTzit50YI=
+Received: from g78.suse.de (unknown [10.163.24.182])
+        by relay2.suse.de (Postfix) with ESMTP id C8BFCA3B93;
+        Mon, 21 Mar 2022 11:21:54 +0000 (UTC)
+From:   Richard Palethorpe <rpalethorpe@suse.com>
+To:     linux-sparse@vger.kernel.org
+Cc:     ltp@lists.linux.it, Richard Palethorpe <rpalethorpe@suse.com>
+Subject: [PATCH] sparse: Use offsetof macro to silence null ptr subtraction warning
+Date:   Mon, 21 Mar 2022 11:21:19 +0000
+Message-Id: <20220321112119.23308-1-rpalethorpe@suse.com>
+X-Mailer: git-send-email 2.35.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Buenos d=C3=ADas:
+Subtracting (char *)0 is undefined behavior. Newer compilers warn
+about this unless it is done in system headers.
 
-Le escribo para hablarle sobre una de las mejores herramientas GPS en el =
-mercado.
+Signed-off-by: Richard Palethorpe <rpalethorpe@suse.com>
+---
+ token.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-La herramienta, que me gustar=C3=ADa presentarle brevemente, dispone de m=
-uchas funciones =C3=BAtiles para su trabajo, que optimizan los procesos d=
-e transporte y le ayudan a realizar tareas de campo de manera m=C3=A1s ef=
-iciente.
+diff --git a/token.h b/token.h
+index bccac0e4..9000e0cb 100644
+--- a/token.h
++++ b/token.h
+@@ -201,7 +201,7 @@ struct token {
+ 
+ static inline struct token *containing_token(struct token **p)
+ {
+-	void *addr = (char *)p - ((char *)&((struct token *)0)->next - (char *)0);
++	void *addr = (char *)p - offsetof(struct token, next);
+ 	return addr;
+ }
+ 
+-- 
+2.35.1
 
-=C2=BFQuiere conocer los detalles?
-
-
-Atentamente,
-Miguel Rodr=C3=ADguez Garc=C3=ADa
