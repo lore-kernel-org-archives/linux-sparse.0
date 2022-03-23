@@ -2,59 +2,116 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 318E3C433F5
-	for <linux-sparse@archiver.kernel.org>; Wed, 23 Mar 2022 09:12:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 904A9C433F5
+	for <linux-sparse@archiver.kernel.org>; Wed, 23 Mar 2022 19:30:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234135AbiCWJN6 (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Wed, 23 Mar 2022 05:13:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43516 "EHLO
+        id S233884AbiCWTcE (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Wed, 23 Mar 2022 15:32:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39474 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231833AbiCWJN6 (ORCPT
+        with ESMTP id S234750AbiCWTcE (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 23 Mar 2022 05:13:58 -0400
-X-Greylist: delayed 375 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Wed, 23 Mar 2022 02:12:29 PDT
-Received: from mail.boldbizthing.com (mail.boldbizthing.com [45.86.209.170])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 73B5C7561C
-        for <linux-sparse@vger.kernel.org>; Wed, 23 Mar 2022 02:12:29 -0700 (PDT)
-Received: by mail.boldbizthing.com (Postfix, from userid 1001)
-        id B24556727E; Wed, 23 Mar 2022 05:05:54 -0400 (EDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=boldbizthing.com;
-        s=mail; t=1648026372;
-        bh=344ka1ykJ0mvfujTlqCYPtTosUKgQHFWZmLJzFrWq60=;
-        h=Date:From:To:Subject:From;
-        b=fEWVWVi+6mF0o9S18bBAaeLjOrJ06giCjUgzsAZvSZaYNnryZmzR0jf2OlhGKvsfd
-         8mmG/4+YJwh0XOLNz9nO7+w5iiVcnlb3tCxV6smTvawstdob/tjD37wpMkYIKhUQxv
-         G4OZOKE0DClkYLN6btGAG30gLq7/B3pSEV8BmA2SIIDK5klk1n4Q26oJomWu8yCckE
-         BPPteptSWmmwcPW6hnpxOIw9EKQuVbSsHM8f6cCVJwHxed580dZIrbEVqX7liAW6YM
-         alKJcdKFlwktWL6EdLtmEB8M6HmYYLFby+/3mrVvXorn5NO9sz0c0kcP75lQJD5be5
-         wqAZixnYU+gQA==
-Received: by mail.boldbizthing.com for <linux-sparse@vger.kernel.org>; Wed, 23 Mar 2022 09:05:46 GMT
-Message-ID: <20220323034500-0.1.c.2vnp.0.q2pkxp2d99@boldbizthing.com>
-Date:   Wed, 23 Mar 2022 09:05:46 GMT
-From:   =?UTF-8?Q? "Miguel_Rodr=C3=ADguez_Garc=C3=ADa" ?= 
-        <miguel.garcia@boldbizthing.com>
-To:     <linux-sparse@vger.kernel.org>
-Subject: Servicio de la flota
-X-Mailer: mail.boldbizthing.com
+        Wed, 23 Mar 2022 15:32:04 -0400
+Received: from mail-yb1-xb35.google.com (mail-yb1-xb35.google.com [IPv6:2607:f8b0:4864:20::b35])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C59AA89083;
+        Wed, 23 Mar 2022 12:30:33 -0700 (PDT)
+Received: by mail-yb1-xb35.google.com with SMTP id x20so4430327ybi.5;
+        Wed, 23 Mar 2022 12:30:33 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=mime-version:from:date:message-id:subject:to:cc;
+        bh=4GBPXMmjtCwB7t0ecjf/4IevMdb1dyWXSGcgSEXFlT8=;
+        b=qtl+lhBaAMthvQDwCYrV6oxBbC+PpsvyuQLj9/TyMc0cCgyzg/Dls7Uf4lCluf5sOx
+         DLyYicn0h5x101JHYSFSrbZBA4YBboKhpgxZfOIKjKBJ2fmLJallwWJEKPTccS1jQp1N
+         pK7eIgpawC5cyF/cod72+8hmqN2tddQFpB8QHs0bk+RHqPXOLUmLC92QqzEAdKmupkbp
+         U7yHXUEuFIn0IDBY6zm3qkGjbtTWJBjSuaIvGL4CEZrV4MB7t/9F10KLzqsDEfy54MyJ
+         tD0/BzuWdLkom/QcU8WK1EwzwLFsnOdMTiBx74ASzxaxaG263bKSDlK7cM+2QoU2LSZ7
+         uqnQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:from:date:message-id:subject:to:cc;
+        bh=4GBPXMmjtCwB7t0ecjf/4IevMdb1dyWXSGcgSEXFlT8=;
+        b=3GzLuG8meCNXv/hbZx1p7QqQkbpRlU/vleKsw8M37tIme/4gUqCVw4B/dRLwTdU/E+
+         0cNJghu1NtpzlzG9JGQnrvOKrivbjsVhtHioAfqtms1/kADfuFkc/uJbXa979KmQB37w
+         uxrf8iVH8OaOK+XbZ6SQwSaXNM2qlOlPrSud57hBP+UdmT1qxTjRLFSf4P/OBEf9wWyZ
+         QCL1XpYVoKTw8X6fbfTleVDzHYz9E+CtmQqGB+BqWQ885EaYAvbt0h9N53Z7ktvdBQBf
+         nbD4UyPg9un1QD3wJ+kdRfXPtpvhHFJCwGCS7BaLxkGa/e6Ew3gl2qh9GnvbatWOLEX9
+         lokQ==
+X-Gm-Message-State: AOAM532518POkunZ1XBvJpMjiPn1p7T/vmtzYRW5ly7f1tnfGOpOi9CS
+        oXmfzI8KRyqVOofTRl4pmu/kFaHOH3VtgP99w1E=
+X-Google-Smtp-Source: ABdhPJxZ1MSoLDdKHZky2vco5xm5QrfsdbxxW3/Aqho9hXPfRJJqaLRTKCYfMAcuhHnxTxfnVEZsegttbk9HVYJbwuQ=
+X-Received: by 2002:a25:d95:0:b0:633:771f:6118 with SMTP id
+ 143-20020a250d95000000b00633771f6118mr1635509ybn.122.1648063833053; Wed, 23
+ Mar 2022 12:30:33 -0700 (PDT)
 MIME-Version: 1.0
+From:   Charlemagne Lasse <charlemagnelasse@gmail.com>
+Date:   Wed, 23 Mar 2022 20:30:22 +0100
+Message-ID: <CAFGhKbyifH1a+nAMCvWM88TK6fpNPdzFtUXPmRGnnQeePV+1sw@mail.gmail.com>
+Subject: Re: [PATCH] x86: bug.h: merge annotate_reachable into _BUG_FLAGS for __WARN_FLAGS
+To:     ndesaulniers@google.com
+Cc:     adobriyan@gmail.com, bp@alien8.de, dave.hansen@linux.intel.com,
+        hpa@zytor.com, jpoimboe@redhat.com, linux-kernel@vger.kernel.org,
+        linux-sparse@vger.kernel.org, llvm@lists.linux.dev,
+        luc.vanoostenryck@gmail.com, mingo@redhat.com, nathan@kernel.org,
+        peterz@infradead.org, tglx@linutronix.de, x86@kernel.org,
+        Sasha Levin <sashal@kernel.org>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Buenos d=C3=ADas:
+> @@ -75,9 +77,9 @@ do {                                \
+>   */
+>  #define __WARN_FLAGS(flags)                    \
+>  do {                                \
+> +    __auto_type f = BUGFLAG_WARNING|(flags);        \
+>      instrumentation_begin();                \
+> -    _BUG_FLAGS(ASM_UD2, BUGFLAG_WARNING|(flags));        \
+> -    annotate_reachable();                    \
+> +    _BUG_FLAGS(ASM_UD2, f, ASM_REACHABLE);            \
+>      instrumentation_end();                    \
+>  } while (0)
 
-Le escribo para hablarle sobre una de las mejores herramientas GPS en el =
-mercado.
+This causes following sparse warning on x86:
 
-La herramienta, que me gustar=C3=ADa presentarle brevemente, dispone de m=
-uchas funciones =C3=BAtiles para su trabajo, que optimizan los procesos d=
-e transporte y le ayudan a realizar tareas de campo de manera m=C3=A1s ef=
-iciente.
+make allnoconfig && touch init/version.c && make CHECK="sparse
+-Wshadow"  C=1 init/version.o
+#
+# No change to .config
+#
+ CALL    scripts/checksyscalls.sh
+ CALL    scripts/atomic/check-atomics.sh
+ CHK     include/generated/compile.h
+ CC      init/version.o
+ CHECK   init/version.c
+init/version.c: note: in included file (through
+include/linux/rculist.h, include/linux/pid.h, include/linux/sched.h,
+include/linux/utsname.h):
+./include/linux/rcupdate.h:1007:9: warning: symbol 'f' shadows an earlier one
+./include/linux/rcupdate.h:1001:47: originally declared here
 
-=C2=BFQuiere conocer los detalles?
 
+Affected versions (from the ones on kernel.org):
 
-Atentamente,
-Miguel Rodr=C3=ADguez Garc=C3=ADa
+* 5.17 - bfb1a7c91fb7 ("x86/bug: Merge annotate_reachable() into
+_BUG_FLAGS() asm")
+* 5.16.17 - fe0c95903a68 ("x86/bug: Merge annotate_reachable() into
+_BUG_FLAGS() asm")
+
+Cannot be seen when changing the variable name:
+
+diff --git a/arch/x86/include/asm/bug.h b/arch/x86/include/asm/bug.h
+index bab883c0b6fe..cbd11e38252a 100644
+--- a/arch/x86/include/asm/bug.h
++++ b/arch/x86/include/asm/bug.h
+@@ -77,9 +77,9 @@ do {                                \
+  */
+ #define __WARN_FLAGS(flags)                    \
+ do {                                \
+-    __auto_type f = BUGFLAG_WARNING|(flags);        \
++    __auto_type __f = BUGFLAG_WARNING|(flags);        \
+     instrumentation_begin();                \
+-    _BUG_FLAGS(ASM_UD2, f, ASM_REACHABLE);            \
++    _BUG_FLAGS(ASM_UD2, __f, ASM_REACHABLE);            \
+     instrumentation_end();                    \
+ } while (0)
