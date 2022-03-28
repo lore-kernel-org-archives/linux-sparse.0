@@ -2,128 +2,150 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 44D8BC433F5
-	for <linux-sparse@archiver.kernel.org>; Mon, 28 Mar 2022 21:20:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 55220C433F5
+	for <linux-sparse@archiver.kernel.org>; Mon, 28 Mar 2022 22:36:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229550AbiC1VVw (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Mon, 28 Mar 2022 17:21:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54774 "EHLO
+        id S229849AbiC1WiJ (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Mon, 28 Mar 2022 18:38:09 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56706 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229501AbiC1VVs (ORCPT
+        with ESMTP id S229965AbiC1WiH (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 28 Mar 2022 17:21:48 -0400
-Received: from mail-oi1-x232.google.com (mail-oi1-x232.google.com [IPv6:2607:f8b0:4864:20::232])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8B7BBDE0AA;
-        Mon, 28 Mar 2022 14:20:03 -0700 (PDT)
-Received: by mail-oi1-x232.google.com with SMTP id 12so17040074oix.12;
-        Mon, 28 Mar 2022 14:20:03 -0700 (PDT)
+        Mon, 28 Mar 2022 18:38:07 -0400
+Received: from mail-io1-xd31.google.com (mail-io1-xd31.google.com [IPv6:2607:f8b0:4864:20::d31])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 945DD4755A
+        for <linux-sparse@vger.kernel.org>; Mon, 28 Mar 2022 15:36:24 -0700 (PDT)
+Received: by mail-io1-xd31.google.com with SMTP id z7so18951324iom.1
+        for <linux-sparse@vger.kernel.org>; Mon, 28 Mar 2022 15:36:24 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=date:from:to:cc:subject:message-id:mime-version:content-disposition;
-        bh=9qRB0II6Ytegh9oDXsqAEWbvdBJG2QMLk1XoynhcSdc=;
-        b=dxqQd6nql5QXzoESlASrLi1QNkobaBAfzSkh02IyFE7xIQp9LayDWrLjad2/e4NV3e
-         xhjRuCUBFwECfaR20P33Z4CpX1MdPjRdQRUuTFiOJFcKXeBjA5r+bizltdaNZWuiSWD6
-         hn1f33L5SfUYyaf5iJIsYYAl/bx+r9sHzE1xKxI4L2A6dDqoobwqfBGMLODhu52x7k5D
-         QHqWvOHY9zBJ3N9mSrpxkEqkw5dBK70UBub3nxP9Zqnztjjy+jv21M5JKOtmDNr9/cF5
-         B5PQm8obEdKDAtVCwldxSMJh4cU1a5C9t2Aw6KmO9bB0SAvfuTQvRrz4YjkoE0rpSa29
-         dRmQ==
+        d=linuxfoundation.org; s=google;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=AExd4vaFTbJ590yLTEsxZaq1Tm0Bzwb1nLh9ynuGeIw=;
+        b=DTRFn7+l1UKGJysQuFvGqP5W+I598Bx27SczkLubNCt0VlS2qdgUPay/HmX8b6XpGC
+         PTu66/GD01WGJz9u0XQ35hx2zataUVLZX413a+wYt3JptVnM1+bb2pnMkZFqWgVlM2je
+         s4wGDP20Dm3uuXw4kmJXTzk4OU+xgUe94XwiM=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:mime-version
-         :content-disposition;
-        bh=9qRB0II6Ytegh9oDXsqAEWbvdBJG2QMLk1XoynhcSdc=;
-        b=s8CYnYUe04PlkSPi7KP7Uft8PjbZkDdrZVhH4ewb0XBE/6JTiOPtpZNN+ZPDwzVo4K
-         45fkufdR3Nf3hGd1siHqdE+fp5TF+TUHHNVDtPNM4fEHmhPnRB5k75qfDIU5i6O7Y3QI
-         LRMA91LBPgL9oITDZLE0R3iMjM08s7FYyAp7Ea9waUGqf3uG8/O52DVBCJJN1YLot6eM
-         EY8cUUdSKi9OviR2EKqv+y+b1AZoD4MX7cwO2RaaG4jLJMp2ml6Mjf1eoFAAQKN/Nxp1
-         7gKrHZ8AjMpDCMgk8XbGfknBNogQjr1BrnnNukWS4phbhj+ZV/uaq4ZUkJzF1TlwzxLo
-         jh+Q==
-X-Gm-Message-State: AOAM530i+eWTPG2cad6racpyf2hhMyJ2vqhVpDKe+Pm+1bqhK4pGed5J
-        epWyM+4ekCkFXAhLQJITujxjZ1yOdEB/qw==
-X-Google-Smtp-Source: ABdhPJyfDVaw45zbC+ieRzXi6qjNPLAoCc7QpjVc07EsaBBdS2dXFzBmXSZZyWt4sD5iyArPPUtkew==
-X-Received: by 2002:aca:705:0:b0:2d9:6bb6:5b0 with SMTP id 5-20020aca0705000000b002d96bb605b0mr621876oih.11.1648502402818;
-        Mon, 28 Mar 2022 14:20:02 -0700 (PDT)
-Received: from marsc.168.1.7 ([2804:d57:1503:f300:282c:2283:f732:e1c7])
-        by smtp.gmail.com with ESMTPSA id q9-20020a4ae649000000b00320d35fc91dsm7408930oot.24.2022.03.28.14.19.58
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 28 Mar 2022 14:20:02 -0700 (PDT)
-Date:   Mon, 28 Mar 2022 18:19:56 -0300
-From:   Marcelo Schmitt <marcelo.schmitt1@gmail.com>
-To:     corbet@lwn.net, mchehab+huawei@kernel.org, dlatypov@google.com,
-        davidgow@google.com
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=AExd4vaFTbJ590yLTEsxZaq1Tm0Bzwb1nLh9ynuGeIw=;
+        b=SN1WY9DL4MeCBehmXMHh5ry+G2ufqF0lC8TzOFt6MZQ4ZU9W7Z+l0oAmz38tN8YFd0
+         UlZQ3zkQwIbDWA78Emc0sl4vfCy9rt28AKNDKcbfr9JySLofQa7YPDLeitx8hDy0QJUY
+         yrGThQFruL6/tRAwFNc/2AerYSRFuNzh/3WIXTXDvF1VUAoE1EUGUuzI6xXU2/ZtyXLS
+         Nz4JkxWjNfw6TSoi6shhID1zlC86tAQ+ZRrUZPdfvX65aEJsW6XS3CCQq3JXRYqB0Axf
+         Vqo/56hL8uoMYVDLAwLFTdiGwXHp5oiCGuXwTTSUB1mNjUNfD6IVqk2q1YRdayHO55YT
+         Giiw==
+X-Gm-Message-State: AOAM5308+WrSBom9uczGUIxpfV/U8GfjqpSGZRneyeIh7vM8b+5yyZE6
+        tqQTNhNLZvysH36CNj81CrWzCQ==
+X-Google-Smtp-Source: ABdhPJxHgbesdx6T5wcEa6Fn7Cv//g3Oqi2VOyXANaYIxT1Jk5KGVgEj1yKkQN/+2BN4fxIYPra8Lw==
+X-Received: by 2002:a02:cb0d:0:b0:321:4041:f680 with SMTP id j13-20020a02cb0d000000b003214041f680mr13781718jap.162.1648506983900;
+        Mon, 28 Mar 2022 15:36:23 -0700 (PDT)
+Received: from [192.168.1.128] ([71.205.29.0])
+        by smtp.gmail.com with ESMTPSA id y20-20020a5d94d4000000b00640843474e2sm8434240ior.10.2022.03.28.15.36.22
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 28 Mar 2022 15:36:23 -0700 (PDT)
+Subject: Re: [PATCH] Documentation: dev-tools: Add a section for static
+ analysis tools
+To:     Marcelo Schmitt <marcelo.schmitt1@gmail.com>, corbet@lwn.net,
+        mchehab+huawei@kernel.org, dlatypov@google.com, davidgow@google.com
 Cc:     linux-doc@vger.kernel.org, linux-sparse@vger.kernel.org,
         cocci@inria.fr, smatch@vger.kernel.org,
-        linux-kernel@vger.kernel.org, skhan@linuxfoundation.org
-Subject: [PATCH] Documentation: dev-tools: Add a section for static analysis
- tools
-Message-ID: <YkImfPbNOzQBq5ZD@marsc.168.1.7>
+        linux-kernel@vger.kernel.org,
+        Shuah Khan <skhan@linuxfoundation.org>
+References: <YkImfPbNOzQBq5ZD@marsc.168.1.7>
+From:   Shuah Khan <skhan@linuxfoundation.org>
+Message-ID: <6f1e410e-4b35-eb37-153a-8f5959ef0a49@linuxfoundation.org>
+Date:   Mon, 28 Mar 2022 16:36:22 -0600
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.8.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+In-Reply-To: <YkImfPbNOzQBq5ZD@marsc.168.1.7>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Complement the Kernel Testing Guide documentation page by adding a
-section about static analysis tools.
+On 3/28/22 3:19 PM, Marcelo Schmitt wrote:
+> Complement the Kernel Testing Guide documentation page by adding a
+> section about static analysis tools.
+> 
+> Signed-off-by: Marcelo Schmitt <marcelo.schmitt1@gmail.com>
+> ---
+> Hey everyone,
+> 
+> I think this patch can be a good addition to the documentation as
+> discussed in the thread for the testing guide documentation page:
+> Link: https://lore.kernel.org/linux-doc/CABVgOS=2iYtqTVdxwH=mcFpcSuLP4cpJ4s6PKP4Gc-SH6jidgQ@mail.gmail.com/
+> 
+> If you think it would be worth it, I can try making something more
+> elaborated. Maybe provide some guidance on when to use each tool.
+> I've been studying how Linux device drivers are tested.
+> Here's a post I wrote talking about some testing tools.
+> Link: https://marcelosc.gitlab.io/how-is-linux-tested/
+> 
+> Best regards,
+> Marcelo
+> 
 
-Signed-off-by: Marcelo Schmitt <marcelo.schmitt1@gmail.com>
----
-Hey everyone,
+This a good addition to the testing overview doc. Please see a couple of
+comments below
 
-I think this patch can be a good addition to the documentation as
-discussed in the thread for the testing guide documentation page:
-Link: https://lore.kernel.org/linux-doc/CABVgOS=2iYtqTVdxwH=mcFpcSuLP4cpJ4s6PKP4Gc-SH6jidgQ@mail.gmail.com/
+>   Documentation/dev-tools/testing-overview.rst | 29 ++++++++++++++++++++
+>   1 file changed, 29 insertions(+)
+> 
+> diff --git a/Documentation/dev-tools/testing-overview.rst b/Documentation/dev-tools/testing-overview.rst
+> index 65feb81edb14..b00511109a9d 100644
+> --- a/Documentation/dev-tools/testing-overview.rst
+> +++ b/Documentation/dev-tools/testing-overview.rst
+> @@ -115,3 +115,32 @@ that none of these errors are occurring during the test.
+>   Some of these tools integrate with KUnit or kselftest and will
+>   automatically fail tests if an issue is detected.
+>   
+> +Static Analysis Tools
+> +======================
+> +
+> +In addition to testing a running kernel, one may also scout for bugs by
+> +analyzing the source code semantics. Three tools are well known for serving this
+> +purpose.
+> +
+> +Sparse can help test the kernel by performing type-checking, lock checking,
+> +value range checking, in addition to reporting various errors and warnings while
+> +examining the code. See the Documentation/dev-tools/sparse.rst documentation
+> +page for details on how to use it.
+> +> +Smatch extends Sparse and provides additional checks for programming logic
+> +mistakes such as missing breaks in switch statements, unused return values on
+> +error checking, forgetting to set an error code in the return of an error path,
+> +etc. Smatch also has tests against more serious issues such as integer
+> +overflows, null pointer dereferences, and memory leaks. See the project page at
+> +http://smatch.sourceforge.net/.
+> +
+> +We also have Coccinelle as an option within static analyzers. Coccinelle is
+> +often used to aid collateral evolution of source code, but it can also help to
+> +avoid certain bugs that have been expressed semantically. The types of tests
+> +available include API tests, tests for correct usage of kernel iterators, checks
+> +for the soundness of free operations, analysis of locking behavior, and further
+> +tests known to help keep consistent kernel usage. See the
+> +Documentation/dev-tools/coccinelle.rst documentation page for details.
+> +
+> +These static analysis tools support running tests on the whole source tree or
+> +over a specific file or directory.
+> 
 
-If you think it would be worth it, I can try making something more
-elaborated. Maybe provide some guidance on when to use each tool.
-I've been studying how Linux device drivers are tested.
-Here's a post I wrote talking about some testing tools.
-Link: https://marcelosc.gitlab.io/how-is-linux-tested/
+You can also add a couple of sentences along the lines to clarify why static
+analysis is beneficial:
 
-Best regards,
-Marcelo
+"It is easier to detect and fix problems during the development process."
 
- Documentation/dev-tools/testing-overview.rst | 29 ++++++++++++++++++++
- 1 file changed, 29 insertions(+)
+Also add a word of caution:
 
-diff --git a/Documentation/dev-tools/testing-overview.rst b/Documentation/dev-tools/testing-overview.rst
-index 65feb81edb14..b00511109a9d 100644
---- a/Documentation/dev-tools/testing-overview.rst
-+++ b/Documentation/dev-tools/testing-overview.rst
-@@ -115,3 +115,32 @@ that none of these errors are occurring during the test.
- Some of these tools integrate with KUnit or kselftest and will
- automatically fail tests if an issue is detected.
- 
-+Static Analysis Tools
-+======================
-+
-+In addition to testing a running kernel, one may also scout for bugs by
-+analyzing the source code semantics. Three tools are well known for serving this
-+purpose.
-+
-+Sparse can help test the kernel by performing type-checking, lock checking,
-+value range checking, in addition to reporting various errors and warnings while
-+examining the code. See the Documentation/dev-tools/sparse.rst documentation
-+page for details on how to use it.
-+
-+Smatch extends Sparse and provides additional checks for programming logic
-+mistakes such as missing breaks in switch statements, unused return values on
-+error checking, forgetting to set an error code in the return of an error path,
-+etc. Smatch also has tests against more serious issues such as integer
-+overflows, null pointer dereferences, and memory leaks. See the project page at
-+http://smatch.sourceforge.net/.
-+
-+We also have Coccinelle as an option within static analyzers. Coccinelle is
-+often used to aid collateral evolution of source code, but it can also help to
-+avoid certain bugs that have been expressed semantically. The types of tests
-+available include API tests, tests for correct usage of kernel iterators, checks
-+for the soundness of free operations, analysis of locking behavior, and further
-+tests known to help keep consistent kernel usage. See the
-+Documentation/dev-tools/coccinelle.rst documentation page for details.
-+
-+These static analysis tools support running tests on the whole source tree or
-+over a specific file or directory.
--- 
-2.35.1
+"Static analysis tools suffer from false positives and errors and warns need to
+  be evaluated carefully before attempting to fix them."
+  
+Reviewed-by: Shuah Khan <skhan@linuxfoundation.org>
 
+thanks,
+-- Shuah
