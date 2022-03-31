@@ -2,129 +2,154 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B5CCAC433F5
-	for <linux-sparse@archiver.kernel.org>; Thu, 31 Mar 2022 11:01:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CD136C433EF
+	for <linux-sparse@archiver.kernel.org>; Thu, 31 Mar 2022 12:10:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234866AbiCaLDJ (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Thu, 31 Mar 2022 07:03:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47220 "EHLO
+        id S235257AbiCaMMU (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Thu, 31 Mar 2022 08:12:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48564 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234869AbiCaLDI (ORCPT
+        with ESMTP id S234646AbiCaMMT (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 31 Mar 2022 07:03:08 -0400
-Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C068120596E
-        for <linux-sparse@vger.kernel.org>; Thu, 31 Mar 2022 04:01:20 -0700 (PDT)
-Received: from gallifrey.ext.pengutronix.de ([2001:67c:670:201:5054:ff:fe8d:eefb] helo=bjornoya.blackshift.org)
-        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.92)
-        (envelope-from <mkl@pengutronix.de>)
-        id 1nZsYJ-0008D1-9T
-        for linux-sparse@vger.kernel.org; Thu, 31 Mar 2022 13:01:19 +0200
-Received: from pengutronix.de (2a03-f580-87bc-d400-ffcf-bd2e-518f-8dbf.ip6.dokom21.de [IPv6:2a03:f580:87bc:d400:ffcf:bd2e:518f:8dbf])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange ECDHE (P-256) server-signature RSA-PSS (4096 bits) server-digest SHA256)
-        (Client did not present a certificate)
-        (Authenticated sender: mkl-all@blackshift.org)
-        by smtp.blackshift.org (Postfix) with ESMTPSA id C5E7D57B9C
-        for <linux-sparse@vger.kernel.org>; Thu, 31 Mar 2022 11:01:18 +0000 (UTC)
-Date:   Thu, 31 Mar 2022 13:01:18 +0200
-From:   Marc Kleine-Budde <mkl@pengutronix.de>
-To:     linux-sparse@vger.kernel.org
-Subject: building Linux for ARMv7 with llvm breaks sparse
-Message-ID: <20220331110118.vr4miyyytqlssjoi@pengutronix.de>
+        Thu, 31 Mar 2022 08:12:19 -0400
+Received: from mail-oa1-x35.google.com (mail-oa1-x35.google.com [IPv6:2001:4860:4864:20::35])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 401F61EA289;
+        Thu, 31 Mar 2022 05:10:32 -0700 (PDT)
+Received: by mail-oa1-x35.google.com with SMTP id 586e51a60fabf-df22f50e0cso7853899fac.3;
+        Thu, 31 Mar 2022 05:10:32 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=JMLH4roAssjYlqt9tXdE/1yhUcCtf54ytNBqcciXIlM=;
+        b=ijUCtOM1m7OVkDb45cGiWdBHuwTxDGwfxBnUwPRC7Q1GuaBWYJJ84njX/3Z25x3GSr
+         YfEYYMSpdZI/Z/eDfTbYg3rOnsgZCm1mXxZFCTLRt82RVayttX4XtuYMNgNGX8kfSdH0
+         LutWf5upxYJPzKRymQvj9WrsefH68XJtF68wZ8VWkklhRaxoNASjbb2wbLO++plJQToG
+         3o1gNdNICkrS07zCMwwCiTKMy6SbfeEmu9zRhQNNO+G+nmNRS3kL7db2aPEQrhuHXANd
+         Yk092aFTrKJxizm62StO2coJTxXptU0L9HkdjxFfesC1HC3id8m0pHEYauQfWfFviwmH
+         rXVw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=JMLH4roAssjYlqt9tXdE/1yhUcCtf54ytNBqcciXIlM=;
+        b=lHXfgI1Y7AnOUZOyJhfQkF8Uf8nlbj/67eyFgQs+DovGwXvUgE9zcukmoIa/oS2HCy
+         9CL7UWJBBt7h/zMIV17a6Xez/iXbZA1+Iwy7o63AZFnhd0z0ajvw+ySCQsPP3/JZTQWl
+         w66Y17PgnKptixagGWxhuP/cT8eFTaoag8LnUF0QivZBcoYYRHs3uMNvEqbQfg+Qu9Fb
+         XBBwNw3AWsMp+nG7jJLsbzRB29w1AmiGlDkoW9duSBxbTxTutKoczICsRT1OgDCxXuzk
+         WDrJR7HHOLBZ2hcBDiqE05/Chp2pI4AdkU2URUW4tHwfaxPVawSeQwrT8O2bo5qzV1F+
+         /4Pg==
+X-Gm-Message-State: AOAM5337YHLGvVN/hVF5GvypCNDgadvM3F79FhcTWFq0EBcaaCIEtm9x
+        O/U5OQG8s1KFAjicm2adFgsHcZYiiHr8yg==
+X-Google-Smtp-Source: ABdhPJwn78KkNRG8XbMBkWr82a2KaLcdLc7slrebULAC9oc6l6CKGpxbuISsQmNj7yszzscXqH2tiw==
+X-Received: by 2002:a05:6871:85:b0:d9:ac7a:7a5a with SMTP id u5-20020a056871008500b000d9ac7a7a5amr2499111oaa.9.1648728630062;
+        Thu, 31 Mar 2022 05:10:30 -0700 (PDT)
+Received: from marsc.168.1.7 ([2804:d57:1500:3a00:7d51:e2a5:f339:2aa7])
+        by smtp.gmail.com with ESMTPSA id v13-20020a4ae6cd000000b00328882a2388sm2978034oot.14.2022.03.31.05.10.25
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 31 Mar 2022 05:10:29 -0700 (PDT)
+Date:   Thu, 31 Mar 2022 09:10:23 -0300
+From:   Marcelo Schmitt <marcelo.schmitt1@gmail.com>
+To:     Dongliang Mu <mudongliangabcd@gmail.com>
+Cc:     Jonathan Corbet <corbet@lwn.net>,
+        Mauro Carvalho Chehab <mchehab+huawei@kernel.org>,
+        dlatypov@google.com, davidgow@google.com,
+        linux-doc@vger.kernel.org, linux-sparse@vger.kernel.org,
+        cocci@inria.fr, smatch@vger.kernel.org,
+        linux-kernel <linux-kernel@vger.kernel.org>,
+        skhan@linuxfoundation.org,
+        Dan Carpenter <dan.carpenter@oracle.com>, julia.lawall@inria.fr
+Subject: Re: [PATCH v3 1/2] Documentation: dev-tools: Add a section for
+ static analysis tools
+Message-ID: <YkWaL26K7UjKB0sa@marsc.168.1.7>
+References: <cover.1648674305.git.marcelo.schmitt1@gmail.com>
+ <7d793c1b9f87d9cb8ac0e858e561e108c2bf0176.1648674305.git.marcelo.schmitt1@gmail.com>
+ <CAD-N9QVvgCqbwiebjVX2_81pH_YhK+j4hhJPG3fbWbAtzFVJTQ@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="kfkwcanmbcjothur"
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-X-SA-Exim-Connect-IP: 2001:67c:670:201:5054:ff:fe8d:eefb
-X-SA-Exim-Mail-From: mkl@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-sparse@vger.kernel.org
+In-Reply-To: <CAD-N9QVvgCqbwiebjVX2_81pH_YhK+j4hhJPG3fbWbAtzFVJTQ@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
+Hi Dongliang,
 
---kfkwcanmbcjothur
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+On 03/31, Dongliang Mu wrote:
+> On Thu, Mar 31, 2022 at 12:07 PM Marcelo Schmitt
+> <marcelo.schmitt1@gmail.com> wrote:
+> >
+> > Complement the Kernel Testing Guide documentation page by adding a
+> > section about static analysis tools.
+> >
+> > Signed-off-by: Marcelo Schmitt <marcelo.schmitt1@gmail.com>
+> > Acked-by: Daniel Latypov <dlatypov@google.com>
+> > Acked-by: Dan Carpenter <dan.carpenter@oracle.com>
+> > Acked-by: Julia Lawall <julia.lawall@inria.fr>
+> > Reviewed-by: David Gow <davidgow@google.com>
+> > Reviewed-by: Shuah Khan <skhan@linuxfoundation.org>
+> > ---
+> > Change log v2 -> v3:
+> > - Added Julia's acknowledgment tag
+> >
+> > Change log v1 -> v2:
+> > - Brought generic tool characteristics to the intro paragraph
+> > - Made explicit that these tools run at compile time
+> > - Added a note of caution about false positives
+> > - Updated Coccinelle info to make it sound better and be more skimmable
+> >
+> >  Documentation/dev-tools/testing-overview.rst | 31 ++++++++++++++++++++
+> >  1 file changed, 31 insertions(+)
+> >
+> > diff --git a/Documentation/dev-tools/testing-overview.rst b/Documentation/dev-tools/testing-overview.rst
+> > index 65feb81edb14..b5e02dd3fd94 100644
+> > --- a/Documentation/dev-tools/testing-overview.rst
+> > +++ b/Documentation/dev-tools/testing-overview.rst
+> > @@ -115,3 +115,34 @@ that none of these errors are occurring during the test.
+> >  Some of these tools integrate with KUnit or kselftest and will
+> >  automatically fail tests if an issue is detected.
+> >
+> > +Static Analysis Tools
+> > +=====================
+> > +
+> > +In addition to testing a running kernel, one can also analyze kernel source code
+> > +directly (**at compile time**) using **static analysis** tools. The tools
+> > +commonly used in the kernel allow one to inspect the whole source tree or just
+> > +specific files within it. They make it easier to detect and fix problems during
+> > +the development process.
+> > +
+> > +Sparse can help test the kernel by performing type-checking, lock checking,
+> > +value range checking, in addition to reporting various errors and warnings while
+> > +examining the code. See the Documentation/dev-tools/sparse.rst documentation
+> > +page for details on how to use it.
+> > +
+> > +Smatch extends Sparse and provides additional checks for programming logic
+> > +mistakes such as missing breaks in switch statements, unused return values on
+> > +error checking, forgetting to set an error code in the return of an error path,
+> > +etc. Smatch also has tests against more serious issues such as integer
+> > +overflows, null pointer dereferences, and memory leaks. See the project page at
+> > +http://smatch.sourceforge.net/.
+> > +
+> > +Coccinelle is another static analyzer at our disposal. Coccinelle is often used
+> > +to aid refactoring and collateral evolution of source code, but it can also help
+> > +to avoid certain bugs that occur in common code patterns. The types of tests
+> > +available include API tests, tests for correct usage of kernel iterators, checks
+> > +for the soundness of free operations, analysis of locking behavior, and further
+> > +tests known to help keep consistent kernel usage. See the
+> > +Documentation/dev-tools/coccinelle.rst documentation page for details.
+> > +
+> > +Beware, though, that static analysis tools suffer from **false positives**.
+> > +Errors and warns need to be evaluated carefully before attempting to fix them.
+> 
+> Hi Marcelo,
+> 
+> Should we include static analysis tools based on LLVM? For example,
+> Clang static analysis.
 
-Hello,
+I think that would be a good addition. I haven't checked out Clang tools
+though, so it would take me a bit more time to write something about that.
 
-building a 32bit ARM kernel with llvm (LLVM=3D1 LLVM_IAS=3D1) and C=3D1 bre=
-aks
-current sparse:
-
-| sparse -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ -Wbitwise
-| -Wno-return-void -Wno-unknown-attribute -D__ARMEL__ -D__arm__
-| --arch=3Darm -mlittle-endian -m32 -Wp,-MMD,scripts/mod/.empty.o.d
-| -nostdinc -I/path/to/linux/arch/arm/include
-| -I./arch/arm/include/generated
-| -I/path/to/linux/include -I./include
-| -I/path/to/linux/arch/arm/include/uapi
-| -I./arch/arm/include/generated/uapi
-| -I/path/to/linux/include/uapi
-| -I./include/generated/uapi -include
-| /path/to/linux/include/linux/compiler-version.h
-| -include /path/to/linux/include/linux/kconfig.h
-| -include
-| /path/to/linux/include/linux/compiler_types.h
-| -D__KERNEL__ -mlittle-endian -Qunused-arguments
-| -fmacro-prefix-map=3D/path/to/linux/=3D
-| -DKBUILD_EXTRA_WARN1 -Wall -Wundef -Werror=3Dstrict-prototypes
-| -Wno-trigraphs -fno-strict-aliasing -fno-common -fshort-wchar -fno-PIE
-| -Werror=3Dimplicit-function-declaration -Werror=3Dimplicit-int
-| -Werror=3Dreturn-type -Wno-format-security -std=3Dgnu11
-| --target=3Darm-linux-gnueabi -fintegrated-as
-| -Werror=3Dunknown-warning-option -Werror=3Dignored-optimization-argument
-| -fno-dwarf2-cfi-asm -mabi=3Daapcs-linux -mfpu=3Dvfp -funwind-tables
-| -meabi gnu -marm -Wa,-W -D__LINUX_ARM_ARCH__=3D6 -march=3Darmv6k
-  ^^^^^^^^^^
-| -mtune=3Darm1136j-s -msoft-float -Uarm -fno-delete-null-pointer-checks
-| -Wno-frame-address -Wno-address-of-packed-member -O2
-| -Wframe-larger-than=3D1024 -fstack-protector-strong -Werror -Wno-gnu
-| -mno-global-merge -Wno-unused-but-set-variable
-| -Wno-unused-const-variable -fomit-frame-pointer
-| -fno-stack-clash-protection -Wdeclaration-after-statement -Wvla
-| -Wno-pointer-sign -Wcast-function-type -fno-strict-overflow
-| -fno-stack-check -Werror=3Ddate-time -Werror=3Dincompatible-pointer-types
-| -Wextra -Wunused -Wno-unused-parameter -Wmissing-declarations
-| -Wmissing-format-attribute -Wmissing-prototypes -Wold-style-definition
-| -Wmissing-include-dirs -Wunused-but-set-variable
-| -Wunused-const-variable -Wno-missing-field-initializers
-| -Wno-sign-compare -Wno-type-limits -Wno-shift-negative-value -g
-| -gdwarf-4 -I /path/to/linux/scripts/mod -I
-| ./scripts/mod -DKBUILD_MODFILE=3D'"scripts/mod/empty"'
-| -DKBUILD_BASENAME=3D'"empty"' -DKBUILD_MODNAME=3D'"empty"'
-| -D__KBUILD_MODNAME=3Dkmod_empty
-| /path/to/linux/scripts/mod/empty.c
-|=20
-| No such file: gnu
-
-regards,
-Marc
-
---=20
-Pengutronix e.K.                 | Marc Kleine-Budde           |
-Embedded Linux                   | https://www.pengutronix.de  |
-Vertretung West/Dortmund         | Phone: +49-231-2826-924     |
-Amtsgericht Hildesheim, HRA 2686 | Fax:   +49-5121-206917-5555 |
-
---kfkwcanmbcjothur
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEBsvAIBsPu6mG7thcrX5LkNig010FAmJFifsACgkQrX5LkNig
-012OjggAhlT+6c9r+sU/dl6AwRA8DMn82g/OyItc9PJ4M4tfnzy1AM2xKAf73jsj
-idD3BjI2fIG5fbANQjh9jMxTBWuPhV60uAZHcaDZQcRzU5iVA7hM3rcJdQu1gVAQ
-z0q7aCVYnC/U3TQo4QrHqs/Iw3Dx8kqI9GP1fIo6P8UMjHRITxl+1Aw48MOYx9dW
-fOL9Z+ahan8aez+7x07KDItFCGNmQrYn9IgnWkCnSnNkbR9/GDTtGgodl6eTGVOd
-t7VGhRpQBSAeLXzyw6e0W1DTxygJ5ogZ8VrNQBo+5iH3ga9kaniQjx9JQ5zL1blc
-IPcS5o/zFTzxGncfaH6Ggq75gRQy8Q==
-=xf+B
------END PGP SIGNATURE-----
-
---kfkwcanmbcjothur--
+> 
+> > --
+> > 2.35.1
+> >
