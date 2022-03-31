@@ -2,62 +2,62 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 16038C433EF
-	for <linux-sparse@archiver.kernel.org>; Thu, 31 Mar 2022 19:18:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6390AC433EF
+	for <linux-sparse@archiver.kernel.org>; Thu, 31 Mar 2022 19:22:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239667AbiCaTTr (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Thu, 31 Mar 2022 15:19:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35970 "EHLO
+        id S234314AbiCaTYQ (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Thu, 31 Mar 2022 15:24:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49550 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229894AbiCaTTq (ORCPT
+        with ESMTP id S240630AbiCaTYP (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 31 Mar 2022 15:19:46 -0400
-Received: from mail-lf1-x12f.google.com (mail-lf1-x12f.google.com [IPv6:2a00:1450:4864:20::12f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BE84F232111
-        for <linux-sparse@vger.kernel.org>; Thu, 31 Mar 2022 12:17:54 -0700 (PDT)
-Received: by mail-lf1-x12f.google.com with SMTP id e16so835240lfc.13
-        for <linux-sparse@vger.kernel.org>; Thu, 31 Mar 2022 12:17:54 -0700 (PDT)
+        Thu, 31 Mar 2022 15:24:15 -0400
+Received: from mail-lf1-x12e.google.com (mail-lf1-x12e.google.com [IPv6:2a00:1450:4864:20::12e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2F9A51D8330
+        for <linux-sparse@vger.kernel.org>; Thu, 31 Mar 2022 12:22:28 -0700 (PDT)
+Received: by mail-lf1-x12e.google.com with SMTP id t25so908965lfg.7
+        for <linux-sparse@vger.kernel.org>; Thu, 31 Mar 2022 12:22:28 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linux-foundation.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=PFXzqcLRZNjMdgT/q9WWNbQF/XlXHucaXUZ/Ewc48t0=;
-        b=EQIuAAiNQsLNCtLQcrwHm9P9bMKINsUFiUhNhWVecXtsFihAABKFO3KLpgn/UJlwhp
-         r8OGPXKCWfpRq+Yr21ykjIqIgLtWRVCYn29l6BASAytb1cQB2QEXr2uyFsdbq3XJze5X
-         hwFSv5B/glpnW00bzsm/WWZoolJJZkTphsRh8=
+        bh=4OEPCdXe2i+3HQ35ixV974j36LoFDje9fVp8XGNtV2Q=;
+        b=eL2A6Cvg7uxcHXGn1hbZHGQljpZsd0M8iYfcUVnx0fvYFqMz6SXL8ynxO++N5U/VIC
+         5QO+Wz5iKKDOyk7Mb4qVdTEtD5HACDEHmPGh3/2KaeRMUTbudvdjWtm5YDYrdeiRFluN
+         dXfcGe0Penkw+spvE141N2Hn8xGzo8QnNjWNE=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=PFXzqcLRZNjMdgT/q9WWNbQF/XlXHucaXUZ/Ewc48t0=;
-        b=Obu9Rdfscy7kOGaznXPVkip2kil2JkuiFdVASycllALS4LVcEb0YDQbOgO/1k7JhWo
-         PzTpqH84hitiC0lQb+wm8coOfz/3iE9Rs0jrK+8H4sExpbu6ziKG9Wk06RaSQl9gPEgV
-         IiLNHIAza9IU5TcAB4aQStaXLHuCMcnI+9Q8wmBljYmCW0kqsgc54o+UtoUL8Krvn90i
-         f6uKkQCkubJppGDQprTO2iNz96WMB0yLaku151LJ2dvsUS80Cy68WJTkYrxsvDQEbWWa
-         LTJXcNIbtU3s4p5YQn8JnxxtZ1LE5wyEhJdu/dypAI84Z88keKTO7j8aD7c04Z+PTx73
-         7pKg==
-X-Gm-Message-State: AOAM5314rU23w4WNXv66CwK0UARCu5nQ0xgcwaqhDtJ+5GWEgAc7mP3d
-        qql88/MNT34fNgi2GlISGZCCOU+idOXHWX1AIMY=
-X-Google-Smtp-Source: ABdhPJzb0x9WTFFcnyF7UqueNvWk3FhUNOq386RwZM6lWPimu3VfyqdSf0bcu2hs5xk/3qOPBdlRiQ==
-X-Received: by 2002:a05:6512:1698:b0:448:872b:4425 with SMTP id bu24-20020a056512169800b00448872b4425mr11475438lfb.377.1648754271027;
-        Thu, 31 Mar 2022 12:17:51 -0700 (PDT)
-Received: from mail-lf1-f49.google.com (mail-lf1-f49.google.com. [209.85.167.49])
-        by smtp.gmail.com with ESMTPSA id m13-20020ac2424d000000b0044859fdd0b7sm22504lfl.301.2022.03.31.12.17.50
+        bh=4OEPCdXe2i+3HQ35ixV974j36LoFDje9fVp8XGNtV2Q=;
+        b=kn4KXLT6b3Z5HZKAZY1+Ij5MerfI7P4gSVfOLiUK3jLmiA6TDiqlaPtHeKiJ70JvSg
+         v5AyZ4yTWIzWcyoyDVSc440wUYprgI8/msY5GAH9OeMP2jzhjenB26pqfpEHgZzhI8+x
+         tUkSapLUaAaL8Z7tZqCpZuA804OwMs1tGGxER6ejv3shwMxYTbNJwM5he6ISi20HIib2
+         r7st4+7O4jX8s+xhQai4Jb3Fn6ckecr9cZZ/hBXHd6ALknyORvZlZvwBFK13lYfLZERK
+         9eqm/vXZ/JXVCymuOXi1nR+PNZzxPh/d/+JN2YV2bVdvmKUVH+j6IzO+b67RZ9mYVKM1
+         MRnw==
+X-Gm-Message-State: AOAM531IoAFaMe0c0UZu+IMLVP/p5jgvLkD5PERxOKE7v8B4pp/RgANF
+        hVzbL9/zWyChI5XFY74GE+ntM7gzHHmYVMo0kns=
+X-Google-Smtp-Source: ABdhPJyoVKlBlksPwbnlVmhZEvMPCN5eo0lsBNCZBOSE0ZcXOPSY2943MAeJSDNtlE3yVyYiVyzklA==
+X-Received: by 2002:a05:6512:2348:b0:44a:3134:7d52 with SMTP id p8-20020a056512234800b0044a31347d52mr11351881lfu.207.1648754545931;
+        Thu, 31 Mar 2022 12:22:25 -0700 (PDT)
+Received: from mail-lf1-f44.google.com (mail-lf1-f44.google.com. [209.85.167.44])
+        by smtp.gmail.com with ESMTPSA id k10-20020a05651c10aa00b002497c4f7fadsm13015ljn.111.2022.03.31.12.22.25
         for <linux-sparse@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 31 Mar 2022 12:17:50 -0700 (PDT)
-Received: by mail-lf1-f49.google.com with SMTP id h7so946182lfl.2
-        for <linux-sparse@vger.kernel.org>; Thu, 31 Mar 2022 12:17:50 -0700 (PDT)
-X-Received: by 2002:a05:6512:b12:b0:44a:ba81:f874 with SMTP id
- w18-20020a0565120b1200b0044aba81f874mr8391329lfu.449.1648754269710; Thu, 31
- Mar 2022 12:17:49 -0700 (PDT)
+        Thu, 31 Mar 2022 12:22:25 -0700 (PDT)
+Received: by mail-lf1-f44.google.com with SMTP id h7so965906lfl.2
+        for <linux-sparse@vger.kernel.org>; Thu, 31 Mar 2022 12:22:25 -0700 (PDT)
+X-Received: by 2002:ac2:4f92:0:b0:448:7eab:c004 with SMTP id
+ z18-20020ac24f92000000b004487eabc004mr11864936lfs.27.1648754544690; Thu, 31
+ Mar 2022 12:22:24 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220331110118.vr4miyyytqlssjoi@pengutronix.de>
-In-Reply-To: <20220331110118.vr4miyyytqlssjoi@pengutronix.de>
+References: <20220331110118.vr4miyyytqlssjoi@pengutronix.de> <CAHk-=wjeC-x28rn50T1oLXayZUm_xYhmRV+N8ewAXjJVZnyUAg@mail.gmail.com>
+In-Reply-To: <CAHk-=wjeC-x28rn50T1oLXayZUm_xYhmRV+N8ewAXjJVZnyUAg@mail.gmail.com>
 From:   Linus Torvalds <torvalds@linux-foundation.org>
-Date:   Thu, 31 Mar 2022 12:17:33 -0700
-X-Gmail-Original-Message-ID: <CAHk-=wjeC-x28rn50T1oLXayZUm_xYhmRV+N8ewAXjJVZnyUAg@mail.gmail.com>
-Message-ID: <CAHk-=wjeC-x28rn50T1oLXayZUm_xYhmRV+N8ewAXjJVZnyUAg@mail.gmail.com>
+Date:   Thu, 31 Mar 2022 12:22:08 -0700
+X-Gmail-Original-Message-ID: <CAHk-=wjeYjkXDpdHwobJ1X+Tk+N8xYPe_O6CbB3zg=fKRVhYJg@mail.gmail.com>
+Message-ID: <CAHk-=wjeYjkXDpdHwobJ1X+Tk+N8xYPe_O6CbB3zg=fKRVhYJg@mail.gmail.com>
 Subject: Re: building Linux for ARMv7 with llvm breaks sparse
 To:     Marc Kleine-Budde <mkl@pengutronix.de>
 Cc:     Sparse Mailing-list <linux-sparse@vger.kernel.org>
@@ -66,20 +66,31 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Thu, Mar 31, 2022 at 4:01 AM Marc Kleine-Budde <mkl@pengutronix.de> wrote:
-> | -meabi gnu
->   ^^^^^^^^^^
+On Thu, Mar 31, 2022 at 12:17 PM Linus Torvalds
+<torvalds@linux-foundation.org> wrote:
+>
+> Does it all work if we just make the kernel use the normal
+>
+>   -meabi=gnu
+>
+> syntax instead?
 
-That's certainly technically valid syntax, but it's unusual, and it
-breaks the normal sparse "ignore stuff we don't know about" thing.
+IOW, just something like this
 
-Does it all work if we just make the kernel use the normal
+    --- a/arch/arm/Makefile
+    +++ b/arch/arm/Makefile
+    @@ -110,7 +110,7 @@ CFLAGS_ABI      +=-funwind-tables
+     endif
 
-  -meabi=gnu
+     ifeq ($(CONFIG_CC_IS_CLANG),y)
+    -CFLAGS_ABI += -meabi gnu
+    +CFLAGS_ABI += -meabi=gnu
+     endif
 
-syntax instead?
+     ifeq ($(CONFIG_CURRENT_POINTER_IN_TPIDRURO),y)
 
-And by that "all work" I mean not just sparse, but the actual real
-clang/arm build.
+that's basically what we do for all the other '-mxyz=abc' cases, so
+it's really that use of -meabi that stands out as being the odd man
+out.
 
-            Linus
+        Linus
