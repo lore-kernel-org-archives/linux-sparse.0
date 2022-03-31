@@ -2,194 +2,128 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1CCF6C433F5
-	for <linux-sparse@archiver.kernel.org>; Thu, 31 Mar 2022 17:06:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8300BC43217
+	for <linux-sparse@archiver.kernel.org>; Thu, 31 Mar 2022 18:17:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233893AbiCaRIC (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Thu, 31 Mar 2022 13:08:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44908 "EHLO
+        id S231908AbiCaSTG (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Thu, 31 Mar 2022 14:19:06 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50806 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240491AbiCaRH7 (ORCPT
+        with ESMTP id S233990AbiCaSTF (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 31 Mar 2022 13:07:59 -0400
-Received: from hall.aurel32.net (hall.aurel32.net [IPv6:2001:bc8:30d7:100::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3ABC71E3749;
-        Thu, 31 Mar 2022 10:06:10 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=aurel32.net
-        ; s=202004.hall; h=In-Reply-To:Content-Type:MIME-Version:References:
-        Message-ID:Subject:Cc:To:From:Date:Content-Transfer-Encoding:From:Reply-To:
-        Subject:Content-ID:Content-Description:X-Debbugs-Cc;
-        bh=3f2eMNjxuItbWlnls7ORiJd9i6hYLVgkXpyx1xRUb2w=; b=ASbLG4Ldhwj8OC8VYiMxB+fAOJ
-        0zPi2gq2b8M/dPFp6bnhHhws3EeV4kFx716cPnkDuyvS7jeSJJa3wxV1Xx0e6RoiourFdP659/OJ/
-        j9csR+WdDyzCIKnbtQ1e2wVrRgEhgnH8PV0qTdFcTb0YOoPP6wLXZeLUlNuKHpc6LTVMMi2pOgsJ7
-        3s1N9Ejdm+2cEnfjiQxiUVchj0RCVW0xQs33M89ORD64m737Pe1Quw4ttaSAXsxcdxr91+PmsxDwH
-        gNH71MoCQmfx7Pn/X+J+XeV0DxeP4IJlkftDg9f50VVJp0ledKFABE0MIFFbM1kFqTyMPhg6Pcm+o
-        jSTHJwvw==;
-Received: from [2a01:e34:ec5d:a741:527b:9dff:fe6e:1e10] (helo=ohm.rr44.fr)
-        by hall.aurel32.net with esmtpsa  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-        (Exim 4.94.2)
-        (envelope-from <aurelien@aurel32.net>)
-        id 1nZyFF-003XcN-Jo; Thu, 31 Mar 2022 19:06:01 +0200
-Received: from aurel32 by ohm.rr44.fr with local (Exim 4.95)
-        (envelope-from <aurelien@aurel32.net>)
-        id 1nZyFD-000mux-8S;
-        Thu, 31 Mar 2022 19:05:59 +0200
-Date:   Thu, 31 Mar 2022 19:05:59 +0200
-From:   Aurelien Jarno <aurelien@aurel32.net>
-To:     Marc Kleine-Budde <mkl@pengutronix.de>
-Cc:     linux-kernel@vger.kernel.org, stable@vger.kernel.org,
-        Kito Cheng <kito.cheng@gmail.com>,
-        Paul Walmsley <paul.walmsley@sifive.com>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Albert Ou <aou@eecs.berkeley.edu>,
-        "open list:RISC-V ARCHITECTURE" <linux-riscv@lists.infradead.org>,
-        linux-sparse@vger.kernel.org, ukl@pengutronix.de,
-        Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH] riscv: fix build with binutils 2.38
-Message-ID: <YkXfdyDISV6S6+kY@aurel32.net>
-Mail-Followup-To: Marc Kleine-Budde <mkl@pengutronix.de>,
-        linux-kernel@vger.kernel.org, stable@vger.kernel.org,
-        Kito Cheng <kito.cheng@gmail.com>,
-        Paul Walmsley <paul.walmsley@sifive.com>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Albert Ou <aou@eecs.berkeley.edu>,
-        "open list:RISC-V ARCHITECTURE" <linux-riscv@lists.infradead.org>,
-        linux-sparse@vger.kernel.org, ukl@pengutronix.de,
-        Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-References: <20220126171442.1338740-1-aurelien@aurel32.net>
- <20220331103247.y33wvkxk5vfbqohf@pengutronix.de>
- <20220331103913.2vlneq6clnheuty6@pengutronix.de>
- <20220331105112.7t3qgtilhortkiq4@pengutronix.de>
+        Thu, 31 Mar 2022 14:19:05 -0400
+Received: from mail-lf1-x132.google.com (mail-lf1-x132.google.com [IPv6:2a00:1450:4864:20::132])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 203341E533E
+        for <linux-sparse@vger.kernel.org>; Thu, 31 Mar 2022 11:17:16 -0700 (PDT)
+Received: by mail-lf1-x132.google.com with SMTP id m3so583289lfj.11
+        for <linux-sparse@vger.kernel.org>; Thu, 31 Mar 2022 11:17:15 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linux-foundation.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=gADLe4HDBmNTTRadD9I18Eo59xDMA1VeRyu9AlQVupI=;
+        b=crQ0nfYz9r5y0LNjvAz6Kl9GkH8VcN7+M3IRO0/MHMSfuwZ3QQbJPMFmMEChGOGuRi
+         lgQsMapR+mH3g1uSCfkahgw35sLDQIFcmdfsSdI3qkJ8Vg8TWDA8dUjlprf7JcAT2Psh
+         pjWsZFv1Yzq1yQ6rqecDWGyO9u5lr3MHZuD6Q=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=gADLe4HDBmNTTRadD9I18Eo59xDMA1VeRyu9AlQVupI=;
+        b=XapKeK21v3SmroTQCvnZNqiAVqpHs4e8MUPN6ZXG1aahESJd5NjIqm48/ysZ+PJpNk
+         gPh+eXz/IT8BbSipKlqSh1WJFRMh5zQsi52h3Z0Q/JZo7HxDgglwaqJBNbIRNtVrRsAF
+         gvYWQiLI9bMEGElMh7viop+hk9q7wC0w8Knv6zDyOhGKpsGyCOJIBWx5jAW8iE0/6w1e
+         OBX5jkV4gtL8L8HfH2HHT9JDvmZAIkRSBVZvRgD3SQ7wfUV2w4s7ClcB+8p6LQ7ErmZ9
+         98NmyslWadqQlxJ12pEC4b3fDqE1Y5pMSGe7hW1sVDFtnt6mlbKhaqXnuluyCoYODSqK
+         rroQ==
+X-Gm-Message-State: AOAM5319HrYbxD0EyuCSRUlJvxo+L5t6jWZPOZpSXJxDnguyv6xe1Nbo
+        ol282VU5dUVoqdocLRdknr++GgSgwJnzQ9gR
+X-Google-Smtp-Source: ABdhPJw/EOTeZ9AhoosxkJsYFyEKn627N9zgS8EcRsxI2KeCz/emA/0e944wnL5z2nQoISosB+qmOw==
+X-Received: by 2002:a05:6512:3f95:b0:448:40cd:dcab with SMTP id x21-20020a0565123f9500b0044840cddcabmr11492860lfa.517.1648750633010;
+        Thu, 31 Mar 2022 11:17:13 -0700 (PDT)
+Received: from mail-lj1-f170.google.com (mail-lj1-f170.google.com. [209.85.208.170])
+        by smtp.gmail.com with ESMTPSA id v1-20020a2e7a01000000b0024ac272d727sm2701ljc.79.2022.03.31.11.17.10
+        for <linux-sparse@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 31 Mar 2022 11:17:10 -0700 (PDT)
+Received: by mail-lj1-f170.google.com with SMTP id b43so843510ljr.10
+        for <linux-sparse@vger.kernel.org>; Thu, 31 Mar 2022 11:17:10 -0700 (PDT)
+X-Received: by 2002:a2e:9041:0:b0:24a:ce83:dcb4 with SMTP id
+ n1-20020a2e9041000000b0024ace83dcb4mr11242362ljg.291.1648750629685; Thu, 31
+ Mar 2022 11:17:09 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="skiiiUAPxBLzLTT4"
-Content-Disposition: inline
+References: <20220126171442.1338740-1-aurelien@aurel32.net>
+ <20220331103247.y33wvkxk5vfbqohf@pengutronix.de> <20220331103913.2vlneq6clnheuty6@pengutronix.de>
+ <20220331105112.7t3qgtilhortkiq4@pengutronix.de>
 In-Reply-To: <20220331105112.7t3qgtilhortkiq4@pengutronix.de>
-User-Agent: Mutt/2.1.4 (2021-12-11)
+From:   Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Thu, 31 Mar 2022 11:16:53 -0700
+X-Gmail-Original-Message-ID: <CAHk-=wjnuMD091mNbY=fRm-qFyhMjbtfiwkAFKyFehyR8bPB5A@mail.gmail.com>
+Message-ID: <CAHk-=wjnuMD091mNbY=fRm-qFyhMjbtfiwkAFKyFehyR8bPB5A@mail.gmail.com>
+Subject: Re: [PATCH] riscv: fix build with binutils 2.38
+To:     Marc Kleine-Budde <mkl@pengutronix.de>
+Cc:     Aurelien Jarno <aurelien@aurel32.net>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        stable <stable@vger.kernel.org>,
+        Kito Cheng <kito.cheng@gmail.com>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Albert Ou <aou@eecs.berkeley.edu>,
+        "open list:RISC-V ARCHITECTURE" <linux-riscv@lists.infradead.org>,
+        Sparse Mailing-list <linux-sparse@vger.kernel.org>,
+        ukl@pengutronix.de,
+        Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Content-Type: multipart/mixed; boundary="0000000000009b482f05db87ab14"
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
+--0000000000009b482f05db87ab14
+Content-Type: text/plain; charset="UTF-8"
 
---skiiiUAPxBLzLTT4
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-Hi,
-
-On 2022-03-31 12:51, Marc Kleine-Budde wrote:
-> Cc +=3D linux-sparse, Uwe, Luc Van Oostenryck
->=20
+On Thu, Mar 31, 2022 at 3:51 AM Marc Kleine-Budde <mkl@pengutronix.de> wrote:
+>
+> Cc += linux-sparse, Uwe, Luc Van Oostenryck
+>
 > tl;dr:
->=20
+>
 > A recent change in the kernel regarding the riscv -march handling breaks
 > current sparse.
->=20
-> On 31.03.2022 12:39:14, Marc Kleine-Budde wrote:
-> > On 31.03.2022 12:32:47, Marc Kleine-Budde wrote:
-> > > On 26.01.2022 18:14:42, Aurelien Jarno wrote:
-> > > > From version 2.38, binutils default to ISA spec version 20191213. T=
-his
-> > > > means that the csr read/write (csrr*/csrw*) instructions and fence.i
-> > > > instruction has separated from the `I` extension, become two standa=
-lone
-> > > > extensions: Zicsr and Zifencei. As the kernel uses those instructio=
-n,
-> > > > this causes the following build failure:
-> > > >=20
-> > > >   CC      arch/riscv/kernel/vdso/vgettimeofday.o
-> > > >   <<BUILDDIR>>/arch/riscv/include/asm/vdso/gettimeofday.h: Assemble=
-r messages:
-> > > >   <<BUILDDIR>>/arch/riscv/include/asm/vdso/gettimeofday.h:71: Error=
-: unrecognized opcode `csrr a5,0xc01'
-> > > >   <<BUILDDIR>>/arch/riscv/include/asm/vdso/gettimeofday.h:71: Error=
-: unrecognized opcode `csrr a5,0xc01'
-> > > >   <<BUILDDIR>>/arch/riscv/include/asm/vdso/gettimeofday.h:71: Error=
-: unrecognized opcode `csrr a5,0xc01'
-> > > >   <<BUILDDIR>>/arch/riscv/include/asm/vdso/gettimeofday.h:71: Error=
-: unrecognized opcode `csrr a5,0xc01'
-> > > >=20
-> > > > The fix is to specify those extensions explicitely in -march. Howev=
-er as
-> > > > older binutils version do not support this, we first need to detect
-> > > > that.
-> > > >=20
-> > > > Cc: stable@vger.kernel.org # 4.15+
-> > > > Cc: Kito Cheng <kito.cheng@gmail.com>
-> > > > Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
-> > > > ---
-> > > >  arch/riscv/Makefile | 6 ++++++
-> > > >  1 file changed, 6 insertions(+)
-> > > >=20
-> > > > diff --git a/arch/riscv/Makefile b/arch/riscv/Makefile
-> > > > index 8a107ed18b0d..7d81102cffd4 100644
-> > > > --- a/arch/riscv/Makefile
-> > > > +++ b/arch/riscv/Makefile
-> > > > @@ -50,6 +50,12 @@ riscv-march-$(CONFIG_ARCH_RV32I)	:=3D rv32ima
-> > > >  riscv-march-$(CONFIG_ARCH_RV64I)	:=3D rv64ima
-> > > >  riscv-march-$(CONFIG_FPU)		:=3D $(riscv-march-y)fd
-> > > >  riscv-march-$(CONFIG_RISCV_ISA_C)	:=3D $(riscv-march-y)c
-> > > > +
-> > > > +# Newer binutils versions default to ISA spec version 20191213 whi=
-ch moves some
-> > > > +# instructions from the I extension to the Zicsr and Zifencei exte=
-nsions.
-> > > > +toolchain-need-zicsr-zifencei :=3D $(call cc-option-yn, -march=3D$=
-(riscv-march-y)_zicsr_zifencei)
-> > > > +riscv-march-$(toolchain-need-zicsr-zifencei) :=3D $(riscv-march-y)=
-_zicsr_zifencei
-> > > > +
-> > > >  KBUILD_CFLAGS +=3D -march=3D$(subst fd,,$(riscv-march-y))
-> > > >  KBUILD_AFLAGS +=3D -march=3D$(riscv-march-y)
-> > >=20
-> > > I'm on current linus/master, this change breaks on current Debian
-> > > testing with:
-> > >=20
-> > > | make: Leaving directory 'linux'
-> > > |   SYNC    include/config/auto.conf.cmd
-> > > |   GEN     Makefile
-> > > |   GEN     Makefile
-> > > |   CC      scripts/mod/empty.o
-> > > |   CHECK   linux/scripts/mod/empty.c
-> >       ^^^^^
-> > It's actually "sparse" that breaks
-> >      =20
-> > > | invalid argument to '-march': '_zicsr_zifencei'
-> >=20
-> > | $ sparse --version
-> > | 0.6.4 (Debian: 0.6.4-2)
 
-I confirm the issue. To make things clear, it's not a Makefile issue,
-sparse get passed the correct -march=3Drv64ima_zicsr_zifencei value, and
-only display the part it can't parse.
+Gaah. Normally sparse doesn't even look at the -march flag, but for
+riscv it does, because it's meaningful for the predefined macros.
 
-On the medium/long term, sparse should get fixed to support those
-extensions. On the short term, we need to find a way to get different
-flags for sparse than for as/gcc.
+Maybe that 'die()' shouldn't be so fatal. And maybe add a few more
+extensions (but ignore them) to the parsing.
 
---=20
-Aurelien Jarno                          GPG: 4096R/1DDD8C9B
-aurelien@aurel32.net                 http://www.aurel32.net
+Something ENTIRELY UNTESTED like the attached.
 
---skiiiUAPxBLzLTT4
-Content-Type: application/pgp-signature; name="signature.asc"
+               Linus
 
------BEGIN PGP SIGNATURE-----
+--0000000000009b482f05db87ab14
+Content-Type: text/x-patch; charset="US-ASCII"; name="patch.diff"
+Content-Disposition: attachment; filename="patch.diff"
+Content-Transfer-Encoding: base64
+Content-ID: <f_l1fbjlbv0>
+X-Attachment-Id: f_l1fbjlbv0
 
-iQIzBAEBCgAdFiEEUryGlb40+QrX1Ay4E4jA+JnoM2sFAmJF33QACgkQE4jA+Jno
-M2sqXA/+JZFawgBGA44DcdLHwmYpdemBwyO0wcocBTWOPT8gxXVkONxfrYiWfB6e
-BF6P7Iesr+8u7qMNyurMcJTDx4XfHQIpQJ8SGQ5/jW/UU6I1JDctvortsmqcgNEq
-LqAJ2tlkPhhoMcXzp+QjqsGxDMMqfsPiLBaQk2wL5VuFRCbYV+kZUk4puF1x1NV9
-K5fnMzYD+A0KwsUmKnmcrfWrKep9bbuXtPo2shBuqaeW+pe/0NlAp/+BQUc21aJ4
-L0f29kzQq2c789WEAhkjpRA7QAZF/3M0msd7PC+I5pDbKJuHSxtXGSkf7tTn8Hyh
-VdWu7wyg+vCOvc/9IA6WLi05ipYIHKZpUkqRDz/4MuH5S19FoVr/0Gdjoq2Ck1mG
-NcYeJgvnTOBJyOUQ7in60EDiWDigzuCVKWvFdkXePfwR50Hj4EH+oCoN1IFlgzkd
-PDq67/pMmun2YzkAagswesdwDQ5DiZ7rPQZ4RiICdR5GWKhs/GZcpI8u0I9ozUXK
-LtYLik/d12pFWjLYZ+s+OP0oigT2F40BuvF/Aua5WIaZ+fx7w0wp2HSYj9S0n9rT
-IRB7npjqqjluMMsr7TQyRZHala38YN4arptBK49pDbvu3IBDiVXGeVxGq89cHhsv
-QAobzMtiKzTIaZrfxvPfK31w33gBq2nz5fboIaRHefS+49FycjY=
-=On2l
------END PGP SIGNATURE-----
-
---skiiiUAPxBLzLTT4--
+IHRhcmdldC1yaXNjdi5jIHwgMTQgKysrKysrKysrKysrLS0KIDEgZmlsZSBjaGFuZ2VkLCAxMiBp
+bnNlcnRpb25zKCspLCAyIGRlbGV0aW9ucygtKQoKZGlmZiAtLWdpdCBhL3RhcmdldC1yaXNjdi5j
+IGIvdGFyZ2V0LXJpc2N2LmMKaW5kZXggNmQ5MTEzYzEuLjIwMWFjMzc1IDEwMDY0NAotLS0gYS90
+YXJnZXQtcmlzY3YuYworKysgYi90YXJnZXQtcmlzY3YuYwpAQCAtMyw2ICszLDcgQEAKICNpbmNs
+dWRlICJ0YXJnZXQuaCIKICNpbmNsdWRlICJtYWNoaW5lLmgiCiAjaW5jbHVkZSA8c3RyaW5nLmg+
+CisjaW5jbHVkZSA8c3RkaW8uaD4KIAogI2RlZmluZSBSSVNDVl8zMkJJVAkoMSA8PCAwKQogI2Rl
+ZmluZSBSSVNDVl82NEJJVAkoMSA8PCAxKQpAQCAtNDcsNiArNDgsMTIgQEAgc3RhdGljIHZvaWQg
+cGFyc2VfbWFyY2hfcmlzY3YoY29uc3QgY2hhciAqYXJnKQogCQl7ICJuIiwJCTAgfSwKIAkJeyAi
+aCIsCQkwIH0sCiAJCXsgInMiLAkJMCB9LAorCQl7ICJpIiwJCTAgfSwKKwkJeyAiZSIsCQkwIH0s
+CisJCXsgIl8iLAkJMCB9LAorCQl7ICJDb3VudGVycyIsCTAgfSwKKwkJeyAiWmljc3IiLAkwIH0s
+CisJCXsgIlppZmVuY2VpIiwJMCB9LAogCX07CiAJaW50IGk7CiAKQEAgLTYwLDcgKzY3LDEwIEBA
+IHN0YXRpYyB2b2lkIHBhcnNlX21hcmNoX3Jpc2N2KGNvbnN0IGNoYXIgKmFyZykKIAkJCWdvdG8g
+ZXh0OwogCQl9CiAJfQotCWRpZSgiaW52YWxpZCBhcmd1bWVudCB0byAnLW1hcmNoJzogJyVzJ1xu
+IiwgYXJnKTsKKwordW5rbm93bjoKKwlmcHJpbnRmKHN0ZGVyciwgIldBUk5JTkc6IGludmFsaWQg
+YXJndW1lbnQgdG8gJy1tYXJjaCc6ICclcydcbiIsIGFyZyk7CisJcmV0dXJuOwogCiBleHQ6CiAJ
+Zm9yIChpID0gMDsgaSA8IEFSUkFZX1NJWkUoZXh0ZW5zaW9ucyk7IGkrKykgewpAQCAtNzMsNyAr
+ODMsNyBAQCBleHQ6CiAJCX0KIAl9CiAJaWYgKGFyZ1swXSkKLQkJZGllKCJpbnZhbGlkIGFyZ3Vt
+ZW50IHRvICctbWFyY2gnOiAnJXMnXG4iLCBhcmcpOworCQlnb3RvIHVua25vd247CiB9CiAKIHN0
+YXRpYyB2b2lkIGluaXRfcmlzY3YoY29uc3Qgc3RydWN0IHRhcmdldCAqc2VsZikK
+--0000000000009b482f05db87ab14--
