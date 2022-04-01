@@ -2,98 +2,120 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 27355C433FE
-	for <linux-sparse@archiver.kernel.org>; Fri,  1 Apr 2022 00:22:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 855ECC433EF
+	for <linux-sparse@archiver.kernel.org>; Fri,  1 Apr 2022 06:53:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231857AbiDAAYJ (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Thu, 31 Mar 2022 20:24:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42380 "EHLO
+        id S245108AbiDAGzO (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Fri, 1 Apr 2022 02:55:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49136 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235340AbiDAAYG (ORCPT
+        with ESMTP id S235013AbiDAGzN (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 31 Mar 2022 20:24:06 -0400
-Received: from mail-wm1-x330.google.com (mail-wm1-x330.google.com [IPv6:2a00:1450:4864:20::330])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 18BC923F9E0
-        for <linux-sparse@vger.kernel.org>; Thu, 31 Mar 2022 17:22:18 -0700 (PDT)
-Received: by mail-wm1-x330.google.com with SMTP id p26-20020a05600c1d9a00b0038ccbff1951so2616775wms.1
-        for <linux-sparse@vger.kernel.org>; Thu, 31 Mar 2022 17:22:18 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=SKqz1Mdn+a76YTOAN4pkLcsDdxqMIb341GyJ1mMbn4g=;
-        b=r7/0P+gLeJObOX79hjnX/5UuEQeJl4zuAbrJGyhV08YNdiRMj8TzrvJbe5YkmUAGWY
-         mZhA9emHoEHCn4lEv4EvNc8fqo4nqUyfDQFq4BEwCQx/DTtnpWDwjd3/IaEZsI8pSqyS
-         WjpMp3DpVBxwsEJ95nCBJ+/pczjqk7ilCSfpnVILZ7SWNsYZmbp3MDKNhETQzOYksHYF
-         qhGFQxDs8lUwKxvSdlJn+vSLlyHqbuXTRb1N11WJyph0kUPERw3FVbCryrZTBj2Tweo9
-         RJpGE7f0J9S2buBc0BEs6Q2CQdJ5UwjnCB//QwYVmRQoKId9dxhttnNc/CCDe/PtT7UL
-         PY6Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=SKqz1Mdn+a76YTOAN4pkLcsDdxqMIb341GyJ1mMbn4g=;
-        b=y3WgmAX/1RyTH2BAA26x51bi/tcuzYZh6fmpz+rFHQNnrcaGv8yc2h89WGVVjGxiUD
-         8+kHy5RBPHscqFb5xs1mw+lJXxjDjruVWCDszf33W2xxV2d5+IllWxGLxhYTRpEuMzS8
-         GIrnRgHenQIqzQsbl9Sgcl+SOHXZwznZsfV8AWzFBqhFSgtLmSTctcuFn9icIKVxAU9m
-         k64Y41pnMl5akC0Ud8mHPfCIJyDn5X5WNt1yQ4hg7aJS9m69AOm7hJ8bDl6KjY4n3+Eq
-         1V4HfNpO4msRycRhRKk81Wv/x3998/EmZl0JDNG7SCaqr6ueQbs2uMH+iOIkpf78ORWT
-         hSrg==
-X-Gm-Message-State: AOAM53295Nubrr5gDf4ykq+BmhcSpgUQrA+b1lABgyTit4pSMV1s4JSZ
-        TjCmyqdL0/T5IAGu5nzyTlNCLpvTO+nAjRVdTkX27A==
-X-Google-Smtp-Source: ABdhPJyXs2kiijhvj7ZEIkf4LgFEBAL3bNGbwnp9Hp9Ce+KJcEqlpKTa5nUQk4PlzawW8Gaz7vFgZm/0MW22sAEhJh4=
-X-Received: by 2002:a05:600c:4f48:b0:38c:a460:cb6 with SMTP id
- m8-20020a05600c4f4800b0038ca4600cb6mr6654078wmq.96.1648772536629; Thu, 31 Mar
- 2022 17:22:16 -0700 (PDT)
-MIME-Version: 1.0
-References: <cover.1648674305.git.marcelo.schmitt1@gmail.com> <62f461a20600b95e694016c4e5348ef2e260fa87.1648674305.git.marcelo.schmitt1@gmail.com>
-In-Reply-To: <62f461a20600b95e694016c4e5348ef2e260fa87.1648674305.git.marcelo.schmitt1@gmail.com>
-From:   David Gow <davidgow@google.com>
-Date:   Fri, 1 Apr 2022 08:22:05 +0800
-Message-ID: <CABVgOSktSP6GwU+zfJLC7A-UZUKT0QHSmACG-ScFDhb34Jf-aw@mail.gmail.com>
-Subject: Re: [PATCH v3 2/2] Documentation: dev-tools: Enhance static analysis
- section with discussion
-To:     Marcelo Schmitt <marcelo.schmitt1@gmail.com>
-Cc:     Jonathan Corbet <corbet@lwn.net>,
-        Mauro Carvalho Chehab <mchehab+huawei@kernel.org>,
-        Daniel Latypov <dlatypov@google.com>,
-        "open list:DOCUMENTATION" <linux-doc@vger.kernel.org>,
-        linux-sparse@vger.kernel.org, cocci@inria.fr,
-        smatch@vger.kernel.org,
+        Fri, 1 Apr 2022 02:55:13 -0400
+Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0AB4A6419
+        for <linux-sparse@vger.kernel.org>; Thu, 31 Mar 2022 23:53:24 -0700 (PDT)
+Received: from gallifrey.ext.pengutronix.de ([2001:67c:670:201:5054:ff:fe8d:eefb] helo=bjornoya.blackshift.org)
+        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
+        (Exim 4.92)
+        (envelope-from <mkl@pengutronix.de>)
+        id 1naB9k-00025p-1L; Fri, 01 Apr 2022 08:53:12 +0200
+Received: from pengutronix.de (2a03-f580-87bc-d400-a2e4-7752-b370-a958.ip6.dokom21.de [IPv6:2a03:f580:87bc:d400:a2e4:7752:b370:a958])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange ECDHE (P-256) server-signature RSA-PSS (4096 bits) server-digest SHA256)
+        (Client did not present a certificate)
+        (Authenticated sender: mkl-all@blackshift.org)
+        by smtp.blackshift.org (Postfix) with ESMTPSA id 1B3C458411;
+        Fri,  1 Apr 2022 06:53:10 +0000 (UTC)
+Date:   Fri, 1 Apr 2022 08:53:09 +0200
+From:   Marc Kleine-Budde <mkl@pengutronix.de>
+To:     Linus Torvalds <torvalds@linux-foundation.org>
+Cc:     Aurelien Jarno <aurelien@aurel32.net>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Shuah Khan <skhan@linuxfoundation.org>,
-        Dan Carpenter <dan.carpenter@oracle.com>, julia.lawall@inria.fr
-Content-Type: text/plain; charset="UTF-8"
+        stable <stable@vger.kernel.org>,
+        Kito Cheng <kito.cheng@gmail.com>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Albert Ou <aou@eecs.berkeley.edu>,
+        "open list:RISC-V ARCHITECTURE" <linux-riscv@lists.infradead.org>,
+        Sparse Mailing-list <linux-sparse@vger.kernel.org>,
+        ukl@pengutronix.de,
+        Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH] riscv: fix build with binutils 2.38
+Message-ID: <20220401065309.dizbkleyw44auhbo@pengutronix.de>
+References: <20220126171442.1338740-1-aurelien@aurel32.net>
+ <20220331103247.y33wvkxk5vfbqohf@pengutronix.de>
+ <20220331103913.2vlneq6clnheuty6@pengutronix.de>
+ <20220331105112.7t3qgtilhortkiq4@pengutronix.de>
+ <CAHk-=wjnuMD091mNbY=fRm-qFyhMjbtfiwkAFKyFehyR8bPB5A@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="5jl2rqq57omr4yri"
+Content-Disposition: inline
+In-Reply-To: <CAHk-=wjnuMD091mNbY=fRm-qFyhMjbtfiwkAFKyFehyR8bPB5A@mail.gmail.com>
+X-SA-Exim-Connect-IP: 2001:67c:670:201:5054:ff:fe8d:eefb
+X-SA-Exim-Mail-From: mkl@pengutronix.de
+X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
+X-PTX-Original-Recipient: linux-sparse@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Thu, Mar 31, 2022 at 5:50 AM Marcelo Schmitt
-<marcelo.schmitt1@gmail.com> wrote:
->
-> Enhance the static analysis tools section with a discussion on when to
-> use each of them.
->
-> This was mainly taken from Dan Carpenter and Julia Lawall's comments on
-> a previous documentation patch for static analysis tools.
->
-> Lore: https://lore.kernel.org/linux-doc/20220329090911.GX3293@kadam/T/#mb97770c8e938095aadc3ee08f4ac7fe32ae386e6
->
-> Signed-off-by: Marcelo Schmitt <marcelo.schmitt1@gmail.com>
-> Acked-by: David Gow <davidgow@google.com>
-> Cc: Dan Carpenter <dan.carpenter@oracle.com>
-> Cc: Julia Lawall <julia.lawall@inria.fr>
-> ---
-> Change log v2 -> v3:
-> - Changed the paragraph about Sparse to make it sound better (hopefully)
-> - Minor adjusts to make the considerations about Coccinelle sound better
->   and be precise
 
-These (plus the cut down note on Sparse/Smatch overlaps) are
-definitely an improvement.
+--5jl2rqq57omr4yri
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Assuming no-one with more knowledge of these that me objects, I think
-this is good-to-go!
+On 31.03.2022 11:16:53, Linus Torvalds wrote:
+> On Thu, Mar 31, 2022 at 3:51 AM Marc Kleine-Budde <mkl@pengutronix.de> wr=
+ote:
+> >
+> > Cc +=3D linux-sparse, Uwe, Luc Van Oostenryck
+> >
+> > tl;dr:
+> >
+> > A recent change in the kernel regarding the riscv -march handling breaks
+> > current sparse.
+>=20
+> Gaah. Normally sparse doesn't even look at the -march flag, but for
+> riscv it does, because it's meaningful for the predefined macros.
+>=20
+> Maybe that 'die()' shouldn't be so fatal. And maybe add a few more
+> extensions (but ignore them) to the parsing.
+>=20
+> Something ENTIRELY UNTESTED like the attached.
 
-Thanks,
--- David
+Works-for-me:
+
+|   CHECK   /srv/work/frogger/socketcan/linux/drivers/net/can/usb/etas_es58=
+x/es58x_core.c
+| WARNING: invalid argument to '-march': 'zicsr_zifencei'
+
+Tested-by: Marc Kleine-Budde <mkl@pengutronix.de>
+
+Regards,
+Marc
+
+--=20
+Pengutronix e.K.                 | Marc Kleine-Budde           |
+Embedded Linux                   | https://www.pengutronix.de  |
+Vertretung West/Dortmund         | Phone: +49-231-2826-924     |
+Amtsgericht Hildesheim, HRA 2686 | Fax:   +49-5121-206917-5555 |
+
+--5jl2rqq57omr4yri
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCgAdFiEEBsvAIBsPu6mG7thcrX5LkNig010FAmJGoVIACgkQrX5LkNig
+0131+gf+OoP5mBIuthsyF3cauP7RO1sSa7VFXUnlth9PI5r6HwTL7dHAjry4lXfJ
+x4Dl/7p024mbaQcCTKyUVStHaSIVd6aze/8pCsjmBTARtMe86P9rOyWGaLcES5P7
+tp/DjsYxQrYrOt+5Fs7+UrqZP5vnXuPYrKfYz0/VP3fLoA6gFGYTvlTXgiYFj7vL
+2xdpRvS1pbZhExvNlkKnJSzKZwE6L841k292RtWWOCzogsPt5YwUlkn/Zb4FbHwR
+y8BbMJhcGHG6T+DkgQA6amREXr6Y0Z5z4vzPDZMRpTFdVVmAUaYgqO7sncdEoyDL
+qv7LdfZg11z7bYVLbk/Z7Y5oXcsG8A==
+=1XuF
+-----END PGP SIGNATURE-----
+
+--5jl2rqq57omr4yri--
