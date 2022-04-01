@@ -2,34 +2,68 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 855ECC433EF
-	for <linux-sparse@archiver.kernel.org>; Fri,  1 Apr 2022 06:53:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6A7A4C433F5
+	for <linux-sparse@archiver.kernel.org>; Fri,  1 Apr 2022 17:14:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245108AbiDAGzO (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Fri, 1 Apr 2022 02:55:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49136 "EHLO
+        id S1349647AbiDARQS (ORCPT
+        <rfc822;linux-sparse@archiver.kernel.org>);
+        Fri, 1 Apr 2022 13:16:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37550 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235013AbiDAGzN (ORCPT
+        with ESMTP id S1349645AbiDARQR (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 1 Apr 2022 02:55:13 -0400
-Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0AB4A6419
-        for <linux-sparse@vger.kernel.org>; Thu, 31 Mar 2022 23:53:24 -0700 (PDT)
-Received: from gallifrey.ext.pengutronix.de ([2001:67c:670:201:5054:ff:fe8d:eefb] helo=bjornoya.blackshift.org)
-        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.92)
-        (envelope-from <mkl@pengutronix.de>)
-        id 1naB9k-00025p-1L; Fri, 01 Apr 2022 08:53:12 +0200
-Received: from pengutronix.de (2a03-f580-87bc-d400-a2e4-7752-b370-a958.ip6.dokom21.de [IPv6:2a03:f580:87bc:d400:a2e4:7752:b370:a958])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange ECDHE (P-256) server-signature RSA-PSS (4096 bits) server-digest SHA256)
-        (Client did not present a certificate)
-        (Authenticated sender: mkl-all@blackshift.org)
-        by smtp.blackshift.org (Postfix) with ESMTPSA id 1B3C458411;
-        Fri,  1 Apr 2022 06:53:10 +0000 (UTC)
-Date:   Fri, 1 Apr 2022 08:53:09 +0200
-From:   Marc Kleine-Budde <mkl@pengutronix.de>
-To:     Linus Torvalds <torvalds@linux-foundation.org>
+        Fri, 1 Apr 2022 13:16:17 -0400
+Received: from mail-lf1-x12f.google.com (mail-lf1-x12f.google.com [IPv6:2a00:1450:4864:20::12f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9CD7C181785
+        for <linux-sparse@vger.kernel.org>; Fri,  1 Apr 2022 10:14:26 -0700 (PDT)
+Received: by mail-lf1-x12f.google.com with SMTP id p10so6042914lfa.12
+        for <linux-sparse@vger.kernel.org>; Fri, 01 Apr 2022 10:14:26 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linux-foundation.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=utfv8DeU9QsQM5/Vhd4xkBU7PeKTZq1L4vDvZwcxU/A=;
+        b=RnYrwK0OqKnAVMAa4S1NjLBhVOO5o1T9pT3+R/Z0DJQ7ZgcmyVh1fGfFWydC77Dqk6
+         hTO+1etbZAy6rFIPVfziiLYn8Bbd9Z/nyH1w1uyvvh+s3For3BVIs9E5KDS2UJIJ/4fI
+         s8CBuVIr9splx36gLjUC3J3QaGOu8QUc2VPlA=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=utfv8DeU9QsQM5/Vhd4xkBU7PeKTZq1L4vDvZwcxU/A=;
+        b=iDhWUX4B3ckSpvl966DGlayPPiXQ4VRUvuqUnImc6rk8t55F6qKUZlSo/NN2c2riVw
+         tnzvdpEdL9J7sJXSROTxXJKLIbnwPA0RUJA6J1msgBBwQATYv4XUtdW8PyXWP4DGZErT
+         h/zwK8trp3tc4WcW+qBsWHK/pi23G8y9o/k6W+lP5ieqcYwbxB0Dxo9iLBAlw9ibIlNV
+         QSIG02JKa9YkurCLHQmkfCu/fDwrv8hrY4x2HNaTcp8nnwnKwFzv0vV8WDnXtw1GdDQk
+         pIpn0yfN6RYjD0FQQHLmcYzZ/SkM+nsQ04erRdRu2fJqiUSa1TWLo+DNF20leYgfN6ne
+         tz1g==
+X-Gm-Message-State: AOAM530p15AeaN2+V1hcFtgAmQtOH0xIjDSbSzUgmaFXmGH106DlVGuc
+        TyW3Hp3Tld0ZLcLM8f7CwtEpQzMjtR81Dq+k0J8=
+X-Google-Smtp-Source: ABdhPJzQZAxxMHhTNaqpHkCVlsgvTyJa9r772KWvrohiF3fPMZT4olP8yl7lmLmsICI/8uQXrP+K3A==
+X-Received: by 2002:ac2:4107:0:b0:44a:3084:39f8 with SMTP id b7-20020ac24107000000b0044a308439f8mr14206427lfi.209.1648833264600;
+        Fri, 01 Apr 2022 10:14:24 -0700 (PDT)
+Received: from mail-lj1-f178.google.com (mail-lj1-f178.google.com. [209.85.208.178])
+        by smtp.gmail.com with ESMTPSA id h6-20020a2e5306000000b00247e893075asm243608ljb.37.2022.04.01.10.14.20
+        for <linux-sparse@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 01 Apr 2022 10:14:22 -0700 (PDT)
+Received: by mail-lj1-f178.google.com with SMTP id s13so4776912ljd.5
+        for <linux-sparse@vger.kernel.org>; Fri, 01 Apr 2022 10:14:20 -0700 (PDT)
+X-Received: by 2002:a2e:9041:0:b0:24a:ce83:dcb4 with SMTP id
+ n1-20020a2e9041000000b0024ace83dcb4mr14079887ljg.291.1648833259843; Fri, 01
+ Apr 2022 10:14:19 -0700 (PDT)
+MIME-Version: 1.0
+References: <20220126171442.1338740-1-aurelien@aurel32.net>
+ <20220331103247.y33wvkxk5vfbqohf@pengutronix.de> <20220331103913.2vlneq6clnheuty6@pengutronix.de>
+ <20220331105112.7t3qgtilhortkiq4@pengutronix.de> <CAHk-=wjnuMD091mNbY=fRm-qFyhMjbtfiwkAFKyFehyR8bPB5A@mail.gmail.com>
+ <20220401065309.dizbkleyw44auhbo@pengutronix.de>
+In-Reply-To: <20220401065309.dizbkleyw44auhbo@pengutronix.de>
+From:   Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Fri, 1 Apr 2022 10:14:03 -0700
+X-Gmail-Original-Message-ID: <CAHk-=wgv6rXFjTdaumFgDC4ixg6QMOL83sQ2XOqvJC0h5fLX2g@mail.gmail.com>
+Message-ID: <CAHk-=wgv6rXFjTdaumFgDC4ixg6QMOL83sQ2XOqvJC0h5fLX2g@mail.gmail.com>
+Subject: Re: [PATCH] riscv: fix build with binutils 2.38
+To:     Marc Kleine-Budde <mkl@pengutronix.de>
 Cc:     Aurelien Jarno <aurelien@aurel32.net>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         stable <stable@vger.kernel.org>,
@@ -41,81 +75,22 @@ Cc:     Aurelien Jarno <aurelien@aurel32.net>,
         Sparse Mailing-list <linux-sparse@vger.kernel.org>,
         ukl@pengutronix.de,
         Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH] riscv: fix build with binutils 2.38
-Message-ID: <20220401065309.dizbkleyw44auhbo@pengutronix.de>
-References: <20220126171442.1338740-1-aurelien@aurel32.net>
- <20220331103247.y33wvkxk5vfbqohf@pengutronix.de>
- <20220331103913.2vlneq6clnheuty6@pengutronix.de>
- <20220331105112.7t3qgtilhortkiq4@pengutronix.de>
- <CAHk-=wjnuMD091mNbY=fRm-qFyhMjbtfiwkAFKyFehyR8bPB5A@mail.gmail.com>
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="5jl2rqq57omr4yri"
-Content-Disposition: inline
-In-Reply-To: <CAHk-=wjnuMD091mNbY=fRm-qFyhMjbtfiwkAFKyFehyR8bPB5A@mail.gmail.com>
-X-SA-Exim-Connect-IP: 2001:67c:670:201:5054:ff:fe8d:eefb
-X-SA-Exim-Mail-From: mkl@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-sparse@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
+On Thu, Mar 31, 2022 at 11:53 PM Marc Kleine-Budde <mkl@pengutronix.de> wrote:
+>
+> | WARNING: invalid argument to '-march': 'zicsr_zifencei'
 
---5jl2rqq57omr4yri
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Gaah, it works but still warns because I cut-and-pasted those
+zicsr/zifencei options from some random source that had them
+capitalized and I didn't look closely enough at the reports.
 
-On 31.03.2022 11:16:53, Linus Torvalds wrote:
-> On Thu, Mar 31, 2022 at 3:51 AM Marc Kleine-Budde <mkl@pengutronix.de> wr=
-ote:
-> >
-> > Cc +=3D linux-sparse, Uwe, Luc Van Oostenryck
-> >
-> > tl;dr:
-> >
-> > A recent change in the kernel regarding the riscv -march handling breaks
-> > current sparse.
->=20
-> Gaah. Normally sparse doesn't even look at the -march flag, but for
-> riscv it does, because it's meaningful for the predefined macros.
->=20
-> Maybe that 'die()' shouldn't be so fatal. And maybe add a few more
-> extensions (but ignore them) to the parsing.
->=20
-> Something ENTIRELY UNTESTED like the attached.
+Anyway, hopefully somebody can bother to fix up that. Possibly by
+changing the strncmp to a strnicmp - but I don't know what the rules
+for lower-case vs capitals are for the other options. I'm still busy
+with the kernel merge window, so this gets archived on my side..
 
-Works-for-me:
-
-|   CHECK   /srv/work/frogger/socketcan/linux/drivers/net/can/usb/etas_es58=
-x/es58x_core.c
-| WARNING: invalid argument to '-march': 'zicsr_zifencei'
-
-Tested-by: Marc Kleine-Budde <mkl@pengutronix.de>
-
-Regards,
-Marc
-
---=20
-Pengutronix e.K.                 | Marc Kleine-Budde           |
-Embedded Linux                   | https://www.pengutronix.de  |
-Vertretung West/Dortmund         | Phone: +49-231-2826-924     |
-Amtsgericht Hildesheim, HRA 2686 | Fax:   +49-5121-206917-5555 |
-
---5jl2rqq57omr4yri
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEBsvAIBsPu6mG7thcrX5LkNig010FAmJGoVIACgkQrX5LkNig
-0131+gf+OoP5mBIuthsyF3cauP7RO1sSa7VFXUnlth9PI5r6HwTL7dHAjry4lXfJ
-x4Dl/7p024mbaQcCTKyUVStHaSIVd6aze/8pCsjmBTARtMe86P9rOyWGaLcES5P7
-tp/DjsYxQrYrOt+5Fs7+UrqZP5vnXuPYrKfYz0/VP3fLoA6gFGYTvlTXgiYFj7vL
-2xdpRvS1pbZhExvNlkKnJSzKZwE6L841k292RtWWOCzogsPt5YwUlkn/Zb4FbHwR
-y8BbMJhcGHG6T+DkgQA6amREXr6Y0Z5z4vzPDZMRpTFdVVmAUaYgqO7sncdEoyDL
-qv7LdfZg11z7bYVLbk/Z7Y5oXcsG8A==
-=1XuF
------END PGP SIGNATURE-----
-
---5jl2rqq57omr4yri--
+             Linus
