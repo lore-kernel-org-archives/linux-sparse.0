@@ -2,58 +2,186 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 66B50C433EF
-	for <linux-sparse@archiver.kernel.org>; Fri, 20 May 2022 08:05:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EA449C433EF
+	for <linux-sparse@archiver.kernel.org>; Fri, 20 May 2022 12:40:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1346778AbiETIFa (ORCPT
+        id S1349324AbiETMkg convert rfc822-to-8bit (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Fri, 20 May 2022 04:05:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44762 "EHLO
+        Fri, 20 May 2022 08:40:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34410 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240489AbiETIF3 (ORCPT
+        with ESMTP id S1349254AbiETMkf (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 20 May 2022 04:05:29 -0400
-Received: from mail.slidebizcompany.com (mail.slidebizcompany.com [135.125.235.171])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DFDD014CA25
-        for <linux-sparse@vger.kernel.org>; Fri, 20 May 2022 01:05:27 -0700 (PDT)
-Received: by mail.slidebizcompany.com (Postfix, from userid 1002)
-        id 3F684A3D92; Fri, 20 May 2022 08:01:47 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=slidebizcompany.com;
-        s=mail; t=1653033764;
-        bh=f01OOv7iZ6eKP39nAJoyJ+/Cmpugf6hkYKbYNn4lotU=;
-        h=Date:From:To:Subject:From;
-        b=EGV5mJ3qhac+7+ATdkhPxBT0xJrVSC3KrTVrTWdRnmJHk2BVuTZZeEZ90FpAx/H/N
-         U+MoBfXnOEg7Ys6ExLniyYitcAi2qwEKnt6RyXClt8E2Drjc5L6jEwR8cIWzYURxXh
-         Xs6KgHBOz5qrPmNstyCViLN25lC2qoCuOhAnqQRdqWHky2c3eMjhFgt8TBBdSXGcjU
-         NjNuI2Sf+s1K9lfs1crbRHjE16YHt2dK2OSEsbwVViaxRhDR/wf9exhHFoD7to5Z+s
-         Z2lcKXjZ1qw6obdwfPyibBgz8lSKI8R/lvDxcFhNqa1EwJA6Y7eWWor8thkTvvGbgj
-         Dwz3Sz2BNuGkg==
-Received: by mail.slidebizcompany.com for <linux-sparse@vger.kernel.org>; Fri, 20 May 2022 08:00:39 GMT
-Message-ID: <20220520064500-0.1.1g.jkem.0.dno6ps3m88@slidebizcompany.com>
-Date:   Fri, 20 May 2022 08:00:39 GMT
-From:   "Miguel Garcia" <miguel.garcia@slidebizcompany.com>
-To:     <linux-sparse@vger.kernel.org>
-Subject: Servicio de la flota
-X-Mailer: mail.slidebizcompany.com
+        Fri, 20 May 2022 08:40:35 -0400
+Received: from mail-qt1-f170.google.com (mail-qt1-f170.google.com [209.85.160.170])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 193871649AF;
+        Fri, 20 May 2022 05:40:34 -0700 (PDT)
+Received: by mail-qt1-f170.google.com with SMTP id y15so2511169qtx.4;
+        Fri, 20 May 2022 05:40:34 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=AW3WbgwLSP0WZKYPK3Y6DQ8WAhPkJkHKkMhSdaktb4M=;
+        b=ci526RxuduDAZtSAK1B75bBv5EU8oW/UM99VYulFLoW0SXbQKgheOVlkKITJCSIzWo
+         KCVz8Vbz8LaRCqZmvBTadqD+PqharqnlSlidLU6xr6EOm9vs5pKDcTLMUkT2wXlf4f7i
+         qqIzhB1wg3g1HIZYq3ruMU4yVVHRsFvGKUkz/N2X61c3RLAmNF21M+sqaaXD3FhwywJU
+         HvrRlvPft9vzFShBS37mBjfVMrN9Opl+rT57FeeAjjiPWxqMsCI9LOuH+BVg3DSXekJ5
+         rdXI41P0lEYLKmucAsODcq8p1ryDd8kAhmngpcoPYk8kr/+gNMcniyrGrb+pTdkVk1yc
+         exMQ==
+X-Gm-Message-State: AOAM531GwRBYfXAHVFdPGs/6F76fA6xx6W9WD+dbC/e2iDHZXot+Yx6y
+        iz3Hcl1LWgbGk4vj9t3tbqhNNOfDbDMAAQ==
+X-Google-Smtp-Source: ABdhPJwlffsHGkLQuTm/hpnqLikeezIRbe5GuMm2uJSZ35XfJGXdhcJxKEOaW3CdGTte+VCjB79OLQ==
+X-Received: by 2002:a05:622a:1654:b0:2f3:deaa:4d53 with SMTP id y20-20020a05622a165400b002f3deaa4d53mr7354433qtj.232.1653050432999;
+        Fri, 20 May 2022 05:40:32 -0700 (PDT)
+Received: from mail-yw1-f179.google.com (mail-yw1-f179.google.com. [209.85.128.179])
+        by smtp.gmail.com with ESMTPSA id i18-20020ac84f52000000b002f9114d2ebcsm2627854qtw.17.2022.05.20.05.40.32
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 20 May 2022 05:40:32 -0700 (PDT)
+Received: by mail-yw1-f179.google.com with SMTP id 00721157ae682-2ff90e0937aso11101967b3.4;
+        Fri, 20 May 2022 05:40:32 -0700 (PDT)
+X-Received: by 2002:a81:9b0c:0:b0:2f4:c522:7d3c with SMTP id
+ s12-20020a819b0c000000b002f4c5227d3cmr9969695ywg.316.1653050431948; Fri, 20
+ May 2022 05:40:31 -0700 (PDT)
 MIME-Version: 1.0
+References: <6285958d.+Z2aDZ4O1Y9eiazd%lkp@intel.com> <0530d502-1291-23f3-64ac-97bd38a26bd4@roeck-us.net>
+In-Reply-To: <0530d502-1291-23f3-64ac-97bd38a26bd4@roeck-us.net>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Fri, 20 May 2022 14:40:20 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdU3SYOwE5ftDwymQpVwWmpbC=1Ytyp0Y9GaeUS2i1cP+A@mail.gmail.com>
+Message-ID: <CAMuHMdU3SYOwE5ftDwymQpVwWmpbC=1Ytyp0Y9GaeUS2i1cP+A@mail.gmail.com>
+Subject: Re: [linux-next:master] BUILD REGRESSION 736ee37e2e8eed7fe48d0a37ee5a709514d478b3
+To:     Guenter Roeck <linux@roeck-us.net>
+Cc:     kernel test robot <lkp@intel.com>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        linux-staging@lists.linux.dev,
+        "open list:TI ETHERNET SWITCH DRIVER (CPSW)" 
+        <linux-omap@vger.kernel.org>, linux-nvme@lists.infradead.org,
+        linux-hwmon@vger.kernel.org,
+        Linux Fbdev development list <linux-fbdev@vger.kernel.org>,
+        KVM list <kvm@vger.kernel.org>,
+        DRI Development <dri-devel@lists.freedesktop.org>,
+        amd-gfx list <amd-gfx@lists.freedesktop.org>,
+        Linux Memory Management List <linux-mm@kvack.org>,
+        Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
+        linux-sparse@vger.kernel.org,
+        linux-m68k <linux-m68k@lists.linux-m68k.org>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8BIT
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Buenos d=C3=ADas:
+Hi Günter
 
-Le escribo para hablarle sobre una de las mejores herramientas GPS en el =
-mercado.
+On Thu, May 19, 2022 at 8:48 AM Guenter Roeck <linux@roeck-us.net> wrote:
+> On 5/18/22 17:55, kernel test robot wrote:
+> > tree/branch: https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git master
+> > branch HEAD: 736ee37e2e8eed7fe48d0a37ee5a709514d478b3  Add linux-next specific files for 20220518
+> >
+> > Error/Warning reports:
+> >
+> > https://lore.kernel.org/linux-mm/202204291924.vTGZmerI-lkp@intel.com
+> > https://lore.kernel.org/linux-mm/202205041248.WgCwPcEV-lkp@intel.com
+> > https://lore.kernel.org/linux-mm/202205122113.uLKzd3SZ-lkp@intel.com
+> > https://lore.kernel.org/linux-mm/202205172344.3GFeaum1-lkp@intel.com
+> > https://lore.kernel.org/linux-mm/202205190527.o9wVEvHI-lkp@intel.com
+> >
+> > Error/Warning: (recently discovered and may have been fixed)
+> >
+> [ .. ]
+> > drivers/hwmon/nct6775-platform.c:199:9: sparse:    unsigned char
+> > drivers/hwmon/nct6775-platform.c:199:9: sparse:    void
+>
+> This is getting tiresome. Every driver using outb() on m68k will
+> experience that "problem". As far as I can see, it is caused by
+>
+> #define out_8(addr,b) (void)((*(__force volatile u8 *) (unsigned long)(addr)) = (b))
+>
+> in arch/m68k/include/asm/raw_io.h. I have no idea what the
+> "(void)" is for,
 
-La herramienta, que me gustar=C3=ADa presentarle brevemente, dispone de m=
-uchas funciones =C3=BAtiles para su trabajo, que optimizan los procesos d=
-e transporte y le ayudan a realizar tareas de campo de manera m=C3=A1s ef=
-iciente.
+The "(void)" makes sure there is no return value.
+Which matters if the result of a function returning void is propagated
+to another function returning void.
 
-=C2=BFQuiere conocer los detalles?
+> but removing it "fixes" the problem.
 
+This introduces new problems (m68k all{mod,yes}config):
 
-Atentamente,
-Miguel Garcia
+    In file included from arch/m68k/include/asm/io_mm.h:25,
+                     from arch/m68k/include/asm/io.h:8,
+                     from include/linux/io.h:13,
+                     from include/linux/of_address.h:7,
+                     from drivers/gpu/drm/msm/adreno/adreno_gpu.c:13:
+    drivers/gpu/drm/msm/adreno/a6xx_gmu.h: In function ‘gmu_write_rscc’:
+    arch/m68k/include/asm/raw_io.h:34:80: error: ‘return’ with a
+value, in function returning void [-Werror=return-type]
+       34 | #define out_le32(addr,l) ((*(__force volatile __le32 *)
+(unsigned long)(addr)) = cpu_to_le32(l))
+          |
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~
+    arch/m68k/include/asm/io_mm.h:397:26: note: in expansion of macro ‘out_le32’
+      397 | #define writel(val,addr) out_le32((addr),(val))
+          |                          ^~~~~~~~
+    drivers/gpu/drm/msm/msm_drv.h:468:32: note: in expansion of macro ‘writel’
+      468 | #define msm_writel(data, addr) writel((data), (addr))
+          |                                ^~~~~~
+    /drivers/gpu/drm/msm/adreno/a6xx_gmu.h:141:9: note: in expansion
+of macro ‘msm_writel’
+      141 |  return msm_writel(value, gmu->rscc + (offset << 2));
+          |         ^~~~~~~~~~
+    In file included from drivers/gpu/drm/msm/adreno/a6xx_gpu.h:11,
+                     from drivers/gpu/drm/msm/adreno/adreno_gpu.c:20:
+    drivers/gpu/drm/msm/adreno/a6xx_gmu.h:139:20: note: declared here
+      139 | static inline void gmu_write_rscc(struct a6xx_gmu *gmu,
+u32 offset, u32 value)
+          |                    ^~~~~~~~~~~~~~
+
+These can be fixed using e.g. (there are more in the Adreno driver):
+
+     static inline void gmu_write(struct a6xx_gmu *gmu, u32 offset, u32 value)
+     {
+    -       return msm_writel(value, gmu->mmio + (offset << 2));
+    +       msm_writel(value, gmu->mmio + (offset << 2));
+     }
+
+> Either case, this is not a problem with the nct6775 driver,
+> nor is it a new problem.
+
+Indeed.
+
+For the sparse people:
+
+The full error is:
+
+        drivers/net/appletalk/cops.c:382:17: error: incompatible types
+in conditional expression (different base types):
+        drivers/net/appletalk/cops.c:382:17:    unsigned char
+        drivers/net/appletalk/cops.c:382:17:    void
+
+Basically, sparse doesn't like "a ? b : c", if the return types of
+b and c don't match, even if the resulting value is not used.
+
+E.g. outb() on m68k:
+
+    #define outb(val, port) (((port) < 1024 && ISA_TYPE ==
+ISA_TYPE_ENEC) ? isa_rom_outb((val), (port)) : isa_outb((val),
+(port)))
+
+where isa_rom_outb() leads to rom_out_8() returning u8, while
+isa_outb() leads to the out_8() that includes the cast to void.
+
+So the best solution seems to be to add more "(void)" casts, to e.g.
+rom_out_8() and friends?
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
