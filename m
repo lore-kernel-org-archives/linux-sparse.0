@@ -2,93 +2,73 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 14AFAC433F5
-	for <linux-sparse@archiver.kernel.org>; Sat, 21 May 2022 09:44:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0BCCCC433F5
+	for <linux-sparse@archiver.kernel.org>; Sat, 21 May 2022 09:46:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1346778AbiEUJoZ (ORCPT
-        <rfc822;linux-sparse@archiver.kernel.org>);
-        Sat, 21 May 2022 05:44:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49956 "EHLO
+        id S231426AbiEUJq1 (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Sat, 21 May 2022 05:46:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52256 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229600AbiEUJoW (ORCPT
+        with ESMTP id S234199AbiEUJq0 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 21 May 2022 05:44:22 -0400
-Received: from mail-ej1-x634.google.com (mail-ej1-x634.google.com [IPv6:2a00:1450:4864:20::634])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 70F095D649
-        for <linux-sparse@vger.kernel.org>; Sat, 21 May 2022 02:44:21 -0700 (PDT)
-Received: by mail-ej1-x634.google.com with SMTP id f9so19657830ejc.0
-        for <linux-sparse@vger.kernel.org>; Sat, 21 May 2022 02:44:21 -0700 (PDT)
+        Sat, 21 May 2022 05:46:26 -0400
+Received: from mail-ej1-x62d.google.com (mail-ej1-x62d.google.com [IPv6:2a00:1450:4864:20::62d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 58BD52CDD8
+        for <linux-sparse@vger.kernel.org>; Sat, 21 May 2022 02:46:25 -0700 (PDT)
+Received: by mail-ej1-x62d.google.com with SMTP id jx22so6114719ejb.12
+        for <linux-sparse@vger.kernel.org>; Sat, 21 May 2022 02:46:25 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=date:from:to:cc:subject:message-id:references:mime-version
          :content-disposition:in-reply-to;
-        bh=PJLYm6B/ts8NZFQY6OcO8A0/vgfZ2swTN8KI+IfZY20=;
-        b=pG+BxLvC2PxfKBxxhy8MCw1uZ9X+pyaE2KzNbaKqa0EsKfYx0COQF0HPVo70Pt4ZCq
-         DIvsw+K2UIwwuK62A1MB//phVhbagXOxG1ailrrbITTqnVKt4Slwe1wm3o370hlHFXNF
-         Fejg7Cr5elzNlhdvPSWn3wOMMj2/UsZxxFU5GeskX7TTf+R2eN3OKYlLlrUxNE33gIPD
-         b3NaqDvPF0JAEytTmuM2YbVIhWr4KTM+6mb6yDSryFX7FwfynwcHdTN+Voj/GPRkf6ty
-         YPcP2tYXxXJ617laXTm3jm8zNIUnScH6qKo3MkEIAylyMSLMK2BBVGEtZ45foiULAnoP
-         jwUg==
+        bh=JV7spCalXEKoXLdLh7Z/t0i3QcibKd4Vm4M2Rr+//fU=;
+        b=VHSsWCUIrJK4f/9280+x9+Gj6kESox7t39eTZqhivQ2Lx27A7wYK7mxpi56vKJ1Wiy
+         BoT91Muk87GKFS3f20gi4r35aryZnBe4WVJ0pqnOrtAWce2OEOXmM5vrsnvyqZQvNtAz
+         lHUK5Kp9nam+1pvQpbHewISahmfZakm/WoCoXejQnzm3wUy0cj8wYXrQE0THGIgAYQau
+         18gK6lZAZu1Rpd+sx1VpowFI3T832VRSh96kEWe7nGCqgnbDLHLI+tnM0D6E6ehEGqkX
+         55qVUvPUQUh5tpBOTE1iWt4SKmDmW+A9tp7qH6YHL4WxBIfAV/hFvKy7dXIj2Fxc8jIy
+         5g6g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to;
-        bh=PJLYm6B/ts8NZFQY6OcO8A0/vgfZ2swTN8KI+IfZY20=;
-        b=hJMPNGUXuYTyIfBuR0kiMKAktiFSjRc6d5t2qSmJCpxpkTbU++YRqs3MczzGAh+hLL
-         U6UaLyaF2nxmgIHIMBJj9MXF73GV/9PEZsZD/nzS04TDY968xRVQzb7Ff2/IexZFRPMx
-         lk6MeXCh+Wjcumojkh9z3pTmBdQegfTxIvsypmE4SHEFGQoCOIsnL7cF+MfisOUmIhqr
-         6+/q+m4f7a28cEkN7QXcnFQoVDVfpBjFoYuDqEHYZv0CLTtE5tmP7iY7FBx8FeTdpxlr
-         tEKJVUCKn9cBev3fa89vmbl4tNEyMJhxdK/07v73CGmBnf0HUiLLFNJ8vDVIItvTakq7
-         7tGQ==
-X-Gm-Message-State: AOAM5300bgs15BdNceTS+jZBeksioJEfn+Z0JgPcbw5AMWqvUFyk+l5G
-        oNy5GAiF+NIBNXV2Jg+hBZc=
-X-Google-Smtp-Source: ABdhPJwar8b0Iwkj9dXNH7m2BZKCQJmo2k7nQ5b9A5/iLyr1O+/nrSo6ob5QIrBhHMxz+YodPb9KPQ==
-X-Received: by 2002:a17:907:6d87:b0:6f8:95d2:6814 with SMTP id sb7-20020a1709076d8700b006f895d26814mr12112251ejc.232.1653126259899;
-        Sat, 21 May 2022 02:44:19 -0700 (PDT)
+        bh=JV7spCalXEKoXLdLh7Z/t0i3QcibKd4Vm4M2Rr+//fU=;
+        b=HqU+Tgzkc9H7J+5HGpoREI2RIy+5IXANX2b6gUxv6d1ytHyCADrLuLXAcjt3JEPP9T
+         dxA5CKVtXaYEDTg7wKQF+Fd3wUiO4e+P53snI7HW0iz4UqVo0s2edbPgPrVqYpDPRolI
+         GQxOsQ3sKavr20RguD4o+x+c7i1tmGBhKmgEusl4RXxHKNevRd08gxrD8DswYdiEAEwa
+         fYEmE8cdXZyrmDAGuV1kLIoB+Bdn4NPryLFYH5OE2kd+AbwUr968bF6Q2iXo6RQx/4zv
+         k/AwXKRbL3ZRlZ8t8yYZuktT3GX5z5RrUojWxtVVh9DtfXwDQwDWFPNkBYgf2NLC3J8j
+         4EvQ==
+X-Gm-Message-State: AOAM533qdrvNHG/E9Toax7hLWCVNOPIQ0nTmfIsZ52oCSn7DD6fS/ukj
+        8tLnXB9IyThxkaOir/TONCQ=
+X-Google-Smtp-Source: ABdhPJwQuY/z8ESXtk0NcE3m8MYiSHJ3IM1MMOC5AJ0gpd9xH/nj37SmT8fdkRUeVzONK3/YMNiM2w==
+X-Received: by 2002:a17:906:fc20:b0:6fe:a5f6:379d with SMTP id ov32-20020a170906fc2000b006fea5f6379dmr6915648ejb.503.1653126383942;
+        Sat, 21 May 2022 02:46:23 -0700 (PDT)
 Received: from mail (239.125-180-91.adsl-dyn.isp.belgacom.be. [91.180.125.239])
-        by smtp.gmail.com with ESMTPSA id s10-20020a170906778a00b006f3ef214dfesm4079479ejm.100.2022.05.21.02.44.18
+        by smtp.gmail.com with ESMTPSA id er22-20020a170907739600b006fe9f9d0938sm2326068ejc.175.2022.05.21.02.46.23
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 21 May 2022 02:44:19 -0700 (PDT)
-Date:   Sat, 21 May 2022 11:44:18 +0200
+        Sat, 21 May 2022 02:46:23 -0700 (PDT)
+Date:   Sat, 21 May 2022 11:46:22 +0200
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-To:     Ramsay Jones <ramsay@ramsayjones.plus.com>
-Cc:     Sparse Mailing-list <linux-sparse@vger.kernel.org>,
-        Junio C Hamano <gitster@pobox.com>
-Subject: Re: [PATCH 0/2] sparse v0.6.4 regression
-Message-ID: <20220521094418.pf6s4usfq4npktn6@mail>
-References: <c29182d4-3141-83c6-21f6-d7f368b3d3c5@ramsayjones.plus.com>
+To:     Alexey Gladkov <gladkov.alexey@gmail.com>
+Cc:     linux-sparse@vger.kernel.org, Oleg Nesterov <oleg@redhat.com>
+Subject: Re: [PATCH 0/3] semind: Index more symbols
+Message-ID: <20220521094622.ygnkse26visliklk@mail>
+References: <20211102140645.83081-1-gladkov.alexey@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <c29182d4-3141-83c6-21f6-d7f368b3d3c5@ramsayjones.plus.com>
+In-Reply-To: <20211102140645.83081-1-gladkov.alexey@gmail.com>
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Tue, Sep 28, 2021 at 12:41:27AM +0100, Ramsay Jones wrote:
+On Tue, Nov 02, 2021 at 03:06:42PM +0100, Alexey Gladkov wrote:
+> Greetings!
 > 
-> Hi Luc,
+> For indexing purposes, macros definitions and typedefs are added to the
+> semind database. Functions that are not used in the code are also indexed.
 
-Hi Ramsay,
+Thank you very much, pushed now, an ... apologies for this huge delay.
 
-> I noticed a regression introduced by commit a69f8d70 which, effectively,
-> disables the 'memcpy-max-count' check. (I had done a 'make CC=cgcc' in
-> git, expecting to see some warnings, including the 'memcpy-max-count'
-> check, and it didn't appear ... :( ). Sorry for not noticing before, but
-> the 'sparse' make target is supposed to suppress that warning for the
-> pack-revindex.c file, so ... ;P
-> 
-> [I tried finding your last 'kernel sparse warnings change' list email
-> to see how many of these warnings still appear in the kernel ... well
-> it would be zero with v0.6.4!]
-
-Now I can see 4 of them.
- 
-> I also included the 'case label' patch I sent before, this time with
-> a commit message and a test. (The test could be extended when sparse
-> is updated to include the full label-positioning of C23!).
-
-Thank you very much, pushed now, and ...
-apologies for this huge delay.
-
--- Luc 
+-- Luc
