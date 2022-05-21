@@ -2,118 +2,93 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 17BE7C4167B
-	for <linux-sparse@archiver.kernel.org>; Fri, 20 May 2022 12:46:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 14AFAC433F5
+	for <linux-sparse@archiver.kernel.org>; Sat, 21 May 2022 09:44:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233646AbiETMql (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Fri, 20 May 2022 08:46:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49688 "EHLO
+        id S1346778AbiEUJoZ (ORCPT
+        <rfc822;linux-sparse@archiver.kernel.org>);
+        Sat, 21 May 2022 05:44:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49956 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1348109AbiETMqg (ORCPT
+        with ESMTP id S229600AbiEUJoW (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 20 May 2022 08:46:36 -0400
-Received: from mail-qk1-f178.google.com (mail-qk1-f178.google.com [209.85.222.178])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 462E75C84F;
-        Fri, 20 May 2022 05:46:35 -0700 (PDT)
-Received: by mail-qk1-f178.google.com with SMTP id g207so3970013qke.7;
-        Fri, 20 May 2022 05:46:35 -0700 (PDT)
+        Sat, 21 May 2022 05:44:22 -0400
+Received: from mail-ej1-x634.google.com (mail-ej1-x634.google.com [IPv6:2a00:1450:4864:20::634])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 70F095D649
+        for <linux-sparse@vger.kernel.org>; Sat, 21 May 2022 02:44:21 -0700 (PDT)
+Received: by mail-ej1-x634.google.com with SMTP id f9so19657830ejc.0
+        for <linux-sparse@vger.kernel.org>; Sat, 21 May 2022 02:44:21 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=PJLYm6B/ts8NZFQY6OcO8A0/vgfZ2swTN8KI+IfZY20=;
+        b=pG+BxLvC2PxfKBxxhy8MCw1uZ9X+pyaE2KzNbaKqa0EsKfYx0COQF0HPVo70Pt4ZCq
+         DIvsw+K2UIwwuK62A1MB//phVhbagXOxG1ailrrbITTqnVKt4Slwe1wm3o370hlHFXNF
+         Fejg7Cr5elzNlhdvPSWn3wOMMj2/UsZxxFU5GeskX7TTf+R2eN3OKYlLlrUxNE33gIPD
+         b3NaqDvPF0JAEytTmuM2YbVIhWr4KTM+6mb6yDSryFX7FwfynwcHdTN+Voj/GPRkf6ty
+         YPcP2tYXxXJ617laXTm3jm8zNIUnScH6qKo3MkEIAylyMSLMK2BBVGEtZ45foiULAnoP
+         jwUg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=UhZYflED6/DiNr1feOC9OhkU49iweDam4jS4WznrIsk=;
-        b=P3H251hbfEKCS0STYhh+ttBN6k4JmCVqAIgJw2sY6OCa/0DUJ8nnJvDHC0OMbW5njm
-         X32Why/FWk49NtmkhlOE/5/vqT3kuE6mcXD7QY9xafdbxyWvySw8uD3zS3v2olp7uAS6
-         j0IarfLosYyy803yAOymeMM5cblvWe8InrjXH7ugU2lEDXkhASGKcg78A6DGHkPcXgzj
-         D/N8WUK9EkOsRFwQivqRztuGL7H75e4wpRL3WIVeyV5HvpXG5cz2ss7hsEHLbPMNc25a
-         dtLfDYEYyrc64d/zMzldBS1QQ8j4b2F27w/Xbs9iLo4aPlDUZCu6wqafCCSDD0j6AMjW
-         tOrQ==
-X-Gm-Message-State: AOAM531N30c3giO9I5iF4yRTinkq8xX4RxQtR39Uev507e8OssJLZL9n
-        Ucz0Zrl6t0T1ejPS+ksdhrai4BRKeGs0mw==
-X-Google-Smtp-Source: ABdhPJzQr1I56C3kTXejdctJYTvYMH8Xf51D+8crHXB+jVEBShmCHRyrvEprSSKn1QJ+AoaLhmGh7g==
-X-Received: by 2002:a05:620a:454f:b0:6a0:5212:96d2 with SMTP id u15-20020a05620a454f00b006a0521296d2mr6187861qkp.603.1653050793932;
-        Fri, 20 May 2022 05:46:33 -0700 (PDT)
-Received: from mail-yb1-f174.google.com (mail-yb1-f174.google.com. [209.85.219.174])
-        by smtp.gmail.com with ESMTPSA id 202-20020a3703d3000000b0069fc13ce213sm3111969qkd.68.2022.05.20.05.46.32
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 20 May 2022 05:46:33 -0700 (PDT)
-Received: by mail-yb1-f174.google.com with SMTP id j2so14097403ybu.0;
-        Fri, 20 May 2022 05:46:32 -0700 (PDT)
-X-Received: by 2002:a05:6902:389:b0:633:31c1:d0f7 with SMTP id
- f9-20020a056902038900b0063331c1d0f7mr9068692ybs.543.1653050792549; Fri, 20
- May 2022 05:46:32 -0700 (PDT)
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=PJLYm6B/ts8NZFQY6OcO8A0/vgfZ2swTN8KI+IfZY20=;
+        b=hJMPNGUXuYTyIfBuR0kiMKAktiFSjRc6d5t2qSmJCpxpkTbU++YRqs3MczzGAh+hLL
+         U6UaLyaF2nxmgIHIMBJj9MXF73GV/9PEZsZD/nzS04TDY968xRVQzb7Ff2/IexZFRPMx
+         lk6MeXCh+Wjcumojkh9z3pTmBdQegfTxIvsypmE4SHEFGQoCOIsnL7cF+MfisOUmIhqr
+         6+/q+m4f7a28cEkN7QXcnFQoVDVfpBjFoYuDqEHYZv0CLTtE5tmP7iY7FBx8FeTdpxlr
+         tEKJVUCKn9cBev3fa89vmbl4tNEyMJhxdK/07v73CGmBnf0HUiLLFNJ8vDVIItvTakq7
+         7tGQ==
+X-Gm-Message-State: AOAM5300bgs15BdNceTS+jZBeksioJEfn+Z0JgPcbw5AMWqvUFyk+l5G
+        oNy5GAiF+NIBNXV2Jg+hBZc=
+X-Google-Smtp-Source: ABdhPJwar8b0Iwkj9dXNH7m2BZKCQJmo2k7nQ5b9A5/iLyr1O+/nrSo6ob5QIrBhHMxz+YodPb9KPQ==
+X-Received: by 2002:a17:907:6d87:b0:6f8:95d2:6814 with SMTP id sb7-20020a1709076d8700b006f895d26814mr12112251ejc.232.1653126259899;
+        Sat, 21 May 2022 02:44:19 -0700 (PDT)
+Received: from mail (239.125-180-91.adsl-dyn.isp.belgacom.be. [91.180.125.239])
+        by smtp.gmail.com with ESMTPSA id s10-20020a170906778a00b006f3ef214dfesm4079479ejm.100.2022.05.21.02.44.18
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 21 May 2022 02:44:19 -0700 (PDT)
+Date:   Sat, 21 May 2022 11:44:18 +0200
+From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To:     Ramsay Jones <ramsay@ramsayjones.plus.com>
+Cc:     Sparse Mailing-list <linux-sparse@vger.kernel.org>,
+        Junio C Hamano <gitster@pobox.com>
+Subject: Re: [PATCH 0/2] sparse v0.6.4 regression
+Message-ID: <20220521094418.pf6s4usfq4npktn6@mail>
+References: <c29182d4-3141-83c6-21f6-d7f368b3d3c5@ramsayjones.plus.com>
 MIME-Version: 1.0
-References: <6285958d.+Z2aDZ4O1Y9eiazd%lkp@intel.com> <0530d502-1291-23f3-64ac-97bd38a26bd4@roeck-us.net>
- <CAMuHMdU3SYOwE5ftDwymQpVwWmpbC=1Ytyp0Y9GaeUS2i1cP+A@mail.gmail.com>
-In-Reply-To: <CAMuHMdU3SYOwE5ftDwymQpVwWmpbC=1Ytyp0Y9GaeUS2i1cP+A@mail.gmail.com>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Fri, 20 May 2022 14:46:20 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdVx7r-4TVV9uVJppT-7ZAriov01BUNk4ghU9Bs4uY28vQ@mail.gmail.com>
-Message-ID: <CAMuHMdVx7r-4TVV9uVJppT-7ZAriov01BUNk4ghU9Bs4uY28vQ@mail.gmail.com>
-Subject: Re: [linux-next:master] BUILD REGRESSION 736ee37e2e8eed7fe48d0a37ee5a709514d478b3
-To:     Guenter Roeck <linux@roeck-us.net>
-Cc:     kernel test robot <lkp@intel.com>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        linux-staging@lists.linux.dev,
-        "open list:TI ETHERNET SWITCH DRIVER (CPSW)" 
-        <linux-omap@vger.kernel.org>, linux-nvme@lists.infradead.org,
-        linux-hwmon@vger.kernel.org,
-        Linux Fbdev development list <linux-fbdev@vger.kernel.org>,
-        KVM list <kvm@vger.kernel.org>,
-        DRI Development <dri-devel@lists.freedesktop.org>,
-        amd-gfx list <amd-gfx@lists.freedesktop.org>,
-        Linux Memory Management List <linux-mm@kvack.org>,
-        Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
-        linux-sparse@vger.kernel.org,
-        linux-m68k <linux-m68k@lists.linux-m68k.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <c29182d4-3141-83c6-21f6-d7f368b3d3c5@ramsayjones.plus.com>
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Fri, May 20, 2022 at 2:40 PM Geert Uytterhoeven <geert@linux-m68k.org> wrote:
-> On Thu, May 19, 2022 at 8:48 AM Guenter Roeck <linux@roeck-us.net> wrote:
-> > On 5/18/22 17:55, kernel test robot wrote:
-> > > tree/branch: https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git master
-> > > branch HEAD: 736ee37e2e8eed7fe48d0a37ee5a709514d478b3  Add linux-next specific files for 20220518
-> > >
-> > > Error/Warning reports:
-> > >
-> > > https://lore.kernel.org/linux-mm/202204291924.vTGZmerI-lkp@intel.com
-> > > https://lore.kernel.org/linux-mm/202205041248.WgCwPcEV-lkp@intel.com
-> > > https://lore.kernel.org/linux-mm/202205122113.uLKzd3SZ-lkp@intel.com
-> > > https://lore.kernel.org/linux-mm/202205172344.3GFeaum1-lkp@intel.com
-> > > https://lore.kernel.org/linux-mm/202205190527.o9wVEvHI-lkp@intel.com
-> > >
-> > > Error/Warning: (recently discovered and may have been fixed)
-> > >
-> > [ .. ]
-> > > drivers/hwmon/nct6775-platform.c:199:9: sparse:    unsigned char
-> > > drivers/hwmon/nct6775-platform.c:199:9: sparse:    void
-> >
-> > This is getting tiresome. Every driver using outb() on m68k will
-> > experience that "problem". As far as I can see, it is caused by
-> >
-> > #define out_8(addr,b) (void)((*(__force volatile u8 *) (unsigned long)(addr)) = (b))
-> >
-> > in arch/m68k/include/asm/raw_io.h. I have no idea what the
-> > "(void)" is for,
->
-> The "(void)" makes sure there is no return value.
-> Which matters if the result of a function returning void is propagated
-> to another function returning void.
+On Tue, Sep 28, 2021 at 12:41:27AM +0100, Ramsay Jones wrote:
+> 
+> Hi Luc,
 
-Which, FTR, sparse also doesn't like:
+Hi Ramsay,
 
-    error: return expression in void function
+> I noticed a regression introduced by commit a69f8d70 which, effectively,
+> disables the 'memcpy-max-count' check. (I had done a 'make CC=cgcc' in
+> git, expecting to see some warnings, including the 'memcpy-max-count'
+> check, and it didn't appear ... :( ). Sorry for not noticing before, but
+> the 'sparse' make target is supposed to suppress that warning for the
+> pack-revindex.c file, so ... ;P
+> 
+> [I tried finding your last 'kernel sparse warnings change' list email
+> to see how many of these warnings still appear in the kernel ... well
+> it would be zero with v0.6.4!]
 
-Gr{oetje,eeting}s,
+Now I can see 4 of them.
+ 
+> I also included the 'case label' patch I sent before, this time with
+> a commit message and a test. (The test could be extended when sparse
+> is updated to include the full label-positioning of C23!).
 
-                        Geert
+Thank you very much, pushed now, and ...
+apologies for this huge delay.
 
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+-- Luc 
