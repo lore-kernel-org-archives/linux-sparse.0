@@ -2,105 +2,75 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C6F9EC433EF
-	for <linux-sparse@archiver.kernel.org>; Sun, 22 May 2022 09:38:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ABA5FC433F5
+	for <linux-sparse@archiver.kernel.org>; Sun, 22 May 2022 10:07:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235099AbiEVJiJ (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Sun, 22 May 2022 05:38:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52594 "EHLO
+        id S235505AbiEVKHp (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Sun, 22 May 2022 06:07:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37324 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236843AbiEVJiI (ORCPT
+        with ESMTP id S230244AbiEVKHp (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 22 May 2022 05:38:08 -0400
-Received: from mail-ed1-x536.google.com (mail-ed1-x536.google.com [IPv6:2a00:1450:4864:20::536])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4BAC43B3CE
-        for <linux-sparse@vger.kernel.org>; Sun, 22 May 2022 02:38:07 -0700 (PDT)
-Received: by mail-ed1-x536.google.com with SMTP id i40so15666360eda.7
-        for <linux-sparse@vger.kernel.org>; Sun, 22 May 2022 02:38:07 -0700 (PDT)
+        Sun, 22 May 2022 06:07:45 -0400
+Received: from mail-ed1-x52e.google.com (mail-ed1-x52e.google.com [IPv6:2a00:1450:4864:20::52e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6EC8C3E5FB
+        for <linux-sparse@vger.kernel.org>; Sun, 22 May 2022 03:07:43 -0700 (PDT)
+Received: by mail-ed1-x52e.google.com with SMTP id i40so15711092eda.7
+        for <linux-sparse@vger.kernel.org>; Sun, 22 May 2022 03:07:43 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=date:from:to:cc:subject:message-id:references:mime-version
          :content-disposition:in-reply-to;
-        bh=YvoekQFmcXRp2Ey/8juh5JDpufn7lNAy/vcOs6/zL8k=;
-        b=R0U3eTPFgRuoIrSQ7kDFHWUQq6P9OFUON1sAkNeHLNdnDV1/BlFAhfuZw2VsNtWtgV
-         vEmUch5BDlym2f/vza92Ax17Ov0UCvhXsbLxltQYNQOs9eP/NTSq1kyBYeAN2u8tDRbc
-         ENRAZjQdb6tnU3JT+OLAuy4aaRBaFm1LmJ8u83n5nlUFjp9+df1m1VRCqavnD7s0zi+B
-         9slR9Bh4OSjOcN5062ZWb6YW/4HM+9AFeIbLb/ed1OE6hd8r0bWxawXFIeYsQFzGRRTm
-         vna/dv8d91IsnG5fsPm5TvsKKIYxuEuR/I557KQoCRqfubzHAb44ZuD2nesMwLoG3CC4
-         na+w==
+        bh=yOGPlOEFl5bvJcI65Dm9SeqI2qkNszG/6pRJKiA7gew=;
+        b=br8WgvEe/AQf9NzgBBOJmXnWxX3vGoyfvXMFd7Sn/wK8J8unthrE7044tYY0usWuQh
+         tkuslcd2XBeOBXhJ+HWCvY16lgGAgSeUbM0PLmejvEDk1wVlqbES7fwyb88fmY9vQFAs
+         KcrIpV56+wnr5DB+6qZ2VxkRW4yIUdQpEp0t82bk2EXOpN7TPE3BeINbojgDzDGkammi
+         jE7gVirl4/e01/ZYz1aP5T53SzvUzS1c5GMou7yG6lYkRlAACeE6qeC0qxWB88Ts8F7J
+         /tNxcWWUMd0c0FIjuLYaBbd9ju18fDsRmnvWFk8YdHi4GGbU/kQOwe1sFMcIQJZE/N66
+         gsTw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to;
-        bh=YvoekQFmcXRp2Ey/8juh5JDpufn7lNAy/vcOs6/zL8k=;
-        b=KbcUDSPiTro/fUZNsE/IsBqdZlJHm9KQMjzKYTHxFbtfzBN3/7MqwN9s7VOH4blX7g
-         eFJ0RJlWwMeM3IQ51yfk/Fow97WIJTruUZBEfz/k+Jr4tW/d0BSPsV8dojwDLG9TloMS
-         NcyO1xwu9WgYFDoB8yxnb9/M7DIXKIJQVM9Xey/LvnSCU5AHMdsdvvo83UkYyo+isJab
-         qO8bs5LLZWS2zS6R9M+9UwsrH0tlZb280txmjxvl6D5ZPcC3JcueN8xc+zoUaJ/d/XjG
-         ul02yGVUTYWaCvw6NLx6PjVwa3BEBZyvZwQ/oWH9pNcQdYKj8PgLq/f6+xFrobndLtnr
-         W9tA==
-X-Gm-Message-State: AOAM530S/rLacVu0vt0C9+oAeANvwAodG12q7gh/Ewhyez1xcJnXNd1F
-        qvLx1dvCgffkUDweSU1tBEg=
-X-Google-Smtp-Source: ABdhPJyUHPh9wjuiUp5q/lfb71MErcxnPIidh+VZqq90xo91JGE9fMvFJ3IfIM6Yd02tO2HHkCVznw==
-X-Received: by 2002:aa7:d8c2:0:b0:42a:b9fa:bad8 with SMTP id k2-20020aa7d8c2000000b0042ab9fabad8mr19321882eds.304.1653212285085;
-        Sun, 22 May 2022 02:38:05 -0700 (PDT)
+        bh=yOGPlOEFl5bvJcI65Dm9SeqI2qkNszG/6pRJKiA7gew=;
+        b=iQfJ/MkceiZP3mtxuyNj8R3QzryGYm2kLBvx200DgOwbWnZpMiaTYdBe4IRwzkFo51
+         QMbxHtZ49DR4da+NehTy9GCRF4WpOlsVXniLBHy9FXXqrbcwu9E48C0QS3d+Wo6ywJJe
+         oEuQanX/nF+uglx8Ggvdb78bYb5lSmszKEYvpNwsuq8wwq+WdXZaurTjmvY3jj15hRfv
+         JymVfRAYDdffQGTzTXBxI8MRg0nLYXUfh3/8vDm2UFmbqsA9tPs+wpCZj7UB6NMQ9kwQ
+         LDlg7t46FF/b3nxSY3CceH1TYJFfP/EhbQdAPet+ynLQBTbX+fNxgxZxAaBDzyBcoM9x
+         /qCg==
+X-Gm-Message-State: AOAM533AwrSxZ4UsAKb6lFbFMhl8gzeZv5UzHB5o0NhsgzjUAhQZDhm+
+        vyrwZ1Kg7UJOFOBui31oizg=
+X-Google-Smtp-Source: ABdhPJz2e5n4nvEt3qiXFLJ9v50DYSh79sWIyz0Xsb+bILYBhSIonqNSfMsEfk7ZGD2xr2/Hp+97NA==
+X-Received: by 2002:aa7:d707:0:b0:42a:bcb9:b8ac with SMTP id t7-20020aa7d707000000b0042abcb9b8acmr18773911edq.231.1653214061988;
+        Sun, 22 May 2022 03:07:41 -0700 (PDT)
 Received: from mail (239.125-180-91.adsl-dyn.isp.belgacom.be. [91.180.125.239])
-        by smtp.gmail.com with ESMTPSA id h18-20020a1709070b1200b006fa84a0af2asm5074867ejl.16.2022.05.22.02.38.03
+        by smtp.gmail.com with ESMTPSA id fy28-20020a1709069f1c00b006febc1ef61csm1625348ejc.106.2022.05.22.03.07.40
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 22 May 2022 02:38:04 -0700 (PDT)
-Date:   Sun, 22 May 2022 11:38:03 +0200
+        Sun, 22 May 2022 03:07:41 -0700 (PDT)
+Date:   Sun, 22 May 2022 12:07:40 +0200
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-To:     Tom Rix <trix@redhat.com>
-Cc:     linux-sparse@vger.kernel.org, dan.carpenter@oracle.com
-Subject: Re: [PATCH] cgcc: handle -x assembler
-Message-ID: <20220522093803.i4z3hpcuhkz3ohj7@mail>
-References: <20220410140026.1830513-1-trix@redhat.com>
+To:     Guennadi Liakhovetski <guennadi.liakhovetski@linux.intel.com>
+Cc:     linux-sparse@vger.kernel.org
+Subject: Re: [PATCH] cgcc: add Xtensa support
+Message-ID: <20220522100740.poyqecyvx4oyu6om@mail>
+References: <144ce263-cb62-5531-b35-c8ab13ce68f7@intel.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220410140026.1830513-1-trix@redhat.com>
+In-Reply-To: <144ce263-cb62-5531-b35-c8ab13ce68f7@intel.com>
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Hi,
+On Wed, Apr 20, 2022 at 02:31:34PM +0200, Guennadi Liakhovetski wrote:
+> Add support for the Xtensa architecture.
 
-Sorry for this late reply.
- 
-On Sun, Apr 10, 2022 at 10:00:26AM -0400, Tom Rix wrote:
-> On linux-next, using
-> make CC=cgcc
-> 
-> fails with
-> cgcc: unknown assembler invoked
-> scripts/Kconfig.include:50: Sorry, this assembler is not supported.
-> 
-> cgcc is being invoked with
-> cgcc -Wa,--version -c -x assembler /dev/null -o /dev/null
-> And dieing when the '-x c' is not matched.
->
-> Add a check for -x assember.
+Thank you. Pulled and pushed.
+-- Luc 
 
+> This should be used with the Zephyr RTOS on Xtensa as implemented in
+> https://github.com/zephyrproject-rtos/zephyr/pull/43776
 
-As you most probably know, cgcc is a wrapper around GCC to transparently
-also call sparse on the source code.
-This was designed when using sparse on non-kernel code. The kernel doesn't
-need it since its build system can do the same directly using the commands:
-	make C=1 <...>
-or
-	make C=2 <...>
-insuring it's called with the correct arguments (like the --arch option)
-and taking in account a few idiosyncrasies.
-
-Your patch is OK regarding cgcc itself but I don't know what good it will
-do after, when calling sparse, since sparse can only process C code an will
-surely choke on assembly files.
-
-So, are you sure you must cgcc here and can't use the existing make C=[12]
-mechanism? Otherwise, a more correct patch would be to change the check
-for '-x c', set $do_check = 0 when the argument is 'assembler' (or
-better, when anything other than 'c') and preferably stop to parse the
-remaining arguments/directly call the $REAL_CC.
-
-Best regards,
--- Luc
+Nice!
+-- Luc 
