@@ -2,96 +2,106 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 996DDC433EF
-	for <linux-sparse@archiver.kernel.org>; Sun, 22 May 2022 12:22:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A546EC433F5
+	for <linux-sparse@archiver.kernel.org>; Sun, 22 May 2022 15:09:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344247AbiEVMWj (ORCPT
-        <rfc822;linux-sparse@archiver.kernel.org>);
-        Sun, 22 May 2022 08:22:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51040 "EHLO
+        id S235502AbiEVPJf (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Sun, 22 May 2022 11:09:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53800 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1344718AbiEVMWi (ORCPT
+        with ESMTP id S230290AbiEVPJf (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 22 May 2022 08:22:38 -0400
-Received: from mail-ed1-x52b.google.com (mail-ed1-x52b.google.com [IPv6:2a00:1450:4864:20::52b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CC9D63BFAE
-        for <linux-sparse@vger.kernel.org>; Sun, 22 May 2022 05:22:30 -0700 (PDT)
-Received: by mail-ed1-x52b.google.com with SMTP id p26so15925880eds.5
-        for <linux-sparse@vger.kernel.org>; Sun, 22 May 2022 05:22:30 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=LG8EYp1+onYXfFssPBwlYdjbgVsgQherIbV0lUMWZRU=;
-        b=OiDaf0aMEGjQBHhExJo2zPDd25tfS7Vq7QG43OoO7i6PmLeDXUJXVX8lSvzzADwBmE
-         pOeBZo3mOMjBsIjBSKWzXIu3QOQUHbkgPkMURCxxixfIaKj3C4x4Vtzj9w7n8sQsYJJA
-         PBVltCk64kJ+kBXNGhO/to6U57AMUisqcHNo01HqA+6g1k4oYT6BORKVjhIqK+rd29Zg
-         sgB1brkgVUjoN/ZKtHirrcI77tvEnlX15nr25p18YAWzZ9BAtFdk7a7Umj48Z/2noE8t
-         05YQUbF/croL/iH8BDhEIs3ak/FNDXfZWjAPTB86DHsLNYIvmdjo/NVexzKJ3yr31Nh/
-         lruw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=LG8EYp1+onYXfFssPBwlYdjbgVsgQherIbV0lUMWZRU=;
-        b=CDhP21GWDhPo9uyHcEFtKHA5ZfZUQFH2wyRy81ZW+5+uzStk0iLzsi/y/UPo0+6gkt
-         l3ATrvhVhh5CXC9RsBMIX0z1SlDedlAcrwWd/zsTTqVNuv7H5rEfYKEftRQ8XHNtSlO8
-         lisCrq50cUipmncNuWBJ7qiwChUm/tp9xKjAqSuFYTNknxC9GFXh6OXGnFx8iUCDJ45o
-         wdPIihgAUmQv4ooH/s7hPuPkn3FpzdoYmt4aEvGBhP961zFzmA/VBrL+R13Uf+rF2Rfp
-         qIPkrTNbsLpP4wXeWcEaiJxBf0fH9XILjtYMwfHzsZHyiUd1epB31CJKI/pbxEwEy8bI
-         t2fA==
-X-Gm-Message-State: AOAM530FXYQDnp1tnPjYZY4BWfN6aT69z/Wj8kdNU+mGFZwJiaBRkQ21
-        F/6ny+EVTMnQes0bzlnt7jU=
-X-Google-Smtp-Source: ABdhPJxXXghxr1/WVYv2CZl/gdaRY6GsXi72CsD+lhzmNuak7+LmRz7VjyOtwSyThG8KvIqvhQrZNA==
-X-Received: by 2002:aa7:d4c8:0:b0:42a:a406:a702 with SMTP id t8-20020aa7d4c8000000b0042aa406a702mr19250936edr.129.1653222149306;
-        Sun, 22 May 2022 05:22:29 -0700 (PDT)
-Received: from mail (239.125-180-91.adsl-dyn.isp.belgacom.be. [91.180.125.239])
-        by smtp.gmail.com with ESMTPSA id n14-20020a17090695ce00b006febd5a0f5bsm1621285ejy.59.2022.05.22.05.22.27
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 22 May 2022 05:22:28 -0700 (PDT)
-Date:   Sun, 22 May 2022 14:22:27 +0200
-From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-To:     Richard Palethorpe <rpalethorpe@suse.de>
-Cc:     linux-sparse@vger.kernel.org, pvorel@suze.cz, chrubis@suse.cz,
-        io@richiejp.com
-Subject: Re: Linux Test Project vendored Sparse
-Message-ID: <20220522122227.mcgnatle6zmgqycn@mail>
-References: <87k0ggbjb0.fsf@suse.de>
+        Sun, 22 May 2022 11:09:35 -0400
+X-Greylist: delayed 182 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Sun, 22 May 2022 08:09:32 PDT
+Received: from avasout-peh-001.plus.net (avasout-peh-001.plus.net [212.159.14.17])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EDB5C3A5E3
+        for <linux-sparse@vger.kernel.org>; Sun, 22 May 2022 08:09:32 -0700 (PDT)
+Received: from [10.0.2.15] ([147.147.167.40])
+        by smtp with ESMTPA
+        id snA3n2GidOC4ksnA4nRoyO; Sun, 22 May 2022 16:06:28 +0100
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=plus.com; s=042019;
+        t=1653231988; bh=5WsWZzuPe4VWyqeEYqEzfre7+g2ON+e0M44zrthOPCI=;
+        h=Date:From:Subject:To:Cc:References:In-Reply-To;
+        b=AhlNEnGOS/UQlrOW67QU14LEm6O9E5Hedd0K6hcDgckwlnBXdhsb+A8WUWzZv59hZ
+         ypwE7XE3rFVzAviuu8Gg1jbbsfm5WLibQ7io1NSrPENFToiJ0/2qDJFc5jb5uzLD7Q
+         KPrWAI5/1TlYdXqRQ6gs0UixUQyBEiziy3EaRE095D5EzC8WF0tpOKhTpAakoYN0ND
+         hNzFyvT1itS/GMUTLPJGd/5IGCqPUbWZVbAbaXabEiu+NBPaPcGOn9geZ12U1NV4TY
+         rw392K7UWh3FWm5dMtem3w8iGCBohLuY1XpY7wi/e7poJyftQlbxy7mybxARmQFn2O
+         Bp31VMmny8GqA==
+X-Clacks-Overhead: "GNU Terry Pratchett"
+X-CM-Score: 0.00
+X-CNFS-Analysis: v=2.4 cv=FsUWQknq c=1 sm=1 tr=0 ts=628a5174
+ a=nyqnwr6A7Kzjd6EpZhiMcA==:117 a=nyqnwr6A7Kzjd6EpZhiMcA==:17
+ a=IkcTkHD0fZMA:10 a=DYzKCcsm62tQ7I8jnDYA:9 a=QEXdDO2ut3YA:10
+X-AUTH: ramsayjones@:2500
+Message-ID: <c07296ee-650a-7261-5acb-75013b909d9b@ramsayjones.plus.com>
+Date:   Sun, 22 May 2022 16:06:27 +0100
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <87k0ggbjb0.fsf@suse.de>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.8.1
+From:   Ramsay Jones <ramsay@ramsayjones.plus.com>
+Subject: Re: [PATCH 0/2] sparse v0.6.4 regression
+To:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc:     Sparse Mailing-list <linux-sparse@vger.kernel.org>,
+        Junio C Hamano <gitster@pobox.com>
+References: <c29182d4-3141-83c6-21f6-d7f368b3d3c5@ramsayjones.plus.com>
+ <20220521094418.pf6s4usfq4npktn6@mail>
+Content-Language: en-GB
+In-Reply-To: <20220521094418.pf6s4usfq4npktn6@mail>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+X-CMAE-Envelope: MS4xfMiyi8VkPvicrv27w3mEDd9vBy4uqY1iGQTvSoKOyXAUKiagdJBhUGjF5z5hpWecvwbQ4Vajre4CLG7A5+ozvIyzhsIdOR/P0VmqitOnTOfkrvvVbk1c
+ ERMn6YrpMw4nH2iukTYHjvLKRAeSQGXn1/vdstMYQEUMn/y/Cup38QAhLSo2Klwu6Sa8RWjpIOqpVkEG75rF6OrrYeDp/ZHtuLY=
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Tue, Dec 07, 2021 at 01:33:56PM +0000, Richard Palethorpe wrote:
-> Hello Sparse contributors,
 
-Hi,
 
-Please accept my apologies for replying so lately.
- 
-> After trying a number of static analysis tools we settled on Sparse to
-> roll our own C checks.
+On 21/05/2022 10:44, Luc Van Oostenryck wrote:
+> On Tue, Sep 28, 2021 at 12:41:27AM +0100, Ramsay Jones wrote:
 
-Nice!
+> Hi Ramsay,
 
-> We use a mixture of the linearized form and AST. If you are interested
-> please see:
-> https://github.com/linux-test-project/ltp/blob/master/tools/sparse/
-> Also I will attach the main code to the body of this e-mail it is only
-> 283 lines.
+Hi Luc, good to hear from you! Hope you are keeping well.
+
+>> I noticed a regression introduced by commit a69f8d70 which, effectively,
+>> disables the 'memcpy-max-count' check. (I had done a 'make CC=cgcc' in
+>> git, expecting to see some warnings, including the 'memcpy-max-count'
+>> check, and it didn't appear ... :( ). Sorry for not noticing before, but
+>> the 'sparse' make target is supposed to suppress that warning for the
+>> pack-revindex.c file, so ... ;P
+>>
+>> [I tried finding your last 'kernel sparse warnings change' list email
+>> to see how many of these warnings still appear in the kernel ... well
+>> it would be zero with v0.6.4!]
 > 
-> I still don't have a firm grasp on how Sparse works, so any feedback
-> would be welcome. BTW we include Sparse as a git module and so far there
-> have been no complaints.
+> Now I can see 4 of them.
 
-I've taken a good look at it and everything look good.
-I also think that using Sparse as a git module is the good choice.
+I tested today's master (@commit fbdc046e (Use offsetof macro to silence
+null ptr subtraction warning, 2022-03-21)), without issue on 64-bit
+linux and cygwin. (so, not 32-bit linux, which requires a reboot ...)
 
-If you have any question, do not hesitate to ask (I should be much
-more responsive now).
- 
-Best regards,
--- Luc
+Also, a 'make CC=cgcc' now issues all the warnings I expect, including:
+
+      CC pack-revindex.o
+  pack-revindex.c:73:23: warning: memset with byte count of 262144
+
+I noticed that three RISC-V patches have been pushed since then, so I will
+test those later ...
+
+>> I also included the 'case label' patch I sent before, this time with
+>> a commit message and a test. (The test could be extended when sparse
+>> is updated to include the full label-positioning of C23!).
+> 
+> Thank you very much, pushed now, and ...
+
+Thanks!
+
+> apologies for this huge delay.
+
+No problem.
+
+ATB,
+Ramsay Jones
+
