@@ -2,82 +2,62 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4A259C433F5
-	for <linux-sparse@archiver.kernel.org>; Mon, 23 May 2022 12:46:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1E304C433EF
+	for <linux-sparse@archiver.kernel.org>; Tue, 24 May 2022 09:39:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235647AbiEWMq2 (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Mon, 23 May 2022 08:46:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37268 "EHLO
+        id S234686AbiEXJjR (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Tue, 24 May 2022 05:39:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55338 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235744AbiEWMqE (ORCPT
+        with ESMTP id S231688AbiEXJjP (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 23 May 2022 08:46:04 -0400
-Received: from mail-wr1-x433.google.com (mail-wr1-x433.google.com [IPv6:2a00:1450:4864:20::433])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 619DFDF29
-        for <linux-sparse@vger.kernel.org>; Mon, 23 May 2022 05:46:02 -0700 (PDT)
-Received: by mail-wr1-x433.google.com with SMTP id f2so21240941wrc.0
-        for <linux-sparse@vger.kernel.org>; Mon, 23 May 2022 05:46:02 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=mAnl9MNocRmV5guUEEHam6a+6J5XIiAh4dGRzsskR5U=;
-        b=igU3pO30h1YT21IurDvbPc85Qs0b3grX9m7rNLeikdNCt36wzyCWGYeKIZ9AedLb3O
-         EqMx4C4zXqHD/vGAzibEZUZ3eIU0GkLNYFwDbBzBGLiTYTD/4sRxgST5tgwi/UiwbRHT
-         cz0kcRpDq8r38rD1e1iWXgu4df+qD+fakUEXPmk2hgyqdTIvIGo5QFH93bI3Q+hnA6gk
-         yRmoUl48t4TPh3TiJWsX+c+veXBp1PhUVEGwt/jPLAvWUgNLxVc/f1bmOBW3zsKGyxqk
-         55cs18x5p0lSChxSlaG3kzkCccjBPAZ7RMDLtzNNYtWtONDmWobuW1kvz03pqwg34IJ7
-         CYuA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=mAnl9MNocRmV5guUEEHam6a+6J5XIiAh4dGRzsskR5U=;
-        b=6CK526/4T4xmHqPt+YFxsJRi1Jcqs7HTIBQPEMNLw0e+rHdlgCtWjQBo1GBlrNTdTd
-         nSvjPJ5A0Hvh3tBVIUfVP9cl7Te5dAbrBBKw7QELwGtBzr6IqOhlHnJuFvX1iGFjTyFa
-         MezyRMzHb/BTJV8sAFG6nnalgcM8JKf9jOWKacPNiPi4XOxBedlnZTDnRV3U0So3MZoW
-         3+uTCY9/8jC7FEAorAkyO/TgXEuALvGtoYH/xkqmIMWdD0mKWD2DJ1ypcTOb8ujFDnxk
-         3tJWjWN23kHsX87YYRjd9c9bLVYvOhHGoa87BqadbWKh1jxoh/pOnunOLefR3osqMTbg
-         RSLg==
-X-Gm-Message-State: AOAM533S8wW8etD1c2I0q0OkXAOf+JEhlMgEXbXqsjsUaygc94RsGW0H
-        GRaQTk7ziOELLckKxuomvk7bsGvJBFE=
-X-Google-Smtp-Source: ABdhPJyxftevcKNz61tV1PTlhqFGTARb6i7J87WtmK4WzrmzqvRiPRTIGT/P/vxlkR0SBXjugRTNhQ==
-X-Received: by 2002:a5d:5281:0:b0:20c:d5be:331c with SMTP id c1-20020a5d5281000000b0020cd5be331cmr18442771wrv.9.1653309960995;
-        Mon, 23 May 2022 05:46:00 -0700 (PDT)
-Received: from example.org (ip-89-103-223-28.net.upcbroadband.cz. [89.103.223.28])
-        by smtp.gmail.com with ESMTPSA id r83-20020a1c4456000000b003973e8a227dsm1025526wma.46.2022.05.23.05.46.00
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 23 May 2022 05:46:00 -0700 (PDT)
-Date:   Mon, 23 May 2022 14:45:56 +0200
-From:   Alexey Gladkov <gladkov.alexey@gmail.com>
-To:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc:     linux-sparse@vger.kernel.org, Oleg Nesterov <oleg@redhat.com>
-Subject: Re: [PATCH 0/3] semind: Index more symbols
-Message-ID: <20220523124556.dxhkv62cngd4r522@example.org>
-References: <20211102140645.83081-1-gladkov.alexey@gmail.com>
- <20220521094622.ygnkse26visliklk@mail>
+        Tue, 24 May 2022 05:39:15 -0400
+X-Greylist: delayed 844 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Tue, 24 May 2022 02:39:15 PDT
+Received: from box.indicandustries.com (hwsrv-970840.hostwindsdns.com [IPv6:2607:5501:3000:21a5::2])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1FFD564BFB
+        for <linux-sparse@vger.kernel.org>; Tue, 24 May 2022 02:39:15 -0700 (PDT)
+Received: from authenticated-user (box.indicandustries.com [104.168.149.109])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by box.indicandustries.com (Postfix) with ESMTPSA id 2F7FB107E01
+        for <linux-sparse@vger.kernel.org>; Tue, 24 May 2022 03:24:04 -0600 (MDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+        d=box.indicandustries.com; s=mail; t=1653384244;
+        bh=V6VCn7WEbqHjVVQ20/+SYu6rwS1WmTHcxX88g+j430s=;
+        h=Reply-To:From:To:Subject:Date:From;
+        b=KiHP9aH+vKH6U/LvBYGd8AvsCSV0Xc3PW3hv/85i0I9HcN53961ohM1hTPfFK3Xsb
+         pfmTdc0WSC1E8G6b2DM/R0Vc2fQuzyUemUNTWJvkfx+qXRkg2qXPD3IR7L5ox63O/T
+         Vzws76zLNz4aAS0jefe4fVRZPEWJaOg1kByGoxkCpA9LwTFUmt+D9/jxtXyt4OMuaM
+         ujvHCdHX9iZPRuXgZQjdH6Dv0X6K0kJYQgGkc+xLq9d+GjRdoMR+3UmQA+62OKUmZs
+         bSuW/KXD+TVIjcWHD55kyvVPTEVP3vOcgQYW/udAUrTdboYPSLVjl0acrehkBrUWKh
+         bNKEpRa4h6g1g==
+Reply-To: amjalia90@gmail.com
+From:   amjad.ali@box.indicandustries.com
+To:     linux-sparse@vger.kernel.org
+Subject: Hello Sir, I seek your urgent consideration.
+Date:   24 May 2022 11:24:03 +0200
+Message-ID: <20220524112403.946DE2FA9A527EC2@box.indicandustries.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220521094622.ygnkse26visliklk@mail>
+Content-Type: text/plain;
+        charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Sat, May 21, 2022 at 11:46:22AM +0200, Luc Van Oostenryck wrote:
-> On Tue, Nov 02, 2021 at 03:06:42PM +0100, Alexey Gladkov wrote:
-> > Greetings!
-> > 
-> > For indexing purposes, macros definitions and typedefs are added to the
-> > semind database. Functions that are not used in the code are also indexed.
-> 
-> Thank you very much, pushed now, an ... apologies for this huge delay.
+Hello,
 
-Looks like I'm the only one using this indexer at work. But in case anyone
-is interested, I have a vim plugin for semind [1].
+Greetings? I am Amjad. I work with a leading Bio Firm.  Due to=20
+the setbacks of the pandemic, my company has opened a bid in=20
+search of new suppliers for basic raw materials needed in=20
+production.
 
-[1] https://github.com/legionus/vim-semind
+I am seeking a representative=C2=A0as I am a staff, I can not be=20
+involved directly. It may not be your area of work but the=20
+profits are great and I will guide you through. I have already=20
+sourced a local supplier for this. I only need a reliable=20
+representative.
 
--- 
-Rgrds, legion
+Please get back to me so I can explain this in full.
 
+Amjad
