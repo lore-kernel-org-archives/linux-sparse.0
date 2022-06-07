@@ -2,94 +2,107 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 33DDAC43334
-	for <linux-sparse@archiver.kernel.org>; Tue,  7 Jun 2022 20:12:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F531CCA499
+	for <linux-sparse@archiver.kernel.org>; Wed,  8 Jun 2022 00:58:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1357539AbiFGUMv (ORCPT
+        id S1354515AbiFHAym (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Tue, 7 Jun 2022 16:12:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58156 "EHLO
+        Tue, 7 Jun 2022 20:54:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48880 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1359137AbiFGUJh (ORCPT
+        with ESMTP id S1450068AbiFGXKs (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 7 Jun 2022 16:09:37 -0400
-Received: from mail-ej1-x62e.google.com (mail-ej1-x62e.google.com [IPv6:2a00:1450:4864:20::62e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 573F91C4F13
-        for <linux-sparse@vger.kernel.org>; Tue,  7 Jun 2022 11:26:55 -0700 (PDT)
-Received: by mail-ej1-x62e.google.com with SMTP id q1so36919375ejz.9
-        for <linux-sparse@vger.kernel.org>; Tue, 07 Jun 2022 11:26:55 -0700 (PDT)
+        Tue, 7 Jun 2022 19:10:48 -0400
+Received: from mail-ej1-x62a.google.com (mail-ej1-x62a.google.com [IPv6:2a00:1450:4864:20::62a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 45DF218492B
+        for <linux-sparse@vger.kernel.org>; Tue,  7 Jun 2022 13:48:16 -0700 (PDT)
+Received: by mail-ej1-x62a.google.com with SMTP id y19so37556888ejq.6
+        for <linux-sparse@vger.kernel.org>; Tue, 07 Jun 2022 13:48:16 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linux-foundation.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=DCw08G+SEqa39b/et5gn5JnDtDhkvjyv3RPc3u1N8So=;
-        b=Dx27OcWn1ugrJNpjWqjKvVsJVyArtJmKKU82f0TCI/lVqzbNIoiEv0wkZUVIVD/N7x
-         4gkdbh3N/NdgdMuIQY3id+gIdshl+bYqdBVSwz/Jf1e5sah5CpaO57XqE2MVwtCC7aiu
-         pBd0CabQ/wU6NpkYIVZJp+cx30JmHAmkAeRME=
+        d=gmail.com; s=20210112;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=ae2EWsMHaQEpT2swz0aG6TlK+vgk2L1Smng6oIqSP+I=;
+        b=UT4gln5aiVScnAr1coIUjJ4owtdcrNmMoY8IfIAH8Tcjkjtaf7VcU8XeuobljxvYaG
+         xdLjZSzpPheoq33FlsH+zOOuUNAU4BcwHak8f6qKuT4+Ai4anusPI/hs18RkctBm4ex+
+         ueMLAHHm4caGXjkRMSFn9GAdtrMCtL6D9MC6b7qGaw0H0qZGDZKogUIYJcXAAXgirbBd
+         MWQ6Icolgd1S3wCK3JufqdQahGq148/oE10oC7GDbtYSkWySZBpWTEZLhqQVI5Ei6Xlu
+         PhMCdC/LYtcXihQMExy09TqZD+mHe9s8WjqzoXzP8ZrzI8wzz4JHchgIlhNf7m+ynO96
+         ajrQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=DCw08G+SEqa39b/et5gn5JnDtDhkvjyv3RPc3u1N8So=;
-        b=KRKxbgoeU/IOfz+RjQJxQB8zLb34JCoy/bwGQ039KUXFGNhXW1rkqTqaipVHHpIgCV
-         ICiM2a+AgAP4nDFTMBmGMCuS+CfoAg1py//lXz3/aUd3O94YISIMYRR/XgYKqWUH0IOV
-         rykeCdEFre9lmTTdmTvPT+kYR0gxs28beMOhQfUGFlHr2dJtR2aJNEAnkpB6diZklArY
-         R/lBYA4cJFLZ0ro8TfR9i3V5l8jaD7dIxwmZ03hPyEolrSoUU3lZAti0wJgPN+CQkCZS
-         53haZdwtWt3bTpRCrjyg8F9Vy7REfup/bUBx/GzecnlppbTAjW/W7Hg1w7ZjzbbHVAgG
-         EIzg==
-X-Gm-Message-State: AOAM531An9r79PUnyvOk0Zo/gMeNu5ql6JwlqJTxzWV/fG/NmsplyZH1
-        z+OWt4Xc8AZCMbjqyrEyJuB015Oh2lgIdLahmX4=
-X-Google-Smtp-Source: ABdhPJx1dfXYe2Vc3572g9Mx3IFJqKACo7H+REFfRFMEBmrolfWUe5dZWuI7Yiljm1yrjT0j9Vhn9g==
-X-Received: by 2002:a17:906:7951:b0:6fe:f0b0:8d1e with SMTP id l17-20020a170906795100b006fef0b08d1emr28258544ejo.300.1654626413570;
-        Tue, 07 Jun 2022 11:26:53 -0700 (PDT)
-Received: from mail-wr1-f51.google.com (mail-wr1-f51.google.com. [209.85.221.51])
-        by smtp.gmail.com with ESMTPSA id d22-20020a50fb16000000b0042617ba6389sm10648916edq.19.2022.06.07.11.26.52
-        for <linux-sparse@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 07 Jun 2022 11:26:53 -0700 (PDT)
-Received: by mail-wr1-f51.google.com with SMTP id q7so25303846wrg.5
-        for <linux-sparse@vger.kernel.org>; Tue, 07 Jun 2022 11:26:52 -0700 (PDT)
-X-Received: by 2002:a5d:47aa:0:b0:218:5ac8:f3a8 with SMTP id
- 10-20020a5d47aa000000b002185ac8f3a8mr1182332wrb.442.1654626412564; Tue, 07
- Jun 2022 11:26:52 -0700 (PDT)
-MIME-Version: 1.0
-References: <20220607125441.36757-1-lucvoo@kernel.org>
-In-Reply-To: <20220607125441.36757-1-lucvoo@kernel.org>
-From:   Linus Torvalds <torvalds@linux-foundation.org>
-Date:   Tue, 7 Jun 2022 11:26:36 -0700
-X-Gmail-Original-Message-ID: <CAHk-=wjYBPYsD-h_KkOG2zZTEXQ3yYEOzD_S83mnJqXjs1tcrQ@mail.gmail.com>
-Message-ID: <CAHk-=wjYBPYsD-h_KkOG2zZTEXQ3yYEOzD_S83mnJqXjs1tcrQ@mail.gmail.com>
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=ae2EWsMHaQEpT2swz0aG6TlK+vgk2L1Smng6oIqSP+I=;
+        b=qigtov6dG3HXPAyzHCRdrmhqxXZ5o8CPZmaWsbjx0BjjkrEdRN8XdAdQ0tDaepCV33
+         FSDHoT+5rhjYH6vEuEcGFiaLZ/+MZDg0OenVpbVPaR7IF4BxPukl1T9oYD3eYQecpMoC
+         VkJyIbLJriksS+yNTNOtMQDl7Sh3jy2yaQlaeSROHNRnU8B8ZP4VSPuykUFRC/xJY1H4
+         Zf3Crp1jOppW5nIyM9VPQ40hgMzIoyw+Go3wvQ0QzzJEK/pencF2hpwz9dVOKspzfl9z
+         ywsQfH5yj4aBhO1zjUGCTM5sNbUywpdlalfNG9LbN4nCc3QE2Iz4EhkfSXG6RUbOeiJT
+         5VIg==
+X-Gm-Message-State: AOAM533+CmZrxKv1um1m8YSF0JfImp3GxLYGVRSWcvONE5qTXcKmEokh
+        Tg2lwMHKv4gWUX/zQI4MJ3o=
+X-Google-Smtp-Source: ABdhPJwaZ0sUIBrFebLVwxgyhji0nPSm0meAcJb04X+flg/h2QjErb2C/IF7hvGUDcZJCFE6KA2nKA==
+X-Received: by 2002:a17:907:9715:b0:711:ca06:ca50 with SMTP id jg21-20020a170907971500b00711ca06ca50mr13330983ejc.192.1654634894485;
+        Tue, 07 Jun 2022 13:48:14 -0700 (PDT)
+Received: from mail (239.125-180-91.adsl-dyn.isp.belgacom.be. [91.180.125.239])
+        by smtp.gmail.com with ESMTPSA id u1-20020a170906124100b006feb875503fsm8201357eja.78.2022.06.07.13.48.13
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 07 Jun 2022 13:48:13 -0700 (PDT)
+Date:   Tue, 7 Jun 2022 22:48:12 +0200
+From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To:     Linus Torvalds <torvalds@linux-foundation.org>
+Cc:     Luc Van Oostenryck <lucvoo@kernel.org>,
+        Sparse Mailing-list <linux-sparse@vger.kernel.org>
 Subject: Re: [PATCH] allow show_token() on TOKEN_ZERO_IDENT
-To:     Luc Van Oostenryck <lucvoo@kernel.org>
-Cc:     Sparse Mailing-list <linux-sparse@vger.kernel.org>,
-        Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Content-Type: text/plain; charset="UTF-8"
+Message-ID: <20220607204812.g7kvxkdlz247ddf3@mail>
+References: <20220607125441.36757-1-lucvoo@kernel.org>
+ <CAHk-=wjYBPYsD-h_KkOG2zZTEXQ3yYEOzD_S83mnJqXjs1tcrQ@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAHk-=wjYBPYsD-h_KkOG2zZTEXQ3yYEOzD_S83mnJqXjs1tcrQ@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Tue, Jun 7, 2022 at 5:55 AM Luc Van Oostenryck <lucvoo@kernel.org> wrote:
->
-> TOKEN_ZERO_IDENTs are created during the evaluation of pre-processor
-> expressions but which otherwise are normal idents and  were first tokenized
-> as TOKEN_IDENTs.
->
-> As such, they could perfectly be displayed by show_token() but are not.
-> So, in error messages they are displayed as "unhandled token type '4'",
-> which is not at all informative.
->
-> Fix this by letting show_token() process them like usual TOKEN_IDENTs.
-> Idem for quote_token().
+On Tue, Jun 07, 2022 at 11:26:36AM -0700, Linus Torvalds wrote:
+> On Tue, Jun 7, 2022 at 5:55 AM Luc Van Oostenryck <lucvoo@kernel.org> wrote:
+> >
+> > TOKEN_ZERO_IDENTs are created during the evaluation of pre-processor
+> > expressions but which otherwise are normal idents and  were first tokenized
+> > as TOKEN_IDENTs.
+> >
+> > As such, they could perfectly be displayed by show_token() but are not.
+> > So, in error messages they are displayed as "unhandled token type '4'",
+> > which is not at all informative.
+> >
+> > Fix this by letting show_token() process them like usual TOKEN_IDENTs.
+> > Idem for quote_token().
+> 
+> Ack.
+> 
+> I do wonder if it should be marked somehow as being that special case.
+> The main reason for 'show_token()' is debugging, after all, and
+> TOKEN_ZERO_IDENT does have magical properties in how it either
+> silently expands to the constant '0', or it generates a warning about
+> undefined preprocessor symbol.
+> 
+> But considering that we've apparently reported it as "unhandled token
+> type '4'" since 2005, I guess it's not exactly a big deal.
 
-Ack.
+Yes, I first thought to do so but then choose not because I could not
+convince myself that its special property was irrelevant in warning/error
+messages. It looks to me more as an internal thing, more semantical than
+lexical, and a non-faithful representation would be confusing in messages.
 
-I do wonder if it should be marked somehow as being that special case.
-The main reason for 'show_token()' is debugging, after all, and
-TOKEN_ZERO_IDENT does have magical properties in how it either
-silently expands to the constant '0', or it generates a warning about
-undefined preprocessor symbol.
-
-But considering that we've apparently reported it as "unhandled token
-type '4'" since 2005, I guess it's not exactly a big deal.
-
-           Linus
+For context, the input text I had (from GCC's testsuite) was:
+	#define empty
+	#if empty#cpu(m68k)
+	#endif
+and the error message sparse issued was:
+	error: garbage at end: #unhandled token type '4' (unhandled token type '4' )
+with this patch it's:
+	error: garbage at end: #cpu(m68k)
+ 
+-- Luc
