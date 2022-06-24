@@ -2,47 +2,44 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 52CB2C433EF
-	for <linux-sparse@archiver.kernel.org>; Tue, 14 Jun 2022 00:17:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3389EC433EF
+	for <linux-sparse@archiver.kernel.org>; Fri, 24 Jun 2022 16:46:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233373AbiFNARq (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Mon, 13 Jun 2022 20:17:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41430 "EHLO
+        id S230366AbiFXQqL (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Fri, 24 Jun 2022 12:46:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42060 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233901AbiFNARo (ORCPT
+        with ESMTP id S230333AbiFXQqJ (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 13 Jun 2022 20:17:44 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0D5132253A
-        for <linux-sparse@vger.kernel.org>; Mon, 13 Jun 2022 17:17:42 -0700 (PDT)
+        Fri, 24 Jun 2022 12:46:09 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D0E4150032
+        for <linux-sparse@vger.kernel.org>; Fri, 24 Jun 2022 09:46:08 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id D3303B8167B
-        for <linux-sparse@vger.kernel.org>; Tue, 14 Jun 2022 00:17:40 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A4A55C34114;
-        Tue, 14 Jun 2022 00:17:38 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 708FE622F5
+        for <linux-sparse@vger.kernel.org>; Fri, 24 Jun 2022 16:46:08 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1E0C8C34114;
+        Fri, 24 Jun 2022 16:46:06 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1655165859;
-        bh=A1dIgaKzESVI+B4DJt6QIN6fbPEVYNPzRIsvg9IjdyA=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=bHSu2h4XldpgJEJe28kFmcXke5jFLXRyAcPSovE3rjQxZTT6vJ++B3ad9XK0BbzKA
-         5dlaD+aNu0RVioe3PDimOmI85Ef6ylkGpb7jyv0uU3/Z/MLi3UeIiJ1RVpGE9XcnUF
-         O9sqDehD54N/SgZ+XUolYIBZ92Gh/GMy+hl67lQVD7NptWqtksE51kkILTRM6Rom3U
-         hOtZ7u+j/NKdfxApDkKAo5SS3kq3I0ksNWoTLuZqfu3GAB4k8m8ypWGi758tMieXdS
-         iUPt4tmKNvTLSqQzGYt5wX49rn7m1i4J0cR/6qVqwRASZ37Tx646qM1Ga+G7NqYKjB
-         LahQqcB/CBRGQ==
+        s=k20201202; t=1656089167;
+        bh=tQPASPYBrhtAaP/xuHHMNarWkRMi1n5PkvyUGO5ej+Q=;
+        h=From:To:Cc:Subject:Date:From;
+        b=NUivbH9bBA8tpZPGAL5anvYIOYZ+dGrePv7jJZOGheDkX8ieEA4UXdOyNU6bCEiwl
+         YJ+VdITFDcRrfKPVmZDjE1IFyImWt5aomAOaiTvQjssMvGVYh9JdeY/PcggbllQiJn
+         RRLvhICApO2Fy4G6wYocn3yI6dssSx9LaYO74qRYimhLVR68jU3y6ODIo73M5+Myno
+         QYlgzyje6KxbSJ4k2LY8qHNdv/VBVD3nHR7wCp0oWU/JhNVuNYne0u9BCvYmowr5/s
+         GynuCm+HfTIWFer7IvwTFGGpvGvw6NY/XIbzOwqU8TE+EcLdvOJ9+DcmzvCLCetcSb
+         WVCBsVdYn7p2g==
 From:   Luc Van Oostenryck <lucvoo@kernel.org>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
-        Randy Dunlap <rdunlap@infradead.org>,
         kernel test robot <lkp@intel.com>
-Subject: [PATCH] predefine __ATOMIC_ACQUIRE & friends as weak
-Date:   Tue, 14 Jun 2022 02:17:25 +0200
-Message-Id: <20220614001725.29431-1-lucvoo@kernel.org>
+Subject: [PATCH] fix "unreplaced" warnings caused by using typeof() on inline functions
+Date:   Fri, 24 Jun 2022 18:46:01 +0200
+Message-Id: <20220624164601.99527-1-lucvoo@kernel.org>
 X-Mailer: git-send-email 2.36.1
-In-Reply-To: <33a053bc-1d81-49f4-0c8a-879a5519c433@infradead.org>
-References: <33a053bc-1d81-49f4-0c8a-879a5519c433@infradead.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
@@ -51,43 +48,112 @@ X-Mailing-List: linux-sparse@vger.kernel.org
 
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-In kernel's arch/mips/Makefile the whole content of gcc's -dM is used
-for CHECKFLAGS. This conflict with some macros also defined internally:
-	builtin:1:9: warning: preprocessor token __ATOMIC_ACQUIRE redefined
-	builtin:0:0: this was the original definition
+Currently, sparse do all its inlining at the tree level, during
+constant expansion. To not mix-up the evaluation of the original
+function body in case the address of an inline function is taken or
+when the function can't otherwise be inlined, the statements and
+symbols lists of inline functions are kept in separated fields.
+Then, if the original body must be evaluated it must first be
+'uninlined' to have a copy in the usual fields.
 
-Fix this by using a weak define for these macros.
+This make sense when dealing with the definition of the function.
+But, when using typeof() on functions, the resulting type doesn't
+refer to this definition, it's just a copy of the type and only
+of the type. There shouldn't be any reasons to uninline anything.
+However, the distinction between 'full function' and 'type only'
+is not made during evaluation and the uninlining attempt produce
+a lot of "warning: unreplaced symbol '...'" because of the lack
+of a corresponding definition.
 
-Reported-by: Randy Dunlap <rdunlap@infradead.org>
+Fix this by not doing the uninlining if the symbol lack a definition.
+
+Note: It would maybe be more appropriate for EXPR_TYPE to use
+      a stripped-own version of evaluate_symbol() doing only the
+      examination of the return and argument types, bypassing the
+      attempt to uninline the body and evaluate the initializer and
+      the statements since there is none of those for an EXPR_TYPE.
+
+Link: https://lore.kernel.org/all/202206191726.wq70mbMK-lkp@intel.com
 Reported-by: kernel test robot <lkp@intel.com>
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- predefine.c | 12 ++++++------
- 1 file changed, 6 insertions(+), 6 deletions(-)
+ evaluate.c                                    |  2 +-
+ validation/inline-early/unreplaced-abstract.c | 28 +++++++++++++++++++
+ validation/optim/devirtualize0.c              | 17 +++++++++++
+ 3 files changed, 46 insertions(+), 1 deletion(-)
+ create mode 100644 validation/inline-early/unreplaced-abstract.c
+ create mode 100644 validation/optim/devirtualize0.c
 
-diff --git a/predefine.c b/predefine.c
-index 98e38a04579d..5b0f0caf4c35 100644
---- a/predefine.c
-+++ b/predefine.c
-@@ -179,12 +179,12 @@ void predefined_macros(void)
- 	if (arch_target->has_int128)
- 		predefined_sizeof("INT128", "", 128);
+diff --git a/evaluate.c b/evaluate.c
+index 61f59ee3908e..fe716f631987 100644
+--- a/evaluate.c
++++ b/evaluate.c
+@@ -3555,7 +3555,7 @@ static struct symbol *evaluate_symbol(struct symbol *sym)
+ 		current_fn = sym;
  
--	predefine("__ATOMIC_RELAXED", 0, "0");
--	predefine("__ATOMIC_CONSUME", 0, "1");
--	predefine("__ATOMIC_ACQUIRE", 0, "3");
--	predefine("__ATOMIC_RELEASE", 0, "4");
--	predefine("__ATOMIC_ACQ_REL", 0, "7");
--	predefine("__ATOMIC_SEQ_CST", 0, "8");
-+	predefine("__ATOMIC_RELAXED", 1, "0");
-+	predefine("__ATOMIC_CONSUME", 1, "1");
-+	predefine("__ATOMIC_ACQUIRE", 1, "3");
-+	predefine("__ATOMIC_RELEASE", 1, "4");
-+	predefine("__ATOMIC_ACQ_REL", 1, "7");
-+	predefine("__ATOMIC_SEQ_CST", 1, "8");
- 
- 	predefine("__ORDER_LITTLE_ENDIAN__", 1, "1234");
- 	predefine("__ORDER_BIG_ENDIAN__", 1, "4321");
+ 		examine_fn_arguments(base_type);
+-		if (!base_type->stmt && base_type->inline_stmt)
++		if (!base_type->stmt && base_type->inline_stmt && sym->definition)
+ 			uninline(sym);
+ 		if (base_type->stmt)
+ 			evaluate_statement(base_type->stmt);
+diff --git a/validation/inline-early/unreplaced-abstract.c b/validation/inline-early/unreplaced-abstract.c
+new file mode 100644
+index 000000000000..e38cd6681f14
+--- /dev/null
++++ b/validation/inline-early/unreplaced-abstract.c
+@@ -0,0 +1,28 @@
++static inline void f0(void) { }
++static inline long f1(long a) { return a + 1;}
++
++_Static_assert([typeof(f0)] != [typeof(f1)]);
++
++
++static inline void g0(void) { }
++static inline long g1(long a) { return a + 1;}
++
++extern long goo(long a);
++long goo(long a)
++{
++	g0();
++	return g1(a);
++}
++
++_Static_assert([typeof(g0)] != [typeof(g1)]);
++
++extern long moo(long a);
++long moo(long a)
++{
++	typeof(f1) *f = g1;
++	return f(a);
++}
++
++/*
++ * check-name: unreplaced-abstract
++ */
+diff --git a/validation/optim/devirtualize0.c b/validation/optim/devirtualize0.c
+new file mode 100644
+index 000000000000..7079e79072fe
+--- /dev/null
++++ b/validation/optim/devirtualize0.c
+@@ -0,0 +1,17 @@
++static inline long f1(long x) { return x + 1;}
++
++extern long foo(long a);
++long foo(long a)
++{
++	typeof(f1) *f = f1;
++	return f(a);
++}
++
++/*
++ * check-name: devirtualize0
++ * check-command: test-linearize -Wno-decl $file
++ * check-known-to-fail
++ *
++ * check-output-ignore
++ * check-output-excludes: call\\.
++ */
 -- 
 2.36.1
 
