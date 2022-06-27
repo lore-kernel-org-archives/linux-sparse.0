@@ -2,60 +2,60 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 27164C43334
-	for <linux-sparse@archiver.kernel.org>; Mon, 27 Jun 2022 19:05:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 13DB5C433EF
+	for <linux-sparse@archiver.kernel.org>; Mon, 27 Jun 2022 19:06:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237548AbiF0TFx (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Mon, 27 Jun 2022 15:05:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53098 "EHLO
+        id S237751AbiF0TF7 (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Mon, 27 Jun 2022 15:05:59 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53108 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235066AbiF0TFw (ORCPT
+        with ESMTP id S232675AbiF0TFx (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 27 Jun 2022 15:05:52 -0400
-Received: from mail-ed1-x52c.google.com (mail-ed1-x52c.google.com [IPv6:2a00:1450:4864:20::52c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1C71C25CE
+        Mon, 27 Jun 2022 15:05:53 -0400
+Received: from mail-ej1-x62f.google.com (mail-ej1-x62f.google.com [IPv6:2a00:1450:4864:20::62f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BF44225D1
         for <linux-sparse@vger.kernel.org>; Mon, 27 Jun 2022 12:05:51 -0700 (PDT)
-Received: by mail-ed1-x52c.google.com with SMTP id o9so14388086edt.12
+Received: by mail-ej1-x62f.google.com with SMTP id mf9so21236929ejb.0
         for <linux-sparse@vger.kernel.org>; Mon, 27 Jun 2022 12:05:51 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=O0ltlf8Y5LDaNVwRLH9nm1tiZfoBbWKE4JiYzHKpQK4=;
-        b=kBw8BUqUEYUzPahOiR8RPORp4URbQ7xey7B4eFIkWlBGaRqiWNqm8XvrO7GmADqAaC
-         LNGoDbE6TFhDE6ADmnphubdfRifyNSOLs9eYknxfEwzaqTMtDtt8/ag3AZu9VQvsLn4k
-         nzCJbbVkmM3XNN4uas4tRwZaS4v2ZVYeuQIwaRqGUc4brjMWQqDDVbm7L0FSjBvNUFsw
-         nXza03JW2dOpYMW+iJ5U1Ch0PjqF+7B1fcu6URS/fGFopF2vQAzeg+GRZ2gBNcllQkwx
-         k0mPE4jRYjXDN37VQYJoIKYXkHAl7B9TUIj5xuSwnwyCa0/GFWtDWyyLMlrU88YE8Voo
-         68vQ==
+        bh=JdyJgs7OQYfPWhdxx4pQzYYW/R/ijOX67FT24uUrsOg=;
+        b=pdk0CbI9qZ6t/B/W6bLxWYF+VjKHURUtGnUqgUXpXfWYcJAcEGosri5fO7otyeBmNK
+         LjeHVjwZRZ/syZeXL9clX8hgjPqVU1R8L3mRwfX2jf0thrMz+NSVB87blJggXpR8iPTr
+         NFuEAvAS2dynSTYM9ZsP6flKGGGGmmIaeKD1bXDvnmIfYaVNa/4ISZI5C2PDmmFqvMuw
+         vFiCKgpaekNYzO6gNOJuon7k4cdoQzdvwtxO2c/q7jx41UBxm5Deq1QLm4pwlpMLK9D6
+         379/xQNM9gRJFv79cPf3b2r4FKyZ3zlqLMhEATdy4wGmLlfRfX2/tpv4AMl9p4S5dDih
+         mGWg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=O0ltlf8Y5LDaNVwRLH9nm1tiZfoBbWKE4JiYzHKpQK4=;
-        b=qWt0biKz4vHxAJEKzzgErU1p8K066ofJIqT7oYj2B/B0S4eT/tjhOaumYayE1KRmI5
-         OtqK9q5RrP8hD3RNI6xbGw83sfYUcSXbLatbc4QS3+xGGGNacwxEx7oRz0zjyON2vVSa
-         UDY7uhlGLsJgtGs+IH9wUs2CXUbkpfiPoEmDxF8Oo/hTcyVMsjfX5v4YbFcDKyRktmP9
-         JkBipgQbRQAY5D8cwA/ty+cAwMl4MWcZQT7pAjNKqdo5uM6vba+nena5pEW45DSiHll2
-         KDtbp8MAIfcBN7vQg8MvwGbe1jduGp8nvjjUbNC5tg4qn+v+wi3p2c6dOoGNvNB7Pr5L
-         yyJQ==
-X-Gm-Message-State: AJIora9GqrHTxMY3VPC4zXGXU2We9hNSXkBo0z9ByBiNRm/c7eScg+Nf
-        X66dND5kPiMvn1dV3touJ54kU2dM6dQ=
-X-Google-Smtp-Source: AGRyM1skz9TSyel+NHHhZIUbVpCwIuPzpe/soU1iM54SyYLeaQxf7XFfqSwGd14Jh6/LvuYfcGDLwQ==
-X-Received: by 2002:a05:6402:430a:b0:435:8ec9:31ec with SMTP id m10-20020a056402430a00b004358ec931ecmr18528842edc.248.1656356749603;
-        Mon, 27 Jun 2022 12:05:49 -0700 (PDT)
+        bh=JdyJgs7OQYfPWhdxx4pQzYYW/R/ijOX67FT24uUrsOg=;
+        b=R75KpfugplVv5djTg9uF58uLC/WpEwCzTud+F0wTqgz1r80H1Eqj2qyj3aomW2RdlV
+         iXVAvOMfabpqum/70FUj8nf/Ooo6n1CYDAmKEZIjnrDmb17PUjAd7bNl++GwDMp8tAJJ
+         8CBI990f2Rqyu2lDRoCF6OvxwVQTVSHYmBy2M0nGvEjO/iowhPjdx36jKJ57hrl+sGn0
+         M9m9DkHamG7c77NWip3Ixj0HOMmy8g2ux3N3Sm5/Wokjv4Vl50ZHzAThIP/+71gvQqRt
+         6IzQLrKL6O02yHAvXOw5zAT0BjOAtZ7Mrbw5wt+heRBBY2iXLkXU9kdsodV84efvioOh
+         c3wg==
+X-Gm-Message-State: AJIora+VUebOJa1ZDrMHb/pReMgKT6jE3AdzM4bl6/e23GgwMKFTiDmk
+        XSk3jHlo8+ufd2tozPKkbOp1eRV68FY=
+X-Google-Smtp-Source: AGRyM1u2nvcOU+q4OCROx1PPzWiUZ3Q+PvD6fNn9r5+2u5bbJYR/zqgYjW6F3cKwsHSxyWbcD57sZw==
+X-Received: by 2002:a17:906:b1c1:b0:726:b009:4b63 with SMTP id bv1-20020a170906b1c100b00726b0094b63mr4622191ejb.24.1656356750405;
+        Mon, 27 Jun 2022 12:05:50 -0700 (PDT)
 Received: from localhost.localdomain (239.125-180-91.adsl-dyn.isp.belgacom.be. [91.180.125.239])
-        by smtp.gmail.com with ESMTPSA id p24-20020a170906615800b00709343c0017sm5456776ejl.98.2022.06.27.12.05.48
+        by smtp.gmail.com with ESMTPSA id p24-20020a170906615800b00709343c0017sm5456776ejl.98.2022.06.27.12.05.49
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 27 Jun 2022 12:05:49 -0700 (PDT)
+        Mon, 27 Jun 2022 12:05:50 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Linus Torvalds <torvalds@linux-foundation.org>,
         Bart Van Assche <bvanassche@acm.org>,
         Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 2/5] bitwise: accept all ones as non-restricted value
-Date:   Mon, 27 Jun 2022 21:05:37 +0200
-Message-Id: <20220627190540.13358-3-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 3/5] bitwise: allow compares for bitwise types
+Date:   Mon, 27 Jun 2022 21:05:38 +0200
+Message-Id: <20220627190540.13358-4-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.36.1
 In-Reply-To: <20220627190540.13358-1-luc.vanoostenryck@gmail.com>
 References: <CAHk-=wj8gM8q04v2jS5JGjEdoE2d+B4_nm74xrFjZ77f9YRsbA@mail.gmail.com>
@@ -66,58 +66,59 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Currently, the only value bitwise types can act on is 0
-because the this value is anyway invariant for all bitwise
-operations and endianness conversions.
+Currently, bitwise types are restricted to bitwise operations
+(&, |, ^ and ~) as well as equality comparisons.
 
-But, a bit-pattern of all ones has the same properties and
-is also very often used.
+This patch makes the others comparisons valid for bitwise types
+too.
 
-So, accept all ones as a valid value for bitwise operations.
-
+Warning: This change make sense in the context of [1] but
+         doesn't make sense for the 'main' bitwise types:
+         __be32 and friends.
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- evaluate.c                |  2 +-
- validation/bitwise-cast.c | 13 +++++++++++++
- 2 files changed, 14 insertions(+), 1 deletion(-)
+ evaluate.c                       | 4 ++++
+ validation/bitwise-cmp.c         | 1 -
+ validation/linear/bitwise-cmps.c | 1 -
+ 3 files changed, 4 insertions(+), 2 deletions(-)
 
 diff --git a/evaluate.c b/evaluate.c
-index 61f59ee3908e..bcbcdf1ef0cc 100644
+index bcbcdf1ef0cc..bb8c0caa905a 100644
 --- a/evaluate.c
 +++ b/evaluate.c
-@@ -417,7 +417,7 @@ static int restricted_value(struct expression *v, struct symbol *type)
- {
- 	if (v->type != EXPR_VALUE)
- 		return 1;
--	if (v->value != 0)
-+	if (v->value != 0 && v->value != bits_mask(type->bit_size))
- 		return 1;
- 	return 0;
- }
-diff --git a/validation/bitwise-cast.c b/validation/bitwise-cast.c
-index 0583461cb745..1075a3e9410c 100644
---- a/validation/bitwise-cast.c
-+++ b/validation/bitwise-cast.c
-@@ -35,6 +35,19 @@ static __be32 quuy(void)
- 	return (__attribute__((force)) __be32) 1730;
- }
+@@ -435,6 +435,10 @@ static int restricted_binop(int op, struct symbol *type)
+ 		case '^':
+ 		case '?':
+ 			return 2;	/* keep fouled */
++		case '<':
++		case '>':
++		case SPECIAL_LTE:
++		case SPECIAL_GTE:
+ 		case SPECIAL_EQUAL:
+ 		case SPECIAL_NOTEQUAL:
+ 			return 3;	/* warn if fouled */
+diff --git a/validation/bitwise-cmp.c b/validation/bitwise-cmp.c
+index ca12b5e51e8e..8c3e6894072d 100644
+--- a/validation/bitwise-cmp.c
++++ b/validation/bitwise-cmp.c
+@@ -28,5 +28,4 @@ static int gtx(b32 x, b32 y)  { return (x >  y); }
  
-+/* Implicit casts of all ones, legal */
-+static __be32 foo1(void)
-+{
-+	__be32 x = 0xffffffff;
-+	return x;
-+}
-+
-+/* Explicit cast of all ones, legal */
-+static __be32 bar1(void)
-+{
-+	return (__be32)0xffffffff;
-+}
-+
  /*
-  * check-name: conversions to bitwise types
-  * check-command: sparse -Wbitwise $file
+  * check-name: bitwise-cmp
+- * check-known-to-fail
+  */
+diff --git a/validation/linear/bitwise-cmps.c b/validation/linear/bitwise-cmps.c
+index 6122944a42c6..f83ab7fe47db 100644
+--- a/validation/linear/bitwise-cmps.c
++++ b/validation/linear/bitwise-cmps.c
+@@ -8,7 +8,6 @@ static int gtu(bs32 x, bs32 y)  { return (x >  y); }
+ /*
+  * check-name: bitwise-cmps
+  * check-command: test-linearize -Wno-decl $file
+- * check-known-to-fail
+  *
+  * check-output-ignore
+  * check-output-excludes: setb\\.
 -- 
 2.36.1
 
