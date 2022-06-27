@@ -2,103 +2,121 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F1202C433EF
-	for <linux-sparse@archiver.kernel.org>; Mon, 27 Jun 2022 19:20:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2E8F1C433EF
+	for <linux-sparse@archiver.kernel.org>; Mon, 27 Jun 2022 23:34:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237953AbiF0TUX (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Mon, 27 Jun 2022 15:20:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40754 "EHLO
+        id S236744AbiF0Xem (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Mon, 27 Jun 2022 19:34:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48040 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235186AbiF0TUW (ORCPT
+        with ESMTP id S236667AbiF0Xek (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 27 Jun 2022 15:20:22 -0400
-Received: from mail-ed1-x531.google.com (mail-ed1-x531.google.com [IPv6:2a00:1450:4864:20::531])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 76187B482
-        for <linux-sparse@vger.kernel.org>; Mon, 27 Jun 2022 12:20:21 -0700 (PDT)
-Received: by mail-ed1-x531.google.com with SMTP id cf14so14458641edb.8
-        for <linux-sparse@vger.kernel.org>; Mon, 27 Jun 2022 12:20:21 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linux-foundation.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=XS8Sw0HZbV+YwphYe57/6LdokvT5GZYB3n7iaIGDRYY=;
-        b=Ml3IzjGALbtfgxW18NW2XHtiGIxGEVlmSN5PrbrPr17pyOAmvEd/B5rEdaF+wFWybD
-         JE9wRL5Hmm6sKxE46D4bYykmmrB6PHfC1nxPf7ekWtdpZEbLXXBRPeKhNcWpItehyD7r
-         T+Hp+Z6EafZj+3Pu8hGKJTrP69FiAyXOGfA1g=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=XS8Sw0HZbV+YwphYe57/6LdokvT5GZYB3n7iaIGDRYY=;
-        b=NNNNLPO9b/shCclaqQ4w9WiQPCNs0lzxkPjzexFPOp3XkjK+kF9W6ODeJQ6t7r55zG
-         XavBYc39ufKzlj4FRlpS/JKhrQmCE+khc9nqpWAznIMBNnOX5REY6q5mPiGbvp/W0ZO/
-         6ZlZKlrB4yT+pHDadAidK/C15uzdXGBxHL7uMCQe41w/6HhHz75B5W0gCR9TgZnKj0d6
-         5cFGGaq0nH6ax8gXSRiqKyrR550qjFtTjV70W0R2ot7zA8evyTl1DM9JbYqiGmHTRAGA
-         jJl10HnHL5IUqv3ds5zrNKMC2C2vDxtYEx5GewpjFCbxO3f8xkzTxFuyombp4s95h8Iu
-         GS7Q==
-X-Gm-Message-State: AJIora+NDfb7eSsSrtDPMfNSvlGwfryKg7+kte5p7/VooBxk+xWMZBtg
-        S13D7+9gTqmQyHj5zSTYLNfrh+/V/7WIuwPOS40=
-X-Google-Smtp-Source: AGRyM1vlj1mlOisymrOPCoY7Crb+GXWaZVrGg32/h3cGbg9PYnpwp1H3hGdz9hJJxPgPYxSYrD8ajQ==
-X-Received: by 2002:a05:6402:3807:b0:435:20fb:318d with SMTP id es7-20020a056402380700b0043520fb318dmr18443631edb.272.1656357619631;
-        Mon, 27 Jun 2022 12:20:19 -0700 (PDT)
-Received: from mail-wr1-f54.google.com (mail-wr1-f54.google.com. [209.85.221.54])
-        by smtp.gmail.com with ESMTPSA id z23-20020a170906435700b007094f98788csm5356484ejm.113.2022.06.27.12.20.18
-        for <linux-sparse@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 27 Jun 2022 12:20:19 -0700 (PDT)
-Received: by mail-wr1-f54.google.com with SMTP id e28so9260079wra.0
-        for <linux-sparse@vger.kernel.org>; Mon, 27 Jun 2022 12:20:18 -0700 (PDT)
-X-Received: by 2002:a05:6000:1251:b0:21a:efae:6cbe with SMTP id
- j17-20020a056000125100b0021aefae6cbemr13493238wrx.281.1656357618629; Mon, 27
- Jun 2022 12:20:18 -0700 (PDT)
+        Mon, 27 Jun 2022 19:34:40 -0400
+X-Greylist: delayed 147 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Mon, 27 Jun 2022 16:34:39 PDT
+Received: from avasout-ptp-004.plus.net (avasout-ptp-004.plus.net [84.93.230.250])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 050B0DF8B
+        for <linux-sparse@vger.kernel.org>; Mon, 27 Jun 2022 16:34:38 -0700 (PDT)
+Received: from [10.0.2.15] ([147.147.167.40])
+        by smtp with ESMTPA
+        id 5yFWotoT2AcBn5yFXodWlZ; Tue, 28 Jun 2022 00:34:37 +0100
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=plus.com; s=042019;
+        t=1656372877; bh=BCldnoRvvfCg67hTdFmX/xhV/rvN3Bl1OjYeLZXPHWk=;
+        h=Date:Subject:To:Cc:References:From:In-Reply-To;
+        b=TplWUzKaXbVU/C8M6323StdEaSf8nNs4Shjx+jqO4vA1CLh+85l2cw+sRP6IPCgef
+         5xMRDV4wxxEiKIOL8+I19+nn3WTvOhwAhXnz3rqn+q8gvmV4OV0iAAFC4cnQByVWOY
+         w27Ex6IbEDNDS9YOkcATCUtWSG96aE5Bo9+STP2Ee6yLvkAPUp0ov09bLJJWaWSfqw
+         6kCfDS9dewrbQeDXDNOQisUvbJnfpPnQtxdCVoMHao5jfRGuGtjLo4XJ1g2ytWM12+
+         bXe+cc1be8X5mY2juo084yCvOtKLj75Wmd5sHOHOp9ufh/jYPLQ5evb0/0WGamDM4N
+         KLcdsfE6CzfIg==
+X-Clacks-Overhead: "GNU Terry Pratchett"
+X-CM-Score: 0.00
+X-CNFS-Analysis: v=2.4 cv=JPUoDuGb c=1 sm=1 tr=0 ts=62ba3e8d
+ a=nyqnwr6A7Kzjd6EpZhiMcA==:117 a=nyqnwr6A7Kzjd6EpZhiMcA==:17
+ a=IkcTkHD0fZMA:10 a=pGLkceISAAAA:8 a=E-OkJ-TVZ97Nki-p6boA:9 a=QEXdDO2ut3YA:10
+X-AUTH: ramsayjones@:2500
+Message-ID: <17a98e32-cda9-71e0-be04-4287dc1498c5@ramsayjones.plus.com>
+Date:   Tue, 28 Jun 2022 00:34:33 +0100
 MIME-Version: 1.0
-References: <CAHk-=wj8gM8q04v2jS5JGjEdoE2d+B4_nm74xrFjZ77f9YRsbA@mail.gmail.com>
- <20220627190540.13358-1-luc.vanoostenryck@gmail.com> <20220627190540.13358-4-luc.vanoostenryck@gmail.com>
-In-Reply-To: <20220627190540.13358-4-luc.vanoostenryck@gmail.com>
-From:   Linus Torvalds <torvalds@linux-foundation.org>
-Date:   Mon, 27 Jun 2022 12:20:02 -0700
-X-Gmail-Original-Message-ID: <CAHk-=wi2eLQzBKrjVogJR_vKGDNM3f4ityrS=zgq2B38Yk5Qpw@mail.gmail.com>
-Message-ID: <CAHk-=wi2eLQzBKrjVogJR_vKGDNM3f4ityrS=zgq2B38Yk5Qpw@mail.gmail.com>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.9.1
 Subject: Re: [PATCH 3/5] bitwise: allow compares for bitwise types
-To:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc:     Sparse Mailing-list <linux-sparse@vger.kernel.org>,
+Content-Language: en-GB
+To:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
+        linux-sparse@vger.kernel.org
+Cc:     Linus Torvalds <torvalds@linux-foundation.org>,
         Bart Van Assche <bvanassche@acm.org>
-Content-Type: text/plain; charset="UTF-8"
+References: <CAHk-=wj8gM8q04v2jS5JGjEdoE2d+B4_nm74xrFjZ77f9YRsbA@mail.gmail.com>
+ <20220627190540.13358-1-luc.vanoostenryck@gmail.com>
+ <20220627190540.13358-4-luc.vanoostenryck@gmail.com>
+From:   Ramsay Jones <ramsay@ramsayjones.plus.com>
+In-Reply-To: <20220627190540.13358-4-luc.vanoostenryck@gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+X-CMAE-Envelope: MS4xfOgfoja+OdAD+ytVEE/iMZFLjGPCahzkjSojVTlzvEBnlAt0pRZM4YGjzUkQXqrXDMCSDjANsCUgJLuMKQ6CwNz2NaH8IFy34ezDZTMMQLSIS6IL+BbQ
+ OkLu8k3gWgNmx704T5v0KZTnqhEZWYBs6yiNAFU0RWmZQs05nEObD7Wxa0YM5V3OPfexu9zbi9sJBZFncYaZZHnVXrmZ+SjLA/Q=
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Mon, Jun 27, 2022 at 12:05 PM Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
->
+
+
+On 27/06/2022 20:05, Luc Van Oostenryck wrote:
 > Currently, bitwise types are restricted to bitwise operations
 > (&, |, ^ and ~) as well as equality comparisons.
->
+> 
 > This patch makes the others comparisons valid for bitwise types
 > too.
->
+> 
 > Warning: This change make sense in the context of [1] but
+
+The [1] reference seems to be missing :)
+
+ATB,
+Ramsay Jones
+
 >          doesn't make sense for the 'main' bitwise types:
 >          __be32 and friends.
-
-Yeah, this is wrong.
-
-It will literally break one of the use-cases, which is endianness comparisons.
-
-You cannot compare values in the wrong endianness for greater-than or
-less-than, because you will get the wrong answer - the ordering is
-different in different byte-orders.
-
-But comparing for equality (and inequality) is fine, and we actually
-do that in the kernel (ie you can take a big-endian value, and compare
-it with another big-endian value for being equal, without converting
-it to the local CPU endianness).
-
-Now, comparing the *constants* 0 and all-ones is fine. They are
-smaller than (and larger than) all other values, regardless of any
-byte/bit order issues.
-
-So I think that really needs to check that one (or both) sides are the
-magic constants.
-
-             Linus
+> Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+> ---
+>  evaluate.c                       | 4 ++++
+>  validation/bitwise-cmp.c         | 1 -
+>  validation/linear/bitwise-cmps.c | 1 -
+>  3 files changed, 4 insertions(+), 2 deletions(-)
+> 
+> diff --git a/evaluate.c b/evaluate.c
+> index bcbcdf1ef0cc..bb8c0caa905a 100644
+> --- a/evaluate.c
+> +++ b/evaluate.c
+> @@ -435,6 +435,10 @@ static int restricted_binop(int op, struct symbol *type)
+>  		case '^':
+>  		case '?':
+>  			return 2;	/* keep fouled */
+> +		case '<':
+> +		case '>':
+> +		case SPECIAL_LTE:
+> +		case SPECIAL_GTE:
+>  		case SPECIAL_EQUAL:
+>  		case SPECIAL_NOTEQUAL:
+>  			return 3;	/* warn if fouled */
+> diff --git a/validation/bitwise-cmp.c b/validation/bitwise-cmp.c
+> index ca12b5e51e8e..8c3e6894072d 100644
+> --- a/validation/bitwise-cmp.c
+> +++ b/validation/bitwise-cmp.c
+> @@ -28,5 +28,4 @@ static int gtx(b32 x, b32 y)  { return (x >  y); }
+>  
+>  /*
+>   * check-name: bitwise-cmp
+> - * check-known-to-fail
+>   */
+> diff --git a/validation/linear/bitwise-cmps.c b/validation/linear/bitwise-cmps.c
+> index 6122944a42c6..f83ab7fe47db 100644
+> --- a/validation/linear/bitwise-cmps.c
+> +++ b/validation/linear/bitwise-cmps.c
+> @@ -8,7 +8,6 @@ static int gtu(bs32 x, bs32 y)  { return (x >  y); }
+>  /*
+>   * check-name: bitwise-cmps
+>   * check-command: test-linearize -Wno-decl $file
+> - * check-known-to-fail
+>   *
+>   * check-output-ignore
+>   * check-output-excludes: setb\\.
