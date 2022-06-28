@@ -2,62 +2,62 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 90427C43334
-	for <linux-sparse@archiver.kernel.org>; Tue, 28 Jun 2022 00:57:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 895D7C433EF
+	for <linux-sparse@archiver.kernel.org>; Tue, 28 Jun 2022 01:07:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236361AbiF1A5C (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Mon, 27 Jun 2022 20:57:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51558 "EHLO
+        id S241362AbiF1BHB (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Mon, 27 Jun 2022 21:07:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34920 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235343AbiF1A5B (ORCPT
+        with ESMTP id S237516AbiF1BHA (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 27 Jun 2022 20:57:01 -0400
+        Mon, 27 Jun 2022 21:07:00 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 8C14A1D0DE
-        for <linux-sparse@vger.kernel.org>; Mon, 27 Jun 2022 17:56:58 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 8CBD61EAE3
+        for <linux-sparse@vger.kernel.org>; Mon, 27 Jun 2022 18:06:59 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1656377817;
+        s=mimecast20190719; t=1656378418;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=Le9rasWFftvBUIXdCkHOfomOzNQQm9TeUsAxHwjuOAw=;
-        b=jO6Z1WzgWxdslL4AwQ89y4IM2i0mXlO0DfXHeKNYHJ3ujTK/Mx8AZo/kmQQ6c3wRx84R1e
-        lY6gFZ9V7ZhqFVAra9AXJzXlWHzSo1yDk5sJx42vsFqD3T4l2Hzqd8bf/q1ngKzhet+xjN
-        +oCOnFx4oX23FGXr+XhPZY0cun5lJ/U=
-Received: from mail-qk1-f198.google.com (mail-qk1-f198.google.com
- [209.85.222.198]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=qd874xtCALLLoZTYnK0UQbFRAzSITPNiJ0IyPu+wf6I=;
+        b=T2QCsBH9gPigMA0mlnG1fQnkN36qCVNfW6WTy5bd2wE/TP84mFe9U422HWFWpGxPSgp/XI
+        KiG2CKUnW/0y4T2OndBjdJMzjL+l0k0S0mKS9bP7oR3NOzxdWEEtEHsoXnsS1wRDPVXlBy
+        0FhloIoVkIZvbTQw+4xAqsrtTU9IktI=
+Received: from mail-qv1-f69.google.com (mail-qv1-f69.google.com
+ [209.85.219.69]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-330-O0UF-iJ2Ml-PdhFtP5oDeg-1; Mon, 27 Jun 2022 20:56:54 -0400
-X-MC-Unique: O0UF-iJ2Ml-PdhFtP5oDeg-1
-Received: by mail-qk1-f198.google.com with SMTP id bm2-20020a05620a198200b006a5dac37fa2so11831306qkb.16
-        for <linux-sparse@vger.kernel.org>; Mon, 27 Jun 2022 17:56:54 -0700 (PDT)
+ us-mta-418-OrRkua93MB6HJxM4kqJQSg-1; Mon, 27 Jun 2022 21:06:55 -0400
+X-MC-Unique: OrRkua93MB6HJxM4kqJQSg-1
+Received: by mail-qv1-f69.google.com with SMTP id m7-20020ad45dc7000000b0047042480dbfso10844552qvh.9
+        for <linux-sparse@vger.kernel.org>; Mon, 27 Jun 2022 18:06:55 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=Le9rasWFftvBUIXdCkHOfomOzNQQm9TeUsAxHwjuOAw=;
-        b=3irTeROSDtRnKcQtqzMGg5PdCYQUmrH3QJ4hHndiNy6M8I0qVtzt4z/115pXGMXcD3
-         dOVkbgQyFN2lIYmyrmbNGvvHnuco6sskbFgV6oGeE6wpJPP7LH7N4UaKTFb3K17VfWb5
-         /PtSn88QpAHeQ3rU/MGgeaymCSl6MSDcEkZTXFoO0mITVL2qNex/1nstoD+XF0+1GqCM
-         LhHY8NIPD/Oq8L4vFaL6GrfCD6tH1QSCxr0SJgHvQGoaKcXs4R3MP0d+6fJAe8I/eUh1
-         82/GGbPBpR3tALn8RH/yWZdGXImuLXa5YmOVcb1kUtPfLN2l/7b0sP1cLrJ7IDijFx2k
-         l9bQ==
-X-Gm-Message-State: AJIora/di94Fcs0j6pYzm/Zz/4bARegPz1FUAgZltytzp94bR1Xxvvf5
-        WkQtTnd1llmt1S5vFbskHyTUWYkclT8J1ds8FREeCsEGy7M4FM0ZyGH6TaI/fjG+CPs5vxXRYFv
-        TDNA2ltFMbiIJiF0hMS1cdQbXr+zlzJCwvsdrhGZz
-X-Received: by 2002:a05:622a:1306:b0:31a:f73e:3d6d with SMTP id v6-20020a05622a130600b0031af73e3d6dmr4502032qtk.339.1656377814125;
-        Mon, 27 Jun 2022 17:56:54 -0700 (PDT)
-X-Google-Smtp-Source: AGRyM1sFL8MzmxZyh2qnSdqly13+uMFK0IBDjQrSTquxB94TtYvbMTQHQ5Agm2zgV9VXjYMWhLtxVo1TwdIgig7APGY=
-X-Received: by 2002:a05:622a:1306:b0:31a:f73e:3d6d with SMTP id
- v6-20020a05622a130600b0031af73e3d6dmr4502021qtk.339.1656377813876; Mon, 27
- Jun 2022 17:56:53 -0700 (PDT)
+        bh=qd874xtCALLLoZTYnK0UQbFRAzSITPNiJ0IyPu+wf6I=;
+        b=7H2V8J6CUjjT/1aXZx2al6T39Gke/lst/Tx6tv/AEztUdUGxF3g2HSEh1v6b/2pOyn
+         h0yqTzi0kVOFctOwp+5bKV/h+mGDLNWga1M1x8GSxlvssiqmJkMB/4iDJGtfd7F37i1u
+         ijxS1DWQG+JMk4uB+7WMGn4khGe9QvahA+HaQQ8scvpw8rt8uKZ2IG1jKIYYJJ2G8Y3g
+         8qT2eMudsQq45VCqznD8OLEcoMUgpz66+av2Wi/4xmBpU2b6af4g0SHMMMwspJIhHZEr
+         EkuV6P0aMNSsy4jmGWjD537LS6cYvEWvYys7g87ALTmngF0aNvhEowbb2VStAWfr9MZR
+         7QEQ==
+X-Gm-Message-State: AJIora+6pGezYMBczLzIvtXiFXpPMLx/j0DItmxtLU85R8rxKH9zBRqZ
+        jtmL5n8PYCzwf3DvSQfPKIpGlfTZ7IFIKEBOTZTQhrVpxv/9Fx4D+JYpw5GI2jGSqFyA9F1dZLL
+        fLeLqfUcWQbL/B45qWF36sqmqIhhHyw0klLzEtuii
+X-Received: by 2002:a37:67c9:0:b0:6af:a24:df4b with SMTP id b192-20020a3767c9000000b006af0a24df4bmr10208172qkc.691.1656378415005;
+        Mon, 27 Jun 2022 18:06:55 -0700 (PDT)
+X-Google-Smtp-Source: AGRyM1sM+DE05HKnqCKiuiPXvpVvEidKjNa59r4LZdriDsOcKKbeLhGbXgYemJcg7o/G2oObtWkqNrJIxr2o+yhihfo=
+X-Received: by 2002:a37:67c9:0:b0:6af:a24:df4b with SMTP id
+ b192-20020a3767c9000000b006af0a24df4bmr10208157qkc.691.1656378414786; Mon, 27
+ Jun 2022 18:06:54 -0700 (PDT)
 MIME-Version: 1.0
 References: <CAK-6q+hd-L54cqOiFNuufS2_VF5XS0R8cjQL7es8921+2u3uwQ@mail.gmail.com>
- <20220627184232.tjfuzeir57l3h5ll@mail>
-In-Reply-To: <20220627184232.tjfuzeir57l3h5ll@mail>
+ <20220627184232.tjfuzeir57l3h5ll@mail> <CAK-6q+haOfQD8_N6pEm80BTrUXwaj07ZBcXP-EBHftpTVEc1XQ@mail.gmail.com>
+In-Reply-To: <CAK-6q+haOfQD8_N6pEm80BTrUXwaj07ZBcXP-EBHftpTVEc1XQ@mail.gmail.com>
 From:   Alexander Aring <aahringo@redhat.com>
-Date:   Mon, 27 Jun 2022 20:56:42 -0400
-Message-ID: <CAK-6q+haOfQD8_N6pEm80BTrUXwaj07ZBcXP-EBHftpTVEc1XQ@mail.gmail.com>
+Date:   Mon, 27 Jun 2022 21:06:43 -0400
+Message-ID: <CAK-6q+g795MwPvUGxWXTE+s-TfJnbh2wf=Udb1k7r6ru-4FTMQ@mail.gmail.com>
 Subject: Re: sparse warnings related to kref_put_lock() and refcount_dec_and_lock()
 To:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
         jacob.e.keller@intel.com, akpm@linux-foundation.org,
@@ -74,95 +74,94 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Hi Luc and others,
+Hi,
 
-On Mon, Jun 27, 2022 at 2:42 PM Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
+On Mon, Jun 27, 2022 at 8:56 PM Alexander Aring <aahringo@redhat.com> wrote:
 >
-> On Mon, Jun 27, 2022 at 11:15:17AM -0400, Alexander Aring wrote:
+> Hi Luc and others,
+>
+> On Mon, Jun 27, 2022 at 2:42 PM Luc Van Oostenryck
+> <luc.vanoostenryck@gmail.com> wrote:
+> >
+> > On Mon, Jun 27, 2022 at 11:15:17AM -0400, Alexander Aring wrote:
+> > > Hi,
+> > >
+> > > I recently converted to use kref_put_lock() in fs/dlm subsystem and
+> > > now I get the following warning in sparse:
+> > >
+> > > warning: context imbalance in 'put_rsb' - unexpected unlock
+> > >
+> > > It seems sparse is not able to detect that there is a conditional
+> > > requirement that the lock passed to kref_put_lock() (or also
+> > > refcount_dec_and_lock()) is locked or not. I evaluate the return value
+> > > to check if kref_put_lock() helds the lock and unlock it then. The
+> > > idea is that the lock needs only to be held when the refcount is going
+> > > to be zero.
+> > >
+> > > It seems other users unlock the lock at the release callback of
+> > > kref_put_lock() and annotate the callback with "__releases()" which
+> > > seems to work to avoid the sparse warning. However this works if you
+> > > don't have additional stack pointers which you need to pass to the
+> > > release callback.
+> > >
+> > > My question would be is this a known problem and a recommended way to
+> > > avoid this sparse warning (maybe just for now)?
+> >
 > > Hi,
 > >
-> > I recently converted to use kref_put_lock() in fs/dlm subsystem and
-> > now I get the following warning in sparse:
+> > I suppose that your case here can be simplified into something like:
 > >
-> > warning: context imbalance in 'put_rsb' - unexpected unlock
+> >         if (some_condition)
+> >                 take(some_lock);
 > >
-> > It seems sparse is not able to detect that there is a conditional
-> > requirement that the lock passed to kref_put_lock() (or also
-> > refcount_dec_and_lock()) is locked or not. I evaluate the return value
-> > to check if kref_put_lock() helds the lock and unlock it then. The
-> > idea is that the lock needs only to be held when the refcount is going
-> > to be zero.
+> >         do_stuff();
 > >
-> > It seems other users unlock the lock at the release callback of
-> > kref_put_lock() and annotate the callback with "__releases()" which
-> > seems to work to avoid the sparse warning. However this works if you
-> > don't have additional stack pointers which you need to pass to the
-> > release callback.
+> >         if (some_condition)
+> >                 release(some_lock);
 > >
-> > My question would be is this a known problem and a recommended way to
-> > avoid this sparse warning (maybe just for now)?
+> > Sparse issues the 'context imbalance' warning because, a priori,
+> > it can't exclude that some execution will takes the lock and not
+> > releases it (or the opposite). In some case, when do_stuff() is
+> > very simple, sparse can see that everything is OK, but generally
+> > it won't (some whole kernel analysis but the general case is
+> > undecidable anyway).
+> >
+> > The recommended way would be to write things rather like this:
+> >
+> >         if (some_condition) {
+> >                 take(some_lock);
+> >                 do_stuff();
+> >                 release(some_lock);
+> >         } else {
+> >                 do_stuff();
+> >         }
+> >
 >
-> Hi,
+> This is not an alternative for me because the lock needs to hold
+> during the "some_condition". (More background is that we dealing with
+> data structures here and cannot allow a get() from this data
+> structures during "some_condition", the lock is preventing this)
+> It is the refcount code which causes trouble here [0] and I think the
+> refcount code should never call the unlock() procedure in any
+> condition and leave it to the caller to call unlock() in any case.
 >
-> I suppose that your case here can be simplified into something like:
+> I to'ed (hope to get more attention to this) more people related to
+> lib/refcount.c implementation (provided by get_maintainers.pl -f).
 >
->         if (some_condition)
->                 take(some_lock);
+> >
+> > The __acquires() and __releases() annotations are needed for sparse
+> > to know that the annotated function always take or always release
+> > some lock but won't handle conditional locks.
+> >
 >
->         do_stuff();
->
->         if (some_condition)
->                 release(some_lock);
->
-> Sparse issues the 'context imbalance' warning because, a priori,
-> it can't exclude that some execution will takes the lock and not
-> releases it (or the opposite). In some case, when do_stuff() is
-> very simple, sparse can see that everything is OK, but generally
-> it won't (some whole kernel analysis but the general case is
-> undecidable anyway).
->
-> The recommended way would be to write things rather like this:
->
->         if (some_condition) {
->                 take(some_lock);
->                 do_stuff();
->                 release(some_lock);
->         } else {
->                 do_stuff();
->         }
->
+> If we change the refcount code to _never_ calling unlock() for the
+> specific lock, then all those foo_and_lock_bar() functions can be
+> annotated with "__acquires()". This should also end in the same code?
 
-This is not an alternative for me because the lock needs to hold
-during the "some_condition". (More background is that we dealing with
-data structures here and cannot allow a get() from this data
-structures during "some_condition", the lock is preventing this)
-It is the refcount code which causes trouble here [0] and I think the
-refcount code should never call the unlock() procedure in any
-condition and leave it to the caller to call unlock() in any case.
-
-I to'ed (hope to get more attention to this) more people related to
-lib/refcount.c implementation (provided by get_maintainers.pl -f).
-
->
-> The __acquires() and __releases() annotations are needed for sparse
-> to know that the annotated function always take or always release
-> some lock but won't handle conditional locks.
->
-
-If we change the refcount code to _never_ calling unlock() for the
-specific lock, then all those foo_and_lock_bar() functions can be
-annotated with "__acquires()". This should also end in the same code?
-For me it looks like the current implementation of refcount.c is fine
-except sparse cannot figure out what's going on and maybe a reason to
-change the specific handling to the mentioned one.
-
-> I hope that this is helpful to you.
->
-
-I hope we will find some solution, because I don't like sparse warnings.
+sorry, this will not work because of the first condition of "if
+(refcount_dec_not_one(r))" which will never hold the lock if true...
+that's what the optimization is all about. However, maybe somebody has
+another idea...
 
 - Alex
-
-[0] https://elixir.bootlin.com/linux/v5.19-rc4/source/lib/refcount.c#L144
 
