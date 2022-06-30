@@ -2,81 +2,187 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C5246C43334
-	for <linux-sparse@archiver.kernel.org>; Thu, 30 Jun 2022 15:44:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 68BADC43334
+	for <linux-sparse@archiver.kernel.org>; Thu, 30 Jun 2022 16:34:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235678AbiF3PoN (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Thu, 30 Jun 2022 11:44:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53656 "EHLO
+        id S235374AbiF3Qeh (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Thu, 30 Jun 2022 12:34:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41628 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235669AbiF3PoM (ORCPT
+        with ESMTP id S233264AbiF3Qeg (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 30 Jun 2022 11:44:12 -0400
-Received: from desiato.infradead.org (desiato.infradead.org [IPv6:2001:8b0:10b:1:d65d:64ff:fe57:4e05])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3557815A05;
-        Thu, 30 Jun 2022 08:44:12 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=desiato.20200630; h=In-Reply-To:Content-Type:MIME-Version:
-        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=IcWzBGmd5zZp0WxQBYsneB6E8zWmcy5CxnK6uyIIvQI=; b=pL3s9qUXp11qJa4cplmb32XiOV
-        nHL1SXpsF1V39XAN4CQIo8fhSZZXisgoqg1CP7vvBIHUgWBysIfpRuL5QhGc3mAqm8orc/KNQKkTG
-        92lZIO2pFb2dPC3FG+t0E16IDHAxpO7GREK4k41LKHcSEw3Zzx3uroYksGFMzKCDbJ4prwi0cyDup
-        rGKvLO6rCqXqjbIQv+x1I9YYfzl4R4UlEV8EWtMMTvbBr0TfdyYp/GfWqsmigetu7yJEf4ZoOf4Fx
-        mksMGAhfifaC8Lyvs6/wOk0X7vXmEuLjJE0vMVpotT/vSMBS7cvmXD9g0cwaDkl8O1YIUe2uy1gw6
-        mRRpT3Pg==;
-Received: from dhcp-077-249-017-003.chello.nl ([77.249.17.3] helo=noisy.programming.kicks-ass.net)
-        by desiato.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1o6wKA-00FI8t-RT; Thu, 30 Jun 2022 15:43:31 +0000
-Received: from hirez.programming.kicks-ass.net (hirez.programming.kicks-ass.net [192.168.1.225])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-        (Client did not present a certificate)
-        by noisy.programming.kicks-ass.net (Postfix) with ESMTPS id 435FB30027E;
-        Thu, 30 Jun 2022 17:43:20 +0200 (CEST)
-Received: by hirez.programming.kicks-ass.net (Postfix, from userid 1000)
-        id 21DCD285D6B9E; Thu, 30 Jun 2022 17:43:20 +0200 (CEST)
-Date:   Thu, 30 Jun 2022 17:43:20 +0200
-From:   Peter Zijlstra <peterz@infradead.org>
-To:     Alexander Aring <aahringo@redhat.com>
-Cc:     will@kernel.org, boqun.feng@gmail.com, mark.rutland@arm.com,
-        thunder.leizhen@huawei.com, jacob.e.keller@intel.com,
-        akpm@linux-foundation.org, linux-sparse@vger.kernel.org,
-        cluster-devel@redhat.com, luc.vanoostenryck@gmail.com,
-        torvalds@linux-foundation.org, linux-kernel@vger.kernel.org
-Subject: Re: [RFC 1/2] refcount: add __cond_lock() for conditional lock
- refcount API
-Message-ID: <Yr3EmEcO1AMFRlLA@hirez.programming.kicks-ass.net>
-References: <20220630135934.1799248-1-aahringo@redhat.com>
- <20220630135934.1799248-2-aahringo@redhat.com>
+        Thu, 30 Jun 2022 12:34:36 -0400
+Received: from mail-ed1-x533.google.com (mail-ed1-x533.google.com [IPv6:2a00:1450:4864:20::533])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0672A3AA55
+        for <linux-sparse@vger.kernel.org>; Thu, 30 Jun 2022 09:34:35 -0700 (PDT)
+Received: by mail-ed1-x533.google.com with SMTP id c13so27285310eds.10
+        for <linux-sparse@vger.kernel.org>; Thu, 30 Jun 2022 09:34:34 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linux-foundation.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=bMOwDWIfg0entuc2l+NsGII8SSnnX37Y724/yrdR39A=;
+        b=SmXL8TSEYyAq3nujYp/HKJzpFnRJ53Zf9BeRIJwii4TmrV7NfiW+RpxFNhJvsnltQV
+         E2cAsXAJNurB1qnDKUQTiCAiuzvQNJEV2T8xSos/koIjPtO42WmVVo9CpSLd8E43lA4H
+         RvLWUIviiQSD1CBhdAogo9N3fHQkcsimZFrOw=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=bMOwDWIfg0entuc2l+NsGII8SSnnX37Y724/yrdR39A=;
+        b=5XMyLuT1yDaBCsfmhovy1iemlOTyQ2g5CXxxrUugwwznDVlu4DEQtYenJ3a0JLuiIN
+         6ejtbDyUVcodvhC0712RZbb+gZRqZGkudgF/0MF+tnukV/f95JChrv+FhQCL2GaxR3ls
+         yDoelt5HW+70hR/XRWzW3d2Nqt08jOk0FzJoyD4b8IV2L4ehYDjpkrO3Ee+ttIgE3Jlh
+         EpD55z5X90PYf8cXdIqd7JpBFfRK5o9hVwCe9yBY3MJYWqlCscQKMaiUC6mHkj0RNxAd
+         Gt52qaowysTx4JJ+EhvJgtEk6HuVEyjAbg+j7FWhFJK1GEaGpPKiDutek7a3zsXc1ZWW
+         r/lQ==
+X-Gm-Message-State: AJIora/l+nAIYFkZWJwbi+tN/EOEAm38+5P3lBMcZ0W3J73qSvT0OHFu
+        NYBQSHIc9aDcCo6NZGpB5R3t/zYdiVVJEOmO
+X-Google-Smtp-Source: AGRyM1sy76CgrpjfUdAPVKyi8FBs4KPVFLp2LuVAaFKTXDyTgM4TQpuq3gIf2OF/cj7tfmdWICqV0A==
+X-Received: by 2002:a05:6402:84f:b0:437:6293:d264 with SMTP id b15-20020a056402084f00b004376293d264mr12576565edz.317.1656606873305;
+        Thu, 30 Jun 2022 09:34:33 -0700 (PDT)
+Received: from mail-wr1-f42.google.com (mail-wr1-f42.google.com. [209.85.221.42])
+        by smtp.gmail.com with ESMTPSA id t7-20020aa7d707000000b0043173ab6728sm13409447edq.7.2022.06.30.09.34.27
+        for <linux-sparse@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 30 Jun 2022 09:34:30 -0700 (PDT)
+Received: by mail-wr1-f42.google.com with SMTP id o4so24187047wrh.3
+        for <linux-sparse@vger.kernel.org>; Thu, 30 Jun 2022 09:34:27 -0700 (PDT)
+X-Received: by 2002:a05:6000:1148:b0:21b:a4b2:ccd3 with SMTP id
+ d8-20020a056000114800b0021ba4b2ccd3mr9386518wrx.193.1656606867259; Thu, 30
+ Jun 2022 09:34:27 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220630135934.1799248-2-aahringo@redhat.com>
+References: <20220630135934.1799248-1-aahringo@redhat.com>
+In-Reply-To: <20220630135934.1799248-1-aahringo@redhat.com>
+From:   Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Thu, 30 Jun 2022 09:34:10 -0700
+X-Gmail-Original-Message-ID: <CAHk-=wjZfO9hGqJ2_hGQG3U_XzSh9_XaXze=HgPdvJbgrvASfA@mail.gmail.com>
+Message-ID: <CAHk-=wjZfO9hGqJ2_hGQG3U_XzSh9_XaXze=HgPdvJbgrvASfA@mail.gmail.com>
+Subject: Re: [RFC 0/2] refcount: attempt to avoid imbalance warnings
+To:     Alexander Aring <aahringo@redhat.com>
+Cc:     Will Deacon <will@kernel.org>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Boqun Feng <boqun.feng@gmail.com>,
+        Mark Rutland <mark.rutland@arm.com>,
+        thunder.leizhen@huawei.com, jacob.e.keller@intel.com,
+        Andrew Morton <akpm@linux-foundation.org>,
+        Sparse Mailing-list <linux-sparse@vger.kernel.org>,
+        cluster-devel <cluster-devel@redhat.com>,
+        Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="000000000000db535805e2acd76b"
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Thu, Jun 30, 2022 at 09:59:33AM -0400, Alexander Aring wrote:
-> This patch adds the __cond_lock() macro to refcounts conditional lock
-> API. Currently sparse cannot detect the conditional lock handling of
-> refcount_dec_and_lock() functionality and prints a context imbalance
-> warning like:
-> 
-> warning: context imbalance in 'put_rsb' - unexpected unlock
-> 
-> with this patch and having the refcount_dec_and_lock() functionality
-> inside the if condition to decide whenever doing unlock or not the
-> warning disappears.
-> 
-> The patch follows a similar naming scheme like raw_spin_trylock() by
-> adding a "raw_" prefix to refcount_dec_and_lock() functionality and
-> introduce a macro for the replaced functions that uses __cond_lock()
-> to signal that an acquire depends on the return value of the passed
-> function.
-> 
-> A cast to bool seems to be necessary because __cond_lock() does return a
-> non-boolean scalar type.
+--000000000000db535805e2acd76b
+Content-Type: text/plain; charset="UTF-8"
 
-I hate the __cond_lock() think with a passions. Please just fix sparse
-to not suck.
+On Thu, Jun 30, 2022 at 6:59 AM Alexander Aring <aahringo@redhat.com> wrote:
+>
+> I send this patch series as RFC because it was necessary to do a kref
+> change after adding __cond_lock() to refcount_dec_and_lock()
+> functionality.
+
+Can you try something like this instead?
+
+This is two separate patches - one for sparse, and one for the kernel.
+
+This is only *very* lightly tested (ie I tested it on a single kernel
+file that used refcount_dec_and_lock())
+
+                Linus
+
+--000000000000db535805e2acd76b
+Content-Type: text/x-patch; charset="US-ASCII"; name="sparse.patch"
+Content-Disposition: attachment; filename="sparse.patch"
+Content-Transfer-Encoding: base64
+Content-ID: <f_l518xtgt0>
+X-Attachment-Id: f_l518xtgt0
+
+IGxpbmVhcml6ZS5jICAgICAgICAgIHwgMjQgKysrKysrKysrKysrKysrKysrKysrKy0tCiB2YWxp
+ZGF0aW9uL2NvbnRleHQuYyB8IDE1ICsrKysrKysrKysrKysrKwogMiBmaWxlcyBjaGFuZ2VkLCAz
+NyBpbnNlcnRpb25zKCspLCAyIGRlbGV0aW9ucygtKQoKZGlmZiAtLWdpdCBhL2xpbmVhcml6ZS5j
+IGIvbGluZWFyaXplLmMKaW5kZXggZDlhZWQ2MWIuLjhkZDAwNWFmIDEwMDY0NAotLS0gYS9saW5l
+YXJpemUuYworKysgYi9saW5lYXJpemUuYwpAQCAtMTUzNyw2ICsxNTM3LDggQEAgc3RhdGljIHBz
+ZXVkb190IGxpbmVhcml6ZV9jYWxsX2V4cHJlc3Npb24oc3RydWN0IGVudHJ5cG9pbnQgKmVwLCBz
+dHJ1Y3QgZXhwcmVzc2kKIAlhZGRfb25lX2luc24oZXAsIGluc24pOwogCiAJaWYgKGN0eXBlKSB7
+CisJCXN0cnVjdCBiYXNpY19ibG9jayAqcG9zdF9jYWxsID0gTlVMTDsKKwogCQlGT1JfRUFDSF9Q
+VFIoY3R5cGUtPmNvbnRleHRzLCBjb250ZXh0KSB7CiAJCQlpbnQgaW4gPSBjb250ZXh0LT5pbjsK
+IAkJCWludCBvdXQgPSBjb250ZXh0LT5vdXQ7CkBAIC0xNTQ3LDggKzE1NDksMjEgQEAgc3RhdGlj
+IHBzZXVkb190IGxpbmVhcml6ZV9jYWxsX2V4cHJlc3Npb24oc3RydWN0IGVudHJ5cG9pbnQgKmVw
+LCBzdHJ1Y3QgZXhwcmVzc2kKIAkJCQlpbiA9IDA7CiAJCQl9CiAJCQlpZiAob3V0IDwgMCkgewot
+CQkJCWNoZWNrID0gMDsKLQkJCQlvdXQgPSAwOworCQkJCXN0cnVjdCBiYXNpY19ibG9jayAqc2V0
+X2NvbnRleHQ7CisJCQkJaWYgKHJldHZhbCA9PSBWT0lEKSB7CisJCQkJCXdhcm5pbmcoZXhwci0+
+cG9zLCAibm9uc2Vuc2ljYWwgY29uZGl0aW9uYWwgb3V0cHV0IGNvbnRleHQgd2l0aCBubyBjb25k
+aXRpb24iKTsKKwkJCQkJYnJlYWs7CisJCQkJfQorCQkJCWlmIChjaGVjayB8fCBpbikgeworCQkJ
+CQl3YXJuaW5nKGV4cHItPnBvcywgIm5vbnNlbnNpY2FsIGNvbmRpdGlvbmFsIGlucHV0IGNvbnRl
+eHQiKTsKKwkJCQkJYnJlYWs7CisJCQkJfQorCQkJCWlmICghcG9zdF9jYWxsKQorCQkJCQlwb3N0
+X2NhbGwgPSBhbGxvY19iYXNpY19ibG9jayhlcCwgZXhwci0+cG9zKTsKKwkJCQlzZXRfY29udGV4
+dCA9IGFsbG9jX2Jhc2ljX2Jsb2NrKGVwLCBleHByLT5wb3MpOworCQkJCWFkZF9icmFuY2goZXAs
+IHJldHZhbCwgc2V0X2NvbnRleHQsIHBvc3RfY2FsbCk7CisJCQkJc2V0X2FjdGl2ZWJsb2NrKGVw
+LCBzZXRfY29udGV4dCk7CisJCQkJb3V0ID0gLW91dDsKIAkJCX0KIAkJCWNvbnRleHRfZGlmZiA9
+IG91dCAtIGluOwogCQkJaWYgKGNoZWNrIHx8IGNvbnRleHRfZGlmZikgewpAQCAtMTU2MCw2ICsx
+NTc1LDExIEBAIHN0YXRpYyBwc2V1ZG9fdCBsaW5lYXJpemVfY2FsbF9leHByZXNzaW9uKHN0cnVj
+dCBlbnRyeXBvaW50ICplcCwgc3RydWN0IGV4cHJlc3NpCiAJCQl9CiAJCX0gRU5EX0ZPUl9FQUNI
+X1BUUihjb250ZXh0KTsKIAorCQlpZiAocG9zdF9jYWxsKSB7CisJCQlhZGRfZ290byhlcCwgcG9z
+dF9jYWxsKTsKKwkJCXNldF9hY3RpdmVibG9jayhlcCwgcG9zdF9jYWxsKTsKKwkJfQorCiAJCWlm
+IChjdHlwZS0+bW9kaWZpZXJzICYgTU9EX05PUkVUVVJOKQogCQkJYWRkX3VucmVhY2hhYmxlKGVw
+KTsKIAl9CmRpZmYgLS1naXQgYS92YWxpZGF0aW9uL2NvbnRleHQuYyBiL3ZhbGlkYXRpb24vY29u
+dGV4dC5jCmluZGV4IGI5NTAwZGM3Li5mODk2MmYxOSAxMDA2NDQKLS0tIGEvdmFsaWRhdGlvbi9j
+b250ZXh0LmMKKysrIGIvdmFsaWRhdGlvbi9jb250ZXh0LmMKQEAgLTEwLDYgKzEwLDEwIEBAIHN0
+YXRpYyB2b2lkIHIodm9pZCkgX19hdHRyaWJ1dGVfXygoY29udGV4dCgxLDApKSkKIAlfX2NvbnRl
+eHRfXygtMSk7CiB9CiAKKy8vIE5lZ2F0aXZlIG91dHB1dCBtZWFucyAiY29uZGl0aW9uYWwgcG9z
+aXRpdmUgb3V0cHV0IgorZXh0ZXJuIGludCBjb25kX2dldCh2b2lkKSBfX2F0dHJpYnV0ZSgoY29u
+dGV4dCgwLC0xKSkpOworZXh0ZXJuIHZvaWQgbm9uc2Vuc2ljYWxfY29uZF9nZXQodm9pZCkgX19h
+dHRyaWJ1dGUoKGNvbnRleHQoMCwtMSkpKTsKKwogZXh0ZXJuIGludCBfY2EoaW50IGZhaWwpOwog
+I2RlZmluZSBjYShmYWlsKSBfX2NvbmRfbG9jayhfY2EoZmFpbCkpCiAKQEAgLTE5LDYgKzIzLDE3
+IEBAIHN0YXRpYyB2b2lkIGdvb2RfcGFpcmVkMSh2b2lkKQogCXIoKTsKIH0KIAorc3RhdGljIHZv
+aWQgZ29vZF9jb25kaXRpb25hbCh2b2lkKQoreworCWlmIChjb25kX2dldCgpKQorCQlyKCk7Cit9
+CisKK3N0YXRpYyB2b2lkIG5vbnNlbnNpY2FsX2NvbmRpdGlvbmFsKHZvaWQpCit7CisJbm9uc2Vu
+c2ljYWxfY29uZF9nZXQoKTsKK30KKwogc3RhdGljIHZvaWQgZ29vZF9wYWlyZWQyKHZvaWQpCiB7
+CiAJYSgpOwo=
+--000000000000db535805e2acd76b
+Content-Type: text/x-patch; charset="US-ASCII"; name="kernel.patch"
+Content-Disposition: attachment; filename="kernel.patch"
+Content-Transfer-Encoding: base64
+Content-ID: <f_l518xy841>
+X-Attachment-Id: f_l518xy841
+
+IGluY2x1ZGUvbGludXgvY29tcGlsZXJfdHlwZXMuaCB8IDIgKysKIGluY2x1ZGUvbGludXgvcmVm
+Y291bnQuaCAgICAgICB8IDYgKysrLS0tCiAyIGZpbGVzIGNoYW5nZWQsIDUgaW5zZXJ0aW9ucygr
+KSwgMyBkZWxldGlvbnMoLSkKCmRpZmYgLS1naXQgYS9pbmNsdWRlL2xpbnV4L2NvbXBpbGVyX3R5
+cGVzLmggYi9pbmNsdWRlL2xpbnV4L2NvbXBpbGVyX3R5cGVzLmgKaW5kZXggZDA4ZGZjYjBhYzY4
+Li40ZjJhODE5ZmQ2MGEgMTAwNjQ0Ci0tLSBhL2luY2x1ZGUvbGludXgvY29tcGlsZXJfdHlwZXMu
+aAorKysgYi9pbmNsdWRlL2xpbnV4L2NvbXBpbGVyX3R5cGVzLmgKQEAgLTI0LDYgKzI0LDcgQEAg
+c3RhdGljIGlubGluZSB2b2lkIF9fY2hrX2lvX3B0cihjb25zdCB2b2xhdGlsZSB2b2lkIF9faW9t
+ZW0gKnB0cikgeyB9CiAvKiBjb250ZXh0L2xvY2tpbmcgKi8KICMgZGVmaW5lIF9fbXVzdF9ob2xk
+KHgpCV9fYXR0cmlidXRlX18oKGNvbnRleHQoeCwxLDEpKSkKICMgZGVmaW5lIF9fYWNxdWlyZXMo
+eCkJX19hdHRyaWJ1dGVfXygoY29udGV4dCh4LDAsMSkpKQorIyBkZWZpbmUgX19jb25kX2FjcXVp
+cmVzKHgpIF9fYXR0cmlidXRlX18oKGNvbnRleHQoeCwwLC0xKSkpCiAjIGRlZmluZSBfX3JlbGVh
+c2VzKHgpCV9fYXR0cmlidXRlX18oKGNvbnRleHQoeCwxLDApKSkKICMgZGVmaW5lIF9fYWNxdWly
+ZSh4KQlfX2NvbnRleHRfXyh4LDEpCiAjIGRlZmluZSBfX3JlbGVhc2UoeCkJX19jb250ZXh0X18o
+eCwtMSkKQEAgLTUwLDYgKzUxLDcgQEAgc3RhdGljIGlubGluZSB2b2lkIF9fY2hrX2lvX3B0cihj
+b25zdCB2b2xhdGlsZSB2b2lkIF9faW9tZW0gKnB0cikgeyB9CiAvKiBjb250ZXh0L2xvY2tpbmcg
+Ki8KICMgZGVmaW5lIF9fbXVzdF9ob2xkKHgpCiAjIGRlZmluZSBfX2FjcXVpcmVzKHgpCisjIGRl
+ZmluZSBfX2NvbmRfYWNxdWlyZXMoeCkKICMgZGVmaW5lIF9fcmVsZWFzZXMoeCkKICMgZGVmaW5l
+IF9fYWNxdWlyZSh4KQkodm9pZCkwCiAjIGRlZmluZSBfX3JlbGVhc2UoeCkJKHZvaWQpMApkaWZm
+IC0tZ2l0IGEvaW5jbHVkZS9saW51eC9yZWZjb3VudC5oIGIvaW5jbHVkZS9saW51eC9yZWZjb3Vu
+dC5oCmluZGV4IGI4YTZlMzg3ZjhmOS4uYTYyZmNjYTk3NDg2IDEwMDY0NAotLS0gYS9pbmNsdWRl
+L2xpbnV4L3JlZmNvdW50LmgKKysrIGIvaW5jbHVkZS9saW51eC9yZWZjb3VudC5oCkBAIC0zNjEs
+OSArMzYxLDkgQEAgc3RhdGljIGlubGluZSB2b2lkIHJlZmNvdW50X2RlYyhyZWZjb3VudF90ICpy
+KQogCiBleHRlcm4gX19tdXN0X2NoZWNrIGJvb2wgcmVmY291bnRfZGVjX2lmX29uZShyZWZjb3Vu
+dF90ICpyKTsKIGV4dGVybiBfX211c3RfY2hlY2sgYm9vbCByZWZjb3VudF9kZWNfbm90X29uZShy
+ZWZjb3VudF90ICpyKTsKLWV4dGVybiBfX211c3RfY2hlY2sgYm9vbCByZWZjb3VudF9kZWNfYW5k
+X211dGV4X2xvY2socmVmY291bnRfdCAqciwgc3RydWN0IG11dGV4ICpsb2NrKTsKLWV4dGVybiBf
+X211c3RfY2hlY2sgYm9vbCByZWZjb3VudF9kZWNfYW5kX2xvY2socmVmY291bnRfdCAqciwgc3Bp
+bmxvY2tfdCAqbG9jayk7CitleHRlcm4gX19tdXN0X2NoZWNrIGJvb2wgcmVmY291bnRfZGVjX2Fu
+ZF9tdXRleF9sb2NrKHJlZmNvdW50X3QgKnIsIHN0cnVjdCBtdXRleCAqbG9jaykgX19jb25kX2Fj
+cXVpcmVzKGxvY2spOworZXh0ZXJuIF9fbXVzdF9jaGVjayBib29sIHJlZmNvdW50X2RlY19hbmRf
+bG9jayhyZWZjb3VudF90ICpyLCBzcGlubG9ja190ICpsb2NrKSBfX2NvbmRfYWNxdWlyZXMobG9j
+ayk7CiBleHRlcm4gX19tdXN0X2NoZWNrIGJvb2wgcmVmY291bnRfZGVjX2FuZF9sb2NrX2lycXNh
+dmUocmVmY291bnRfdCAqciwKIAkJCQkJCSAgICAgICBzcGlubG9ja190ICpsb2NrLAotCQkJCQkJ
+ICAgICAgIHVuc2lnbmVkIGxvbmcgKmZsYWdzKTsKKwkJCQkJCSAgICAgICB1bnNpZ25lZCBsb25n
+ICpmbGFncykgX19jb25kX2FjcXVpcmVzKGxvY2spOwogI2VuZGlmIC8qIF9MSU5VWF9SRUZDT1VO
+VF9IICovCg==
+--000000000000db535805e2acd76b--
