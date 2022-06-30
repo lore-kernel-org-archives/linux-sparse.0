@@ -2,139 +2,191 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5054DC43334
-	for <linux-sparse@archiver.kernel.org>; Wed, 29 Jun 2022 14:43:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 12A1BC43334
+	for <linux-sparse@archiver.kernel.org>; Thu, 30 Jun 2022 14:14:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233693AbiF2OnH (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Wed, 29 Jun 2022 10:43:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48518 "EHLO
+        id S236985AbiF3OOb (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Thu, 30 Jun 2022 10:14:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43906 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233729AbiF2OnF (ORCPT
+        with ESMTP id S237080AbiF3ON6 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 29 Jun 2022 10:43:05 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 95CCE38A
-        for <linux-sparse@vger.kernel.org>; Wed, 29 Jun 2022 07:43:04 -0700 (PDT)
+        Thu, 30 Jun 2022 10:13:58 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 0CE39419A0
+        for <linux-sparse@vger.kernel.org>; Thu, 30 Jun 2022 06:59:49 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1656513783;
+        s=mimecast20190719; t=1656597588;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=V7S0nWCPZZOEGbD8N2JmBW7Bz7rcl+xCGtpBNVP7MTQ=;
-        b=WeQMoKghm8UCY7MWlojxuz3dXdXcpiNmZ9agKTsVzuGXyb788vb1Q55ZFyXwrCfNLv5SRF
-        GYVtD09fMKPl6P0ghHQ/zLUU6O0nznTi5aU7Q1jLEInOsIV9KXZh+HXMzy/oZeP1au3SY+
-        BxFRBzYXZtiMwcW8rZQe91YCgzbjvYs=
-Received: from mail-qv1-f72.google.com (mail-qv1-f72.google.com
- [209.85.219.72]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=YL9f1II4Mw4H7t2E0klzVA5qKcGu0RnSH4xCbZTGJWU=;
+        b=YO4eepO7KrJ/BGFOU2/A+wBBSCB1EEaK8dzrgMKdC4U0kF9PuFYBxU/CWZsk7JKmMSNx8h
+        bR81l/E2gBJ3VePUWRoyTnbCYfMifp9vbR9mFD5xg3afvcYn6ktp/NvhmkVxlwX5rKsXcM
+        3fQ1B9N284H6tfWAs4rUy8N7HeHLAzo=
+Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
+ [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-553-hfDj8tFeNnCNbx9uItxq8A-1; Wed, 29 Jun 2022 10:43:02 -0400
-X-MC-Unique: hfDj8tFeNnCNbx9uItxq8A-1
-Received: by mail-qv1-f72.google.com with SMTP id g29-20020a0caadd000000b004702ed3c3f5so15436750qvb.11
-        for <linux-sparse@vger.kernel.org>; Wed, 29 Jun 2022 07:43:02 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=V7S0nWCPZZOEGbD8N2JmBW7Bz7rcl+xCGtpBNVP7MTQ=;
-        b=4asB715iG55vn5JX4JqdPz48qQdyyc/QrqD4cnF01T2B1w03AnwZxQGx1rOcF5ZBI2
-         zcmj061ejfGB9g10G/S7UPDGI6BZhdVR3YgCmjOfuv++KHPMkwrIeqhBPQB1hiWu8+SB
-         0VkTS8Ee+5dPt82ezOjMzx3rPxQfinIgWeG2ImYN6TJFfPST7/l6HoFeDg3j3CpX8i6j
-         haXLmMDbPJ247T7zUM7qIvR9dgRQmgPWq5XwimLPSo7cp/TKhMMZZC1jvxgm72kp78p6
-         gnVgCITxtzEd3PdYZDehv65KsZFygjU/MehzRZZGPP1VNucKpsBWwOplDPqhUOMxM09e
-         zEsg==
-X-Gm-Message-State: AJIora+zbqYrSOgY00qw2FXP5i/5wB2EPVLgtoPxVogadrKDHTWABibq
-        FM2g/b2Dr/FVePw5WQJkwpMr8+LM9mMCLRSatgdxVQ2jbRksNywUJa6EZkrAWrMw450Wpq6Kegd
-        qluynSmgQDOOaKiiWdX7bt67h5i92rUl/ZTUyw8AW
-X-Received: by 2002:a05:622a:90a:b0:31b:899:3070 with SMTP id bx10-20020a05622a090a00b0031b08993070mr2755603qtb.470.1656513781463;
-        Wed, 29 Jun 2022 07:43:01 -0700 (PDT)
-X-Google-Smtp-Source: AGRyM1snXWlAR3sgWdAIaN3DlBIW0o4Fn6o5OCZioO1HkvOSAAI/43K9/YCye+hVbbMtLzZX4DAPjMyCEshh3UDDr/g=
-X-Received: by 2002:a05:622a:90a:b0:31b:899:3070 with SMTP id
- bx10-20020a05622a090a00b0031b08993070mr2755577qtb.470.1656513781205; Wed, 29
- Jun 2022 07:43:01 -0700 (PDT)
-MIME-Version: 1.0
-References: <CAK-6q+hd-L54cqOiFNuufS2_VF5XS0R8cjQL7es8921+2u3uwQ@mail.gmail.com>
- <20220627184232.tjfuzeir57l3h5ll@mail> <CAK-6q+haOfQD8_N6pEm80BTrUXwaj07ZBcXP-EBHftpTVEc1XQ@mail.gmail.com>
- <CAK-6q+g795MwPvUGxWXTE+s-TfJnbh2wf=Udb1k7r6ru-4FTMQ@mail.gmail.com>
- <20220628085821.kn3jjrviyprgai4w@mail> <CAHk-=wie9HSY-MmFr9zHeizRTgSfdONop0-4ezBiq5hYNp4U6g@mail.gmail.com>
-In-Reply-To: <CAHk-=wie9HSY-MmFr9zHeizRTgSfdONop0-4ezBiq5hYNp4U6g@mail.gmail.com>
+ us-mta-22--w1_ynfMMyqKXXq4Nnz9sA-1; Thu, 30 Jun 2022 09:59:45 -0400
+X-MC-Unique: -w1_ynfMMyqKXXq4Nnz9sA-1
+Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.rdu2.redhat.com [10.11.54.5])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id E44E31C004ED;
+        Thu, 30 Jun 2022 13:59:44 +0000 (UTC)
+Received: from fs-i40c-03.fs.lab.eng.bos.redhat.com (fs-i40c-03.fs.lab.eng.bos.redhat.com [10.16.224.23])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 9166A815B;
+        Thu, 30 Jun 2022 13:59:44 +0000 (UTC)
 From:   Alexander Aring <aahringo@redhat.com>
-Date:   Wed, 29 Jun 2022 10:42:48 -0400
-Message-ID: <CAK-6q+jngywC7UZ6XG=yww16nJQgz0Z=VYKH8Fhg0kbZCkaypA@mail.gmail.com>
-Subject: Re: sparse warnings related to kref_put_lock() and refcount_dec_and_lock()
-To:     Linus Torvalds <torvalds@linux-foundation.org>
-Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
-        jacob.e.keller@intel.com,
-        Andrew Morton <akpm@linux-foundation.org>,
-        thunder.leizhen@huawei.com,
-        Sparse Mailing-list <linux-sparse@vger.kernel.org>,
-        cluster-devel <cluster-devel@redhat.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Authentication-Results: relay.mimecast.com;
-        auth=pass smtp.auth=CUSA124A263 smtp.mailfrom=aahringo@redhat.com
-X-Mimecast-Spam-Score: 0
-X-Mimecast-Originator: redhat.com
-Content-Type: text/plain; charset="UTF-8"
+To:     will@kernel.org
+Cc:     peterz@infradead.org, boqun.feng@gmail.com, mark.rutland@arm.com,
+        thunder.leizhen@huawei.com, jacob.e.keller@intel.com,
+        akpm@linux-foundation.org, linux-sparse@vger.kernel.org,
+        cluster-devel@redhat.com, luc.vanoostenryck@gmail.com,
+        torvalds@linux-foundation.org, linux-kernel@vger.kernel.org,
+        aahringo@redhat.com
+Subject: [RFC 1/2] refcount: add __cond_lock() for conditional lock refcount API
+Date:   Thu, 30 Jun 2022 09:59:33 -0400
+Message-Id: <20220630135934.1799248-2-aahringo@redhat.com>
+In-Reply-To: <20220630135934.1799248-1-aahringo@redhat.com>
+References: <20220630135934.1799248-1-aahringo@redhat.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 2.79 on 10.11.54.5
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Hi,
+This patch adds the __cond_lock() macro to refcounts conditional lock
+API. Currently sparse cannot detect the conditional lock handling of
+refcount_dec_and_lock() functionality and prints a context imbalance
+warning like:
 
-On Tue, Jun 28, 2022 at 1:27 PM Linus Torvalds
-<torvalds@linux-foundation.org> wrote:
->
-> On Tue, Jun 28, 2022 at 1:58 AM Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
-> >
-> > I would certainly not recommend this but ...
-> > if it's OK to cheat and lie then you can do:
-> > +       bool refcount_dec_and_lock(refcount_t *r, spinlock_t *lock) __acquires(lock);
->
-> Actually, we have "__cond_lock()" in the kernel to actually document
-> that something takes a lock only in certain conditions.
->
-> It needs to be declared as a macro in the header file, with this as an example:
->
->    #define raw_spin_trylock(lock)  __cond_lock(lock, _raw_spin_trylock(lock))
->
+warning: context imbalance in 'put_rsb' - unexpected unlock
 
-I added a prefix of "raw_" to refcount_dec_and_lock() and similar
-functions and replaced the original functions with the __cond_lock()
-macro to redirect to their raw_ functions. Similar to how the
-raw_spinlock_trylock() naming scheme is doing it. The "raw_"
-functionality should never be called by the user then.
+with this patch and having the refcount_dec_and_lock() functionality
+inside the if condition to decide whenever doing unlock or not the
+warning disappears.
 
-> ie that says that "raw_spin_trylock() takes 'lock' when
-> _raw_spin_trylock() returned true".
->
-> That then makes it possible to write code like
->
->     if (raw_spin_trylock(lock)) {..
->                  raw_spin_unlock(lock));
->     }
->
-> and sparse will get the nesting right.
->
-> But that does *not* solve the issue of people then writing this as
->
->     locked = raw_spin_trylock(lock);
->     .. do_something ..
->     if (locked)
->                  raw_spin_unlock(lock));
->
-> and you end up with the same thing again.
->
+The patch follows a similar naming scheme like raw_spin_trylock() by
+adding a "raw_" prefix to refcount_dec_and_lock() functionality and
+introduce a macro for the replaced functions that uses __cond_lock()
+to signal that an acquire depends on the return value of the passed
+function.
 
-Yes it mostly removed all sparse warnings I see. I needed to move at
-one call of the refcount_dec_and_lock() function inside the if
-condition and the sparse warning was gone. It should not be a problem
-to change it in this way.
+A cast to bool seems to be necessary because __cond_lock() does return a
+non-boolean scalar type.
 
-If there are no other complaints I will send a patch for the raw_
-prefix to all those conditional refcount lock functions and the add a
-__cond_lock() macro for the original function calls.
+The __must_check annotation was tested and is still working with this
+patch applied.
 
-Thanks!
+Signed-off-by: Alexander Aring <aahringo@redhat.com>
+---
+ include/linux/refcount.h | 21 ++++++++++++++++-----
+ lib/refcount.c           | 23 ++++++++++++-----------
+ 2 files changed, 28 insertions(+), 16 deletions(-)
 
-- Alex
+diff --git a/include/linux/refcount.h b/include/linux/refcount.h
+index b8a6e387f8f9..be7b970ce475 100644
+--- a/include/linux/refcount.h
++++ b/include/linux/refcount.h
+@@ -361,9 +361,20 @@ static inline void refcount_dec(refcount_t *r)
+ 
+ extern __must_check bool refcount_dec_if_one(refcount_t *r);
+ extern __must_check bool refcount_dec_not_one(refcount_t *r);
+-extern __must_check bool refcount_dec_and_mutex_lock(refcount_t *r, struct mutex *lock);
+-extern __must_check bool refcount_dec_and_lock(refcount_t *r, spinlock_t *lock);
+-extern __must_check bool refcount_dec_and_lock_irqsave(refcount_t *r,
+-						       spinlock_t *lock,
+-						       unsigned long *flags);
++extern __must_check bool raw_refcount_dec_and_mutex_lock(refcount_t *r,
++							 struct mutex *lock);
++#define refcount_dec_and_mutex_lock(r, lock) \
++	((bool)(__cond_lock(lock, raw_refcount_dec_and_mutex_lock(r, lock))))
++
++extern __must_check bool raw_refcount_dec_and_lock(refcount_t *r,
++						   spinlock_t *lock);
++#define refcount_dec_and_lock(r, lock) \
++	((bool)(__cond_lock(lock, raw_refcount_dec_and_lock(r, lock))))
++
++extern __must_check bool raw_refcount_dec_and_lock_irqsave(refcount_t *r,
++							   spinlock_t *lock,
++							   unsigned long *flags);
++#define refcount_dec_and_lock_irqsave(r, lock, flags) \
++	((bool)(__cond_lock(lock, raw_refcount_dec_and_lock_irqsave(r, lock, flags))))
++
+ #endif /* _LINUX_REFCOUNT_H */
+diff --git a/lib/refcount.c b/lib/refcount.c
+index a207a8f22b3c..1a8c7b9aba23 100644
+--- a/lib/refcount.c
++++ b/lib/refcount.c
+@@ -110,7 +110,7 @@ EXPORT_SYMBOL(refcount_dec_not_one);
+  * Return: true and hold mutex if able to decrement refcount to 0, false
+  *         otherwise
+  */
+-bool refcount_dec_and_mutex_lock(refcount_t *r, struct mutex *lock)
++bool raw_refcount_dec_and_mutex_lock(refcount_t *r, struct mutex *lock)
+ {
+ 	if (refcount_dec_not_one(r))
+ 		return false;
+@@ -123,11 +123,11 @@ bool refcount_dec_and_mutex_lock(refcount_t *r, struct mutex *lock)
+ 
+ 	return true;
+ }
+-EXPORT_SYMBOL(refcount_dec_and_mutex_lock);
++EXPORT_SYMBOL(raw_refcount_dec_and_mutex_lock);
+ 
+ /**
+- * refcount_dec_and_lock - return holding spinlock if able to decrement
+- *                         refcount to 0
++ * raw_refcount_dec_and_lock - return holding spinlock if able to decrement
++ *			       refcount to 0
+  * @r: the refcount
+  * @lock: the spinlock to be locked
+  *
+@@ -141,7 +141,7 @@ EXPORT_SYMBOL(refcount_dec_and_mutex_lock);
+  * Return: true and hold spinlock if able to decrement refcount to 0, false
+  *         otherwise
+  */
+-bool refcount_dec_and_lock(refcount_t *r, spinlock_t *lock)
++bool raw_refcount_dec_and_lock(refcount_t *r, spinlock_t *lock)
+ {
+ 	if (refcount_dec_not_one(r))
+ 		return false;
+@@ -154,11 +154,12 @@ bool refcount_dec_and_lock(refcount_t *r, spinlock_t *lock)
+ 
+ 	return true;
+ }
+-EXPORT_SYMBOL(refcount_dec_and_lock);
++EXPORT_SYMBOL(raw_refcount_dec_and_lock);
+ 
+ /**
+- * refcount_dec_and_lock_irqsave - return holding spinlock with disabled
+- *                                 interrupts if able to decrement refcount to 0
++ * raw_refcount_dec_and_lock_irqsave - return holding spinlock with disabled
++ *				       interrupts if able to decrement
++ *				       refcount to 0
+  * @r: the refcount
+  * @lock: the spinlock to be locked
+  * @flags: saved IRQ-flags if the is acquired
+@@ -169,8 +170,8 @@ EXPORT_SYMBOL(refcount_dec_and_lock);
+  * Return: true and hold spinlock if able to decrement refcount to 0, false
+  *         otherwise
+  */
+-bool refcount_dec_and_lock_irqsave(refcount_t *r, spinlock_t *lock,
+-				   unsigned long *flags)
++bool raw_refcount_dec_and_lock_irqsave(refcount_t *r, spinlock_t *lock,
++				       unsigned long *flags)
+ {
+ 	if (refcount_dec_not_one(r))
+ 		return false;
+@@ -183,4 +184,4 @@ bool refcount_dec_and_lock_irqsave(refcount_t *r, spinlock_t *lock,
+ 
+ 	return true;
+ }
+-EXPORT_SYMBOL(refcount_dec_and_lock_irqsave);
++EXPORT_SYMBOL(raw_refcount_dec_and_lock_irqsave);
+-- 
+2.31.1
 
