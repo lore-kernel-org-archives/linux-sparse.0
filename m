@@ -2,98 +2,129 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7983BC433EF
-	for <linux-sparse@archiver.kernel.org>; Fri,  1 Jul 2022 12:13:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B034AC433EF
+	for <linux-sparse@archiver.kernel.org>; Fri,  1 Jul 2022 13:41:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237150AbiGAMM7 (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Fri, 1 Jul 2022 08:12:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46236 "EHLO
+        id S230290AbiGANlM (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Fri, 1 Jul 2022 09:41:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35612 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237158AbiGAMM4 (ORCPT
+        with ESMTP id S229964AbiGANlL (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 1 Jul 2022 08:12:56 -0400
-Received: from mga09.intel.com (mga09.intel.com [134.134.136.24])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EF9E98734D
-        for <linux-sparse@vger.kernel.org>; Fri,  1 Jul 2022 05:12:54 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1656677575; x=1688213575;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=qv4kLKxH0W7SU07rNjlbVClL2PstfgZsWvIXqa8Wkp0=;
-  b=HJwsGi620fBV2fLqHR6fGGlKvtYXarxhDOxa1Ra8cxo/1MMF7SYd3end
-   JP/i6mn4ggahEVlFGW3GESoyIAFUSib1G231IoziaoSpL5mjryfwYiHyG
-   WKIkMYEXOmAlkFgfu5l/YNk0pR87z6wMM0WdB0dgfIqk4/Fna2EgfivXP
-   4hYECa2dUoEdvglzbmOKRF0ii1fCTNb5x+1XuTav53MNC8iTcO84N6HaM
-   p5LzTpu4NV6qR3B+ugNO/IfG9xRlkJCZFgUUk6QdhGEZutaOUDhBzuTR2
-   x9axuwlwyroqvoh6xookaRm8l67/z1mr+8WfoNgs1txDhBKyfQSEj9DoK
-   g==;
-X-IronPort-AV: E=McAfee;i="6400,9594,10394"; a="283371567"
-X-IronPort-AV: E=Sophos;i="5.92,237,1650956400"; 
-   d="scan'208";a="283371567"
-Received: from fmsmga004.fm.intel.com ([10.253.24.48])
-  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Jul 2022 05:12:52 -0700
-X-IronPort-AV: E=Sophos;i="5.92,237,1650956400"; 
-   d="scan'208";a="659412276"
-Received: from smile.fi.intel.com ([10.237.72.54])
-  by fmsmga004-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Jul 2022 05:12:50 -0700
-Received: from andy by smile.fi.intel.com with local (Exim 4.96)
-        (envelope-from <andriy.shevchenko@intel.com>)
-        id 1o7FTo-0012uJ-1f;
-        Fri, 01 Jul 2022 15:10:36 +0300
-Date:   Fri, 1 Jul 2022 15:10:36 +0300
-From:   Andy Shevchenko <andriy.shevchenko@intel.com>
-To:     Luc Van Oostenryck <lucvoo@kernel.org>,
-        Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= <ukleinek@debian.org>
+        Fri, 1 Jul 2022 09:41:11 -0400
+X-Greylist: delayed 557 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Fri, 01 Jul 2022 06:41:09 PDT
+Received: from algol.kleine-koenig.org (algol.kleine-koenig.org [162.55.41.232])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3F6D615829
+        for <linux-sparse@vger.kernel.org>; Fri,  1 Jul 2022 06:41:09 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+        by algol.kleine-koenig.org (Postfix) with ESMTP id 48BD44999B8;
+        Fri,  1 Jul 2022 15:31:50 +0200 (CEST)
+Received: from algol.kleine-koenig.org ([IPv6:::1])
+        by localhost (algol.kleine-koenig.org [IPv6:::1]) (amavisd-new, port 10024)
+        with ESMTP id 7k6TRpVWmYGB; Fri,  1 Jul 2022 15:31:49 +0200 (CEST)
+Received: from taurus.defre.kleine-koenig.org (unknown [IPv6:2a02:8071:b7c0:8100:725c:297:eb88:6c8f])
+        by algol.kleine-koenig.org (Postfix) with ESMTPSA;
+        Fri,  1 Jul 2022 15:31:49 +0200 (CEST)
+Message-ID: <e91d351c-3c16-e48d-7e9d-9f096c4acbc9@debian.org>
+Date:   Fri, 1 Jul 2022 15:31:45 +0200
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.10.0
+Subject: Re: [PATCH] fix "unreplaced" warnings caused by using typeof() on
+ inline functions
+Content-Language: en-US
+To:     Andy Shevchenko <andriy.shevchenko@intel.com>,
+        Luc Van Oostenryck <lucvoo@kernel.org>
 Cc:     linux-sparse@vger.kernel.org,
         Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
         kernel test robot <lkp@intel.com>
-Subject: Re: [PATCH] fix "unreplaced" warnings caused by using typeof() on
- inline functions
-Message-ID: <Yr7kPM1wLZnOqxOA@smile.fi.intel.com>
 References: <20220624164601.99527-1-lucvoo@kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220624164601.99527-1-lucvoo@kernel.org>
-Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
+ <Yr7kPM1wLZnOqxOA@smile.fi.intel.com>
+From:   =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <ukleinek@debian.org>
+In-Reply-To: <Yr7kPM1wLZnOqxOA@smile.fi.intel.com>
+Content-Type: multipart/signed; micalg=pgp-sha256;
+ protocol="application/pgp-signature";
+ boundary="------------ecAb6Que8oWvZLd314m8sL3j"
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Fri, Jun 24, 2022 at 06:46:01PM +0200, Luc Van Oostenryck wrote:
-> From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-> 
-> Currently, sparse do all its inlining at the tree level, during
-> constant expansion. To not mix-up the evaluation of the original
-> function body in case the address of an inline function is taken or
-> when the function can't otherwise be inlined, the statements and
-> symbols lists of inline functions are kept in separated fields.
-> Then, if the original body must be evaluated it must first be
-> 'uninlined' to have a copy in the usual fields.
-> 
-> This make sense when dealing with the definition of the function.
-> But, when using typeof() on functions, the resulting type doesn't
-> refer to this definition, it's just a copy of the type and only
-> of the type. There shouldn't be any reasons to uninline anything.
-> However, the distinction between 'full function' and 'type only'
-> is not made during evaluation and the uninlining attempt produce
-> a lot of "warning: unreplaced symbol '...'" because of the lack
-> of a corresponding definition.
-> 
-> Fix this by not doing the uninlining if the symbol lack a definition.
-> 
-> Note: It would maybe be more appropriate for EXPR_TYPE to use
->       a stripped-own version of evaluate_symbol() doing only the
->       examination of the return and argument types, bypassing the
->       attempt to uninline the body and evaluate the initializer and
->       the statements since there is none of those for an EXPR_TYPE.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--------------ecAb6Que8oWvZLd314m8sL3j
+Content-Type: multipart/mixed; boundary="------------hxAW5scPIQ0CuKuoz0y59Ljw";
+ protected-headers="v1"
+From: =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <ukleinek@debian.org>
+To: Andy Shevchenko <andriy.shevchenko@intel.com>,
+ Luc Van Oostenryck <lucvoo@kernel.org>
+Cc: linux-sparse@vger.kernel.org,
+ Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
+ kernel test robot <lkp@intel.com>
+Message-ID: <e91d351c-3c16-e48d-7e9d-9f096c4acbc9@debian.org>
+Subject: Re: [PATCH] fix "unreplaced" warnings caused by using typeof() on
+ inline functions
+References: <20220624164601.99527-1-lucvoo@kernel.org>
+ <Yr7kPM1wLZnOqxOA@smile.fi.intel.com>
+In-Reply-To: <Yr7kPM1wLZnOqxOA@smile.fi.intel.com>
 
-Uwe, can we get a Debian package with this fix, it's really a tons of such
-messages when compile kernel with C=1?
+--------------hxAW5scPIQ0CuKuoz0y59Ljw
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: base64
 
--- 
-With Best Regards,
-Andy Shevchenko
+T24gNy8xLzIyIDE0OjEwLCBBbmR5IFNoZXZjaGVua28gd3JvdGU6DQo+IE9uIEZyaSwgSnVu
+IDI0LCAyMDIyIGF0IDA2OjQ2OjAxUE0gKzAyMDAsIEx1YyBWYW4gT29zdGVucnljayB3cm90
+ZToNCj4+IEZyb206IEx1YyBWYW4gT29zdGVucnljayA8bHVjLnZhbm9vc3RlbnJ5Y2tAZ21h
+aWwuY29tPg0KPj4NCj4+IEN1cnJlbnRseSwgc3BhcnNlIGRvIGFsbCBpdHMgaW5saW5pbmcg
+YXQgdGhlIHRyZWUgbGV2ZWwsIGR1cmluZw0KPj4gY29uc3RhbnQgZXhwYW5zaW9uLiBUbyBu
+b3QgbWl4LXVwIHRoZSBldmFsdWF0aW9uIG9mIHRoZSBvcmlnaW5hbA0KPj4gZnVuY3Rpb24g
+Ym9keSBpbiBjYXNlIHRoZSBhZGRyZXNzIG9mIGFuIGlubGluZSBmdW5jdGlvbiBpcyB0YWtl
+biBvcg0KPj4gd2hlbiB0aGUgZnVuY3Rpb24gY2FuJ3Qgb3RoZXJ3aXNlIGJlIGlubGluZWQs
+IHRoZSBzdGF0ZW1lbnRzIGFuZA0KPj4gc3ltYm9scyBsaXN0cyBvZiBpbmxpbmUgZnVuY3Rp
+b25zIGFyZSBrZXB0IGluIHNlcGFyYXRlZCBmaWVsZHMuDQo+PiBUaGVuLCBpZiB0aGUgb3Jp
+Z2luYWwgYm9keSBtdXN0IGJlIGV2YWx1YXRlZCBpdCBtdXN0IGZpcnN0IGJlDQo+PiAndW5p
+bmxpbmVkJyB0byBoYXZlIGEgY29weSBpbiB0aGUgdXN1YWwgZmllbGRzLg0KPj4NCj4+IFRo
+aXMgbWFrZSBzZW5zZSB3aGVuIGRlYWxpbmcgd2l0aCB0aGUgZGVmaW5pdGlvbiBvZiB0aGUg
+ZnVuY3Rpb24uDQo+PiBCdXQsIHdoZW4gdXNpbmcgdHlwZW9mKCkgb24gZnVuY3Rpb25zLCB0
+aGUgcmVzdWx0aW5nIHR5cGUgZG9lc24ndA0KPj4gcmVmZXIgdG8gdGhpcyBkZWZpbml0aW9u
+LCBpdCdzIGp1c3QgYSBjb3B5IG9mIHRoZSB0eXBlIGFuZCBvbmx5DQo+PiBvZiB0aGUgdHlw
+ZS4gVGhlcmUgc2hvdWxkbid0IGJlIGFueSByZWFzb25zIHRvIHVuaW5saW5lIGFueXRoaW5n
+Lg0KPj4gSG93ZXZlciwgdGhlIGRpc3RpbmN0aW9uIGJldHdlZW4gJ2Z1bGwgZnVuY3Rpb24n
+IGFuZCAndHlwZSBvbmx5Jw0KPj4gaXMgbm90IG1hZGUgZHVyaW5nIGV2YWx1YXRpb24gYW5k
+IHRoZSB1bmlubGluaW5nIGF0dGVtcHQgcHJvZHVjZQ0KPj4gYSBsb3Qgb2YgIndhcm5pbmc6
+IHVucmVwbGFjZWQgc3ltYm9sICcuLi4nIiBiZWNhdXNlIG9mIHRoZSBsYWNrDQo+PiBvZiBh
+IGNvcnJlc3BvbmRpbmcgZGVmaW5pdGlvbi4NCj4+DQo+PiBGaXggdGhpcyBieSBub3QgZG9p
+bmcgdGhlIHVuaW5saW5pbmcgaWYgdGhlIHN5bWJvbCBsYWNrIGEgZGVmaW5pdGlvbi4NCj4+
+DQo+PiBOb3RlOiBJdCB3b3VsZCBtYXliZSBiZSBtb3JlIGFwcHJvcHJpYXRlIGZvciBFWFBS
+X1RZUEUgdG8gdXNlDQo+PiAgICAgICAgYSBzdHJpcHBlZC1vd24gdmVyc2lvbiBvZiBldmFs
+dWF0ZV9zeW1ib2woKSBkb2luZyBvbmx5IHRoZQ0KPj4gICAgICAgIGV4YW1pbmF0aW9uIG9m
+IHRoZSByZXR1cm4gYW5kIGFyZ3VtZW50IHR5cGVzLCBieXBhc3NpbmcgdGhlDQo+PiAgICAg
+ICAgYXR0ZW1wdCB0byB1bmlubGluZSB0aGUgYm9keSBhbmQgZXZhbHVhdGUgdGhlIGluaXRp
+YWxpemVyIGFuZA0KPj4gICAgICAgIHRoZSBzdGF0ZW1lbnRzIHNpbmNlIHRoZXJlIGlzIG5v
+bmUgb2YgdGhvc2UgZm9yIGFuIEVYUFJfVFlQRS4NCj4gDQo+IFV3ZSwgY2FuIHdlIGdldCBh
+IERlYmlhbiBwYWNrYWdlIHdpdGggdGhpcyBmaXgsIGl0J3MgcmVhbGx5IGEgdG9ucyBvZiBz
+dWNoDQo+IG1lc3NhZ2VzIHdoZW4gY29tcGlsZSBrZXJuZWwgd2l0aCBDPTE/DQoNCkx1Yywg
+ZG8geW91IGNvbnNpZGVyIGl0IHNlbnNpYmxlIHRvIGNyZWF0ZSBhIDAuNi40IHZhcmlhbnQg
+b2Ygc3BhcnNlIA0KdGhhdCBpbmNsdWRlcyB0aGlzIGZpeD8gQXJlIHRoZXJlIGFueSBtb3Jl
+IHBhdGNoZXMgdGhhdCB5b3UnZCBkZWVtIA0Kc2Vuc2libGUgdG8gaW5sdWNkZT8gRG9lcyB0
+aGF0IG1lYW4gaXQncyB0aW1lIGZvciBhIDAuNi41IHJlbGVhc2U/DQoNCkJlc3QgcmVnYXJk
+cw0KVXdlDQo=
 
+--------------hxAW5scPIQ0CuKuoz0y59Ljw--
 
+--------------ecAb6Que8oWvZLd314m8sL3j
+Content-Type: application/pgp-signature; name="OpenPGP_signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="OpenPGP_signature"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAEBCgAdFiEEfnIqFpAYrP8+dKQLwfwUeK3K7AkFAmK+90IACgkQwfwUeK3K
+7Al/6gf/RC9n3O0mGytyiZaSrWtKl+4VIMXxT9ipNyrAcHxGS1mcSSGteBZKuroy
+OVFh48+1d3caf3BNPGVIGSfOPnof+ud+EyV8D6uv1qWK6tSlJeNn+f65ZXJYjank
+ieJA5B2XRoXF/uQGGtooIcdXVCvMPSleRE2Yhp4Scce+rOvx8g9JH2b946h5XC/x
+vPk6GPbfVthGY37Newm5zGuWzgcc0HkrexXNOmiclydpbwQsEXxzAUBeWhus5439
+s49imbTcGk1/dJ3ltVfa6UJr2TjKfeQBN43ktQT3O3fwjkmcRcAsBqrGJ3OeRP0j
+KY/WjQstcAw14/OsIM5HRRNCD8Z76g==
+=ppG2
+-----END PGP SIGNATURE-----
+
+--------------ecAb6Que8oWvZLd314m8sL3j--
