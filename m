@@ -2,129 +2,174 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B034AC433EF
-	for <linux-sparse@archiver.kernel.org>; Fri,  1 Jul 2022 13:41:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EAD9EC433EF
+	for <linux-sparse@archiver.kernel.org>; Fri,  1 Jul 2022 19:09:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230290AbiGANlM (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Fri, 1 Jul 2022 09:41:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35612 "EHLO
+        id S230406AbiGATJT (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Fri, 1 Jul 2022 15:09:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54492 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229964AbiGANlL (ORCPT
+        with ESMTP id S229664AbiGATJR (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 1 Jul 2022 09:41:11 -0400
-X-Greylist: delayed 557 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Fri, 01 Jul 2022 06:41:09 PDT
-Received: from algol.kleine-koenig.org (algol.kleine-koenig.org [162.55.41.232])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3F6D615829
-        for <linux-sparse@vger.kernel.org>; Fri,  1 Jul 2022 06:41:09 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-        by algol.kleine-koenig.org (Postfix) with ESMTP id 48BD44999B8;
-        Fri,  1 Jul 2022 15:31:50 +0200 (CEST)
-Received: from algol.kleine-koenig.org ([IPv6:::1])
-        by localhost (algol.kleine-koenig.org [IPv6:::1]) (amavisd-new, port 10024)
-        with ESMTP id 7k6TRpVWmYGB; Fri,  1 Jul 2022 15:31:49 +0200 (CEST)
-Received: from taurus.defre.kleine-koenig.org (unknown [IPv6:2a02:8071:b7c0:8100:725c:297:eb88:6c8f])
-        by algol.kleine-koenig.org (Postfix) with ESMTPSA;
-        Fri,  1 Jul 2022 15:31:49 +0200 (CEST)
-Message-ID: <e91d351c-3c16-e48d-7e9d-9f096c4acbc9@debian.org>
-Date:   Fri, 1 Jul 2022 15:31:45 +0200
+        Fri, 1 Jul 2022 15:09:17 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 400193BBC0
+        for <linux-sparse@vger.kernel.org>; Fri,  1 Jul 2022 12:09:16 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1656702555;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=0fTpQgJi583J8jUAwjwOMbnhXpGFLL7LTfUdXvC5nug=;
+        b=ejsG/ESM+zr4EneS9BXmyd82/z3vLpVD7KME9pjXLGGMWRAxSQd9yGUDivKoyYv0V7n3gU
+        8ZOIF+Eushy+hZPZjl3WUeufPHa47TReymHNUXeq1H9BNBDKmOsxR/U7VFiVJrRJ8/FVfH
+        cUoU/Rm+7M2Y4upBBoxkU3k4E1duM80=
+Received: from mail-qv1-f72.google.com (mail-qv1-f72.google.com
+ [209.85.219.72]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-135-yLH4ZUoeOvqWzi_rjqwwfw-1; Fri, 01 Jul 2022 15:09:12 -0400
+X-MC-Unique: yLH4ZUoeOvqWzi_rjqwwfw-1
+Received: by mail-qv1-f72.google.com with SMTP id j6-20020a05621419c600b004704e6665caso3104098qvc.6
+        for <linux-sparse@vger.kernel.org>; Fri, 01 Jul 2022 12:09:12 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=0fTpQgJi583J8jUAwjwOMbnhXpGFLL7LTfUdXvC5nug=;
+        b=Hil2CMHtg1ayokBkkSBJpixhC/St9p0yM2bnhQ1TdbAGy/dvwH+8mEUY2hNhpLkSvo
+         EwC5C6ysBS96uopW+HRMcXU8IHUT1Cgh6253Iewdu32kTOXvti8PkxvrDFGPBuKMtFlt
+         HT9+/hoI8EhzDSpbOXVP2eOnKKwYtZjKF61EPvuz25gkdMGyxOFUQhqH2c4tNLJ4Kq4Q
+         x7afytdHXKU2/+eaSmFdukmAVgEbxl8SR8JBszysCkrpV/ZBrQLxV9yZXwcRY9YoTXKP
+         BLMEK9ex5ZoS+KHnHJOM/cJ0KIQ/fOIT7UmqJYTw/RPArlYV5lCEX74uuMJtA+uiekuI
+         sd2w==
+X-Gm-Message-State: AJIora+ZofKpWX+nQJNf5CPNYK0bEVubQlhDJ+oCo6BAKrCEvucbxdds
+        h2Q62tVe7hYy5+prwLRGo8cNwOWEGldw7iQpNSdEzeVgKCXi0jQlLKO7SIkfpk3M2IOn3EpjGAC
+        sPRAIgz6wd/ebTxraN0/ALn7joIHlN+BQ5MCx3/fE
+X-Received: by 2002:ac8:4e8b:0:b0:31d:34c6:86a2 with SMTP id 11-20020ac84e8b000000b0031d34c686a2mr6376697qtp.526.1656702551835;
+        Fri, 01 Jul 2022 12:09:11 -0700 (PDT)
+X-Google-Smtp-Source: AGRyM1vmSaEwZdRV22oe7QtV5IzenWy25OI2oIP1ZZYcQg8tltXD2qNQp+JMu8VFupmj1poaUi8ytsw36XaCQrSfliI=
+X-Received: by 2002:ac8:4e8b:0:b0:31d:34c6:86a2 with SMTP id
+ 11-20020ac84e8b000000b0031d34c686a2mr6376668qtp.526.1656702551575; Fri, 01
+ Jul 2022 12:09:11 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.10.0
-Subject: Re: [PATCH] fix "unreplaced" warnings caused by using typeof() on
- inline functions
-Content-Language: en-US
-To:     Andy Shevchenko <andriy.shevchenko@intel.com>,
-        Luc Van Oostenryck <lucvoo@kernel.org>
-Cc:     linux-sparse@vger.kernel.org,
+References: <20220630135934.1799248-1-aahringo@redhat.com> <CAHk-=wjZfO9hGqJ2_hGQG3U_XzSh9_XaXze=HgPdvJbgrvASfA@mail.gmail.com>
+ <CAK-6q+jkNbotWK7cFsNGO+B+ApcdUd7+_4mdcF8=00YsDAATTA@mail.gmail.com>
+In-Reply-To: <CAK-6q+jkNbotWK7cFsNGO+B+ApcdUd7+_4mdcF8=00YsDAATTA@mail.gmail.com>
+From:   Alexander Aring <aahringo@redhat.com>
+Date:   Fri, 1 Jul 2022 15:09:00 -0400
+Message-ID: <CAK-6q+i67rNeioq+=MzLyCJ_fh7DvDVWOHA02oOasKocvkhXSw@mail.gmail.com>
+Subject: Re: [RFC 0/2] refcount: attempt to avoid imbalance warnings
+To:     Linus Torvalds <torvalds@linux-foundation.org>
+Cc:     Will Deacon <will@kernel.org>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Boqun Feng <boqun.feng@gmail.com>,
+        Mark Rutland <mark.rutland@arm.com>,
+        thunder.leizhen@huawei.com, jacob.e.keller@intel.com,
+        Andrew Morton <akpm@linux-foundation.org>,
+        Sparse Mailing-list <linux-sparse@vger.kernel.org>,
+        cluster-devel <cluster-devel@redhat.com>,
         Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
-        kernel test robot <lkp@intel.com>
-References: <20220624164601.99527-1-lucvoo@kernel.org>
- <Yr7kPM1wLZnOqxOA@smile.fi.intel.com>
-From:   =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <ukleinek@debian.org>
-In-Reply-To: <Yr7kPM1wLZnOqxOA@smile.fi.intel.com>
-Content-Type: multipart/signed; micalg=pgp-sha256;
- protocol="application/pgp-signature";
- boundary="------------ecAb6Que8oWvZLd314m8sL3j"
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Authentication-Results: relay.mimecast.com;
+        auth=pass smtp.auth=CUSA124A263 smtp.mailfrom=aahringo@redhat.com
+X-Mimecast-Spam-Score: 0
+X-Mimecast-Originator: redhat.com
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---------------ecAb6Que8oWvZLd314m8sL3j
-Content-Type: multipart/mixed; boundary="------------hxAW5scPIQ0CuKuoz0y59Ljw";
- protected-headers="v1"
-From: =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <ukleinek@debian.org>
-To: Andy Shevchenko <andriy.shevchenko@intel.com>,
- Luc Van Oostenryck <lucvoo@kernel.org>
-Cc: linux-sparse@vger.kernel.org,
- Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
- kernel test robot <lkp@intel.com>
-Message-ID: <e91d351c-3c16-e48d-7e9d-9f096c4acbc9@debian.org>
-Subject: Re: [PATCH] fix "unreplaced" warnings caused by using typeof() on
- inline functions
-References: <20220624164601.99527-1-lucvoo@kernel.org>
- <Yr7kPM1wLZnOqxOA@smile.fi.intel.com>
-In-Reply-To: <Yr7kPM1wLZnOqxOA@smile.fi.intel.com>
+Hi,
 
---------------hxAW5scPIQ0CuKuoz0y59Ljw
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: base64
+On Fri, Jul 1, 2022 at 8:07 AM Alexander Aring <aahringo@redhat.com> wrote:
+>
+> Hi,
+>
+> On Thu, Jun 30, 2022 at 12:34 PM Linus Torvalds
+> <torvalds@linux-foundation.org> wrote:
+> >
+> > On Thu, Jun 30, 2022 at 6:59 AM Alexander Aring <aahringo@redhat.com> wrote:
+> > >
+> > > I send this patch series as RFC because it was necessary to do a kref
+> > > change after adding __cond_lock() to refcount_dec_and_lock()
+> > > functionality.
+> >
+> > Can you try something like this instead?
+> >
+> > This is two separate patches - one for sparse, and one for the kernel.
+> >
+> > This is only *very* lightly tested (ie I tested it on a single kernel
+> > file that used refcount_dec_and_lock())
+> >
+>
+> yes that avoids the warnings for fs/dlm.c by calling unlock() when the
+> kref_put_lock() returns true.
+>
+> However there exists other users of kref_put_lock() which drops a
+> sparse warning now after those patches e.g.  net/sunrpc/svcauth.c.
+> I think I can explain why. It is that kref_put_lock() has a release
+> callback and it's _optional_ that this release callback calls the
+> unlock(). If the release callback calls unlock() then the user of
+> kref_put_lock() signals this with a releases() annotation of the
+> passed release callback.
+>
+> It seems that sparse is not detecting this annotation anymore when
+> it's passed as callback and the function pointer parameter declaration
+> of kref_put_lock() does not have such annotation. The annotation gets
+> "dropped" then.
+>
+> If I change the parameter order and add a annotation to the release
+> callback, like:
+>
+> __kref_put_lock(struct kref *kref, spinlock_t *lock,
+>                void (*release)(struct kref *kref) __releases(lock))
+> #define kref_put_lock(kref, release, lock) __kref_put_lock(kref, lock, release)
+>
+> the problem is gone but forces every user to release the lock in the
+> release callback which isn't required and also cuts the API because
+> the lock which you want to call unlock() on can be not part of your
+> container_of(kref) struct.
+>
+> Then I did a similar thing before which would solve it for every user
+> because there is simply no function pointer passed as parameter and
+> the annotation gets never "dropped":
+>
+> #define kref_put_lock(kref, release, lock) \
+> (refcount_dec_and_lock(&(kref)->refcount, lock) ? ({ release(kref); 1; }) : 0)
+>
+> Maybe a functionality of forwarding function annotation if passed as a
+> function pointer (function pointer declared without annotations) as in
+> e.g. kref_put_lock() can be added into sparse?
 
-T24gNy8xLzIyIDE0OjEwLCBBbmR5IFNoZXZjaGVua28gd3JvdGU6DQo+IE9uIEZyaSwgSnVu
-IDI0LCAyMDIyIGF0IDA2OjQ2OjAxUE0gKzAyMDAsIEx1YyBWYW4gT29zdGVucnljayB3cm90
-ZToNCj4+IEZyb206IEx1YyBWYW4gT29zdGVucnljayA8bHVjLnZhbm9vc3RlbnJ5Y2tAZ21h
-aWwuY29tPg0KPj4NCj4+IEN1cnJlbnRseSwgc3BhcnNlIGRvIGFsbCBpdHMgaW5saW5pbmcg
-YXQgdGhlIHRyZWUgbGV2ZWwsIGR1cmluZw0KPj4gY29uc3RhbnQgZXhwYW5zaW9uLiBUbyBu
-b3QgbWl4LXVwIHRoZSBldmFsdWF0aW9uIG9mIHRoZSBvcmlnaW5hbA0KPj4gZnVuY3Rpb24g
-Ym9keSBpbiBjYXNlIHRoZSBhZGRyZXNzIG9mIGFuIGlubGluZSBmdW5jdGlvbiBpcyB0YWtl
-biBvcg0KPj4gd2hlbiB0aGUgZnVuY3Rpb24gY2FuJ3Qgb3RoZXJ3aXNlIGJlIGlubGluZWQs
-IHRoZSBzdGF0ZW1lbnRzIGFuZA0KPj4gc3ltYm9scyBsaXN0cyBvZiBpbmxpbmUgZnVuY3Rp
-b25zIGFyZSBrZXB0IGluIHNlcGFyYXRlZCBmaWVsZHMuDQo+PiBUaGVuLCBpZiB0aGUgb3Jp
-Z2luYWwgYm9keSBtdXN0IGJlIGV2YWx1YXRlZCBpdCBtdXN0IGZpcnN0IGJlDQo+PiAndW5p
-bmxpbmVkJyB0byBoYXZlIGEgY29weSBpbiB0aGUgdXN1YWwgZmllbGRzLg0KPj4NCj4+IFRo
-aXMgbWFrZSBzZW5zZSB3aGVuIGRlYWxpbmcgd2l0aCB0aGUgZGVmaW5pdGlvbiBvZiB0aGUg
-ZnVuY3Rpb24uDQo+PiBCdXQsIHdoZW4gdXNpbmcgdHlwZW9mKCkgb24gZnVuY3Rpb25zLCB0
-aGUgcmVzdWx0aW5nIHR5cGUgZG9lc24ndA0KPj4gcmVmZXIgdG8gdGhpcyBkZWZpbml0aW9u
-LCBpdCdzIGp1c3QgYSBjb3B5IG9mIHRoZSB0eXBlIGFuZCBvbmx5DQo+PiBvZiB0aGUgdHlw
-ZS4gVGhlcmUgc2hvdWxkbid0IGJlIGFueSByZWFzb25zIHRvIHVuaW5saW5lIGFueXRoaW5n
-Lg0KPj4gSG93ZXZlciwgdGhlIGRpc3RpbmN0aW9uIGJldHdlZW4gJ2Z1bGwgZnVuY3Rpb24n
-IGFuZCAndHlwZSBvbmx5Jw0KPj4gaXMgbm90IG1hZGUgZHVyaW5nIGV2YWx1YXRpb24gYW5k
-IHRoZSB1bmlubGluaW5nIGF0dGVtcHQgcHJvZHVjZQ0KPj4gYSBsb3Qgb2YgIndhcm5pbmc6
-IHVucmVwbGFjZWQgc3ltYm9sICcuLi4nIiBiZWNhdXNlIG9mIHRoZSBsYWNrDQo+PiBvZiBh
-IGNvcnJlc3BvbmRpbmcgZGVmaW5pdGlvbi4NCj4+DQo+PiBGaXggdGhpcyBieSBub3QgZG9p
-bmcgdGhlIHVuaW5saW5pbmcgaWYgdGhlIHN5bWJvbCBsYWNrIGEgZGVmaW5pdGlvbi4NCj4+
-DQo+PiBOb3RlOiBJdCB3b3VsZCBtYXliZSBiZSBtb3JlIGFwcHJvcHJpYXRlIGZvciBFWFBS
-X1RZUEUgdG8gdXNlDQo+PiAgICAgICAgYSBzdHJpcHBlZC1vd24gdmVyc2lvbiBvZiBldmFs
-dWF0ZV9zeW1ib2woKSBkb2luZyBvbmx5IHRoZQ0KPj4gICAgICAgIGV4YW1pbmF0aW9uIG9m
-IHRoZSByZXR1cm4gYW5kIGFyZ3VtZW50IHR5cGVzLCBieXBhc3NpbmcgdGhlDQo+PiAgICAg
-ICAgYXR0ZW1wdCB0byB1bmlubGluZSB0aGUgYm9keSBhbmQgZXZhbHVhdGUgdGhlIGluaXRp
-YWxpemVyIGFuZA0KPj4gICAgICAgIHRoZSBzdGF0ZW1lbnRzIHNpbmNlIHRoZXJlIGlzIG5v
-bmUgb2YgdGhvc2UgZm9yIGFuIEVYUFJfVFlQRS4NCj4gDQo+IFV3ZSwgY2FuIHdlIGdldCBh
-IERlYmlhbiBwYWNrYWdlIHdpdGggdGhpcyBmaXgsIGl0J3MgcmVhbGx5IGEgdG9ucyBvZiBz
-dWNoDQo+IG1lc3NhZ2VzIHdoZW4gY29tcGlsZSBrZXJuZWwgd2l0aCBDPTE/DQoNCkx1Yywg
-ZG8geW91IGNvbnNpZGVyIGl0IHNlbnNpYmxlIHRvIGNyZWF0ZSBhIDAuNi40IHZhcmlhbnQg
-b2Ygc3BhcnNlIA0KdGhhdCBpbmNsdWRlcyB0aGlzIGZpeD8gQXJlIHRoZXJlIGFueSBtb3Jl
-IHBhdGNoZXMgdGhhdCB5b3UnZCBkZWVtIA0Kc2Vuc2libGUgdG8gaW5sdWNkZT8gRG9lcyB0
-aGF0IG1lYW4gaXQncyB0aW1lIGZvciBhIDAuNi41IHJlbGVhc2U/DQoNCkJlc3QgcmVnYXJk
-cw0KVXdlDQo=
+I think the explanation above is not quite right. I am questioning
+myself now why it was working before... and I guess the answer is that
+it was working for kref_put_lock() with the callback __releases()
+handling. It has somehow now an additional acquire() because the
+__cond_acquires() change.
 
---------------hxAW5scPIQ0CuKuoz0y59Ljw--
+Before the patch:
 
---------------ecAb6Que8oWvZLd314m8sL3j
-Content-Type: application/pgp-signature; name="OpenPGP_signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="OpenPGP_signature"
+no warnings:
 
------BEGIN PGP SIGNATURE-----
+void foo_release(struct kref *kref)
+__releases(&foo_lock)
+{
+        ...
+        unlock(foo_lock);
+}
 
-iQEzBAEBCgAdFiEEfnIqFpAYrP8+dKQLwfwUeK3K7AkFAmK+90IACgkQwfwUeK3K
-7Al/6gf/RC9n3O0mGytyiZaSrWtKl+4VIMXxT9ipNyrAcHxGS1mcSSGteBZKuroy
-OVFh48+1d3caf3BNPGVIGSfOPnof+ud+EyV8D6uv1qWK6tSlJeNn+f65ZXJYjank
-ieJA5B2XRoXF/uQGGtooIcdXVCvMPSleRE2Yhp4Scce+rOvx8g9JH2b946h5XC/x
-vPk6GPbfVthGY37Newm5zGuWzgcc0HkrexXNOmiclydpbwQsEXxzAUBeWhus5439
-s49imbTcGk1/dJ3ltVfa6UJr2TjKfeQBN43ktQT3O3fwjkmcRcAsBqrGJ3OeRP0j
-KY/WjQstcAw14/OsIM5HRRNCD8Z76g==
-=ppG2
------END PGP SIGNATURE-----
+...
+kref_put_lock(&foo->kref, foo_release, &foo_lock);
 
---------------ecAb6Que8oWvZLd314m8sL3j--
+shows context imbalance warnings:
+
+void foo_release(struct kref *kref) { }
+
+if (kref_put_lock(&foo->kref, foo_release, &foo_lock))
+        unlock(foo_lock);
+
+After the patch it's vice versa of showing warnings or not about
+context imbalances.
+
+- Alex
+
