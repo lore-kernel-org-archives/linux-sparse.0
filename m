@@ -2,174 +2,88 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EAD9EC433EF
-	for <linux-sparse@archiver.kernel.org>; Fri,  1 Jul 2022 19:09:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F3CD3C433EF
+	for <linux-sparse@archiver.kernel.org>; Tue,  5 Jul 2022 23:09:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230406AbiGATJT (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Fri, 1 Jul 2022 15:09:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54492 "EHLO
+        id S232222AbiGEXJF (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Tue, 5 Jul 2022 19:09:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60138 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229664AbiGATJR (ORCPT
+        with ESMTP id S231600AbiGEXJC (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 1 Jul 2022 15:09:17 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 400193BBC0
-        for <linux-sparse@vger.kernel.org>; Fri,  1 Jul 2022 12:09:16 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1656702555;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=0fTpQgJi583J8jUAwjwOMbnhXpGFLL7LTfUdXvC5nug=;
-        b=ejsG/ESM+zr4EneS9BXmyd82/z3vLpVD7KME9pjXLGGMWRAxSQd9yGUDivKoyYv0V7n3gU
-        8ZOIF+Eushy+hZPZjl3WUeufPHa47TReymHNUXeq1H9BNBDKmOsxR/U7VFiVJrRJ8/FVfH
-        cUoU/Rm+7M2Y4upBBoxkU3k4E1duM80=
-Received: from mail-qv1-f72.google.com (mail-qv1-f72.google.com
- [209.85.219.72]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-135-yLH4ZUoeOvqWzi_rjqwwfw-1; Fri, 01 Jul 2022 15:09:12 -0400
-X-MC-Unique: yLH4ZUoeOvqWzi_rjqwwfw-1
-Received: by mail-qv1-f72.google.com with SMTP id j6-20020a05621419c600b004704e6665caso3104098qvc.6
-        for <linux-sparse@vger.kernel.org>; Fri, 01 Jul 2022 12:09:12 -0700 (PDT)
+        Tue, 5 Jul 2022 19:09:02 -0400
+Received: from mail-pg1-x52e.google.com (mail-pg1-x52e.google.com [IPv6:2607:f8b0:4864:20::52e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 90150140BB
+        for <linux-sparse@vger.kernel.org>; Tue,  5 Jul 2022 16:09:01 -0700 (PDT)
+Received: by mail-pg1-x52e.google.com with SMTP id o18so11458539pgu.9
+        for <linux-sparse@vger.kernel.org>; Tue, 05 Jul 2022 16:09:01 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=rivosinc-com.20210112.gappssmtp.com; s=20210112;
+        h=date:subject:in-reply-to:cc:from:to:message-id:mime-version
+         :content-transfer-encoding;
+        bh=z8EKfgRX0wThVoewP5wZ3r1yeN0h/8IMac2/h3YDe7I=;
+        b=BK8FYUugTCWAPVoY2qcCxvo1PCPnf5zl6hjLvKmhg+LKpoNRDnQEndHZLEYRll0zk3
+         8FL0J0rgAkwpOjwIYjSb40V2nKDdipnzi3YMb3rG1UJsltyWDElPNfESAUBXuMY40VSV
+         o3K6zIhZRY062fYakbVti4zmlBPCCU6+aNVUQqwkgq7RugpXGgtEWBKodCUgr37tOgC7
+         pDjKVjpck+Fdaj3qKrzrNmBz5g9rgxHqKfLBTmLvQTsEWJiZqc/mq1uJnV0rTvWBs152
+         ar5AR8G+dduxlYGnzVqbQ9NEXybqKzt/XyBzmmYFHjwO1zT+nOSezNkbPTvMg3gmvBkg
+         KkvQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=0fTpQgJi583J8jUAwjwOMbnhXpGFLL7LTfUdXvC5nug=;
-        b=Hil2CMHtg1ayokBkkSBJpixhC/St9p0yM2bnhQ1TdbAGy/dvwH+8mEUY2hNhpLkSvo
-         EwC5C6ysBS96uopW+HRMcXU8IHUT1Cgh6253Iewdu32kTOXvti8PkxvrDFGPBuKMtFlt
-         HT9+/hoI8EhzDSpbOXVP2eOnKKwYtZjKF61EPvuz25gkdMGyxOFUQhqH2c4tNLJ4Kq4Q
-         x7afytdHXKU2/+eaSmFdukmAVgEbxl8SR8JBszysCkrpV/ZBrQLxV9yZXwcRY9YoTXKP
-         BLMEK9ex5ZoS+KHnHJOM/cJ0KIQ/fOIT7UmqJYTw/RPArlYV5lCEX74uuMJtA+uiekuI
-         sd2w==
-X-Gm-Message-State: AJIora+ZofKpWX+nQJNf5CPNYK0bEVubQlhDJ+oCo6BAKrCEvucbxdds
-        h2Q62tVe7hYy5+prwLRGo8cNwOWEGldw7iQpNSdEzeVgKCXi0jQlLKO7SIkfpk3M2IOn3EpjGAC
-        sPRAIgz6wd/ebTxraN0/ALn7joIHlN+BQ5MCx3/fE
-X-Received: by 2002:ac8:4e8b:0:b0:31d:34c6:86a2 with SMTP id 11-20020ac84e8b000000b0031d34c686a2mr6376697qtp.526.1656702551835;
-        Fri, 01 Jul 2022 12:09:11 -0700 (PDT)
-X-Google-Smtp-Source: AGRyM1vmSaEwZdRV22oe7QtV5IzenWy25OI2oIP1ZZYcQg8tltXD2qNQp+JMu8VFupmj1poaUi8ytsw36XaCQrSfliI=
-X-Received: by 2002:ac8:4e8b:0:b0:31d:34c6:86a2 with SMTP id
- 11-20020ac84e8b000000b0031d34c686a2mr6376668qtp.526.1656702551575; Fri, 01
- Jul 2022 12:09:11 -0700 (PDT)
-MIME-Version: 1.0
-References: <20220630135934.1799248-1-aahringo@redhat.com> <CAHk-=wjZfO9hGqJ2_hGQG3U_XzSh9_XaXze=HgPdvJbgrvASfA@mail.gmail.com>
- <CAK-6q+jkNbotWK7cFsNGO+B+ApcdUd7+_4mdcF8=00YsDAATTA@mail.gmail.com>
-In-Reply-To: <CAK-6q+jkNbotWK7cFsNGO+B+ApcdUd7+_4mdcF8=00YsDAATTA@mail.gmail.com>
-From:   Alexander Aring <aahringo@redhat.com>
-Date:   Fri, 1 Jul 2022 15:09:00 -0400
-Message-ID: <CAK-6q+i67rNeioq+=MzLyCJ_fh7DvDVWOHA02oOasKocvkhXSw@mail.gmail.com>
-Subject: Re: [RFC 0/2] refcount: attempt to avoid imbalance warnings
-To:     Linus Torvalds <torvalds@linux-foundation.org>
-Cc:     Will Deacon <will@kernel.org>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Boqun Feng <boqun.feng@gmail.com>,
-        Mark Rutland <mark.rutland@arm.com>,
-        thunder.leizhen@huawei.com, jacob.e.keller@intel.com,
-        Andrew Morton <akpm@linux-foundation.org>,
-        Sparse Mailing-list <linux-sparse@vger.kernel.org>,
-        cluster-devel <cluster-devel@redhat.com>,
-        Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Authentication-Results: relay.mimecast.com;
-        auth=pass smtp.auth=CUSA124A263 smtp.mailfrom=aahringo@redhat.com
-X-Mimecast-Spam-Score: 0
-X-Mimecast-Originator: redhat.com
-Content-Type: text/plain; charset="UTF-8"
+        h=x-gm-message-state:date:subject:in-reply-to:cc:from:to:message-id
+         :mime-version:content-transfer-encoding;
+        bh=z8EKfgRX0wThVoewP5wZ3r1yeN0h/8IMac2/h3YDe7I=;
+        b=V47jW3BPLT60P1YqxzJqE6glFf47NqHgREyGsuZ7nW/biHCZQnSsq14U8WLfCZN+Pn
+         260Mkk1BRiNq0CHrOM1pm4m+Lukz0bd+9eATeXoyAQJ7vaWUQAd4FfwJWWZG5T595fYR
+         CbfgKYqR85vpzLJYF6oek5Mbsn4xAjGFRB8Q6m7kCuqORAtzV/xI+4iW4rmfcCmgqYGY
+         AXK0TGzKXwUe78yi8Cpb6Yo6GKVsB+RYh9ivWlp5nCeOU6j/c8FGIO2dkm3AvJZnNRod
+         xgq1yAKOea8ZW/KQswZ87JfVN/dLmlfJ18qN9DTFPDh+vz5jP6zxEJFVC5rim1ZyKRM3
+         xeFA==
+X-Gm-Message-State: AJIora8R2GUg1YsqaX8vp5ZIEmiZ03zAIMIa4EJqzZZoKjfWUidYsY0t
+        Ys10krPKl9+MWJXUpBojRIa7cVEnrwMiNg==
+X-Google-Smtp-Source: AGRyM1uaXORTwb0ZRybtB59eAa2VAOw3qiqMgTloECFVIf7k0bbcwET7ZNLv2JIxwd1D/fVc/EuK7g==
+X-Received: by 2002:a63:9b0a:0:b0:406:8c31:47e6 with SMTP id r10-20020a639b0a000000b004068c3147e6mr31114432pgd.329.1657062540886;
+        Tue, 05 Jul 2022 16:09:00 -0700 (PDT)
+Received: from localhost (76-210-143-223.lightspeed.sntcca.sbcglobal.net. [76.210.143.223])
+        by smtp.gmail.com with ESMTPSA id u16-20020a170902e5d000b0016bd16f8acbsm7968883plf.114.2022.07.05.16.08.59
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 05 Jul 2022 16:09:00 -0700 (PDT)
+Date:   Tue, 05 Jul 2022 16:09:00 -0700 (PDT)
+X-Google-Original-Date: Tue, 05 Jul 2022 16:08:58 PDT (-0700)
+Subject:     Re: [PATCH v1 0/6] RISC-V -march handling improvements
+In-Reply-To: <20220521212325.lw6fdzsmlwvioggv@mail>
+CC:     linux-sparse@vger.kernel.org, Kito Cheng <kito.cheng@gmail.com>,
+        linux-riscv@lists.infradead.org, mkl@pengutronix.de,
+        aurelien@aurel32.net,
+        Linus Torvalds <torvalds@linux-foundation.org>
+From:   Palmer Dabbelt <palmer@rivosinc.com>
+To:     luc.vanoostenryck@gmail.com
+Message-ID: <mhng-6db3942c-ae4a-497e-bda1-01e7e2661595@palmer-mbp2014>
+Mime-Version: 1.0 (MHng)
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Hi,
-
-On Fri, Jul 1, 2022 at 8:07 AM Alexander Aring <aahringo@redhat.com> wrote:
+On Sat, 21 May 2022 14:23:25 PDT (-0700), luc.vanoostenryck@gmail.com wrote:
+> On Fri, Apr 01, 2022 at 10:00:35PM -0700, Palmer Dabbelt wrote:
 >
 > Hi,
 >
-> On Thu, Jun 30, 2022 at 12:34 PM Linus Torvalds
-> <torvalds@linux-foundation.org> wrote:
-> >
-> > On Thu, Jun 30, 2022 at 6:59 AM Alexander Aring <aahringo@redhat.com> wrote:
-> > >
-> > > I send this patch series as RFC because it was necessary to do a kref
-> > > change after adding __cond_lock() to refcount_dec_and_lock()
-> > > functionality.
-> >
-> > Can you try something like this instead?
-> >
-> > This is two separate patches - one for sparse, and one for the kernel.
-> >
-> > This is only *very* lightly tested (ie I tested it on a single kernel
-> > file that used refcount_dec_and_lock())
-> >
->
-> yes that avoids the warnings for fs/dlm.c by calling unlock() when the
-> kref_put_lock() returns true.
->
-> However there exists other users of kref_put_lock() which drops a
-> sparse warning now after those patches e.g.  net/sunrpc/svcauth.c.
-> I think I can explain why. It is that kref_put_lock() has a release
-> callback and it's _optional_ that this release callback calls the
-> unlock(). If the release callback calls unlock() then the user of
-> kref_put_lock() signals this with a releases() annotation of the
-> passed release callback.
->
-> It seems that sparse is not detecting this annotation anymore when
-> it's passed as callback and the function pointer parameter declaration
-> of kref_put_lock() does not have such annotation. The annotation gets
-> "dropped" then.
->
-> If I change the parameter order and add a annotation to the release
-> callback, like:
->
-> __kref_put_lock(struct kref *kref, spinlock_t *lock,
->                void (*release)(struct kref *kref) __releases(lock))
-> #define kref_put_lock(kref, release, lock) __kref_put_lock(kref, lock, release)
->
-> the problem is gone but forces every user to release the lock in the
-> release callback which isn't required and also cuts the API because
-> the lock which you want to call unlock() on can be not part of your
-> container_of(kref) struct.
->
-> Then I did a similar thing before which would solve it for every user
-> because there is simply no function pointer passed as parameter and
-> the annotation gets never "dropped":
->
-> #define kref_put_lock(kref, release, lock) \
-> (refcount_dec_and_lock(&(kref)->refcount, lock) ? ({ release(kref); 1; }) : 0)
->
-> Maybe a functionality of forwarding function annotation if passed as a
-> function pointer (function pointer declared without annotations) as in
-> e.g. kref_put_lock() can be added into sparse?
+> Thank you for these patches and please accept my apologies
+> for this much delayed reply.
 
-I think the explanation above is not quite right. I am questioning
-myself now why it was working before... and I guess the answer is that
-it was working for kref_put_lock() with the callback __releases()
-handling. It has somehow now an additional acquire() because the
-__cond_acquires() change.
+No worries, looks like we're about equally slow ;)
 
-Before the patch:
+> I've just pushed the Zicsr and Zifencei patches since these solve
+> an immediate problem and I've some minor questions/objections for
+> the other ones.
 
-no warnings:
+From looking at sparse/master, it looks like a lot of those comments got 
+resolved and merged.  That all looks good to me, I pointed my local 
+sparse over to ce1a6720 ("Merge branches 'unreplaced' and 'inline'") and 
+will be using that (via `make ... C=1 CF="-Wno-sparse-error"`) in my 
+pre-merge testing until something changes.
 
-void foo_release(struct kref *kref)
-__releases(&foo_lock)
-{
-        ...
-        unlock(foo_lock);
-}
-
-...
-kref_put_lock(&foo->kref, foo_release, &foo_lock);
-
-shows context imbalance warnings:
-
-void foo_release(struct kref *kref) { }
-
-if (kref_put_lock(&foo->kref, foo_release, &foo_lock))
-        unlock(foo_lock);
-
-After the patch it's vice versa of showing warnings or not about
-context imbalances.
-
-- Alex
-
+Thanks!
