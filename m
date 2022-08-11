@@ -2,88 +2,103 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F3CD3C433EF
-	for <linux-sparse@archiver.kernel.org>; Tue,  5 Jul 2022 23:09:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 39223C00140
+	for <linux-sparse@archiver.kernel.org>; Thu, 11 Aug 2022 03:33:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232222AbiGEXJF (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Tue, 5 Jul 2022 19:09:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60138 "EHLO
+        id S233810AbiHKDdL (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Wed, 10 Aug 2022 23:33:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48080 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231600AbiGEXJC (ORCPT
+        with ESMTP id S229924AbiHKDdK (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 5 Jul 2022 19:09:02 -0400
-Received: from mail-pg1-x52e.google.com (mail-pg1-x52e.google.com [IPv6:2607:f8b0:4864:20::52e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 90150140BB
-        for <linux-sparse@vger.kernel.org>; Tue,  5 Jul 2022 16:09:01 -0700 (PDT)
-Received: by mail-pg1-x52e.google.com with SMTP id o18so11458539pgu.9
-        for <linux-sparse@vger.kernel.org>; Tue, 05 Jul 2022 16:09:01 -0700 (PDT)
+        Wed, 10 Aug 2022 23:33:10 -0400
+Received: from mail-pl1-x631.google.com (mail-pl1-x631.google.com [IPv6:2607:f8b0:4864:20::631])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CA51748EB1
+        for <linux-sparse@vger.kernel.org>; Wed, 10 Aug 2022 20:33:09 -0700 (PDT)
+Received: by mail-pl1-x631.google.com with SMTP id x23so15932958pll.7
+        for <linux-sparse@vger.kernel.org>; Wed, 10 Aug 2022 20:33:09 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=rivosinc-com.20210112.gappssmtp.com; s=20210112;
-        h=date:subject:in-reply-to:cc:from:to:message-id:mime-version
-         :content-transfer-encoding;
-        bh=z8EKfgRX0wThVoewP5wZ3r1yeN0h/8IMac2/h3YDe7I=;
-        b=BK8FYUugTCWAPVoY2qcCxvo1PCPnf5zl6hjLvKmhg+LKpoNRDnQEndHZLEYRll0zk3
-         8FL0J0rgAkwpOjwIYjSb40V2nKDdipnzi3YMb3rG1UJsltyWDElPNfESAUBXuMY40VSV
-         o3K6zIhZRY062fYakbVti4zmlBPCCU6+aNVUQqwkgq7RugpXGgtEWBKodCUgr37tOgC7
-         pDjKVjpck+Fdaj3qKrzrNmBz5g9rgxHqKfLBTmLvQTsEWJiZqc/mq1uJnV0rTvWBs152
-         ar5AR8G+dduxlYGnzVqbQ9NEXybqKzt/XyBzmmYFHjwO1zT+nOSezNkbPTvMg3gmvBkg
-         KkvQ==
+        h=to:from:cc:content-transfer-encoding:mime-version:message-id:date
+         :subject:from:to:cc;
+        bh=auiLol2oSfZpMSxSGpxC7SJSMQbADVIHVYu6+RIdKBE=;
+        b=e8zjgsgG20pHcpBrBuiTUAmRQ1aCKJvzjnUTHWGN4Gkk+t6qQn+dQjV3amAkuFnkLV
+         JL2VSiomC2yM94imlAGt7TYVAOYYknrd7lZtq5/SHDyRDRNVjoF8DtaHnWxo2+cdrAj6
+         3UIIOarQVQ2rKvNuoXy+cg9p/HHtgREgL57xqq4MNfQPg1du1jiMwQe29fluLq1tXhwR
+         idq6rU/CnddWyErwNjAHg7LLhtH9hYryOsB/h6WjOw89LPajrqIs2xWSDvSyX9ci3kXT
+         r1GIGUzwsFKPkoEeY7e/ckMehJizBm0K78KpQg+UsQ519fE1JEfWGugcMo2VX/dFzIhz
+         g/xQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:subject:in-reply-to:cc:from:to:message-id
-         :mime-version:content-transfer-encoding;
-        bh=z8EKfgRX0wThVoewP5wZ3r1yeN0h/8IMac2/h3YDe7I=;
-        b=V47jW3BPLT60P1YqxzJqE6glFf47NqHgREyGsuZ7nW/biHCZQnSsq14U8WLfCZN+Pn
-         260Mkk1BRiNq0CHrOM1pm4m+Lukz0bd+9eATeXoyAQJ7vaWUQAd4FfwJWWZG5T595fYR
-         CbfgKYqR85vpzLJYF6oek5Mbsn4xAjGFRB8Q6m7kCuqORAtzV/xI+4iW4rmfcCmgqYGY
-         AXK0TGzKXwUe78yi8Cpb6Yo6GKVsB+RYh9ivWlp5nCeOU6j/c8FGIO2dkm3AvJZnNRod
-         xgq1yAKOea8ZW/KQswZ87JfVN/dLmlfJ18qN9DTFPDh+vz5jP6zxEJFVC5rim1ZyKRM3
-         xeFA==
-X-Gm-Message-State: AJIora8R2GUg1YsqaX8vp5ZIEmiZ03zAIMIa4EJqzZZoKjfWUidYsY0t
-        Ys10krPKl9+MWJXUpBojRIa7cVEnrwMiNg==
-X-Google-Smtp-Source: AGRyM1uaXORTwb0ZRybtB59eAa2VAOw3qiqMgTloECFVIf7k0bbcwET7ZNLv2JIxwd1D/fVc/EuK7g==
-X-Received: by 2002:a63:9b0a:0:b0:406:8c31:47e6 with SMTP id r10-20020a639b0a000000b004068c3147e6mr31114432pgd.329.1657062540886;
-        Tue, 05 Jul 2022 16:09:00 -0700 (PDT)
+        h=to:from:cc:content-transfer-encoding:mime-version:message-id:date
+         :subject:x-gm-message-state:from:to:cc;
+        bh=auiLol2oSfZpMSxSGpxC7SJSMQbADVIHVYu6+RIdKBE=;
+        b=SvVYlFM4JzzOdgoJKZRmzKH1qycFUtMX5buHZFB9mszOP0BqUSHQwR7HYSiA7+et83
+         ZWirdlTZxVzlRViY5n0KJDraTWej8GOKLFkmvpp+2aFD6Exx7C04F9XLUnzT9n+o56AF
+         w625txC/hfKBw/FHdG00w+kxN932o/dVCz5DIyLT4Oj6n9VI6PUi3iSmYtNELr6oZvkJ
+         am5GGUjB4MQCcukijBPLR9ibq5hoZhfSyuLVkoC85Bs25NpgGOomNlKzG+OLQzi3Vxb5
+         dCQMjMqC2UEv/XqRYxTLWbEmMHPnDTdTMOsZMOaiV715sm7fYPVdHJDwYfqADWgtnRAz
+         C9mg==
+X-Gm-Message-State: ACgBeo2pGs5kXTlLjUwBh2sLW6GS70HOvR5oMTg2GvyMs7FLtkNTGapP
+        v9JrBV8SIQ1xAC4CfgcbP2pCKICphxjj+A==
+X-Google-Smtp-Source: AA6agR6qhv0ac6gweHRqtjJ/VsiIRtv30UTCY+97TVOO3rOFdnln4laWNqq3sdf/d7wCRuUBFO5Neg==
+X-Received: by 2002:a17:903:32c9:b0:171:2846:eef8 with SMTP id i9-20020a17090332c900b001712846eef8mr9586895plr.117.1660188789094;
+        Wed, 10 Aug 2022 20:33:09 -0700 (PDT)
 Received: from localhost (76-210-143-223.lightspeed.sntcca.sbcglobal.net. [76.210.143.223])
-        by smtp.gmail.com with ESMTPSA id u16-20020a170902e5d000b0016bd16f8acbsm7968883plf.114.2022.07.05.16.08.59
+        by smtp.gmail.com with ESMTPSA id iw18-20020a170903045200b0016d6d1b610fsm13690876plb.98.2022.08.10.20.33.08
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 05 Jul 2022 16:09:00 -0700 (PDT)
-Date:   Tue, 05 Jul 2022 16:09:00 -0700 (PDT)
-X-Google-Original-Date: Tue, 05 Jul 2022 16:08:58 PDT (-0700)
-Subject:     Re: [PATCH v1 0/6] RISC-V -march handling improvements
-In-Reply-To: <20220521212325.lw6fdzsmlwvioggv@mail>
-CC:     linux-sparse@vger.kernel.org, Kito Cheng <kito.cheng@gmail.com>,
-        linux-riscv@lists.infradead.org, mkl@pengutronix.de,
-        aurelien@aurel32.net,
-        Linus Torvalds <torvalds@linux-foundation.org>
-From:   Palmer Dabbelt <palmer@rivosinc.com>
-To:     luc.vanoostenryck@gmail.com
-Message-ID: <mhng-6db3942c-ae4a-497e-bda1-01e7e2661595@palmer-mbp2014>
-Mime-Version: 1.0 (MHng)
-Content-Type: text/plain; charset=utf-8; format=flowed
+        Wed, 10 Aug 2022 20:33:08 -0700 (PDT)
+Subject: [PATCH] RISC-V: Add support for the zicbom extension
+Date:   Wed, 10 Aug 2022 20:31:38 -0700
+Message-Id: <20220811033138.20676-1-palmer@rivosinc.com>
+X-Mailer: git-send-email 2.34.1
+MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+Cc:     Palmer Dabbelt <palmer@rivosinc.com>
+From:   Palmer Dabbelt <palmer@rivosinc.com>
+To:     luc.vanoostenryck@gmail.com, linux-sparse@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Sat, 21 May 2022 14:23:25 PDT (-0700), luc.vanoostenryck@gmail.com wrote:
-> On Fri, Apr 01, 2022 at 10:00:35PM -0700, Palmer Dabbelt wrote:
->
-> Hi,
->
-> Thank you for these patches and please accept my apologies
-> for this much delayed reply.
+This was recently added to binutils and with any luck will soon be in
+Linux, without it sparse will fail when trying to build new kernels on
+systems with new toolchains.
 
-No worries, looks like we're about equally slow ;)
+Signed-off-by: Palmer Dabbelt <palmer@rivosinc.com>
+---
+ target-riscv.c | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-> I've just pushed the Zicsr and Zifencei patches since these solve
-> an immediate problem and I've some minor questions/objections for
-> the other ones.
+diff --git a/target-riscv.c b/target-riscv.c
+index 217ab7e8..db0f7e57 100644
+--- a/target-riscv.c
++++ b/target-riscv.c
+@@ -19,6 +19,7 @@
+ #define RISCV_GENERIC	(RISCV_MUL|RISCV_DIV|RISCV_ATOMIC|RISCV_FPU)
+ #define RISCV_ZICSR	(1 << 10)
+ #define RISCV_ZIFENCEI	(1 << 11)
++#define RISCV_ZICBOM	(1 << 12)
+ 
+ static unsigned int riscv_flags;
+ 
+@@ -41,6 +42,7 @@ static void parse_march_riscv(const char *arg)
+ 		{ "c",		RISCV_COMP },
+ 		{ "_zicsr",	RISCV_ZICSR },
+ 		{ "_zifencei",	RISCV_ZIFENCEI },
++		{ "_zicbom",	RISCV_ZICBOM },
+ 	};
+ 	int i;
+ 
+@@ -131,6 +133,8 @@ static void predefine_riscv(const struct target *self)
+ 		predefine("__riscv_zicsr", 1, "1");
+ 	if (riscv_flags & RISCV_ZIFENCEI)
+ 		predefine("__riscv_zifencei", 1, "1");
++	if (riscv_flags & RISCV_ZICBOM)
++		predefine("__riscv_zicbom", 1, "1");
+ 
+ 	if (cmodel)
+ 		predefine_strong("__riscv_cmodel_%s", cmodel);
+-- 
+2.34.1
 
-From looking at sparse/master, it looks like a lot of those comments got 
-resolved and merged.  That all looks good to me, I pointed my local 
-sparse over to ce1a6720 ("Merge branches 'unreplaced' and 'inline'") and 
-will be using that (via `make ... C=1 CF="-Wno-sparse-error"`) in my 
-pre-merge testing until something changes.
-
-Thanks!
