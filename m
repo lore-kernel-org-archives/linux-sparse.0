@@ -2,55 +2,55 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7F37CC19F2D
-	for <linux-sparse@archiver.kernel.org>; Thu, 11 Aug 2022 05:34:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CDE58C25B0C
+	for <linux-sparse@archiver.kernel.org>; Thu, 11 Aug 2022 05:34:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233695AbiHKFeN (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Thu, 11 Aug 2022 01:34:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52506 "EHLO
+        id S233601AbiHKFeO (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Thu, 11 Aug 2022 01:34:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52514 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233601AbiHKFeM (ORCPT
+        with ESMTP id S233820AbiHKFeN (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 11 Aug 2022 01:34:12 -0400
-Received: from mail-pf1-x434.google.com (mail-pf1-x434.google.com [IPv6:2607:f8b0:4864:20::434])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D38F389CE1
-        for <linux-sparse@vger.kernel.org>; Wed, 10 Aug 2022 22:34:11 -0700 (PDT)
-Received: by mail-pf1-x434.google.com with SMTP id f28so15633019pfk.1
-        for <linux-sparse@vger.kernel.org>; Wed, 10 Aug 2022 22:34:11 -0700 (PDT)
+        Thu, 11 Aug 2022 01:34:13 -0400
+Received: from mail-pf1-x42d.google.com (mail-pf1-x42d.google.com [IPv6:2607:f8b0:4864:20::42d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0B9E289CF4
+        for <linux-sparse@vger.kernel.org>; Wed, 10 Aug 2022 22:34:13 -0700 (PDT)
+Received: by mail-pf1-x42d.google.com with SMTP id z187so15591247pfb.12
+        for <linux-sparse@vger.kernel.org>; Wed, 10 Aug 2022 22:34:13 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=rivosinc-com.20210112.gappssmtp.com; s=20210112;
         h=to:from:cc:content-transfer-encoding:mime-version:message-id:date
          :subject:from:to:cc;
         bh=poL32i9FN8BXa/T55NDTTeBSufDN57FtVvyoUXTIZXY=;
-        b=SzQAomMSDEIhrkI6KoKaqeCRnWrinhQtAzbMhBnsWo1q6z/RkC6Qg7+DLU1UiYUT4x
-         lceFwxgEc1VnIUoko3Ug7BhbtSDtT1KMtq++mP3AfB0rPh73NWzRUMbJ7W6pY0eqPe/m
-         D3jj6JUcOhk/oGonpMvZqxR4M3+nmoVDw9PNWJfve0FbFxNj4YgNji9YaMVkdMalyRLr
-         011tEOGwcIzSeZa6eif537fA3GNk1Pj45GaVQqgjjJoEJ41fWIjgPAH89pgqqFwwgI1o
-         zfyZR2/h4ytb2M2QE6fHi95NWmN/l8BtNvv6H2ZMerdSPCymyaColJ0VcECoVlAfVkn8
-         KNjQ==
+        b=jR2/6ctcNyoYEFcwVG66P1uVyxuP/qccFErns3cVN5tz4frOAp6gUyw3gtOJ10Er0g
+         z/p+m9fvYrNLhLX2JGmg80bCJ/9b8F1Ys1Ndif+KdbbKs/J9J6efF0QDuvn9nww9J/+c
+         N7+r6CZLsJojFtQas+QNVZXFxPAgdiVpAAhlk2CSMy9f57m+HxEFbH7KCqK+PG/Go/1k
+         SZgR8oVTQvGR0WEUFAge1/Y4rRkbshccgNm17U/4Y9rxS6630io7gXM7YafBm65lbsn+
+         xGcf1BG7Q6ZHELrPOZjWBPtjJr/KqpzeRUMVFuS/PywHCwK/LKR8jeiGVc5VotjAa32L
+         u1jQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=to:from:cc:content-transfer-encoding:mime-version:message-id:date
          :subject:x-gm-message-state:from:to:cc;
         bh=poL32i9FN8BXa/T55NDTTeBSufDN57FtVvyoUXTIZXY=;
-        b=X1aTdtLLR9rjFhmQM4vGv2zriMJg+7hvEGjcoG0+H5dV/veEa+TGaw/jiACqaFhN20
-         cne/VCmBZRxLn0XZFISGKGpOHRe2d60Li5FltdIhNAGcehS0YIoLN87qHV7K8YjQ2fsM
-         0UADmFggvF69HYtrddIgpHsP8t0/CbqpJaT09KKpQVjhezQ0AmEXxVkq0Ux52ZypLDIu
-         hVtTowtwlQWCgcosB+o4zvAnQXTc3tUJUDK6A+nuVxZR+o49GL4TY1hR28XP/b5o9Pf/
-         VHsK1PEW1MEKaoRd+SgOkOyDRXpcU+lqa3+11wttFT4sswBpgBSITmGcCIWjQd5UjZyr
-         tXkg==
-X-Gm-Message-State: ACgBeo0BFVgE5BzwzqbGjKq7HEFC0Z/ztTUjst/k9it7/mvdkKN4zgJv
-        u6xYz+wD5Jeqjdp71TcbEU8wBQ==
-X-Google-Smtp-Source: AA6agR6AUGf4FgTencb0cYu56kNBFFxigYmYR8S7HPDF6UghtndchYFD5IxGrRtErgGQ2zJH/AqKOA==
-X-Received: by 2002:a65:6151:0:b0:412:e419:d651 with SMTP id o17-20020a656151000000b00412e419d651mr25616408pgv.378.1660196051327;
-        Wed, 10 Aug 2022 22:34:11 -0700 (PDT)
+        b=Sy12/52bCnRV7vv+K6GJslenZKoeyKqSF0b+iHvYTrc0JjJ6HLfyyu3AqwojRwnMu8
+         iJfbWopKYciIEK05nEUt/SO+DMqzI7VB4mPCu+ZAHKGnbsi6Z9pRXGR1BLQ5sQ9rsRhU
+         SCP/m8L3YDKujbq1NwIA8S0J4mLlnTRo/P+yQWz6clLwx2Zf+q/XDo1TntkUWVbdRcXi
+         +FI5MT3OWD9HFdsbdd7ALoGNFcEW0bZ6roff7ZDXPbPYL/bXRfsqgor7aTjJA57KCDOx
+         phBLENTgOtbUlKOoWT3x6GAg6okxmP3l0qKLnlwPqn52ZwpshhAp6mjh5I4dq4ttow4g
+         5igA==
+X-Gm-Message-State: ACgBeo3kvT1pw3Ms8GnDasDnD2EAuGTIoyu4TyW786BfjEojb4shagxN
+        50LTh300eT/0NtIZdyFTpL4xSw==
+X-Google-Smtp-Source: AA6agR7rkjp1E1B6TnMPyy4dESnQkrruH0ALI6RPABrsOLVyRr6nNdvSCfPlOrhWV2EKFaxOveBNEA==
+X-Received: by 2002:aa7:8c51:0:b0:528:2ed8:7e35 with SMTP id e17-20020aa78c51000000b005282ed87e35mr29774574pfd.13.1660196052481;
+        Wed, 10 Aug 2022 22:34:12 -0700 (PDT)
 Received: from localhost (76-210-143-223.lightspeed.sntcca.sbcglobal.net. [76.210.143.223])
-        by smtp.gmail.com with ESMTPSA id r24-20020aa79638000000b0052ad6d627a6sm2991872pfg.166.2022.08.10.22.34.10
+        by smtp.gmail.com with ESMTPSA id 1-20020a621501000000b0052b9351737fsm3112894pfv.92.2022.08.10.22.34.12
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 10 Aug 2022 22:34:11 -0700 (PDT)
+        Wed, 10 Aug 2022 22:34:12 -0700 (PDT)
 Subject: [PATCH] RISC-V: Add support fo the zihintpause extension
-Date:   Wed, 10 Aug 2022 22:29:57 -0700
-Message-Id: <20220811052957.16634-1-palmer@rivosinc.com>
+Date:   Wed, 10 Aug 2022 22:33:56 -0700
+Message-Id: <20220811053356.17375-1-palmer@rivosinc.com>
 X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
