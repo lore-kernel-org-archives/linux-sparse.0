@@ -2,302 +2,146 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E564CC54EE9
-	for <linux-sparse@archiver.kernel.org>; Tue, 27 Sep 2022 23:37:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A409C32771
+	for <linux-sparse@archiver.kernel.org>; Wed, 28 Sep 2022 06:21:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230071AbiI0XhJ (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Tue, 27 Sep 2022 19:37:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37416 "EHLO
+        id S232294AbiI1GVY (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Wed, 28 Sep 2022 02:21:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45970 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229477AbiI0XhH (ORCPT
+        with ESMTP id S230514AbiI1GVW (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 27 Sep 2022 19:37:07 -0400
-Received: from mga12.intel.com (mga12.intel.com [192.55.52.136])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6C6F31D1E16;
-        Tue, 27 Sep 2022 16:37:03 -0700 (PDT)
+        Wed, 28 Sep 2022 02:21:22 -0400
+Received: from mga06.intel.com (mga06b.intel.com [134.134.136.31])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1D3A511D0FB;
+        Tue, 27 Sep 2022 23:21:19 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1664321823; x=1695857823;
+  t=1664346079; x=1695882079;
   h=date:from:to:cc:subject:message-id:references:
    mime-version:in-reply-to;
-  bh=ohN+1ynWrOg95Gv7IZaaaqS3IR+KaX68teYdBFPYeik=;
-  b=Lnrn6h7xKk7heWSszmTdxvL0M5Oh2LhJgw7HynAOi8v/reJqSowK35Xl
-   q1/IqaiBmMCfvilF+Tq+IVgSGxTMl459Itu1a6zvkmNvfNjuaQPYkWtAY
-   raB5voGGl+PWoN6ki2emmT2qMXeLv9ROvG1AncMIrxYziyVIWsHWqkoBQ
-   Yo1B0J5AMIKXdNbeTM5y+o5kd3sPi47Fcinp2DuQZ8o0I8U/ZsQXt8N1j
-   KUnpktpH5mhRUMO/LlQIakxX4rOEbQCMi4PiTtiqqV5MrpgnR7h4v4bsh
-   nv99+4X+7MA67iXwKp7zy98ddtdykVrkfyUDqwikQy0VatX3QpKHzfQZ7
-   A==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10483"; a="281178146"
-X-IronPort-AV: E=Sophos;i="5.93,350,1654585200"; 
-   d="scan'208";a="281178146"
-Received: from fmsmga001.fm.intel.com ([10.253.24.23])
-  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Sep 2022 16:37:03 -0700
+  bh=rABcO6dupgkZAkgWvO/zIexngtcZYKJI6WDcEfDIzVo=;
+  b=FDihaH6otpApgj3ek/uXW2L6d0uNCNDSoYorT7JdSJPiQnA2amhgz7p6
+   qjAIQu30nbUB4JVLNI7BtYxnJU7nttxp685NDpko8ktKJuy7CoxTGeCTb
+   b3RabiPur4g3glziK0Xw/OyBax1VVblr4FgOXDCCrgw/ZPNlANtLcckJc
+   ZoHCYkrh+nTvxarYFIM7kM+JKsk1Ak3fPEQll5xOzKtkNGN5uQe+ShCBf
+   DEz5D63NbkNZWAdJFKoFSTONrnUCmGtGzihpR5hjDbnMtRlSKPqmiTWec
+   OuFbeB1eF9WbU/96i7aLfmJ24BTCr0UAw5//jFS935uMDz0d8+UBGHNSq
+   g==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10483"; a="363357670"
+X-IronPort-AV: E=Sophos;i="5.93,351,1654585200"; 
+   d="scan'208";a="363357670"
+Received: from fmsmga007.fm.intel.com ([10.253.24.52])
+  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Sep 2022 23:21:18 -0700
 X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6500,9779,10483"; a="764063464"
-X-IronPort-AV: E=Sophos;i="5.93,350,1654585200"; 
-   d="scan'208";a="764063464"
+X-IronPort-AV: E=McAfee;i="6500,9779,10483"; a="624033257"
+X-IronPort-AV: E=Sophos;i="5.93,351,1654585200"; 
+   d="scan'208";a="624033257"
 Received: from lkp-server02.sh.intel.com (HELO dfa2c9fcd321) ([10.239.97.151])
-  by fmsmga001.fm.intel.com with ESMTP; 27 Sep 2022 16:36:58 -0700
+  by fmsmga007.fm.intel.com with ESMTP; 27 Sep 2022 23:21:11 -0700
 Received: from kbuild by dfa2c9fcd321 with local (Exim 4.96)
         (envelope-from <lkp@intel.com>)
-        id 1odK8H-0001hw-1l;
-        Tue, 27 Sep 2022 23:36:57 +0000
-Date:   Wed, 28 Sep 2022 07:36:42 +0800
+        id 1odQRT-00026i-0a;
+        Wed, 28 Sep 2022 06:21:11 +0000
+Date:   Wed, 28 Sep 2022 14:21:01 +0800
 From:   kernel test robot <lkp@intel.com>
-To:     Kees Cook <keescook@chromium.org>,
-        Gwan-gyeong Mun <gwan-gyeong.mun@intel.com>
-Cc:     kbuild-all@lists.01.org, dri-devel@lists.freedesktop.org,
-        Kees Cook <keescook@chromium.org>,
-        David Airlie <airlied@linux.ie>, Tom Rix <trix@redhat.com>,
-        Daniel Latypov <dlatypov@google.com>, llvm@lists.linux.dev,
-        Nick Desaulniers <ndesaulniers@google.com>,
-        "Gustavo A. R. Silva" <gustavoars@kernel.org>,
-        linux-kernel@vger.kernel.org,
-        Nathan Chancellor <nathan@kernel.org>,
-        linux-sparse@vger.kernel.org, linux-hardening@vger.kernel.org,
-        Daniel Vetter <daniel@ffwll.ch>,
-        Rodrigo Vivi <rodrigo.vivi@intel.com>,
-        intel-gfx@lists.freedesktop.org,
-        Vitor Massaru Iha <vitor@massaru.org>,
-        Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [Intel-gfx] [PATCH v2] overflow: Introduce overflows_type() and
- castable_to_type()
-Message-ID: <202209280708.s6LIMLn4-lkp@intel.com>
-References: <20220926191109.1803094-1-keescook@chromium.org>
+To:     Gwan-gyeong Mun <gwan-gyeong.mun@intel.com>,
+        intel-gfx@lists.freedesktop.org
+Cc:     kbuild-all@lists.01.org, gustavoars@kernel.org, trix@redhat.com,
+        dlatypov@google.com, llvm@lists.linux.dev,
+        linux@rasmusvillemoes.dk, dri-devel@lists.freedesktop.org,
+        chris@chris-wilson.co.uk, linux-hardening@vger.kernel.org,
+        andrzej.hajda@intel.com, linux-sparse@vger.kernel.org,
+        matthew.auld@intel.com, airlied@redhat.com,
+        thomas.hellstrom@linux.intel.com, keescook@chromium.org,
+        jani.nikula@intel.com, nathan@kernel.org, mchehab@kernel.org,
+        ndesaulniers@google.com, linux-kernel@vger.kernel.org,
+        daniel@ffwll.ch, vitor@massaru.org, luc.vanoostenryck@gmail.com,
+        nirmoy.das@intel.com
+Subject: Re: [Intel-gfx] [PATCH v12 3/9] overflow: Introduce overflows_type()
+ and __castable_to_type()
+Message-ID: <202209281418.lZIjIe4J-lkp@intel.com>
+References: <20220926153953.3836470-4-gwan-gyeong.mun@intel.com>
 MIME-Version: 1.0
-Content-Type: multipart/mixed; boundary="TxzbNXVNIlU08Y+g"
+Content-Type: multipart/mixed; boundary="owajM0vxnXJT18cG"
 Content-Disposition: inline
-In-Reply-To: <20220926191109.1803094-1-keescook@chromium.org>
+In-Reply-To: <20220926153953.3836470-4-gwan-gyeong.mun@intel.com>
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
 
---TxzbNXVNIlU08Y+g
+--owajM0vxnXJT18cG
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 
-Hi Kees,
+Hi Gwan-gyeong,
 
-I love your patch! Yet something to improve:
+I love your patch! Perhaps something to improve:
 
-[auto build test ERROR on kees/for-next/hardening]
-[also build test ERROR on next-20220927]
-[cannot apply to drm-tip/drm-tip drm-intel/for-linux-next drm-misc/drm-misc-next linus/master v6.0-rc7]
+[auto build test WARNING on drm-tip/drm-tip]
+[also build test WARNING on linus/master v6.0-rc7]
+[cannot apply to drm-intel/for-linux-next kees/for-next/hardening next-20220927]
 [If your patch is applied to the wrong git tree, kindly drop us a note.
 And when submitting patch, we suggest to use '--base' as documented in
 https://git-scm.com/docs/git-format-patch#_base_tree_information]
 
-url:    https://github.com/intel-lab-lkp/linux/commits/Kees-Cook/overflow-Introduce-overflows_type-and-castable_to_type/20220927-094847
-base:   https://git.kernel.org/pub/scm/linux/kernel/git/kees/linux.git for-next/hardening
-config: x86_64-rhel-8.3-func
+url:    https://github.com/intel-lab-lkp/linux/commits/Gwan-gyeong-Mun/Fixes-integer-overflow-or-integer-truncation-issues-in-page-lookups-ttm-place-configuration-and-scatterlist-creation/20220927-094859
+base:   git://anongit.freedesktop.org/drm/drm-tip drm-tip
+config: x86_64-rhel-8.3-kunit
 compiler: gcc-11 (Debian 11.3.0-5) 11.3.0
 reproduce (this is a W=1 build):
-        # https://github.com/intel-lab-lkp/linux/commit/ffc9129a19eb65b2d20780558b0c1af24d66434a
+        # https://github.com/intel-lab-lkp/linux/commit/49eb3d58d93b3ac457ea8de8879e19e55c2788e6
         git remote add linux-review https://github.com/intel-lab-lkp/linux
-        git fetch --no-tags linux-review Kees-Cook/overflow-Introduce-overflows_type-and-castable_to_type/20220927-094847
-        git checkout ffc9129a19eb65b2d20780558b0c1af24d66434a
+        git fetch --no-tags linux-review Gwan-gyeong-Mun/Fixes-integer-overflow-or-integer-truncation-issues-in-page-lookups-ttm-place-configuration-and-scatterlist-creation/20220927-094859
+        git checkout 49eb3d58d93b3ac457ea8de8879e19e55c2788e6
         # save the config file
         mkdir build_dir && cp config build_dir/.config
-        make W=1 O=build_dir ARCH=x86_64 SHELL=/bin/bash drivers/gpu/drm/i915/
+        make W=1 O=build_dir ARCH=x86_64 SHELL=/bin/bash lib/
 
 If you fix the issue, kindly add following tag where applicable
 | Reported-by: kernel test robot <lkp@intel.com>
 
-All errors (new ones prefixed by >>):
+All warnings (new ones prefixed by >>):
 
-   In file included from drivers/gpu/drm/i915/i915_utils.h:29,
-                    from drivers/gpu/drm/i915/i915_user_extensions.c:14:
-   drivers/gpu/drm/i915/i915_user_extensions.c: In function 'i915_user_extensions':
->> include/linux/overflow.h:33:40: error: invalid operands to binary << (have 'struct i915_user_extension *' and 'long unsigned int')
-      33 | #define __type_half_max(type) ((type)1 << (8*sizeof(type) - 1 - is_signed_type(type)))
-         |                                        ^~ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-         |                                                               |
-         |                                                               long unsigned int
-   include/linux/overflow.h:34:27: note: in expansion of macro '__type_half_max'
-      34 | #define type_max(T) ((T)((__type_half_max(T) - 1) + __type_half_max(T)))
-         |                           ^~~~~~~~~~~~~~~
-   include/linux/overflow.h:132:23: note: in expansion of macro 'type_max'
-     132 |                 (x) > type_max(typeof(T)) ? 1 : 0               \
-         |                       ^~~~~~~~
-   include/linux/overflow.h:159:31: note: in expansion of macro '__overflows_type_constexpr'
-     159 |                               __overflows_type_constexpr(n, T), \
-         |                               ^~~~~~~~~~~~~~~~~~~~~~~~~~
-   drivers/gpu/drm/i915/i915_user_extensions.c:54:21: note: in expansion of macro 'overflows_type'
-      54 |                     overflows_type(next, ext))
-         |                     ^~~~~~~~~~~~~~
->> include/linux/overflow.h:33:40: error: invalid operands to binary << (have 'struct i915_user_extension *' and 'long unsigned int')
-      33 | #define __type_half_max(type) ((type)1 << (8*sizeof(type) - 1 - is_signed_type(type)))
-         |                                        ^~ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-         |                                                               |
-         |                                                               long unsigned int
-   include/linux/overflow.h:34:53: note: in expansion of macro '__type_half_max'
-      34 | #define type_max(T) ((T)((__type_half_max(T) - 1) + __type_half_max(T)))
-         |                                                     ^~~~~~~~~~~~~~~
-   include/linux/overflow.h:132:23: note: in expansion of macro 'type_max'
-     132 |                 (x) > type_max(typeof(T)) ? 1 : 0               \
-         |                       ^~~~~~~~
-   include/linux/overflow.h:159:31: note: in expansion of macro '__overflows_type_constexpr'
-     159 |                               __overflows_type_constexpr(n, T), \
-         |                               ^~~~~~~~~~~~~~~~~~~~~~~~~~
-   drivers/gpu/drm/i915/i915_user_extensions.c:54:21: note: in expansion of macro 'overflows_type'
-      54 |                     overflows_type(next, ext))
-         |                     ^~~~~~~~~~~~~~
->> include/linux/overflow.h:33:40: error: invalid operands to binary << (have 'struct i915_user_extension *' and 'long unsigned int')
-      33 | #define __type_half_max(type) ((type)1 << (8*sizeof(type) - 1 - is_signed_type(type)))
-         |                                        ^~ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-         |                                                               |
-         |                                                               long unsigned int
-   include/linux/overflow.h:34:27: note: in expansion of macro '__type_half_max'
-      34 | #define type_max(T) ((T)((__type_half_max(T) - 1) + __type_half_max(T)))
-         |                           ^~~~~~~~~~~~~~~
-   include/linux/overflow.h:134:34: note: in expansion of macro 'type_max'
-     134 |                 (x) < 0 || (x) > type_max(typeof(T)) ? 1 : 0    \
-         |                                  ^~~~~~~~
-   include/linux/overflow.h:159:31: note: in expansion of macro '__overflows_type_constexpr'
-     159 |                               __overflows_type_constexpr(n, T), \
-         |                               ^~~~~~~~~~~~~~~~~~~~~~~~~~
-   drivers/gpu/drm/i915/i915_user_extensions.c:54:21: note: in expansion of macro 'overflows_type'
-      54 |                     overflows_type(next, ext))
-         |                     ^~~~~~~~~~~~~~
->> include/linux/overflow.h:33:40: error: invalid operands to binary << (have 'struct i915_user_extension *' and 'long unsigned int')
-      33 | #define __type_half_max(type) ((type)1 << (8*sizeof(type) - 1 - is_signed_type(type)))
-         |                                        ^~ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-         |                                                               |
-         |                                                               long unsigned int
-   include/linux/overflow.h:34:53: note: in expansion of macro '__type_half_max'
-      34 | #define type_max(T) ((T)((__type_half_max(T) - 1) + __type_half_max(T)))
-         |                                                     ^~~~~~~~~~~~~~~
-   include/linux/overflow.h:134:34: note: in expansion of macro 'type_max'
-     134 |                 (x) < 0 || (x) > type_max(typeof(T)) ? 1 : 0    \
-         |                                  ^~~~~~~~
-   include/linux/overflow.h:159:31: note: in expansion of macro '__overflows_type_constexpr'
-     159 |                               __overflows_type_constexpr(n, T), \
-         |                               ^~~~~~~~~~~~~~~~~~~~~~~~~~
-   drivers/gpu/drm/i915/i915_user_extensions.c:54:21: note: in expansion of macro 'overflows_type'
-      54 |                     overflows_type(next, ext))
-         |                     ^~~~~~~~~~~~~~
->> include/linux/overflow.h:33:40: error: invalid operands to binary << (have 'struct i915_user_extension *' and 'long unsigned int')
-      33 | #define __type_half_max(type) ((type)1 << (8*sizeof(type) - 1 - is_signed_type(type)))
-         |                                        ^~ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-         |                                                               |
-         |                                                               long unsigned int
-   include/linux/overflow.h:34:27: note: in expansion of macro '__type_half_max'
-      34 | #define type_max(T) ((T)((__type_half_max(T) - 1) + __type_half_max(T)))
-         |                           ^~~~~~~~~~~~~~~
-   include/linux/overflow.h:35:30: note: in expansion of macro 'type_max'
-      35 | #define type_min(T) ((T)((T)-type_max(T)-(T)1))
-         |                              ^~~~~~~~
-   include/linux/overflow.h:135:25: note: in expansion of macro 'type_min'
-     135 |                 : (x) < type_min(typeof(T)) ||                  \
-         |                         ^~~~~~~~
-   include/linux/overflow.h:159:31: note: in expansion of macro '__overflows_type_constexpr'
-     159 |                               __overflows_type_constexpr(n, T), \
-         |                               ^~~~~~~~~~~~~~~~~~~~~~~~~~
-   drivers/gpu/drm/i915/i915_user_extensions.c:54:21: note: in expansion of macro 'overflows_type'
-      54 |                     overflows_type(next, ext))
-         |                     ^~~~~~~~~~~~~~
->> include/linux/overflow.h:33:40: error: invalid operands to binary << (have 'struct i915_user_extension *' and 'long unsigned int')
-      33 | #define __type_half_max(type) ((type)1 << (8*sizeof(type) - 1 - is_signed_type(type)))
-         |                                        ^~ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-         |                                                               |
-         |                                                               long unsigned int
-   include/linux/overflow.h:34:53: note: in expansion of macro '__type_half_max'
-      34 | #define type_max(T) ((T)((__type_half_max(T) - 1) + __type_half_max(T)))
-         |                                                     ^~~~~~~~~~~~~~~
-   include/linux/overflow.h:35:30: note: in expansion of macro 'type_max'
-      35 | #define type_min(T) ((T)((T)-type_max(T)-(T)1))
-         |                              ^~~~~~~~
-   include/linux/overflow.h:135:25: note: in expansion of macro 'type_min'
-     135 |                 : (x) < type_min(typeof(T)) ||                  \
-         |                         ^~~~~~~~
-   include/linux/overflow.h:159:31: note: in expansion of macro '__overflows_type_constexpr'
-     159 |                               __overflows_type_constexpr(n, T), \
-         |                               ^~~~~~~~~~~~~~~~~~~~~~~~~~
-   drivers/gpu/drm/i915/i915_user_extensions.c:54:21: note: in expansion of macro 'overflows_type'
-      54 |                     overflows_type(next, ext))
-         |                     ^~~~~~~~~~~~~~
->> include/linux/overflow.h:33:40: error: invalid operands to binary << (have 'struct i915_user_extension *' and 'long unsigned int')
-      33 | #define __type_half_max(type) ((type)1 << (8*sizeof(type) - 1 - is_signed_type(type)))
-         |                                        ^~ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-         |                                                               |
-         |                                                               long unsigned int
-   include/linux/overflow.h:34:27: note: in expansion of macro '__type_half_max'
-      34 | #define type_max(T) ((T)((__type_half_max(T) - 1) + __type_half_max(T)))
-         |                           ^~~~~~~~~~~~~~~
-   include/linux/overflow.h:136:25: note: in expansion of macro 'type_max'
-     136 |                   (x) > type_max(typeof(T)) ? 1 : 0)
-         |                         ^~~~~~~~
-   include/linux/overflow.h:159:31: note: in expansion of macro '__overflows_type_constexpr'
-     159 |                               __overflows_type_constexpr(n, T), \
-         |                               ^~~~~~~~~~~~~~~~~~~~~~~~~~
-   drivers/gpu/drm/i915/i915_user_extensions.c:54:21: note: in expansion of macro 'overflows_type'
-      54 |                     overflows_type(next, ext))
-         |                     ^~~~~~~~~~~~~~
->> include/linux/overflow.h:33:40: error: invalid operands to binary << (have 'struct i915_user_extension *' and 'long unsigned int')
-      33 | #define __type_half_max(type) ((type)1 << (8*sizeof(type) - 1 - is_signed_type(type)))
-         |                                        ^~ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-         |                                                               |
-         |                                                               long unsigned int
-   include/linux/overflow.h:34:53: note: in expansion of macro '__type_half_max'
-      34 | #define type_max(T) ((T)((__type_half_max(T) - 1) + __type_half_max(T)))
-         |                                                     ^~~~~~~~~~~~~~~
-   include/linux/overflow.h:136:25: note: in expansion of macro 'type_max'
-     136 |                   (x) > type_max(typeof(T)) ? 1 : 0)
-         |                         ^~~~~~~~
-   include/linux/overflow.h:159:31: note: in expansion of macro '__overflows_type_constexpr'
-     159 |                               __overflows_type_constexpr(n, T), \
-         |                               ^~~~~~~~~~~~~~~~~~~~~~~~~~
-   drivers/gpu/drm/i915/i915_user_extensions.c:54:21: note: in expansion of macro 'overflows_type'
-      54 |                     overflows_type(next, ext))
-         |                     ^~~~~~~~~~~~~~
->> drivers/gpu/drm/i915/i915_user_extensions.c:54:21: error: argument 2 in call to function '__builtin_add_overflow' does not have integral type
+   lib/overflow_kunit.c:20: warning: ignoring '#pragma clang diagnostic' [-Wunknown-pragmas]
+      20 | #pragma clang diagnostic ignored "-Wtautological-constant-out-of-range-compare"
+         | 
+   lib/overflow_kunit.c: In function 'castable_to_type_test':
+>> lib/overflow_kunit.c:984:13: warning: unused variable 'small' [-Wunused-variable]
+     984 |         s64 small;
+         |             ^~~~~
+>> lib/overflow_kunit.c:983:13: warning: unused variable 'big' [-Wunused-variable]
+     983 |         u64 big;
+         |             ^~~
 
 
-vim +33 include/linux/overflow.h
+vim +/small +984 lib/overflow_kunit.c
 
-f0907827a8a915 Rasmus Villemoes 2018-05-08   8  
-f0907827a8a915 Rasmus Villemoes 2018-05-08   9  /*
-4eb6bd55cfb22f Nick Desaulniers 2021-09-10  10   * We need to compute the minimum and maximum values representable in a given
-4eb6bd55cfb22f Nick Desaulniers 2021-09-10  11   * type. These macros may also be useful elsewhere. It would seem more obvious
-4eb6bd55cfb22f Nick Desaulniers 2021-09-10  12   * to do something like:
-f0907827a8a915 Rasmus Villemoes 2018-05-08  13   *
-f0907827a8a915 Rasmus Villemoes 2018-05-08  14   * #define type_min(T) (T)(is_signed_type(T) ? (T)1 << (8*sizeof(T)-1) : 0)
-f0907827a8a915 Rasmus Villemoes 2018-05-08  15   * #define type_max(T) (T)(is_signed_type(T) ? ((T)1 << (8*sizeof(T)-1)) - 1 : ~(T)0)
-f0907827a8a915 Rasmus Villemoes 2018-05-08  16   *
-f0907827a8a915 Rasmus Villemoes 2018-05-08  17   * Unfortunately, the middle expressions, strictly speaking, have
-f0907827a8a915 Rasmus Villemoes 2018-05-08  18   * undefined behaviour, and at least some versions of gcc warn about
-f0907827a8a915 Rasmus Villemoes 2018-05-08  19   * the type_max expression (but not if -fsanitize=undefined is in
-f0907827a8a915 Rasmus Villemoes 2018-05-08  20   * effect; in that case, the warning is deferred to runtime...).
-f0907827a8a915 Rasmus Villemoes 2018-05-08  21   *
-f0907827a8a915 Rasmus Villemoes 2018-05-08  22   * The slightly excessive casting in type_min is to make sure the
-f0907827a8a915 Rasmus Villemoes 2018-05-08  23   * macros also produce sensible values for the exotic type _Bool. [The
-f0907827a8a915 Rasmus Villemoes 2018-05-08  24   * overflow checkers only almost work for _Bool, but that's
-f0907827a8a915 Rasmus Villemoes 2018-05-08  25   * a-feature-not-a-bug, since people shouldn't be doing arithmetic on
-f0907827a8a915 Rasmus Villemoes 2018-05-08  26   * _Bools. Besides, the gcc builtins don't allow _Bool* as third
-f0907827a8a915 Rasmus Villemoes 2018-05-08  27   * argument.]
-f0907827a8a915 Rasmus Villemoes 2018-05-08  28   *
-f0907827a8a915 Rasmus Villemoes 2018-05-08  29   * Idea stolen from
-f0907827a8a915 Rasmus Villemoes 2018-05-08  30   * https://mail-index.netbsd.org/tech-misc/2007/02/05/0000.html -
-f0907827a8a915 Rasmus Villemoes 2018-05-08  31   * credit to Christian Biere.
-f0907827a8a915 Rasmus Villemoes 2018-05-08  32   */
-f0907827a8a915 Rasmus Villemoes 2018-05-08 @33  #define __type_half_max(type) ((type)1 << (8*sizeof(type) - 1 - is_signed_type(type)))
-f0907827a8a915 Rasmus Villemoes 2018-05-08  34  #define type_max(T) ((T)((__type_half_max(T) - 1) + __type_half_max(T)))
-f0907827a8a915 Rasmus Villemoes 2018-05-08  35  #define type_min(T) ((T)((T)-type_max(T)-(T)1))
-f0907827a8a915 Rasmus Villemoes 2018-05-08  36  
+   979	
+   980	static void castable_to_type_test(struct kunit *test)
+   981	{
+   982	#if BITS_PER_LONG == 64
+ > 983		u64 big;
+ > 984		s64 small;
+   985	#else
+   986		u32 big;
+   987		s32 small;
+   988	#endif
+   989		int count = 0;
+   990	
 
 -- 
 0-DAY CI Kernel Test Service
 https://01.org/lkp
 
---TxzbNXVNIlU08Y+g
+--owajM0vxnXJT18cG
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: attachment; filename=config
 
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/x86_64 6.0.0-rc2 Kernel Configuration
+# Linux/x86_64 6.0.0-rc7 Kernel Configuration
 #
 CONFIG_CC_VERSION_TEXT="gcc-11 (Debian 11.3.0-5) 11.3.0"
 CONFIG_CC_IS_GCC=y
@@ -349,7 +193,7 @@ CONFIG_SYSVIPC_SYSCTL=y
 CONFIG_SYSVIPC_COMPAT=y
 CONFIG_POSIX_MQUEUE=y
 CONFIG_POSIX_MQUEUE_SYSCTL=y
-CONFIG_WATCH_QUEUE=y
+# CONFIG_WATCH_QUEUE is not set
 CONFIG_CROSS_MEMORY_ATTACH=y
 # CONFIG_USELIB is not set
 CONFIG_AUDIT=y
@@ -388,6 +232,7 @@ CONFIG_GENERIC_CLOCKEVENTS_MIN_ADJUST=y
 CONFIG_GENERIC_CMOS_UPDATE=y
 CONFIG_HAVE_POSIX_CPU_TIMERS_TASK_WORK=y
 CONFIG_POSIX_CPU_TIMERS_TASK_WORK=y
+CONFIG_TIME_KUNIT_TEST=m
 CONFIG_CONTEXT_TRACKING=y
 CONFIG_CONTEXT_TRACKING_IDLE=y
 
@@ -448,23 +293,15 @@ CONFIG_CPU_ISOLATION=y
 # RCU Subsystem
 #
 CONFIG_TREE_RCU=y
-CONFIG_RCU_EXPERT=y
+# CONFIG_RCU_EXPERT is not set
 CONFIG_SRCU=y
 CONFIG_TREE_SRCU=y
 CONFIG_TASKS_RCU_GENERIC=y
-CONFIG_FORCE_TASKS_RCU=y
-CONFIG_TASKS_RCU=y
-# CONFIG_FORCE_TASKS_RUDE_RCU is not set
 CONFIG_TASKS_RUDE_RCU=y
-CONFIG_FORCE_TASKS_TRACE_RCU=y
-CONFIG_TASKS_TRACE_RCU=y
 CONFIG_RCU_STALL_COMMON=y
 CONFIG_RCU_NEED_SEGCBLIST=y
-CONFIG_RCU_FANOUT=64
-CONFIG_RCU_FANOUT_LEAF=16
 CONFIG_RCU_NOCB_CPU=y
 # CONFIG_RCU_NOCB_CPU_DEFAULT_ALL is not set
-# CONFIG_TASKS_TRACE_RCU_READ_MB is not set
 # end of RCU Subsystem
 
 CONFIG_IKCONFIG=y
@@ -521,7 +358,7 @@ CONFIG_IPC_NS=y
 CONFIG_USER_NS=y
 CONFIG_PID_NS=y
 CONFIG_NET_NS=y
-CONFIG_CHECKPOINT_RESTORE=y
+# CONFIG_CHECKPOINT_RESTORE is not set
 CONFIG_SCHED_AUTOGROUP=y
 # CONFIG_SYSFS_DEPRECATED is not set
 CONFIG_RELAY=y
@@ -748,9 +585,9 @@ CONFIG_X86_UMIP=y
 CONFIG_CC_HAS_IBT=y
 # CONFIG_X86_KERNEL_IBT is not set
 CONFIG_X86_INTEL_MEMORY_PROTECTION_KEYS=y
-# CONFIG_X86_INTEL_TSX_MODE_OFF is not set
+CONFIG_X86_INTEL_TSX_MODE_OFF=y
 # CONFIG_X86_INTEL_TSX_MODE_ON is not set
-CONFIG_X86_INTEL_TSX_MODE_AUTO=y
+# CONFIG_X86_INTEL_TSX_MODE_AUTO is not set
 # CONFIG_X86_SGX is not set
 CONFIG_EFI=y
 CONFIG_EFI_STUB=y
@@ -1073,6 +910,7 @@ CONFIG_HAVE_MOD_ARCH_SPECIFIC=y
 CONFIG_MODULES_USE_ELF_RELA=y
 CONFIG_HAVE_IRQ_EXIT_ON_IRQ_STACK=y
 CONFIG_HAVE_SOFTIRQ_ON_OWN_STACK=y
+CONFIG_SOFTIRQ_ON_OWN_STACK=y
 CONFIG_ARCH_HAS_ELF_RANDOMIZE=y
 CONFIG_HAVE_ARCH_MMAP_RND_BITS=y
 CONFIG_HAVE_EXIT_THREAD=y
@@ -1163,7 +1001,7 @@ CONFIG_BLK_ICQ=y
 CONFIG_BLK_DEV_BSGLIB=y
 CONFIG_BLK_DEV_INTEGRITY=y
 CONFIG_BLK_DEV_INTEGRITY_T10=m
-CONFIG_BLK_DEV_ZONED=y
+# CONFIG_BLK_DEV_ZONED is not set
 CONFIG_BLK_DEV_THROTTLING=y
 # CONFIG_BLK_DEV_THROTTLING_LOW is not set
 CONFIG_BLK_WBT=y
@@ -1172,7 +1010,6 @@ CONFIG_BLK_WBT_MQ=y
 # CONFIG_BLK_CGROUP_IOCOST is not set
 # CONFIG_BLK_CGROUP_IOPRIO is not set
 CONFIG_BLK_DEBUG_FS=y
-CONFIG_BLK_DEBUG_FS_ZONED=y
 # CONFIG_BLK_SED_OPAL is not set
 # CONFIG_BLK_INLINE_ENCRYPTION is not set
 
@@ -1187,7 +1024,6 @@ CONFIG_EFI_PARTITION=y
 CONFIG_BLOCK_COMPAT=y
 CONFIG_BLK_MQ_PCI=y
 CONFIG_BLK_MQ_VIRTIO=y
-CONFIG_BLK_MQ_RDMA=y
 CONFIG_BLK_PM=y
 CONFIG_BLOCK_HOLDER_DEPRECATED=y
 CONFIG_BLK_MQ_STACKING=y
@@ -1227,6 +1063,7 @@ CONFIG_FREEZER=y
 # Executable file formats
 #
 CONFIG_BINFMT_ELF=y
+CONFIG_BINFMT_ELF_KUNIT_TEST=y
 CONFIG_COMPAT_BINFMT_ELF=y
 CONFIG_ELFCORE=y
 CONFIG_CORE_DUMP_DEFAULT_ELF_HEADERS=y
@@ -1317,12 +1154,7 @@ CONFIG_NEED_PER_CPU_PAGE_FIRST_CHUNK=y
 CONFIG_USE_PERCPU_NUMA_NODE_ID=y
 CONFIG_HAVE_SETUP_PER_CPU_AREA=y
 CONFIG_FRONTSWAP=y
-CONFIG_CMA=y
-# CONFIG_CMA_DEBUG is not set
-# CONFIG_CMA_DEBUGFS is not set
-# CONFIG_CMA_SYSFS is not set
-CONFIG_CMA_AREAS=19
-# CONFIG_MEM_SOFT_DIRTY is not set
+# CONFIG_CMA is not set
 CONFIG_GENERIC_EARLY_IOREMAP=y
 CONFIG_DEFERRED_STRUCT_PAGE_INIT=y
 CONFIG_PAGE_IDLE_FLAG=y
@@ -1355,7 +1187,6 @@ CONFIG_SECRETMEM=y
 # end of Memory Management options
 
 CONFIG_NET=y
-CONFIG_COMPAT_NETLINK_MESSAGES=y
 CONFIG_NET_INGRESS=y
 CONFIG_NET_EGRESS=y
 CONFIG_SKB_EXTENSIONS=y
@@ -1386,7 +1217,6 @@ CONFIG_XFRM_ESP=m
 CONFIG_XFRM_IPCOMP=m
 CONFIG_NET_KEY=m
 CONFIG_NET_KEY_MIGRATE=y
-# CONFIG_SMC is not set
 CONFIG_INET=y
 CONFIG_IP_MULTICAST=y
 CONFIG_IP_ADVANCED_ROUTER=y
@@ -1476,7 +1306,10 @@ CONFIG_IPV6_PIMSM_V2=y
 # CONFIG_IPV6_RPL_LWTUNNEL is not set
 # CONFIG_IPV6_IOAM6_LWTUNNEL is not set
 CONFIG_NETLABEL=y
-# CONFIG_MPTCP is not set
+CONFIG_MPTCP=y
+CONFIG_INET_MPTCP_DIAG=m
+CONFIG_MPTCP_IPV6=y
+CONFIG_MPTCP_KUNIT_TEST=m
 CONFIG_NETWORK_SECMARK=y
 CONFIG_NET_PTP_CLASSIFY=y
 CONFIG_NETWORK_PHY_TIMESTAMPING=y
@@ -1843,7 +1676,6 @@ CONFIG_SCTP_COOKIE_HMAC_SHA1=y
 CONFIG_INET_SCTP_DIAG=m
 # CONFIG_RDS is not set
 CONFIG_TIPC=m
-# CONFIG_TIPC_MEDIA_IB is not set
 CONFIG_TIPC_MEDIA_UDP=y
 CONFIG_TIPC_CRYPTO=y
 CONFIG_TIPC_DIAG=m
@@ -2033,8 +1865,6 @@ CONFIG_STREAM_PARSER=y
 # CONFIG_MCTP is not set
 CONFIG_FIB_RULES=y
 CONFIG_WIRELESS=y
-CONFIG_WEXT_CORE=y
-CONFIG_WEXT_PROC=y
 CONFIG_CFG80211=m
 # CONFIG_NL80211_TESTMODE is not set
 # CONFIG_CFG80211_DEVELOPER_WARNINGS is not set
@@ -2043,13 +1873,13 @@ CONFIG_CFG80211_USE_KERNEL_REGDB_KEYS=y
 CONFIG_CFG80211_DEFAULT_PS=y
 # CONFIG_CFG80211_DEBUGFS is not set
 CONFIG_CFG80211_CRDA_SUPPORT=y
-CONFIG_CFG80211_WEXT=y
+# CONFIG_CFG80211_WEXT is not set
 CONFIG_MAC80211=m
 CONFIG_MAC80211_HAS_RC=y
 CONFIG_MAC80211_RC_MINSTREL=y
 CONFIG_MAC80211_RC_DEFAULT_MINSTREL=y
 CONFIG_MAC80211_RC_DEFAULT="minstrel_ht"
-CONFIG_MAC80211_MESH=y
+# CONFIG_MAC80211_MESH is not set
 CONFIG_MAC80211_LEDS=y
 CONFIG_MAC80211_DEBUGFS=y
 # CONFIG_MAC80211_MESSAGE_TRACING is not set
@@ -2062,7 +1892,6 @@ CONFIG_RFKILL_INPUT=y
 CONFIG_NET_9P=y
 CONFIG_NET_9P_FD=y
 CONFIG_NET_9P_VIRTIO=y
-# CONFIG_NET_9P_RDMA is not set
 # CONFIG_NET_9P_DEBUG is not set
 # CONFIG_CAIF is not set
 CONFIG_CEPH_LIB=m
@@ -2080,6 +1909,7 @@ CONFIG_NET_SELFTESTS=y
 CONFIG_NET_SOCK_MSG=y
 CONFIG_FAILOVER=m
 CONFIG_ETHTOOL_NETLINK=y
+CONFIG_NETDEV_ADDR_LIST_TEST=m
 
 #
 # Device Drivers
@@ -2193,7 +2023,9 @@ CONFIG_ALLOW_DEV_COREDUMP=y
 # CONFIG_DEBUG_DRIVER is not set
 # CONFIG_DEBUG_DEVRES is not set
 # CONFIG_DEBUG_TEST_DRIVER_REMOVE is not set
-# CONFIG_TEST_ASYNC_DRIVER_PROBE is not set
+CONFIG_PM_QOS_KUNIT_TEST=y
+CONFIG_TEST_ASYNC_DRIVER_PROBE=m
+CONFIG_DRIVER_PE_KUNIT_TEST=y
 CONFIG_GENERIC_CPU_AUTOPROBE=y
 CONFIG_GENERIC_CPU_VULNERABILITIES=y
 CONFIG_REGMAP=y
@@ -2249,7 +2081,8 @@ CONFIG_EFI_GENERIC_STUB_INITRD_CMDLINE_LOADER=y
 # CONFIG_EFI_BOOTLOADER_CONTROL is not set
 # CONFIG_EFI_CAPSULE_LOADER is not set
 # CONFIG_EFI_TEST is not set
-# CONFIG_APPLE_PROPERTIES is not set
+CONFIG_EFI_DEV_PATH_PARSER=y
+CONFIG_APPLE_PROPERTIES=y
 # CONFIG_RESET_ATTACK_MITIGATION is not set
 # CONFIG_EFI_RCI2_TABLE is not set
 # CONFIG_EFI_DISABLE_PCI_DMA is not set
@@ -2288,17 +2121,11 @@ CONFIG_PNP=y
 CONFIG_PNPACPI=y
 CONFIG_BLK_DEV=y
 CONFIG_BLK_DEV_NULL_BLK=m
-CONFIG_BLK_DEV_NULL_BLK_FAULT_INJECTION=y
 # CONFIG_BLK_DEV_FD is not set
 CONFIG_CDROM=m
 # CONFIG_PARIDE is not set
 # CONFIG_BLK_DEV_PCIESSD_MTIP32XX is not set
-CONFIG_ZRAM=m
-CONFIG_ZRAM_DEF_COMP_LZORLE=y
-# CONFIG_ZRAM_DEF_COMP_LZO is not set
-CONFIG_ZRAM_DEF_COMP="lzo-rle"
-CONFIG_ZRAM_WRITEBACK=y
-# CONFIG_ZRAM_MEMORY_TRACKING is not set
+# CONFIG_ZRAM is not set
 CONFIG_BLK_DEV_LOOP=m
 CONFIG_BLK_DEV_LOOP_MIN_COUNT=0
 # CONFIG_BLK_DEV_DRBD is not set
@@ -2323,14 +2150,12 @@ CONFIG_NVME_MULTIPATH=y
 # CONFIG_NVME_VERBOSE_ERRORS is not set
 # CONFIG_NVME_HWMON is not set
 CONFIG_NVME_FABRICS=m
-# CONFIG_NVME_RDMA is not set
 # CONFIG_NVME_FC is not set
 # CONFIG_NVME_TCP is not set
 # CONFIG_NVME_AUTH is not set
 CONFIG_NVME_TARGET=m
 # CONFIG_NVME_TARGET_PASSTHRU is not set
 CONFIG_NVME_TARGET_LOOP=m
-# CONFIG_NVME_TARGET_RDMA is not set
 CONFIG_NVME_TARGET_FC=m
 # CONFIG_NVME_TARGET_TCP is not set
 # CONFIG_NVME_TARGET_AUTH is not set
@@ -2508,7 +2333,7 @@ CONFIG_SCSI_ISCI=m
 # CONFIG_SCSI_DC395x is not set
 # CONFIG_SCSI_AM53C974 is not set
 # CONFIG_SCSI_WD719X is not set
-CONFIG_SCSI_DEBUG=m
+# CONFIG_SCSI_DEBUG is not set
 # CONFIG_SCSI_PMCRAID is not set
 # CONFIG_SCSI_PM8001 is not set
 # CONFIG_SCSI_BFA_FC is not set
@@ -2624,7 +2449,7 @@ CONFIG_MD_RAID0=m
 CONFIG_MD_RAID1=m
 CONFIG_MD_RAID10=m
 CONFIG_MD_RAID456=m
-CONFIG_MD_MULTIPATH=m
+# CONFIG_MD_MULTIPATH is not set
 CONFIG_MD_FAULTY=m
 CONFIG_MD_CLUSTER=m
 # CONFIG_BCACHE is not set
@@ -2664,7 +2489,6 @@ CONFIG_DM_VERITY=m
 CONFIG_DM_SWITCH=m
 CONFIG_DM_LOG_WRITES=m
 CONFIG_DM_INTEGRITY=m
-# CONFIG_DM_ZONED is not set
 CONFIG_DM_AUDIT=y
 CONFIG_TARGET_CORE=m
 CONFIG_TCM_IBLOCK=m
@@ -2692,7 +2516,7 @@ CONFIG_NETDEVICES=y
 CONFIG_MII=y
 CONFIG_NET_CORE=y
 # CONFIG_BONDING is not set
-CONFIG_DUMMY=m
+# CONFIG_DUMMY is not set
 # CONFIG_WIREGUARD is not set
 # CONFIG_EQUALIZER is not set
 # CONFIG_NET_FC is not set
@@ -2705,14 +2529,14 @@ CONFIG_DUMMY=m
 # CONFIG_BAREUDP is not set
 # CONFIG_GTP is not set
 # CONFIG_AMT is not set
-CONFIG_MACSEC=m
+# CONFIG_MACSEC is not set
 CONFIG_NETCONSOLE=m
 CONFIG_NETCONSOLE_DYNAMIC=y
 CONFIG_NETPOLL=y
 CONFIG_NET_POLL_CONTROLLER=y
-CONFIG_TUN=m
+# CONFIG_TUN is not set
 # CONFIG_TUN_VNET_CROSS_LE is not set
-CONFIG_VETH=m
+# CONFIG_VETH is not set
 CONFIG_VIRTIO_NET=m
 # CONFIG_NLMON is not set
 # CONFIG_NET_VRF is not set
@@ -3134,7 +2958,6 @@ CONFIG_WLAN_VENDOR_INTEL=y
 # CONFIG_IWL4965 is not set
 # CONFIG_IWL3945 is not set
 # CONFIG_IWLWIFI is not set
-# CONFIG_IWLMEI is not set
 CONFIG_WLAN_VENDOR_INTERSIL=y
 # CONFIG_HOSTAP is not set
 # CONFIG_HERMES is not set
@@ -3184,7 +3007,7 @@ CONFIG_WLAN_VENDOR_ZYDAS=y
 # CONFIG_ZD1211RW is not set
 CONFIG_WLAN_VENDOR_QUANTENNA=y
 # CONFIG_QTNFMAC_PCIE is not set
-CONFIG_MAC80211_HWSIM=m
+# CONFIG_MAC80211_HWSIM is not set
 # CONFIG_USB_NET_RNDIS_WLAN is not set
 # CONFIG_VIRT_WIFI is not set
 # CONFIG_WAN is not set
@@ -3197,6 +3020,7 @@ CONFIG_MAC80211_HWSIM=m
 
 # CONFIG_VMXNET3 is not set
 # CONFIG_FUJITSU_ES is not set
+# CONFIG_USB4_NET is not set
 # CONFIG_NETDEVSIM is not set
 CONFIG_NET_FAILOVER=m
 # CONFIG_ISDN is not set
@@ -3284,39 +3108,7 @@ CONFIG_MOUSE_SYNAPTICS_I2C=m
 # CONFIG_INPUT_JOYSTICK is not set
 # CONFIG_INPUT_TABLET is not set
 # CONFIG_INPUT_TOUCHSCREEN is not set
-CONFIG_INPUT_MISC=y
-# CONFIG_INPUT_AD714X is not set
-# CONFIG_INPUT_BMA150 is not set
-# CONFIG_INPUT_E3X0_BUTTON is not set
-# CONFIG_INPUT_PCSPKR is not set
-# CONFIG_INPUT_MMA8450 is not set
-# CONFIG_INPUT_APANEL is not set
-# CONFIG_INPUT_GPIO_BEEPER is not set
-# CONFIG_INPUT_GPIO_DECODER is not set
-# CONFIG_INPUT_GPIO_VIBRA is not set
-# CONFIG_INPUT_ATLAS_BTNS is not set
-# CONFIG_INPUT_ATI_REMOTE2 is not set
-# CONFIG_INPUT_KEYSPAN_REMOTE is not set
-# CONFIG_INPUT_KXTJ9 is not set
-# CONFIG_INPUT_POWERMATE is not set
-# CONFIG_INPUT_YEALINK is not set
-# CONFIG_INPUT_CM109 is not set
-CONFIG_INPUT_UINPUT=y
-# CONFIG_INPUT_PCF8574 is not set
-# CONFIG_INPUT_PWM_BEEPER is not set
-# CONFIG_INPUT_PWM_VIBRA is not set
-# CONFIG_INPUT_GPIO_ROTARY_ENCODER is not set
-# CONFIG_INPUT_DA7280_HAPTICS is not set
-# CONFIG_INPUT_ADXL34X is not set
-# CONFIG_INPUT_IMS_PCU is not set
-# CONFIG_INPUT_IQS269A is not set
-# CONFIG_INPUT_IQS626A is not set
-# CONFIG_INPUT_IQS7222 is not set
-# CONFIG_INPUT_CMA3000 is not set
-# CONFIG_INPUT_IDEAPAD_SLIDEBAR is not set
-# CONFIG_INPUT_DRV260X_HAPTICS is not set
-# CONFIG_INPUT_DRV2665_HAPTICS is not set
-# CONFIG_INPUT_DRV2667_HAPTICS is not set
+# CONFIG_INPUT_MISC is not set
 CONFIG_RMI4_CORE=m
 CONFIG_RMI4_I2C=m
 CONFIG_RMI4_SPI=m
@@ -3621,7 +3413,7 @@ CONFIG_SPI_MASTER=y
 # SPI Protocol Masters
 #
 # CONFIG_SPI_SPIDEV is not set
-# CONFIG_SPI_LOOPBACK_TEST is not set
+CONFIG_SPI_LOOPBACK_TEST=m
 # CONFIG_SPI_TLE62X0 is not set
 # CONFIG_SPI_SLAVE is not set
 CONFIG_SPI_DYNAMIC=y
@@ -4343,7 +4135,7 @@ CONFIG_INTEL_GTT=m
 CONFIG_VGA_SWITCHEROO=y
 CONFIG_DRM=m
 CONFIG_DRM_MIPI_DSI=y
-# CONFIG_DRM_DEBUG_SELFTEST is not set
+CONFIG_DRM_KUNIT_TEST=m
 CONFIG_DRM_KMS_HELPER=m
 CONFIG_DRM_FBDEV_EMULATION=y
 CONFIG_DRM_FBDEV_OVERALLOC=100
@@ -4437,8 +4229,10 @@ CONFIG_DRM_CIRRUS_QEMU=m
 # CONFIG_DRM_GUD is not set
 # CONFIG_DRM_SSD130X is not set
 # CONFIG_DRM_LEGACY is not set
+CONFIG_DRM_EXPORT_FOR_TESTS=y
 CONFIG_DRM_PANEL_ORIENTATION_QUIRKS=y
 CONFIG_DRM_NOMODESET=y
+CONFIG_DRM_LIB_RANDOM=y
 CONFIG_DRM_PRIVACY_SCREEN=y
 
 #
@@ -5053,34 +4847,7 @@ CONFIG_LEDS_TRIGGER_AUDIO=m
 # Simple LED drivers
 #
 # CONFIG_ACCESSIBILITY is not set
-CONFIG_INFINIBAND=m
-CONFIG_INFINIBAND_USER_MAD=m
-CONFIG_INFINIBAND_USER_ACCESS=m
-CONFIG_INFINIBAND_USER_MEM=y
-CONFIG_INFINIBAND_ON_DEMAND_PAGING=y
-CONFIG_INFINIBAND_ADDR_TRANS=y
-CONFIG_INFINIBAND_ADDR_TRANS_CONFIGFS=y
-CONFIG_INFINIBAND_VIRT_DMA=y
-# CONFIG_INFINIBAND_EFA is not set
-# CONFIG_INFINIBAND_ERDMA is not set
-# CONFIG_MLX4_INFINIBAND is not set
-# CONFIG_INFINIBAND_MTHCA is not set
-# CONFIG_INFINIBAND_OCRDMA is not set
-# CONFIG_INFINIBAND_USNIC is not set
-# CONFIG_INFINIBAND_RDMAVT is not set
-CONFIG_RDMA_RXE=m
-CONFIG_RDMA_SIW=m
-CONFIG_INFINIBAND_IPOIB=m
-# CONFIG_INFINIBAND_IPOIB_CM is not set
-CONFIG_INFINIBAND_IPOIB_DEBUG=y
-# CONFIG_INFINIBAND_IPOIB_DEBUG_DATA is not set
-CONFIG_INFINIBAND_SRP=m
-CONFIG_INFINIBAND_SRPT=m
-# CONFIG_INFINIBAND_ISER is not set
-# CONFIG_INFINIBAND_ISERT is not set
-# CONFIG_INFINIBAND_RTRS_CLIENT is not set
-# CONFIG_INFINIBAND_RTRS_SERVER is not set
-# CONFIG_INFINIBAND_OPA_VNIC is not set
+# CONFIG_INFINIBAND is not set
 CONFIG_EDAC_ATOMIC_SCRUB=y
 CONFIG_EDAC_SUPPORT=y
 CONFIG_EDAC=y
@@ -5110,6 +4877,7 @@ CONFIG_RTC_HCTOSYS=y
 CONFIG_RTC_HCTOSYS_DEVICE="rtc0"
 # CONFIG_RTC_SYSTOHC is not set
 # CONFIG_RTC_DEBUG is not set
+CONFIG_RTC_LIB_KUNIT_TEST=m
 CONFIG_RTC_NVMEM=y
 
 #
@@ -5440,6 +5208,8 @@ CONFIG_COMMON_CLK=y
 # CONFIG_COMMON_CLK_CS2000_CP is not set
 # CONFIG_COMMON_CLK_PWM is not set
 # CONFIG_XILINX_VCU is not set
+CONFIG_CLK_KUNIT_TEST=m
+CONFIG_CLK_GATE_KUNIT_TEST=m
 CONFIG_HWSPINLOCK=y
 
 #
@@ -5605,7 +5375,10 @@ CONFIG_INTEL_RAPL=m
 
 CONFIG_RAS=y
 # CONFIG_RAS_CEC is not set
-# CONFIG_USB4 is not set
+CONFIG_USB4=y
+# CONFIG_USB4_DEBUGFS_WRITE is not set
+CONFIG_USB4_KUNIT_TEST=y
+# CONFIG_USB4_DMA_TEST is not set
 
 #
 # Android
@@ -5667,15 +5440,14 @@ CONFIG_INTEL_TH_PTI=m
 CONFIG_DCACHE_WORD_ACCESS=y
 # CONFIG_VALIDATE_FS_PARSER is not set
 CONFIG_FS_IOMAP=y
-CONFIG_EXT2_FS=m
-CONFIG_EXT2_FS_XATTR=y
-CONFIG_EXT2_FS_POSIX_ACL=y
-CONFIG_EXT2_FS_SECURITY=y
+# CONFIG_EXT2_FS is not set
 # CONFIG_EXT3_FS is not set
 CONFIG_EXT4_FS=y
+CONFIG_EXT4_USE_FOR_EXT2=y
 CONFIG_EXT4_FS_POSIX_ACL=y
 CONFIG_EXT4_FS_SECURITY=y
 # CONFIG_EXT4_DEBUG is not set
+CONFIG_EXT4_KUNIT_TESTS=m
 CONFIG_JBD2=y
 # CONFIG_JBD2_DEBUG is not set
 CONFIG_FS_MBCACHE=y
@@ -5687,7 +5459,7 @@ CONFIG_XFS_QUOTA=y
 CONFIG_XFS_POSIX_ACL=y
 CONFIG_XFS_RT=y
 CONFIG_XFS_ONLINE_SCRUB=y
-CONFIG_XFS_ONLINE_REPAIR=y
+# CONFIG_XFS_ONLINE_REPAIR is not set
 CONFIG_XFS_DEBUG=y
 CONFIG_XFS_ASSERT_FATAL=y
 CONFIG_GFS2_FS=m
@@ -5710,13 +5482,12 @@ CONFIG_F2FS_FS=m
 CONFIG_F2FS_STAT_FS=y
 CONFIG_F2FS_FS_XATTR=y
 CONFIG_F2FS_FS_POSIX_ACL=y
-CONFIG_F2FS_FS_SECURITY=y
+# CONFIG_F2FS_FS_SECURITY is not set
 # CONFIG_F2FS_CHECK_FS is not set
 # CONFIG_F2FS_FAULT_INJECTION is not set
 # CONFIG_F2FS_FS_COMPRESSION is not set
 CONFIG_F2FS_IOSTAT=y
 # CONFIG_F2FS_UNFAIR_RWSEM is not set
-# CONFIG_ZONEFS_FS is not set
 CONFIG_FS_DAX=y
 CONFIG_FS_DAX_PMD=y
 CONFIG_FS_POSIX_ACL=y
@@ -5754,7 +5525,7 @@ CONFIG_OVERLAY_FS=m
 #
 # Caches
 #
-CONFIG_NETFS_SUPPORT=y
+CONFIG_NETFS_SUPPORT=m
 CONFIG_NETFS_STATS=y
 CONFIG_FSCACHE=m
 CONFIG_FSCACHE_STATS=y
@@ -5783,6 +5554,7 @@ CONFIG_VFAT_FS=m
 CONFIG_FAT_DEFAULT_CODEPAGE=437
 CONFIG_FAT_DEFAULT_IOCHARSET="ascii"
 # CONFIG_FAT_DEFAULT_UTF8 is not set
+CONFIG_FAT_KUNIT_TEST=m
 # CONFIG_EXFAT_FS is not set
 # CONFIG_NTFS_FS is not set
 # CONFIG_NTFS3_FS is not set
@@ -5844,7 +5616,7 @@ CONFIG_SQUASHFS_XZ=y
 # CONFIG_SQUASHFS_EMBEDDED is not set
 CONFIG_SQUASHFS_FRAGMENT_CACHE_SIZE=3
 # CONFIG_VXFS_FS is not set
-CONFIG_MINIX_FS=m
+# CONFIG_MINIX_FS is not set
 # CONFIG_OMFS_FS is not set
 # CONFIG_HPFS_FS is not set
 # CONFIG_QNX4FS_FS is not set
@@ -5912,7 +5684,6 @@ CONFIG_SUNRPC_BACKCHANNEL=y
 CONFIG_RPCSEC_GSS_KRB5=m
 # CONFIG_SUNRPC_DISABLE_INSECURE_ENCTYPES is not set
 CONFIG_SUNRPC_DEBUG=y
-CONFIG_SUNRPC_XPRT_RDMA=m
 CONFIG_CEPH_FS=m
 # CONFIG_CEPH_FSCACHE is not set
 CONFIG_CEPH_FS_POSIX_ACL=y
@@ -5928,15 +5699,12 @@ CONFIG_CIFS_DEBUG=y
 # CONFIG_CIFS_DEBUG_DUMP_KEYS is not set
 CONFIG_CIFS_DFS_UPCALL=y
 # CONFIG_CIFS_SWN_UPCALL is not set
-# CONFIG_CIFS_SMB_DIRECT is not set
 # CONFIG_CIFS_FSCACHE is not set
 # CONFIG_SMB_SERVER is not set
 CONFIG_SMBFS_COMMON=m
 # CONFIG_CODA_FS is not set
 # CONFIG_AFS_FS is not set
-CONFIG_9P_FS=y
-CONFIG_9P_FS_POSIX_ACL=y
-# CONFIG_9P_FS_SECURITY is not set
+# CONFIG_9P_FS is not set
 CONFIG_NLS=y
 CONFIG_NLS_DEFAULT="utf8"
 CONFIG_NLS_CODEPAGE_437=y
@@ -6006,14 +5774,12 @@ CONFIG_TRUSTED_KEYS_TPM=y
 CONFIG_ENCRYPTED_KEYS=y
 # CONFIG_USER_DECRYPTED_DATA is not set
 # CONFIG_KEY_DH_OPERATIONS is not set
-# CONFIG_KEY_NOTIFICATIONS is not set
 # CONFIG_SECURITY_DMESG_RESTRICT is not set
 CONFIG_SECURITY=y
 CONFIG_SECURITYFS=y
 CONFIG_SECURITY_NETWORK=y
-# CONFIG_SECURITY_INFINIBAND is not set
 CONFIG_SECURITY_NETWORK_XFRM=y
-# CONFIG_SECURITY_PATH is not set
+CONFIG_SECURITY_PATH=y
 CONFIG_INTEL_TXT=y
 CONFIG_HAVE_HARDENED_USERCOPY_ALLOCATOR=y
 CONFIG_HARDENED_USERCOPY=y
@@ -6022,7 +5788,14 @@ CONFIG_FORTIFY_SOURCE=y
 # CONFIG_SECURITY_SELINUX is not set
 # CONFIG_SECURITY_SMACK is not set
 # CONFIG_SECURITY_TOMOYO is not set
-# CONFIG_SECURITY_APPARMOR is not set
+CONFIG_SECURITY_APPARMOR=y
+# CONFIG_SECURITY_APPARMOR_DEBUG is not set
+CONFIG_SECURITY_APPARMOR_INTROSPECT_POLICY=y
+CONFIG_SECURITY_APPARMOR_HASH=y
+CONFIG_SECURITY_APPARMOR_HASH_DEFAULT=y
+CONFIG_SECURITY_APPARMOR_EXPORT_BINARY=y
+CONFIG_SECURITY_APPARMOR_PARANOID_LOAD=y
+CONFIG_SECURITY_APPARMOR_KUNIT_TEST=y
 # CONFIG_SECURITY_LOADPIN is not set
 CONFIG_SECURITY_YAMA=y
 # CONFIG_SECURITY_SAFESETID is not set
@@ -6037,8 +5810,9 @@ CONFIG_INTEGRITY_AUDIT=y
 # CONFIG_IMA is not set
 # CONFIG_IMA_SECURE_AND_OR_TRUSTED_BOOT is not set
 # CONFIG_EVM is not set
-CONFIG_DEFAULT_SECURITY_DAC=y
-CONFIG_LSM="landlock,lockdown,yama,loadpin,safesetid,integrity,bpf"
+CONFIG_DEFAULT_SECURITY_APPARMOR=y
+# CONFIG_DEFAULT_SECURITY_DAC is not set
+CONFIG_LSM="landlock,lockdown,yama,loadpin,safesetid,integrity,apparmor,selinux,smack,tomoyo,bpf"
 
 #
 # Kernel hardening options
@@ -6316,13 +6090,14 @@ CONFIG_BINARY_PRINTF=y
 #
 CONFIG_RAID6_PQ=m
 CONFIG_RAID6_PQ_BENCHMARK=y
+CONFIG_LINEAR_RANGES=m
 # CONFIG_PACKING is not set
 CONFIG_BITREVERSE=y
 CONFIG_GENERIC_STRNCPY_FROM_USER=y
 CONFIG_GENERIC_STRNLEN_USER=y
 CONFIG_GENERIC_NET_UTILS=y
 CONFIG_CORDIC=m
-# CONFIG_PRIME_NUMBERS is not set
+CONFIG_PRIME_NUMBERS=m
 CONFIG_RATIONAL=y
 CONFIG_GENERIC_PCI_IOMAP=y
 CONFIG_GENERIC_IOMAP=y
@@ -6357,7 +6132,7 @@ CONFIG_CRC_T10DIF=y
 CONFIG_CRC64_ROCKSOFT=m
 CONFIG_CRC_ITU_T=m
 CONFIG_CRC32=y
-# CONFIG_CRC32_SELFTEST is not set
+CONFIG_CRC32_SELFTEST=m
 CONFIG_CRC32_SLICEBY8=y
 # CONFIG_CRC32_SLICEBY4 is not set
 # CONFIG_CRC32_SARWATE is not set
@@ -6413,18 +6188,6 @@ CONFIG_NEED_DMA_MAP_STATE=y
 CONFIG_ARCH_DMA_ADDR_T_64BIT=y
 CONFIG_ARCH_HAS_FORCE_DMA_UNENCRYPTED=y
 CONFIG_SWIOTLB=y
-CONFIG_DMA_CMA=y
-# CONFIG_DMA_PERNUMA_CMA is not set
-
-#
-# Default contiguous memory area size:
-#
-CONFIG_CMA_SIZE_MBYTES=0
-CONFIG_CMA_SIZE_SEL_MBYTES=y
-# CONFIG_CMA_SIZE_SEL_PERCENTAGE is not set
-# CONFIG_CMA_SIZE_SEL_MIN is not set
-# CONFIG_CMA_SIZE_SEL_MAX is not set
-CONFIG_CMA_ALIGNMENT=8
 # CONFIG_DMA_API_DEBUG is not set
 # CONFIG_DMA_MAP_BENCHMARK is not set
 CONFIG_SGL_ALLOC=y
@@ -6433,13 +6196,12 @@ CONFIG_CPUMASK_OFFSTACK=y
 CONFIG_CPU_RMAP=y
 CONFIG_DQL=y
 CONFIG_GLOB=y
-# CONFIG_GLOB_SELFTEST is not set
+CONFIG_GLOB_SELFTEST=m
 CONFIG_NLATTR=y
 CONFIG_CLZ_TAB=y
 CONFIG_IRQ_POLL=y
 CONFIG_MPILIB=y
 CONFIG_SIGNATURE=y
-CONFIG_DIMLIB=y
 CONFIG_OID_REGISTRY=y
 CONFIG_UCS2_STRING=y
 CONFIG_HAVE_GENERIC_VDSO=y
@@ -6585,9 +6347,15 @@ CONFIG_KASAN_GENERIC=y
 CONFIG_KASAN_INLINE=y
 CONFIG_KASAN_STACK=y
 CONFIG_KASAN_VMALLOC=y
+CONFIG_KASAN_KUNIT_TEST=m
 # CONFIG_KASAN_MODULE_TEST is not set
 CONFIG_HAVE_ARCH_KFENCE=y
-# CONFIG_KFENCE is not set
+CONFIG_KFENCE=y
+CONFIG_KFENCE_SAMPLE_INTERVAL=100
+CONFIG_KFENCE_NUM_OBJECTS=255
+# CONFIG_KFENCE_DEFERRABLE is not set
+CONFIG_KFENCE_STRESS_TEST_FAULTS=0
+CONFIG_KFENCE_KUNIT_TEST=m
 # end of Memory Debugging
 
 CONFIG_DEBUG_SHIRQ=y
@@ -6662,10 +6430,9 @@ CONFIG_BUG_ON_DATA_CORRUPTION=y
 #
 # RCU Debugging
 #
-CONFIG_TORTURE_TEST=m
 # CONFIG_RCU_SCALE_TEST is not set
 # CONFIG_RCU_TORTURE_TEST is not set
-CONFIG_RCU_REF_SCALE_TEST=m
+# CONFIG_RCU_REF_SCALE_TEST is not set
 CONFIG_RCU_CPU_STALL_TIMEOUT=60
 CONFIG_RCU_EXP_CPU_STALL_TIMEOUT=0
 # CONFIG_RCU_TRACE is not set
@@ -6698,6 +6465,7 @@ CONFIG_RING_BUFFER=y
 CONFIG_EVENT_TRACING=y
 CONFIG_CONTEXT_SWITCH_TRACER=y
 CONFIG_TRACING=y
+CONFIG_GLOBAL_TRACE_BUF_SIZE=1441792
 CONFIG_GENERIC_TRACER=y
 CONFIG_TRACING_SUPPORT=y
 CONFIG_FTRACE=y
@@ -6739,7 +6507,7 @@ CONFIG_RING_BUFFER_BENCHMARK=m
 # CONFIG_TRACE_EVAL_MAP_FILE is not set
 # CONFIG_FTRACE_RECORD_RECURSION is not set
 # CONFIG_FTRACE_STARTUP_TEST is not set
-# CONFIG_FTRACE_SORT_STARTUP_TEST is not set
+CONFIG_FTRACE_SORT_STARTUP_TEST=y
 # CONFIG_RING_BUFFER_STARTUP_TEST is not set
 # CONFIG_RING_BUFFER_VALIDATE_TIME_DELTAS is not set
 # CONFIG_PREEMPTIRQ_DELAY_TEST is not set
@@ -6784,70 +6552,81 @@ CONFIG_UNWINDER_ORC=y
 #
 # Kernel Testing and Coverage
 #
-# CONFIG_KUNIT is not set
+CONFIG_KUNIT=y
+CONFIG_KUNIT_DEBUGFS=y
+# CONFIG_KUNIT_TEST is not set
+# CONFIG_KUNIT_EXAMPLE_TEST is not set
+CONFIG_KUNIT_ALL_TESTS=m
 # CONFIG_NOTIFIER_ERROR_INJECTION is not set
 CONFIG_FUNCTION_ERROR_INJECTION=y
-CONFIG_FAULT_INJECTION=y
-# CONFIG_FAILSLAB is not set
-# CONFIG_FAIL_PAGE_ALLOC is not set
-# CONFIG_FAULT_INJECTION_USERCOPY is not set
-CONFIG_FAIL_MAKE_REQUEST=y
-# CONFIG_FAIL_IO_TIMEOUT is not set
-# CONFIG_FAIL_FUTEX is not set
-CONFIG_FAULT_INJECTION_DEBUG_FS=y
-# CONFIG_FAIL_FUNCTION is not set
-# CONFIG_FAIL_MMC_REQUEST is not set
-# CONFIG_FAIL_SUNRPC is not set
+# CONFIG_FAULT_INJECTION is not set
 CONFIG_ARCH_HAS_KCOV=y
 CONFIG_CC_HAS_SANCOV_TRACE_PC=y
 # CONFIG_KCOV is not set
 CONFIG_RUNTIME_TESTING_MENU=y
 # CONFIG_LKDTM is not set
-# CONFIG_TEST_MIN_HEAP is not set
-# CONFIG_TEST_DIV64 is not set
+CONFIG_CPUMASK_KUNIT_TEST=m
+CONFIG_TEST_LIST_SORT=m
+CONFIG_TEST_MIN_HEAP=m
+CONFIG_TEST_SORT=m
+CONFIG_TEST_DIV64=m
+# CONFIG_KPROBES_SANITY_TEST is not set
 # CONFIG_BACKTRACE_SELF_TEST is not set
 # CONFIG_TEST_REF_TRACKER is not set
 # CONFIG_RBTREE_TEST is not set
 # CONFIG_REED_SOLOMON_TEST is not set
 # CONFIG_INTERVAL_TREE_TEST is not set
 # CONFIG_PERCPU_TEST is not set
-# CONFIG_ATOMIC64_SELFTEST is not set
+CONFIG_ATOMIC64_SELFTEST=m
 # CONFIG_ASYNC_RAID6_TEST is not set
 # CONFIG_TEST_HEXDUMP is not set
-# CONFIG_STRING_SELFTEST is not set
-# CONFIG_TEST_STRING_HELPERS is not set
-# CONFIG_TEST_STRSCPY is not set
-# CONFIG_TEST_KSTRTOX is not set
-# CONFIG_TEST_PRINTF is not set
-# CONFIG_TEST_SCANF is not set
-# CONFIG_TEST_BITMAP is not set
-# CONFIG_TEST_UUID is not set
-# CONFIG_TEST_XARRAY is not set
-# CONFIG_TEST_RHASHTABLE is not set
-# CONFIG_TEST_SIPHASH is not set
-# CONFIG_TEST_IDA is not set
+CONFIG_STRING_SELFTEST=m
+CONFIG_TEST_STRING_HELPERS=m
+CONFIG_TEST_STRSCPY=m
+CONFIG_TEST_KSTRTOX=m
+CONFIG_TEST_PRINTF=m
+CONFIG_TEST_SCANF=m
+CONFIG_TEST_BITMAP=m
+CONFIG_TEST_UUID=m
+CONFIG_TEST_XARRAY=m
+CONFIG_TEST_RHASHTABLE=m
+CONFIG_TEST_SIPHASH=m
+CONFIG_TEST_IDA=m
 # CONFIG_TEST_LKM is not set
-# CONFIG_TEST_BITOPS is not set
-# CONFIG_TEST_VMALLOC is not set
-# CONFIG_TEST_USER_COPY is not set
+CONFIG_TEST_BITOPS=m
+CONFIG_TEST_VMALLOC=m
+CONFIG_TEST_USER_COPY=m
 CONFIG_TEST_BPF=m
 # CONFIG_TEST_BLACKHOLE_DEV is not set
 # CONFIG_FIND_BIT_BENCHMARK is not set
 # CONFIG_TEST_FIRMWARE is not set
 # CONFIG_TEST_SYSCTL is not set
-# CONFIG_TEST_UDELAY is not set
-# CONFIG_TEST_STATIC_KEYS is not set
+CONFIG_BITFIELD_KUNIT=m
+CONFIG_HASH_KUNIT_TEST=m
+CONFIG_RESOURCE_KUNIT_TEST=m
+CONFIG_SYSCTL_KUNIT_TEST=m
+CONFIG_LIST_KUNIT_TEST=m
+CONFIG_LINEAR_RANGES_TEST=m
+CONFIG_CMDLINE_KUNIT_TEST=m
+CONFIG_BITS_TEST=m
+CONFIG_SLUB_KUNIT_TEST=m
+CONFIG_RATIONAL_KUNIT_TEST=m
+CONFIG_MEMCPY_KUNIT_TEST=m
+CONFIG_OVERFLOW_KUNIT_TEST=m
+CONFIG_STACKINIT_KUNIT_TEST=m
+CONFIG_TEST_UDELAY=m
+CONFIG_TEST_STATIC_KEYS=m
 # CONFIG_TEST_KMOD is not set
-# CONFIG_TEST_MEMCAT_P is not set
-# CONFIG_TEST_LIVEPATCH is not set
-# CONFIG_TEST_MEMINIT is not set
-# CONFIG_TEST_HMM is not set
-# CONFIG_TEST_FREE_PAGES is not set
-# CONFIG_TEST_FPU is not set
+CONFIG_TEST_MEMCAT_P=m
+CONFIG_TEST_LIVEPATCH=m
+CONFIG_TEST_MEMINIT=m
+CONFIG_TEST_HMM=m
+CONFIG_TEST_FREE_PAGES=m
+CONFIG_TEST_FPU=m
 # CONFIG_TEST_CLOCKSOURCE_WATCHDOG is not set
 CONFIG_ARCH_USE_MEMTEST=y
 # CONFIG_MEMTEST is not set
 # end of Kernel Testing and Coverage
 # end of Kernel hacking
 
---TxzbNXVNIlU08Y+g--
+--owajM0vxnXJT18cG--
