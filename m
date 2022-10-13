@@ -2,194 +2,125 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 15604C4332F
-	for <linux-sparse@archiver.kernel.org>; Thu, 13 Oct 2022 11:35:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8F318C4332F
+	for <linux-sparse@archiver.kernel.org>; Thu, 13 Oct 2022 19:37:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229604AbiJMLfQ (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Thu, 13 Oct 2022 07:35:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47322 "EHLO
+        id S229616AbiJMThW (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Thu, 13 Oct 2022 15:37:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34308 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229504AbiJMLfO (ORCPT
+        with ESMTP id S229572AbiJMThW (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 13 Oct 2022 07:35:14 -0400
-Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.154.123])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 76B3438A0D
-        for <linux-sparse@vger.kernel.org>; Thu, 13 Oct 2022 04:35:09 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
-  t=1665660909; x=1697196909;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=qMj1bKanK1c2EKhcZ1fsPSdUxovkOWrvRQCIDt1v7Z0=;
-  b=ltwAydD5wcqcYSX4BowQxjthtE5LYkdvjqlrwlG7t9AJ7X1V287XHFO8
-   4w2G0qzzMHfcecjik1aGESliJtE4WlsLUOrDShqnCCGbEWtpYWIUPZYdw
-   ljuBGQKZ+cBpmrZxQ9AxY+NDkbkoz+vnZsh3Pc1z///Npq3GONgcwYXBy
-   dp7Mp4U1IDNuTo91FmMKvsN2EPY2pEcL1NXcoOKewZlPM5/oyQyS9yfmS
-   vCbNbtu1XPlEZ0tWImiluTUmx0Lu5TpCNRNtRt7p/2ZWFKlnwosSdKDQg
-   gPDEtpVUfMKrpvz98Umf1PfdhBIyJd5j/df1M4kX3rvxetHY2iKR/I5df
-   A==;
-X-IronPort-AV: E=Sophos;i="5.95,180,1661842800"; 
-   d="scan'208";a="118365819"
-Received: from unknown (HELO email.microchip.com) ([170.129.1.10])
-  by esa6.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 13 Oct 2022 04:35:07 -0700
-Received: from chn-vm-ex03.mchp-main.com (10.10.85.151) by
- chn-vm-ex02.mchp-main.com (10.10.85.144) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2507.12; Thu, 13 Oct 2022 04:35:07 -0700
-Received: from wendy (10.10.115.15) by chn-vm-ex03.mchp-main.com
- (10.10.85.151) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.12 via Frontend
- Transport; Thu, 13 Oct 2022 04:35:06 -0700
-Date:   Thu, 13 Oct 2022 12:34:44 +0100
-From:   Conor Dooley <conor.dooley@microchip.com>
-To:     Palmer Dabbelt <palmer@rivosinc.com>
-CC:     Conor Dooley <conor@kernel.org>, <luc.vanoostenryck@gmail.com>,
-        <linux-sparse@vger.kernel.org>
-Subject: Re: [PATCH] RISC-V: Add support for the zicbom extension
-Message-ID: <Y0f31LvsmVePDzo0@wendy>
-References: <Y0ctngWSXWupub2O@spud>
- <mhng-42e79e92-7b14-4539-aed6-f848ac6f10c4@palmer-ri-x1c9a>
+        Thu, 13 Oct 2022 15:37:22 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 51DDC16698E
+        for <linux-sparse@vger.kernel.org>; Thu, 13 Oct 2022 12:37:21 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1665689840;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=jVovCSzH+8utlFay2NdxOUG1pH0EjSKl/qJoAZkz6d8=;
+        b=PZgMfrFng3lQj06Tg70g8Pju9JpCPoTJxYa5GaJwxRFKh+yLmP7+J4yDYOo0j31E+z14wx
+        7HdoVdVj77CLqtd/KtucNgKFQNeWDp/M5YAuLqiDhElYsbLxA/lLlppW57n6+vW1JibVOF
+        PUsTtEIxOTN6DmvAWWlmx0ixR81Wu1g=
+Received: from mail-qk1-f197.google.com (mail-qk1-f197.google.com
+ [209.85.222.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
+ us-mta-244-EX6Lnt_rONCNt8Zi4O_3Yw-1; Thu, 13 Oct 2022 15:37:19 -0400
+X-MC-Unique: EX6Lnt_rONCNt8Zi4O_3Yw-1
+Received: by mail-qk1-f197.google.com with SMTP id u6-20020a05620a430600b006e47fa02576so1625986qko.22
+        for <linux-sparse@vger.kernel.org>; Thu, 13 Oct 2022 12:37:19 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=mime-version:user-agent:content-transfer-encoding:date:cc:to:from
+         :subject:message-id:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=jVovCSzH+8utlFay2NdxOUG1pH0EjSKl/qJoAZkz6d8=;
+        b=gDWltRkTzdVV4+Nc7o+W+ShaHZcYWqdy4TDJWCjztG9heszEuNg+8WoMCpEKMGoI3D
+         zGo2WQ63AzG1WdULwPyIks4QzDK5R7UhyAoA1Z0E3BEF1Z3WgaSNGRotfMs1pEEPl4yj
+         3e6Yb2GB643N22gLshKC98e/R3Z4XlBNzkHhPjiB31t4AH/fHnEm46hDUdw6M9H/cZyb
+         HXmv/W+dsnWg8mSYdF4p5A6XbxrjBJ8UzJN6McT2/qj4SYS1qRIm0ooU+1pQFjwfaG15
+         a89i/D7CVDm9SZP0hliZJhXEw4F2vjDqYisC9x6R89YQiL9MnNP2dhK8XTSW10/M5UvW
+         dfSg==
+X-Gm-Message-State: ACrzQf2qS03kC+/jrFbXNESzzHCsjDSaIzT7/IrBeqcXn0ezmlqQn6om
+        Yb+StN7+pBFfYDtDeY7t6sJcNS0U2qtWSJ1kDB8kWDt8M/1KpUsJgwjEShrnZgrMDPwC4Ac5Nzh
+        k92xkjTHO/fpsXy3ehO1vT9QGK2G3d3Tb6F8PRJgfniC1+v88dk5X7RQOhNe0B3sIkKflWIoX2Q
+        IC
+X-Received: by 2002:a05:620a:25d4:b0:6bb:f596:97d0 with SMTP id y20-20020a05620a25d400b006bbf59697d0mr1219925qko.411.1665689838593;
+        Thu, 13 Oct 2022 12:37:18 -0700 (PDT)
+X-Google-Smtp-Source: AMsMyM6jT7X/pAKPYmyq2AJLKB1fDw7rmMhDXAhwYk6OKFW2I0QGn7qealSkzWwxBXG0wwg1CEeHgw==
+X-Received: by 2002:a05:620a:25d4:b0:6bb:f596:97d0 with SMTP id y20-20020a05620a25d400b006bbf59697d0mr1219898qko.411.1665689838307;
+        Thu, 13 Oct 2022 12:37:18 -0700 (PDT)
+Received: from t14s.localdomain (c-73-69-212-193.hsd1.ma.comcast.net. [73.69.212.193])
+        by smtp.gmail.com with ESMTPSA id ay39-20020a05620a17a700b006ed30a8fb21sm490071qkb.76.2022.10.13.12.37.17
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 13 Oct 2022 12:37:17 -0700 (PDT)
+Message-ID: <e583356b104fbef6940a06bf360aa59c42bba3c2.camel@redhat.com>
+Subject: address_space and noderef on non-pointer types
+From:   David Malcolm <dmalcolm@redhat.com>
+To:     linux-sparse@vger.kernel.org, linux-toolchains@vger.kernel.org
+Cc:     David Faust <david.faust@oracle.com>,
+        Julia Lawall <julia.lawall@inria.fr>,
+        "Jose E. Marchesi" <jose.marchesi@oracle.com>,
+        Elena Zannoni <elena.zannoni@oracle.com>
+Date:   Thu, 13 Oct 2022 15:37:16 -0400
+User-Agent: Evolution 3.44.4 (3.44.4-1.fc36)
 MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Disposition: inline
-In-Reply-To: <mhng-42e79e92-7b14-4539-aed6-f848ac6f10c4@palmer-ri-x1c9a>
+X-Mimecast-Spam-Score: 0
+X-Mimecast-Originator: redhat.com
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Wed, Oct 12, 2022 at 04:34:00PM -0700, Palmer Dabbelt wrote:
-> On Wed, 12 Oct 2022 14:11:58 PDT (-0700), Conor Dooley wrote:
-> > On Fri, Aug 12, 2022 at 09:25:23AM +0100, Conor Dooley wrote:
-> > > On Wed, Aug 10, 2022 at 08:31:38PM -0700, Palmer Dabbelt wrote:
-> > > > This was recently added to binutils and with any luck will soon be in
-> > > > Linux, without it sparse will fail when trying to build new kernels on
-> > > > systems with new toolchains.
-> > > >
-> > > 
-> > > In passing while testing the zihintpause one:
-> > > Tested-by: Conor Dooley <conor.dooley@microchip.com>
-> > 
-> > Hey Luc,
-> > Would you be able to take a look at this patch and at
-> > https://lore.kernel.org/linux-sparse/YvYQSdQBuZGSit2s@wendy/T/#t
-> > please? They're causing sparse to fail for recent kernels when the
-> > extensions are used.
-> 
-> Just kind of thinking out loud here, but:
+Is it valid to apply the sparse attributes 'noderef' or 'address_space'
+to non-pointers, and if so, what does this mean?
 
-Wee brain dump in response, dunno if I am missing your point & if so
-please correct me...
+I see examples of using them on non-pointers in sparse's own test
+suite.
 
-> 
-> Another option would be to just convert the kernel over to Kconfig-based
-> ifdefs and ignore the -march stuff in sparse.  As per the discussion over
-> here <https://github.com/riscv/riscv-isa-manual/issues/869> it looks like
+For example, in:
+https://git.kernel.org/pub/scm/devel/sparse/sparse.git/tree/validation/type=
+-attribute-as.c
+"struct s" is annotated with
+  __attribute__((address_space(__as)))
 
-hmm, gnu tools meetings - are bystanders like myself allowed to attend?
-I doubt I'd have anything interesting to say, but given the names it
-seems like a good thing to keep an eye on.
+Similarly, there's
+https://git.kernel.org/pub/scm/devel/sparse/sparse.git/tree/validation/node=
+ref.c#n18
+where sparse accepts:
+  struct x __A x;
+e.g.:
+  struct x __attribute__((noderef)) x;
 
-To be blunt, if the toolchain people are not clear on what the craic is
-with how extensions interact how are the rest of us supposed to get it?
-In my naivety I'd expect that sort of distinction to be clear from the
-spec docs...
+The docs for noderef:=20
+https://git.kernel.org/pub/scm/devel/sparse/sparse.git/tree/Documentation/a=
+nnotations.rst#n54
+say:
+"This attribute is to be used on a r-value to specify it cannot be
+dereferenced. A pointer so annotated is in all other aspects exactly
+like a pointer  but trying to actually access anything through it will
+cause a warning."
+What is the intended meaning of "noderef" for a non-pointer?
 
-By kconfig based, do you mean w/ the sort of thing I was messing with in
-this patchset:
-https://lore.kernel.org/linux-riscv/20221006173520.1785507-2-conor@kernel.org/
+Similarly, the docs for "address_space" say:
+"This attribute is to be used on pointers to specify that its target is
+in address space *name* (an identifier or a constant integer)."
 
-I really don't like having ifdef-ery, seems to just result in missed
-conditions as the recent Zicbom stuff has shown. Since it's thinking-
-out-loud o clock - while its not my place to make decisions, I think for
-future extension patchsets I am going to try and push people towards as
-few conditionally defined variables etc as possible.
-I think you said the other day that things like __riscv_zmmul are
-conditionally defined based on the toolchain supporting them right?
-That'd make sense since older toolchains wouldn't know they existed...
-Anyways, what I meant by all that is that instead of ifdef-ery, I'd
-rather IS_ENABLED() with unconditionally {defined,defined} variables so
-that we don't end up with little pockets of code that end up missed
-because of some overlapping extension ifdef hell.
+but don't specify what it means to use in on a non-pointer.
 
-Upstream seems to have a lot of people that run bells & whistles
-toolchains with the new & shiny toys available or the standard
-riscv-gnu-toolchain builds of something significantly older. I'd just be
-a little worried about potentially having poor coverage of some odd
-combinations of things with #ifdefs.
+Sorry if this is a silly question.
 
-> we're going to end up with different string->behavior mappings for user-mode
-> vs privileged software and compilers will be expected to follow the
-> user-mode mappings, so we'll probably have to do this at some point anyway.
+The background here is that I'm a GCC developer and have been
+experimenting with implementing some sparse attributes and warnings
+"natively" in GCC; see e.g. the RFE in GCC bugzilla for implementing
+address_space, noderef and force here:
+https://gcc.gnu.org/bugzilla/show_bug.cgi?id=3D59850 ; I'm trying to get
+my patched GCC to handle Sparse's own test suite and hence running into
+this issue.
 
-Could you explain this one a little more? Even after reading that issue
-I am a little unsure what you mean by different string->behaviour
-mappings. Something along the lines of some Zfoo extension could deny
-user-mode software from using certain instructions but in kernel-land we
-would want to (or need to?) use those instructions?
+Thanks
+Dave
 
-> That would mean sparse only works right for Linux, I'm not sure if that's
-> the design point today or not.  If that's an issue we could still convert
-> Linux over and then just have some sort of "--sparse-ignore-march-on-riscv"
-
-Do we ignore march, or could we just chop the string after the single
-letter extensions? I am not up on how much of (if any) of the march
-string is/would ever be used. I had a quick look at target-riscv.c and
-it seems we just use it to predefine __riscv_foo & set xlen. Does that
-mean if we used ifdef-ery or IS_ENABLED to gate features we could avoid
-having to use new __riscv_foo symbols and therefore not have to
-predefine them in sparse? Maybe I am misunderstanding - something,
-something out of my depth...
-
-> argument so we don't keep coupling kernel builds to sparse updates.  There's
-> going to be a ton of new extensions so this kind of thing is just going to
-> keep happening.
-
-Yeah, it'd be nice to avoid having to deal with new march updates
-constantly, especially since we cannot expect everyone to run ToT sparse
-either. The current situation makes me wonder who outside the pair of us
-is even running sparse in the first place?
-
-Thanks,
-Conor.
-
-
-
-> > > > Signed-off-by: Palmer Dabbelt <palmer@rivosinc.com>
-> > > > ---
-> > > >  target-riscv.c | 4 ++++
-> > > >  1 file changed, 4 insertions(+)
-> > > >
-> > > > diff --git a/target-riscv.c b/target-riscv.c
-> > > > index 217ab7e8..db0f7e57 100644
-> > > > --- a/target-riscv.c
-> > > > +++ b/target-riscv.c
-> > > > @@ -19,6 +19,7 @@
-> > > >  #define RISCV_GENERIC	(RISCV_MUL|RISCV_DIV|RISCV_ATOMIC|RISCV_FPU)
-> > > >  #define RISCV_ZICSR	(1 << 10)
-> > > >  #define RISCV_ZIFENCEI	(1 << 11)
-> > > > +#define RISCV_ZICBOM	(1 << 12)
-> > > >
-> > > >  static unsigned int riscv_flags;
-> > > >
-> > > > @@ -41,6 +42,7 @@ static void parse_march_riscv(const char *arg)
-> > > >  		{ "c",		RISCV_COMP },
-> > > >  		{ "_zicsr",	RISCV_ZICSR },
-> > > >  		{ "_zifencei",	RISCV_ZIFENCEI },
-> > > > +		{ "_zicbom",	RISCV_ZICBOM },
-> > > >  	};
-> > > >  	int i;
-> > > >
-> > > > @@ -131,6 +133,8 @@ static void predefine_riscv(const struct target *self)
-> > > >  		predefine("__riscv_zicsr", 1, "1");
-> > > >  	if (riscv_flags & RISCV_ZIFENCEI)
-> > > >  		predefine("__riscv_zifencei", 1, "1");
-> > > > +	if (riscv_flags & RISCV_ZICBOM)
-> > > > +		predefine("__riscv_zicbom", 1, "1");
-> > > >
-> > > >  	if (cmodel)
-> > > >  		predefine_strong("__riscv_cmodel_%s", cmodel);
-> > > > --
-> > > > 2.34.1
-> > > >
-> > > 
-> 
