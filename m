@@ -1,97 +1,58 @@
-Return-Path: <linux-sparse-owner@kernel.org>
+Return-Path: <linux-sparse-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 57E5EC4321E
-	for <linux-sparse@archiver.kernel.org>; Fri, 25 Nov 2022 18:51:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 419B6C46467
+	for <linux-sparse@archiver.kernel.org>; Mon,  2 Jan 2023 09:06:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229570AbiKYSvA (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Fri, 25 Nov 2022 13:51:00 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57320 "EHLO
+        id S231550AbjABJGJ (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Mon, 2 Jan 2023 04:06:09 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35648 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229554AbiKYSu7 (ORCPT
+        with ESMTP id S229923AbjABJGI (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 25 Nov 2022 13:50:59 -0500
-Received: from mail-yb1-xb32.google.com (mail-yb1-xb32.google.com [IPv6:2607:f8b0:4864:20::b32])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 44FDE53EEB;
-        Fri, 25 Nov 2022 10:50:59 -0800 (PST)
-Received: by mail-yb1-xb32.google.com with SMTP id k206so4784820ybk.5;
-        Fri, 25 Nov 2022 10:50:59 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=QlXZSq63uGUHYf3xEcy5GQyj8k3wzV3aaEBxQdNWSY4=;
-        b=Ru0IfZVgDAD8+P3Vd/Cj6cxPxF1il1m19ndBb00b7fH4eUv5LyC2DmjHZHb/moUV8a
-         JsHge43IkuVIWxO44XV59e4g09b+Elr2SLBiQ6IncYJ1qCu198pX6dbQvCzxvfKiNRjG
-         vMUVcr5U+8Kk9sD8v59zmjFHrsosxLm+CbmQdD8r3TjVTxKRuPXV81ZDSQBaUNHROONl
-         0sJ91C8DtHRaoHSPXNEPRQyHQZe2GD6/JLRFVBnyzzpmWc/pzDOp14qCif7nGdWMzb9m
-         nX3jSAQdqVCWAjAgn/5l8aaKymxs3OYuzuTQaUoOYnVYES/FgdTTd19Oy2jA8KVKnQt6
-         cR9A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=QlXZSq63uGUHYf3xEcy5GQyj8k3wzV3aaEBxQdNWSY4=;
-        b=kJjaXTX9hLylnIcHTbZXVSV5Pb8ZjJJ8ga6BybvbLjJmBXdysENQSOuILdlQqZEZmX
-         dghx3D7UcsxYH2xyeE8LHlSvAPliTSvtHPnf36b3zWCEDivZTO3NRbj6D+zcwPSaYFT6
-         3uXASlfDtiJr62nnYmc1ztG+ysRRfEQ8Clkx4n4R1gxhzTxiwjJdG6Xi4rjDdeCSfbEU
-         7r6djOCQ38AdaOSbrY93C95oNsGGe7g1gJ6gSkwIaf1e1EPBdeiGu1ts5rZv1fBqRMlb
-         NwqD0OmBT2OOZh67WWogfarOPxW5y/QIkQ8UbB94DMxLLxqNM9U+Pe36WP0JMwX5E9cr
-         l8Xg==
-X-Gm-Message-State: ANoB5plCg6+NERWoGQT37jiP0faO2TjQD/Ilccaef1jWSANqpA216pRG
-        ZWjet59XwkxeJ2smC4e6y62B2ejiLTamHSFjdGY=
-X-Google-Smtp-Source: AA0mqf6XrludxqskbuOzV8FiitKfkb9O012hOxOMjMob+MhSVyQo30OjRMO2zb8ZSrAvK81lTzgc9Zh74jFhbyh+76s=
-X-Received: by 2002:a25:ca58:0:b0:6f4:3ced:f7f8 with SMTP id
- a85-20020a25ca58000000b006f43cedf7f8mr68149ybg.489.1669402258512; Fri, 25 Nov
- 2022 10:50:58 -0800 (PST)
+        Mon, 2 Jan 2023 04:06:08 -0500
+Received: from mail.slidebizcompany.com (mail.slidebizcompany.com [135.125.235.171])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 24670BCD
+        for <linux-sparse@vger.kernel.org>; Mon,  2 Jan 2023 01:06:03 -0800 (PST)
+Received: by mail.slidebizcompany.com (Postfix, from userid 1002)
+        id A42CAA2475; Mon,  2 Jan 2023 09:05:42 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=slidebizcompany.com;
+        s=mail; t=1672650351;
+        bh=f01OOv7iZ6eKP39nAJoyJ+/Cmpugf6hkYKbYNn4lotU=;
+        h=Date:From:To:Subject:From;
+        b=OHepDHcgO65eTr2BzRp4qkcDh4toRY8rwozBwSTaYm/pBCXRT/yjO9o1KNs9bwz5H
+         5MtlGuJD6eIA270uttKhDJHKpWCyYidCbgZSFuo3nhYQnR8kcmLIXhP8y1Q1o132F+
+         zu0Tbv5XIDEGq/Va7jUugYjywxDjnU/5b2UIfJ6qP3cCXje23edRddDwv1xo+rR4mw
+         CMtkaDUzKba+WnRP1B0zbYisqABVnOs5oreGTyvI6+4oW+WTpGjmeVc7ZxOhZQrfZP
+         VxFhcrkYWHbT8w03dxZ9fqlYFaoA7WmDecKo4cwnwedGKJ1CnFlZEpj5NIILCy4069
+         OcT5d2+8SdQ3g==
+Received: by mail.slidebizcompany.com for <linux-sparse@vger.kernel.org>; Mon,  2 Jan 2023 09:05:35 GMT
+Message-ID: <20230102074500-0.1.53.1ov3i.0.vlhf4a2upq@slidebizcompany.com>
+Date:   Mon,  2 Jan 2023 09:05:35 GMT
+From:   "Miguel Garcia" <miguel.garcia@slidebizcompany.com>
+To:     <linux-sparse@vger.kernel.org>
+Subject: Servicio de la flota
+X-Mailer: mail.slidebizcompany.com
 MIME-Version: 1.0
-References: <20221125154947.2163498-1-Liam.Howlett@oracle.com>
-In-Reply-To: <20221125154947.2163498-1-Liam.Howlett@oracle.com>
-From:   Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
-Date:   Fri, 25 Nov 2022 19:50:47 +0100
-Message-ID: <CANiq72ntFXb+ZhBqgBAMu2n8wcgJLZRZC1rmBVvL5m+K1Nhw2w@mail.gmail.com>
-Subject: Re: [PATCH] tools: Rename __fallthrough to fallthrough
-To:     Liam Howlett <liam.howlett@oracle.com>
-Cc:     "linux-perf-users@vger.kernel.org" <linux-perf-users@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "llvm@lists.linux.dev" <llvm@lists.linux.dev>,
-        "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Ingo Molnar <mingo@redhat.com>,
-        Mark Rutland <mark.rutland@arm.com>,
-        Miguel Ojeda <ojeda@kernel.org>,
-        Rasmus Villemoes <linux@rasmusvillemoes.dk>,
-        Arnaldo Carvalho de Melo <acme@redhat.com>,
-        Nathan Chancellor <nathan@kernel.org>,
-        Nick Desaulniers <ndesaulniers@google.com>,
-        Tom Rix <trix@redhat.com>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Fri, Nov 25, 2022 at 4:50 PM Liam Howlett <liam.howlett@oracle.com> wrote:
->
-> Rename the fallthrough attribute to better align with the kernel
-> version.  Copy the definition from include/linux/compiler_attributes.h
-> including the #else clause.  Adding the #else clause allows the tools
-> compiler.h header to drop the check for a definition entirely and keeps
-> both definitions together.
+Buenos d=C3=ADas:
 
-Thanks for doing this! Consistency with `tools/` is nice to have indeed.
+Le escribo para hablarle sobre una de las mejores herramientas GPS en el =
+mercado.
 
-I see that `compiler-gcc.h` is included for Clang too in `tools/`, so
-it looks fine to me:
+La herramienta, que me gustar=C3=ADa presentarle brevemente, dispone de m=
+uchas funciones =C3=BAtiles para su trabajo, que optimizan los procesos d=
+e transporte y le ayudan a realizar tareas de campo de manera m=C3=A1s ef=
+iciente.
 
-    Reviewed-by: Miguel Ojeda <ojeda@kernel.org>
+=C2=BFQuiere conocer los detalles?
 
-In the future, it could be nice to enable the warning for Clang too,
-though I see it requires a few cleanups.
 
-Another idea is to use something similar to `compiler_attributes.h` in
-`tools/` (perhaps just copying it and removing what is not needed?).
-
-Cheers,
-Miguel
+Atentamente,
+Miguel Garcia
