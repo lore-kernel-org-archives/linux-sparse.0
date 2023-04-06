@@ -2,61 +2,43 @@ Return-Path: <linux-sparse-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7E1FDC7618D
-	for <linux-sparse@archiver.kernel.org>; Thu,  6 Apr 2023 20:03:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 655D5C76196
+	for <linux-sparse@archiver.kernel.org>; Thu,  6 Apr 2023 21:11:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236830AbjDFUDL (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Thu, 6 Apr 2023 16:03:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38742 "EHLO
+        id S229674AbjDFVLI (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Thu, 6 Apr 2023 17:11:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43342 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229600AbjDFUDK (ORCPT
+        with ESMTP id S237369AbjDFVLH (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 6 Apr 2023 16:03:10 -0400
-Received: from mail-yw1-x112a.google.com (mail-yw1-x112a.google.com [IPv6:2607:f8b0:4864:20::112a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A41AE83D0;
-        Thu,  6 Apr 2023 13:03:09 -0700 (PDT)
-Received: by mail-yw1-x112a.google.com with SMTP id 00721157ae682-536af432ee5so761150177b3.0;
-        Thu, 06 Apr 2023 13:03:09 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112; t=1680811389; x=1683403389;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=lFrdCeDCOJkHQGDyFu7yRUwnrgoVUUx7k0c1Neje6RM=;
-        b=fkVai4FnC0lB+EnDg9FQsFrd/PbAgdmTtU6AOiIa8YwIAlVMTCf0R3kWHL9ZGmsE40
-         IwBT6ePo/Rz23Sr8X0MftHYStPGTuXDN6BiWGM0qB3QPD+xedt6G9QHbExJlEH6AgrQP
-         kR37B350cFN4uLxmlRpeGNV9g/h0DhphVVUZ5zFl4VROMjbqbcKRX3vox69dHOKkwCto
-         rlj3IyC9KTiyekNYFcRSTOGGRwgBzIKpuudtjNArayKwSOHjPAjN5B0e7fyQ7K/0AJBA
-         q0tx5DE4PetsJdBUwvgyXmCuAclVdiVhLisQ2kfLxUnzFSruzelRAUA4GPghTSdCbFYK
-         zy6g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1680811389; x=1683403389;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=lFrdCeDCOJkHQGDyFu7yRUwnrgoVUUx7k0c1Neje6RM=;
-        b=Jcfa4HVVygrg0yqHrcsBRZIDvIP9XVtwRqrrp3UpX4H7zXDeL7Q4BTsLSku66XQBXS
-         d+m4YsXDt5h0xGM9WYYQpPrfPx1N6J/jtlXLGmMNbgw8TLTTHibCJxtLO+hLrbazqjzm
-         CeJNPqAtndy39qyxO0eQw5QkZfCbZFeP6YUoDk+yndzLPrpPxmEP4oQ+wz2AZ/XrGUxJ
-         kXwaHic/vVszpv93jQu3IUUaYcEHf7k7KOBt5EBnT+mHRp47ANPhECCuHbyqqeuiHI0T
-         g84tQBTsfTyGDVrfg1vMdtV3NJZwHRYDZYBic/NXW9Xx/od5pxTjvpfSqSu9eWab0Nyy
-         ws+g==
-X-Gm-Message-State: AAQBX9dPdbESWkZRJ/isSTGrGahHf+fmhSEvLc/7CYQ9sIR4n5ePA3/X
-        c5YItUu2P6FJUMeYy4kOjKy7Pn9vPBPUAmt3XFk=
-X-Google-Smtp-Source: AKy350aANX+UTxPTPh2+zIsCbbdQdpecQ1XqZIGaIBnAYEiVmox+pwYQ2BDIID4Tc/Vw0OZ3VsJGHNzZDnE+tHV9BAg=
-X-Received: by 2002:a81:c509:0:b0:52e:e095:d840 with SMTP id
- k9-20020a81c509000000b0052ee095d840mr6802785ywi.0.1680811388797; Thu, 06 Apr
- 2023 13:03:08 -0700 (PDT)
-MIME-Version: 1.0
-References: <20221125154947.2163498-1-Liam.Howlett@oracle.com>
- <CANiq72ntFXb+ZhBqgBAMu2n8wcgJLZRZC1rmBVvL5m+K1Nhw2w@mail.gmail.com> <20230406195830.ieiozetmk7qjllol@revolver>
-In-Reply-To: <20230406195830.ieiozetmk7qjllol@revolver>
-From:   Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
-Date:   Thu, 6 Apr 2023 22:02:57 +0200
-Message-ID: <CANiq72=C4OCcbX4C-ap3YTm5Ni6RdskQ67rt4iWs0_1hTe1rkw@mail.gmail.com>
-Subject: Re: [PATCH] tools: Rename __fallthrough to fallthrough
-To:     "Liam R. Howlett" <Liam.Howlett@oracle.com>
-Cc:     "linux-perf-users@vger.kernel.org" <linux-perf-users@vger.kernel.org>,
+        Thu, 6 Apr 2023 17:11:07 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9338A83DC;
+        Thu,  6 Apr 2023 14:11:06 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 2D1BA60FC8;
+        Thu,  6 Apr 2023 21:11:06 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6952CC433D2;
+        Thu,  6 Apr 2023 21:11:05 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1680815465;
+        bh=2yegvndSNWcDDDZa3DYn4RZfHLTWagweI7FoXC1lxE4=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=dB8rOFd6TPZOUe8GnmRNJbwWjs3N4zkHlmfqgXzf9KpWRhaijRFTAttjV1HfYkUup
+         n4COpwx0bJdBq+l4xXUBWDkpfwyGHiLNWLFsDjOCbiIUyjEl0cS4Az0AN9Dy7XG2Ji
+         x62D8KqLxplxhAwrOIs5HHyJv6HCcQ/aSV6GSyOgoFginudc42SxDrQd6ozuOjvnC8
+         Hw2WqJIhAoeCLAG9G0rqUO16lbOqi47I3NTRkhzLttpVBnyWiNYTnYiLIhSJ9b+6X9
+         nfQ8VSRfPvD4UCrU0/sZ8Isf4tfKdF43kxmEzfuSGYvduJqNN2A3onBJIruPLPzPoE
+         EB7918ghh8XEA==
+Received: by quaco.ghostprotocols.net (Postfix, from userid 1000)
+        id 14D244052D; Thu,  6 Apr 2023 18:11:03 -0300 (-03)
+Date:   Thu, 6 Apr 2023 18:11:03 -0300
+From:   Arnaldo Carvalho de Melo <acme@kernel.org>
+To:     Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
+Cc:     "Liam R. Howlett" <Liam.Howlett@oracle.com>,
+        "linux-perf-users@vger.kernel.org" <linux-perf-users@vger.kernel.org>,
         "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
         "llvm@lists.linux.dev" <llvm@lists.linux.dev>,
         "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>,
@@ -69,19 +51,30 @@ Cc:     "linux-perf-users@vger.kernel.org" <linux-perf-users@vger.kernel.org>,
         Nathan Chancellor <nathan@kernel.org>,
         Nick Desaulniers <ndesaulniers@google.com>,
         Tom Rix <trix@redhat.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Subject: Re: [PATCH] tools: Rename __fallthrough to fallthrough
+Message-ID: <ZC81Z4p8WnYtVwFT@kernel.org>
+References: <20221125154947.2163498-1-Liam.Howlett@oracle.com>
+ <CANiq72ntFXb+ZhBqgBAMu2n8wcgJLZRZC1rmBVvL5m+K1Nhw2w@mail.gmail.com>
+ <20230406195830.ieiozetmk7qjllol@revolver>
+ <CANiq72=C4OCcbX4C-ap3YTm5Ni6RdskQ67rt4iWs0_1hTe1rkw@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CANiq72=C4OCcbX4C-ap3YTm5Ni6RdskQ67rt4iWs0_1hTe1rkw@mail.gmail.com>
+X-Url:  http://acmel.wordpress.com
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Thu, Apr 6, 2023 at 9:58=E2=80=AFPM Liam R. Howlett <Liam.Howlett@oracle=
-.com> wrote:
->
-> Any chance of this being accepted?  I'm looking to use this in the radix
-> test suite and would rather not duplicate code.
+Em Thu, Apr 06, 2023 at 10:02:57PM +0200, Miguel Ojeda escreveu:
+> On Thu, Apr 6, 2023 at 9:58 PM Liam R. Howlett <Liam.Howlett@oracle.com> wrote:
+> >
+> > Any chance of this being accepted?  I'm looking to use this in the radix
+> > test suite and would rather not duplicate code.
+> 
+> That would be up to the `tools/perf/` maintainers.
 
-That would be up to the `tools/perf/` maintainers.
+Thanks, applied,
 
-Cheers,
-Miguel
+- Arnaldo
