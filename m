@@ -2,58 +2,89 @@ Return-Path: <linux-sparse-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 59BC7C77B7C
-	for <linux-sparse@archiver.kernel.org>; Thu, 11 May 2023 08:12:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 97263C77B75
+	for <linux-sparse@archiver.kernel.org>; Wed, 17 May 2023 12:47:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229888AbjEKIMQ (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Thu, 11 May 2023 04:12:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39272 "EHLO
+        id S231750AbjEQMrg (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Wed, 17 May 2023 08:47:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58438 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229812AbjEKIMQ (ORCPT
+        with ESMTP id S231759AbjEQMr3 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 11 May 2023 04:12:16 -0400
-X-Greylist: delayed 390 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Thu, 11 May 2023 01:12:13 PDT
-Received: from mail.clydespay.com (mail.clydespay.com [135.125.235.171])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1EE2F2703
-        for <linux-sparse@vger.kernel.org>; Thu, 11 May 2023 01:12:13 -0700 (PDT)
-Received: by mail.clydespay.com (Postfix, from userid 1002)
-        id 65CE0A2B99; Thu, 11 May 2023 08:05:27 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=clydespay.com;
-        s=mail; t=1683792341;
-        bh=f01OOv7iZ6eKP39nAJoyJ+/Cmpugf6hkYKbYNn4lotU=;
-        h=Date:From:To:Subject:From;
-        b=JLGbd7RWzRYxSfdIz3CcmcPX4jN+NBH7i2EKjQSzlxcn0ScAkdbOjIHPGZa02fWLc
-         Pe1HUjkRGlYF3byzGR6sl50xFNMvY5ihCwXoKarblIGRy108SdH06HM3GEaHgmrUDF
-         uXPAYF9rANHu7dcNIhuKusQ5gpxhok/WxvKUzIbsxcCY1kC1vlsrFZ4GiPNmscQ1Sr
-         3xnkBgA8lgjPuITrjNDOznfD2FrgfNmUn2H17WCX7davrmswQt/oVze+JrrOXV5/Gi
-         Y7w9rKKCtfoG8/v87ol3Z6uBHwoEvbm8mGo3Ikoo+Uu/qvGyw+aX/+bhxUHquOzQOB
-         290/DJdvr+g+Q==
-Received: by mail.clydespay.com for <linux-sparse@vger.kernel.org>; Thu, 11 May 2023 08:05:22 GMT
-Message-ID: <20230511064500-0.1.7n.257u3.0.mvcsq5xgqn@clydespay.com>
-Date:   Thu, 11 May 2023 08:05:22 GMT
-From:   "Miguel Garcia" <miguel.garcia@clydespay.com>
-To:     <linux-sparse@vger.kernel.org>
-Subject: Servicio de la flota
-X-Mailer: mail.clydespay.com
+        Wed, 17 May 2023 08:47:29 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3BFA712C;
+        Wed, 17 May 2023 05:47:28 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id C05BD646CD;
+        Wed, 17 May 2023 12:47:27 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id BB90FC433EF;
+        Wed, 17 May 2023 12:47:24 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1684327647;
+        bh=NTct6PtjEtuPM5wlTLSiKa6Oz8nevVfIM3Gsc53yGng=;
+        h=From:To:Cc:Subject:Date:From;
+        b=NE2fqtYq5UrGRjgu9TsVFmF3Q0M2nt7uV0wRr//Fs9MOw+oFwH1in5Vtj+NEFRHO8
+         Usx11UMUFfFJq6gLSiF4HVKCDHoU814M6SC6NFTVmQah+i/xFJki4Ohni3CJNlgiex
+         ZJR78/8DCfipgYdoReKXPt+L3DCtV1v8ClacFS9/YgdQd92nT+w37T1lGwiK/eyUk1
+         gf1MW9X1MvJ+qIRhE2Nc078U5PwcWGDVk6olMWi8+XvjSr/ZBmC4MABzfCR3SOkDBI
+         NeqM1VvceE615MHVjXdzDvXMabe8bOV5hwLRFk5QjYMRF0Mbd+K73A1X56vCUEgDUP
+         oXw2Te19MbvmQ==
+From:   Arnd Bergmann <arnd@kernel.org>
+To:     Steven Rostedt <rostedt@goodmis.org>,
+        Masami Hiramatsu <mhiramat@kernel.org>
+Cc:     linux-trace-kernel@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>,
+        Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
+        Kees Cook <keescook@chromium.org>,
+        Bart Van Assche <bvanassche@acm.org>,
+        Sami Tolvanen <samitolvanen@google.com>,
+        "Peter Zijlstra (Intel)" <peterz@infradead.org>,
+        linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: [PATCH] tracing: make ftrace_likely_update() declaration visible
+Date:   Wed, 17 May 2023 14:47:12 +0200
+Message-Id: <20230517124721.929540-1-arnd@kernel.org>
+X-Mailer: git-send-email 2.39.2
 MIME-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Buenos d=C3=ADas:
+From: Arnd Bergmann <arnd@arndb.de>
 
-Le escribo para hablarle sobre una de las mejores herramientas GPS en el =
-mercado.
+This function is only used when CONFIG_TRACE_BRANCH_PROFILING is
+set, and the declaration is hidden behind this Kconfig symbol,
+which causes a warning if disabled:
 
-La herramienta, que me gustar=C3=ADa presentarle brevemente, dispone de m=
-uchas funciones =C3=BAtiles para su trabajo, que optimizan los procesos d=
-e transporte y le ayudan a realizar tareas de campo de manera m=C3=A1s ef=
-iciente.
+kernel/trace/trace_branch.c:205:6: error: no previous prototype for 'ftrace_likely_update' [-Werror=missing-prototypes]
 
-=C2=BFQuiere conocer los detalles?
+Move the declaration out of the #ifdef to avoid the warning.
 
+Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+---
+ include/linux/compiler.h | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
 
-Atentamente,
-Miguel Garcia
+diff --git a/include/linux/compiler.h b/include/linux/compiler.h
+index 947a60b801db..d7779a18b24f 100644
+--- a/include/linux/compiler.h
++++ b/include/linux/compiler.h
+@@ -12,11 +12,10 @@
+  * Note: DISABLE_BRANCH_PROFILING can be used by special lowlevel code
+  * to disable branch tracing on a per file basis.
+  */
+-#if defined(CONFIG_TRACE_BRANCH_PROFILING) \
+-    && !defined(DISABLE_BRANCH_PROFILING) && !defined(__CHECKER__)
+ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
+ 			  int expect, int is_constant);
+-
++#if defined(CONFIG_TRACE_BRANCH_PROFILING) \
++    && !defined(DISABLE_BRANCH_PROFILING) && !defined(__CHECKER__)
+ #define likely_notrace(x)	__builtin_expect(!!(x), 1)
+ #define unlikely_notrace(x)	__builtin_expect(!!(x), 0)
+ 
+-- 
+2.39.2
+
