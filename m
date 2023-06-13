@@ -2,89 +2,110 @@ Return-Path: <linux-sparse-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7870CC77B75
-	for <linux-sparse@archiver.kernel.org>; Wed, 17 May 2023 18:44:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 382BEC88CB2
+	for <linux-sparse@archiver.kernel.org>; Tue, 13 Jun 2023 07:38:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229677AbjEQSoQ convert rfc822-to-8bit (ORCPT
+        id S235218AbjFMHif convert rfc822-to-8bit (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Wed, 17 May 2023 14:44:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38972 "EHLO
+        Tue, 13 Jun 2023 03:38:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38350 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229512AbjEQSoP (ORCPT
+        with ESMTP id S234472AbjFMHie (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 17 May 2023 14:44:15 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C6D741BC;
-        Wed, 17 May 2023 11:44:13 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 5121263E63;
-        Wed, 17 May 2023 18:44:13 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5F848C433D2;
-        Wed, 17 May 2023 18:44:11 +0000 (UTC)
-Date:   Wed, 17 May 2023 14:44:09 -0400
-From:   Steven Rostedt <rostedt@goodmis.org>
-To:     Linus Torvalds <torvalds@linux-foundation.org>
-Cc:     Arnd Bergmann <arnd@kernel.org>,
-        Masami Hiramatsu <mhiramat@kernel.org>,
-        linux-trace-kernel@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>,
-        Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
-        Kees Cook <keescook@chromium.org>,
-        Bart Van Assche <bvanassche@acm.org>,
-        Sami Tolvanen <samitolvanen@google.com>,
-        "Peter Zijlstra (Intel)" <peterz@infradead.org>,
-        linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH] tracing: make ftrace_likely_update() declaration
- visible
-Message-ID: <20230517144409.3f790524@gandalf.local.home>
-In-Reply-To: <CAHk-=wh+129KAcegJqvo2PKPUK3yw5qQwF0LcHofdT0bPbs8iQ@mail.gmail.com>
-References: <20230517124721.929540-1-arnd@kernel.org>
-        <CAHk-=wh+129KAcegJqvo2PKPUK3yw5qQwF0LcHofdT0bPbs8iQ@mail.gmail.com>
-X-Mailer: Claws Mail 3.17.8 (GTK+ 2.24.33; x86_64-pc-linux-gnu)
+        Tue, 13 Jun 2023 03:38:34 -0400
+Received: from mail-yw1-f179.google.com (mail-yw1-f179.google.com [209.85.128.179])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6D7E3AA;
+        Tue, 13 Jun 2023 00:38:33 -0700 (PDT)
+Received: by mail-yw1-f179.google.com with SMTP id 00721157ae682-56d5492850dso6764397b3.0;
+        Tue, 13 Jun 2023 00:38:33 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1686641912; x=1689233912;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=5HYSRhDPwRoW06pJwnVk/r95T6M6w1GodDXdJDLZ7hw=;
+        b=ErTBJHcVFLs7fU0t/WS8JU/lWBKznx7RfhF6qFEZ8Mzwf/SU2w2i1gPeK9nEePwyYK
+         0O46g2jbCe27596CJMeQpACBJtUEZZAqKrDyCkEbC7sWHdgfM7sQXfyeFABqXAiW6vVI
+         bn19WtZNg8YMqV62sr8OjzDogN4Nm71KrzZtCptZ2bptbWlCe6zE+j0n2nNYkEQnSlXH
+         Ybu00AsNs6thwz97zcHDI5QyhicemJLbwQsfCQ/sJQCNmXRSjSQqHn3VYf1dDNQ0iPyB
+         mhJCWvS2hDuSwm5mB7A5rQg2SJAj2qBMEx7LPZCvIbnnSM/BzVv0NWHzfNr+15VQn9Xi
+         +uZg==
+X-Gm-Message-State: AC+VfDw8Q07fQh8YZLYGWdyJsuinzEGW1zC0KOcQRifEXz/e+SVrOLUl
+        Stq5web72+MTSJNDtSIpwLLalouC9V7NxA==
+X-Google-Smtp-Source: ACHHUZ5Xy96REM2G8fMuYRpTXaL0Tx08J209KzAHyTv/iamcC284Vmx7eV+yhc2IHk03D3kppazIwA==
+X-Received: by 2002:a25:cf8a:0:b0:ba6:b00d:b865 with SMTP id f132-20020a25cf8a000000b00ba6b00db865mr779527ybg.56.1686641912378;
+        Tue, 13 Jun 2023 00:38:32 -0700 (PDT)
+Received: from mail-yb1-f181.google.com (mail-yb1-f181.google.com. [209.85.219.181])
+        by smtp.gmail.com with ESMTPSA id e72-20020a25e74b000000b00bc8f984984asm1258554ybh.35.2023.06.13.00.38.32
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 13 Jun 2023 00:38:32 -0700 (PDT)
+Received: by mail-yb1-f181.google.com with SMTP id 3f1490d57ef6-bc4e167c4b2so3115260276.3;
+        Tue, 13 Jun 2023 00:38:32 -0700 (PDT)
+X-Received: by 2002:a25:4245:0:b0:ba8:1ebe:9b96 with SMTP id
+ p66-20020a254245000000b00ba81ebe9b96mr762286yba.1.1686641911996; Tue, 13 Jun
+ 2023 00:38:31 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+References: <20230613021643.3330661-1-gongruiqi@huaweicloud.com>
+In-Reply-To: <20230613021643.3330661-1-gongruiqi@huaweicloud.com>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Tue, 13 Jun 2023 09:38:20 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdXGG2xu+nXJt6CSTfV6aM=U=hMW+DiDgP3RhOw8+O8y=A@mail.gmail.com>
+Message-ID: <CAMuHMdXGG2xu+nXJt6CSTfV6aM=U=hMW+DiDgP3RhOw8+O8y=A@mail.gmail.com>
+Subject: Re: [PATCH] pinctrl: renesas: remove checker warnings: x | !y
+To:     "GONG, Ruiqi" <gongruiqi@huaweicloud.com>
+Cc:     Linus Walleij <linus.walleij@linaro.org>,
+        linux-renesas-soc@vger.kernel.org, linux-gpio@vger.kernel.org,
+        linux-kernel@vger.kernel.org, gongruiqi1@huawei.com,
+        linux-sparse@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 8BIT
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Wed, 17 May 2023 09:39:41 -0700
-Linus Torvalds <torvalds@linux-foundation.org> wrote:
+Hi Gong,
 
-> On Wed, May 17, 2023 at 5:47 AM Arnd Bergmann <arnd@kernel.org> wrote:
-> >
-> > From: Arnd Bergmann <arnd@arndb.de>
-> >
-> > This function is only used when CONFIG_TRACE_BRANCH_PROFILING is
-> > set, and the declaration is hidden behind this Kconfig symbol,
-> > which causes a warning if disabled:  
-> 
-> That explanation is not very clear.
-> 
-> The problem is that the tracing code itself is built with
-> DISABLE_BRANCH_PROFILING, in order to not recurse. And that hides the
-> declaration when the definition is compiled, leading to the problem.
-> 
-> CONFIG_TRACE_BRANCH_PROFILING isn't the problem in itself - *that*
-> part of the test is consistent (not used, not declared, and not
-> compiled if it is off).
-> 
-> The problem is that DISABLE_BRANCH_PROFILING case, where it is used
-> elsewhere, but not declared when it is itself compiled.
-> 
-> I applied the patch, but I tried to reword the explanation to be more
-> clear. I may have failed.
-> 
+On Tue, Jun 13, 2023 at 4:13 AM GONG, Ruiqi <gongruiqi@huaweicloud.com> wrote:
+> Eliminate the following Sparse reports when building with C=1:
+>
+> drivers/pinctrl/renesas/pinctrl-rzn1.c:187:52: warning: dubious: x | !y
+> drivers/pinctrl/renesas/pinctrl-rzn1.c:193:52: warning: dubious: x | !y
+>
+> Signed-off-by: GONG, Ruiqi <gongruiqi@huaweicloud.com>
 
-That's pretty much it. The DISABLE_BRANCH_PROFILING is to disable it in
-various places where it will crash if used (vdso is one of them). It is
-also used to prevent the code that declares it from recursing on itself (as
-you stated).
+Thanks for your patch!
 
-Thus, the issue is simply that the declaration is hidden by the recursion
-protection where the function is actually defined.
+Looks like sparse needs to be taught the "|" is not used in a boolean
+context here?
 
-Reviewed-by: Steven Rostedt (Google) <rostedt@goodmis.org>
+> --- a/drivers/pinctrl/renesas/pinctrl-rzn1.c
+> +++ b/drivers/pinctrl/renesas/pinctrl-rzn1.c
+> @@ -184,13 +184,15 @@ static void rzn1_hw_set_lock(struct rzn1_pinctrl *ipctl, u8 lock, u8 value)
+>          * address | 1.
+>          */
+>         if (lock & LOCK_LEVEL1) {
+> -               u32 val = ipctl->lev1_protect_phys | !(value & LOCK_LEVEL1);
+> +               u32 val = ipctl->lev1_protect_phys |
+> +                       (value & LOCK_LEVEL1 ? 0 : 1);
+>
+>                 writel(val, &ipctl->lev1->status_protect);
+>         }
+>
+>         if (lock & LOCK_LEVEL2) {
+> -               u32 val = ipctl->lev2_protect_phys | !(value & LOCK_LEVEL2);
+> +               u32 val = ipctl->lev2_protect_phys |
+> +                       (value & LOCK_LEVEL2 ? 0 : 1);
+>
+>                 writel(val, &ipctl->lev2->status_protect);
+>         }
 
--- Steve
+Gr{oetje,eeting}s,
+
+                        Geert
+
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
