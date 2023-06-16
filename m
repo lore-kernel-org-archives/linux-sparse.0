@@ -2,123 +2,179 @@ Return-Path: <linux-sparse-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0EBFBC7EE2E
-	for <linux-sparse@archiver.kernel.org>; Tue, 13 Jun 2023 09:45:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7A06FEB64D7
+	for <linux-sparse@archiver.kernel.org>; Fri, 16 Jun 2023 18:45:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240443AbjFMJpk (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Tue, 13 Jun 2023 05:45:40 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58808 "EHLO
+        id S231144AbjFPSp6 (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Fri, 16 Jun 2023 14:45:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58872 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240448AbjFMJph (ORCPT
+        with ESMTP id S229561AbjFPSp6 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 13 Jun 2023 05:45:37 -0400
-Received: from dggsgout11.his.huawei.com (dggsgout11.his.huawei.com [45.249.212.51])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 23AE1173C;
-        Tue, 13 Jun 2023 02:45:33 -0700 (PDT)
-Received: from mail02.huawei.com (unknown [172.30.67.153])
-        by dggsgout11.his.huawei.com (SkyGuard) with ESMTP id 4QgNvs0klWz4f3wRQ;
-        Tue, 13 Jun 2023 17:45:29 +0800 (CST)
-Received: from [10.67.110.48] (unknown [10.67.110.48])
-        by APP1 (Coremail) with SMTP id cCh0CgDHIBu4OohkevjXKw--.29140S2;
-        Tue, 13 Jun 2023 17:45:29 +0800 (CST)
-Message-ID: <4a501c9f-245f-5ecd-46e9-dc0e71abf8a5@huaweicloud.com>
-Date:   Tue, 13 Jun 2023 17:45:28 +0800
+        Fri, 16 Jun 2023 14:45:58 -0400
+Received: from mail-wm1-x329.google.com (mail-wm1-x329.google.com [IPv6:2a00:1450:4864:20::329])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B650435AD
+        for <linux-sparse@vger.kernel.org>; Fri, 16 Jun 2023 11:45:56 -0700 (PDT)
+Received: by mail-wm1-x329.google.com with SMTP id 5b1f17b1804b1-3f8d0d68530so9650855e9.0
+        for <linux-sparse@vger.kernel.org>; Fri, 16 Jun 2023 11:45:56 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1686941154; x=1689533154;
+        h=content-disposition:mime-version:message-id:subject:cc:to:from:date
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=sxu2k8WVGEvm9vtT7HHKa/tRoMu/61Yzm9RfmzLYoAY=;
+        b=J5YFPt/ItgLmRb9pTwMiA6FgEtSnJ4ZUUSu5/bd7QuoOwpPYdbFBjLYPe0w+iYHY6E
+         TteIVDj01BFf1jvJcdbJakXA0qzQnJUvnlOjSZt6FJ4twj75/hEQsnz/ehEi9TKWjZW8
+         xZShsY6P+Owg2FV8zfrMDu+Z9azS26xkK8tPNKeRcZB/tYKRbQsIFqF6bEWL0YaFrGy6
+         uGut/nLL5e93VLXVpUHWq8Y9FQ51dmXlNOncRGGn/DurVKarhvHFQjsFx+zDrnzT9tyl
+         3TEcyBIPFsrwK81lzTTugKUG3FKHatq/gNh/2a2qBwFMd/a5Fv9RpKD2MXv9rOx5GmoH
+         775A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1686941154; x=1689533154;
+        h=content-disposition:mime-version:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=sxu2k8WVGEvm9vtT7HHKa/tRoMu/61Yzm9RfmzLYoAY=;
+        b=OcAgs/anS5BXqopF9nXvQUet6xUDLdTtuFkDlveIN14NPe3EzzdxJhqwP8iQunWYTM
+         YG8MOC0CCYS7HG7EOD/7jlfOrfboZd9rMquW6uyZaZ8rU/KgZJ6JudJo0eLDVZAo8kBt
+         OoXNdvG5zHYjLTRE0UE4pzA7bQ217Fz4rgjAktSuELrGbKHvPCxfguK5ROIC978T/U2R
+         F09mn4AdukSR+xZEt2Hp7WpLZRWdnK8Bxwj0IMu4yHAe0les3ZLI02gGC4DYx1fozMAP
+         WSR4mAddnQHySStb/qQa9CQwvhEHmLJN/PM14SdX77mnwqXOAH4VX45tgd95kTYdtS4T
+         cVAQ==
+X-Gm-Message-State: AC+VfDyINpYPZ3rTSHGABuaLt3THrffdeS7uX/PmMMkcPRzesq3HnAQ0
+        CLQRsCcMiLbs5navJuHhhxuPC81LSj2FG6Fy9uE=
+X-Google-Smtp-Source: ACHHUZ4XQ/CQgB3CCDXbu18qikjjI8xTBzhMuNvt44SlqYWQBw0hTM2hWsPFwimt7R93KF5AYG28Nw==
+X-Received: by 2002:a1c:f603:0:b0:3f8:f80e:7b48 with SMTP id w3-20020a1cf603000000b003f8f80e7b48mr1942895wmc.32.1686941154194;
+        Fri, 16 Jun 2023 11:45:54 -0700 (PDT)
+Received: from localhost ([102.36.222.112])
+        by smtp.gmail.com with ESMTPSA id d6-20020adffd86000000b0030ae87bd3e3sm24296403wrr.18.2023.06.16.11.45.50
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 16 Jun 2023 11:45:51 -0700 (PDT)
+Date:   Fri, 16 Jun 2023 21:45:42 +0300
+From:   Dan Carpenter <dan.carpenter@linaro.org>
+To:     linux-sparse@vger.kernel.org
+Cc:     Peter Zijlstra <peterz@infradead.org>
+Subject: [PATCH] parse: add support for the __cleanup__ attribute
+Message-ID: <ZIyt1uUYW/YXEluw@moroto>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.11.0
-Subject: Re: [PATCH] pinctrl: renesas: remove checker warnings: x | !y
-Content-Language: en-US
-To:     Geert Uytterhoeven <geert@linux-m68k.org>
-Cc:     Linus Walleij <linus.walleij@linaro.org>,
-        linux-renesas-soc@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-kernel@vger.kernel.org, gongruiqi1@huawei.com,
-        linux-sparse@vger.kernel.org,
-        Dan Carpenter <dan.carpenter@linaro.org>
-References: <20230613021643.3330661-1-gongruiqi@huaweicloud.com>
- <CAMuHMdXGG2xu+nXJt6CSTfV6aM=U=hMW+DiDgP3RhOw8+O8y=A@mail.gmail.com>
-From:   "GONG, Ruiqi" <gongruiqi@huaweicloud.com>
-In-Reply-To: <CAMuHMdXGG2xu+nXJt6CSTfV6aM=U=hMW+DiDgP3RhOw8+O8y=A@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
-X-CM-TRANSID: cCh0CgDHIBu4OohkevjXKw--.29140S2
-X-Coremail-Antispam: 1UD129KBjvJXoW7Cry8Xr4fWw1xtF4kWw18uFg_yoW8Zr4UpF
-        47ta4UtFsYyF4UZFZ8t3yxWrWYyan2krWDG3WDKa4UZFZ8ZF1kt3WSgw4FvF4Durs7Aw1q
-        qF4UKa4fG3W3A3JanT9S1TB71UUUUUUqnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
-        9KBjDU0xBIdaVrnRJUUUkjb4IE77IF4wAFF20E14v26r4j6ryUM7CY07I20VC2zVCF04k2
-        6cxKx2IYs7xG6r1S6rWUM7CIcVAFz4kK6r1j6r18M28lY4IEw2IIxxk0rwA2F7IY1VAKz4
-        vEj48ve4kI8wA2z4x0Y4vE2Ix0cI8IcVAFwI0_tr0E3s1l84ACjcxK6xIIjxv20xvEc7Cj
-        xVAFwI0_Gr1j6F4UJwA2z4x0Y4vEx4A2jsIE14v26rxl6s0DM28EF7xvwVC2z280aVCY1x
-        0267AKxVW0oVCq3wAS0I0E0xvYzxvE52x082IY62kv0487Mc02F40EFcxC0VAKzVAqx4xG
-        6I80ewAv7VC0I7IYx2IY67AKxVWUJVWUGwAv7VC2z280aVAFwI0_Jr0_Gr1lOx8S6xCaFV
-        Cjc4AY6r1j6r4UM4x0Y48IcVAKI48JMxk0xIA0c2IEe2xFo4CEbIxvr21l42xK82IYc2Ij
-        64vIr41l4I8I3I0E4IkC6x0Yz7v_Jr0_Gr1lx2IqxVAqx4xG67AKxVWUJVWUGwC20s026x
-        8GjcxK67AKxVWUGVWUWwC2zVAF1VAY17CE14v26r1q6r43MIIYrxkI7VAKI48JMIIF0xvE
-        2Ix0cI8IcVAFwI0_Jr0_JF4lIxAIcVC0I7IYx2IY6xkF7I0E14v26r1j6r4UMIIF0xvE42
-        xK8VAvwI8IcIk0rVWrZr1j6s0DMIIF0xvEx4A2jsIE14v26r1j6r4UMIIF0xvEx4A2jsIE
-        c7CjxVAFwI0_Gr0_Gr1UYxBIdaVFxhVjvjDU0xZFpf9x07UWE__UUUUU=
-X-CM-SenderInfo: pjrqw2pxltxq5kxd4v5lfo033gof0z/
-X-CFilter-Loop: Reflected
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Hi Geert,
+The kernel is soon going to start using the __cleanup__ attribute so we
+need to add support for it in Sparse.  This patch is a bit ugly, but it
+gives me the minimum that I need to make Smatch work and hopefully it's
+the starts the conversation about how to do this correctly.
 
-On 2023/06/13 15:38, Geert Uytterhoeven wrote:
-> Hi Gong,
-> 
-> On Tue, Jun 13, 2023 at 4:13 AM GONG, Ruiqi <gongruiqi@huaweicloud.com> wrote:
->> Eliminate the following Sparse reports when building with C=1:
->>
->> drivers/pinctrl/renesas/pinctrl-rzn1.c:187:52: warning: dubious: x | !y
->> drivers/pinctrl/renesas/pinctrl-rzn1.c:193:52: warning: dubious: x | !y
->>
->> Signed-off-by: GONG, Ruiqi <gongruiqi@huaweicloud.com>
-> 
-> Thanks for your patch!
-> 
-> Looks like sparse needs to be taught the "|" is not used in a boolean
-> context here?
+Signed-off-by: Dan Carpenter <dan.carpenter@linaro.org>
+---
+ parse.c  | 24 +++++++++++++++++++++++-
+ symbol.h |  2 ++
+ 2 files changed, 25 insertions(+), 1 deletion(-)
 
-Okay after reading the source code of Sparse I think what this kind of
-warnings actually means is to hint us a possible misuse of "|" instead
-of "||" (i.e. misusing a binary operator in a conditional context). Here
-the code is doing binary operation (i.e. to flip a bit or two), so in
-this sense the warnings should be just false alarms.
-
-However, the original code is a bit weird for me because of the sudden
-appearance of a boolean operator (i.e. "!") in the middle of a binary
-calculation. And I think it looks better after this change, since it
-makes the expression look more "binary". So maybe we can still consider
-apply this change ;)
-
-Greetings,
-Ruiqi
-
-> 
->> --- a/drivers/pinctrl/renesas/pinctrl-rzn1.c
->> +++ b/drivers/pinctrl/renesas/pinctrl-rzn1.c
->> @@ -184,13 +184,15 @@ static void rzn1_hw_set_lock(struct rzn1_pinctrl *ipctl, u8 lock, u8 value)
->>          * address | 1.
->>          */
->>         if (lock & LOCK_LEVEL1) {
->> -               u32 val = ipctl->lev1_protect_phys | !(value & LOCK_LEVEL1);
->> +               u32 val = ipctl->lev1_protect_phys |
->> +                       (value & LOCK_LEVEL1 ? 0 : 1);
->>
->>                 writel(val, &ipctl->lev1->status_protect);
->>         }
->>
->>         if (lock & LOCK_LEVEL2) {
->> -               u32 val = ipctl->lev2_protect_phys | !(value & LOCK_LEVEL2);
->> +               u32 val = ipctl->lev2_protect_phys |
->> +                       (value & LOCK_LEVEL2 ? 0 : 1);
->>
->>                 writel(val, &ipctl->lev2->status_protect);
->>         }
-> 
-> Gr{oetje,eeting}s,
-> 
->                         Geert
-> 
-
+diff --git a/parse.c b/parse.c
+index 3d6fef7cb011..185a4c7f7cfb 100644
+--- a/parse.c
++++ b/parse.c
+@@ -79,7 +79,8 @@ typedef struct token *attr_t(struct token *, struct symbol *,
+ 			     struct decl_state *);
+ 
+ static attr_t
+-	attribute_packed, attribute_aligned, attribute_modifier,
++	attribute_packed, attribute_aligned, attribute_cleanup,
++	attribute_modifier,
+ 	attribute_function,
+ 	attribute_bitwise,
+ 	attribute_address_space, attribute_context,
+@@ -361,6 +362,10 @@ static struct symbol_op aligned_op = {
+ 	.attribute = attribute_aligned,
+ };
+ 
++static struct symbol_op cleanup_op = {
++	.attribute = attribute_cleanup,
++};
++
+ static struct symbol_op attr_mod_op = {
+ 	.attribute = attribute_modifier,
+ };
+@@ -537,6 +542,7 @@ static struct init_keyword {
+ 	/* Attributes */
+ 	D("packed",		&packed_op),
+ 	D("aligned",		&aligned_op),
++	D("__cleanup__",	&cleanup_op),
+ 	D("nocast",		&attr_mod_op,		.mods = MOD_NOCAST),
+ 	D("noderef",		&attr_mod_op,		.mods = MOD_NODEREF),
+ 	D("safe",		&attr_mod_op,		.mods = MOD_SAFE),
+@@ -1114,6 +1120,18 @@ static struct token *attribute_aligned(struct token *token, struct symbol *attr,
+ 	return token;
+ }
+ 
++static struct token *attribute_cleanup(struct token *token, struct symbol *attr, struct decl_state *ctx)
++{
++	struct expression *expr = NULL;
++
++	if (match_op(token, '(')) {
++		token = parens_expression(token, &expr, "in attribute");
++		if (expr && expr->type == EXPR_SYMBOL)
++			ctx->cleanup = expr;
++	}
++	return token;
++}
++
+ static void apply_mod(struct position *pos, unsigned long *mods, unsigned long mod)
+ {
+ 	if (*mods & mod & ~MOD_DUP_OK)
+@@ -1910,6 +1928,7 @@ static struct token *declaration_list(struct token *token, struct symbol_list **
+ 
+ 		decl->ctype = ctx.ctype;
+ 		decl->ctype.modifiers |= mod;
++		decl->cleanup = ctx.cleanup;
+ 		decl->endpos = token->pos;
+ 		add_symbol(list, decl);
+ 		if (!match_op(token, ','))
+@@ -1964,6 +1983,7 @@ struct token *typename(struct token *token, struct symbol **p, int *forced)
+ 	token = declarator(token, &ctx);
+ 	apply_modifiers(token->pos, &ctx);
+ 	sym->ctype = ctx.ctype;
++	sym->cleanup = ctx.cleanup;
+ 	sym->endpos = token->pos;
+ 	class = ctx.storage_class;
+ 	if (forced)
+@@ -2924,6 +2944,7 @@ struct token *external_declaration(struct token *token, struct symbol_list **lis
+ 
+ 	decl->ctype = ctx.ctype;
+ 	decl->ctype.modifiers |= mod;
++	decl->cleanup = ctx.cleanup;
+ 	decl->endpos = token->pos;
+ 
+ 	/* Just a type declaration? */
+@@ -3048,6 +3069,7 @@ struct token *external_declaration(struct token *token, struct symbol_list **lis
+ 		apply_modifiers(token->pos, &ctx);
+ 		decl->ctype = ctx.ctype;
+ 		decl->ctype.modifiers |= mod;
++		decl->cleanup = ctx.cleanup;
+ 		decl->endpos = token->pos;
+ 		if (!ident) {
+ 			sparse_error(token->pos, "expected identifier name in type definition");
+diff --git a/symbol.h b/symbol.h
+index 5270fcd73a10..88130c15d4bd 100644
+--- a/symbol.h
++++ b/symbol.h
+@@ -107,6 +107,7 @@ struct decl_state {
+ 	struct ctype ctype;
+ 	struct ident **ident;
+ 	struct symbol_op *mode;
++	struct expression *cleanup;
+ 	unsigned long f_modifiers;		// function attributes
+ 	unsigned long storage_class;
+ 	unsigned char prefer_abstract;
+@@ -204,6 +205,7 @@ struct symbol {
+ 			struct statement *inline_stmt;
+ 			struct symbol_list *inline_symbol_list;
+ 			struct expression *initializer;
++			struct expression *cleanup;
+ 			struct entrypoint *ep;
+ 			struct symbol *definition;
+ 		};
+-- 
+2.39.2
