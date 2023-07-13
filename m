@@ -2,179 +2,136 @@ Return-Path: <linux-sparse-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7A06FEB64D7
-	for <linux-sparse@archiver.kernel.org>; Fri, 16 Jun 2023 18:45:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4DF42C001DE
+	for <linux-sparse@archiver.kernel.org>; Thu, 13 Jul 2023 16:38:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231144AbjFPSp6 (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Fri, 16 Jun 2023 14:45:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58872 "EHLO
+        id S232003AbjGMQi1 (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Thu, 13 Jul 2023 12:38:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48158 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229561AbjFPSp6 (ORCPT
+        with ESMTP id S234941AbjGMQhY (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 16 Jun 2023 14:45:58 -0400
-Received: from mail-wm1-x329.google.com (mail-wm1-x329.google.com [IPv6:2a00:1450:4864:20::329])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B650435AD
-        for <linux-sparse@vger.kernel.org>; Fri, 16 Jun 2023 11:45:56 -0700 (PDT)
-Received: by mail-wm1-x329.google.com with SMTP id 5b1f17b1804b1-3f8d0d68530so9650855e9.0
-        for <linux-sparse@vger.kernel.org>; Fri, 16 Jun 2023 11:45:56 -0700 (PDT)
+        Thu, 13 Jul 2023 12:37:24 -0400
+Received: from mail-il1-x131.google.com (mail-il1-x131.google.com [IPv6:2607:f8b0:4864:20::131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 750262D46;
+        Thu, 13 Jul 2023 09:37:04 -0700 (PDT)
+Received: by mail-il1-x131.google.com with SMTP id e9e14a558f8ab-346541baf2aso5038165ab.1;
+        Thu, 13 Jul 2023 09:37:04 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1686941154; x=1689533154;
-        h=content-disposition:mime-version:message-id:subject:cc:to:from:date
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=sxu2k8WVGEvm9vtT7HHKa/tRoMu/61Yzm9RfmzLYoAY=;
-        b=J5YFPt/ItgLmRb9pTwMiA6FgEtSnJ4ZUUSu5/bd7QuoOwpPYdbFBjLYPe0w+iYHY6E
-         TteIVDj01BFf1jvJcdbJakXA0qzQnJUvnlOjSZt6FJ4twj75/hEQsnz/ehEi9TKWjZW8
-         xZShsY6P+Owg2FV8zfrMDu+Z9azS26xkK8tPNKeRcZB/tYKRbQsIFqF6bEWL0YaFrGy6
-         uGut/nLL5e93VLXVpUHWq8Y9FQ51dmXlNOncRGGn/DurVKarhvHFQjsFx+zDrnzT9tyl
-         3TEcyBIPFsrwK81lzTTugKUG3FKHatq/gNh/2a2qBwFMd/a5Fv9RpKD2MXv9rOx5GmoH
-         775A==
+        d=gmail.com; s=20221208; t=1689266223; x=1691858223;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=xtXcwS8d/IDIwtZ853/2GI+9Fn3yNRgVoZNcTx+O3Ew=;
+        b=HlYsuUhPgjpXCZ9henX1PDwU0cw3h2N3V5/vsfI3JqIAfhpOmkW+trSjYWT65U3nyC
+         jLebmc9PX5LkHYZtGISPEwFqP511fRUaV3p126UUUQ12cEoisYsRB0Ai0IFMoK/o+Zno
+         rGguAhVV1T0Xtt56BsYcD8yFiSs4AzNYqyvja+HjPwA8MdQrfo408bDsxt9OJHXJyZ3y
+         NcJt4Mr3dq/irqiTKq+AH7wN/d04UujVFnf3InP9dyq90JzGLKhF4XgF3DEE6WUMuJvX
+         hlybq+IReegFZ0TKYVW5nMEdCMyQ4uQvKHiCH6vc07xhaWaOnWfaVWviGizRleqeG3TT
+         UVIw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1686941154; x=1689533154;
-        h=content-disposition:mime-version:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=sxu2k8WVGEvm9vtT7HHKa/tRoMu/61Yzm9RfmzLYoAY=;
-        b=OcAgs/anS5BXqopF9nXvQUet6xUDLdTtuFkDlveIN14NPe3EzzdxJhqwP8iQunWYTM
-         YG8MOC0CCYS7HG7EOD/7jlfOrfboZd9rMquW6uyZaZ8rU/KgZJ6JudJo0eLDVZAo8kBt
-         OoXNdvG5zHYjLTRE0UE4pzA7bQ217Fz4rgjAktSuELrGbKHvPCxfguK5ROIC978T/U2R
-         F09mn4AdukSR+xZEt2Hp7WpLZRWdnK8Bxwj0IMu4yHAe0les3ZLI02gGC4DYx1fozMAP
-         WSR4mAddnQHySStb/qQa9CQwvhEHmLJN/PM14SdX77mnwqXOAH4VX45tgd95kTYdtS4T
-         cVAQ==
-X-Gm-Message-State: AC+VfDyINpYPZ3rTSHGABuaLt3THrffdeS7uX/PmMMkcPRzesq3HnAQ0
-        CLQRsCcMiLbs5navJuHhhxuPC81LSj2FG6Fy9uE=
-X-Google-Smtp-Source: ACHHUZ4XQ/CQgB3CCDXbu18qikjjI8xTBzhMuNvt44SlqYWQBw0hTM2hWsPFwimt7R93KF5AYG28Nw==
-X-Received: by 2002:a1c:f603:0:b0:3f8:f80e:7b48 with SMTP id w3-20020a1cf603000000b003f8f80e7b48mr1942895wmc.32.1686941154194;
-        Fri, 16 Jun 2023 11:45:54 -0700 (PDT)
-Received: from localhost ([102.36.222.112])
-        by smtp.gmail.com with ESMTPSA id d6-20020adffd86000000b0030ae87bd3e3sm24296403wrr.18.2023.06.16.11.45.50
+        d=1e100.net; s=20221208; t=1689266223; x=1691858223;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=xtXcwS8d/IDIwtZ853/2GI+9Fn3yNRgVoZNcTx+O3Ew=;
+        b=S7PhbR/FylssW1zOHKmrzmEdu8gzszsKLlzwHCGhcrwcUVNQ5xHRj10+tZPcKd96mq
+         tvVf89jiYsRrOVDvXC1BdfqQVQRyI89a44U8e4YSCeqpWKoI/n1xalzN9wi+rUfVQKwd
+         afhwbwChEvxU9BesX2wjxfgKTbg263APmppCZS1BZoRtbF+my2BDI+ELNbkRMAkzsbp4
+         xQqeDORk3GRRsxpfS9h+m99NxLp1HWbFi9fsmM4Pj3dfrsynQpdOvvJnIrJsbFpFGlOU
+         9yd6PucrNBIxCujFf2qOVkpaAMESDGapuWUy8E8JmKvW4xMkVtUnFwDWTB561m4NsT3f
+         cklA==
+X-Gm-Message-State: ABy/qLY3x5S1WpyNhCatNgX9ZoI0fvP2q5MFd6cE82nNYkUzSxlJz1Oh
+        nQBDxot9depOUV7aDXT7uuw=
+X-Google-Smtp-Source: APBJJlGKK8QkvWwdEzHjGRc5A1ATdY9Dfw8qrHFYEawb7ulcwGWCKqqAd0Mg8QH2SMEdwJLdP2dZ3w==
+X-Received: by 2002:a92:6c0f:0:b0:346:7fc:4fb8 with SMTP id h15-20020a926c0f000000b0034607fc4fb8mr122786ilc.1.1689266223658;
+        Thu, 13 Jul 2023 09:37:03 -0700 (PDT)
+Received: from frodo.. (c-73-78-62-130.hsd1.co.comcast.net. [73.78.62.130])
+        by smtp.googlemail.com with ESMTPSA id s7-20020a92d907000000b00345950d7e94sm2147571iln.20.2023.07.13.09.37.02
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 16 Jun 2023 11:45:51 -0700 (PDT)
-Date:   Fri, 16 Jun 2023 21:45:42 +0300
-From:   Dan Carpenter <dan.carpenter@linaro.org>
-To:     linux-sparse@vger.kernel.org
-Cc:     Peter Zijlstra <peterz@infradead.org>
-Subject: [PATCH] parse: add support for the __cleanup__ attribute
-Message-ID: <ZIyt1uUYW/YXEluw@moroto>
+        Thu, 13 Jul 2023 09:37:03 -0700 (PDT)
+From:   Jim Cromie <jim.cromie@gmail.com>
+To:     jbaron@akamai.com, daniel.vetter@ffwll.ch,
+        linux-kernel@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        amd-gfx@lists.freedesktop.org, intel-gvt-dev@lists.freedesktop.org,
+        intel-gfx@lists.freedesktop.org
+Cc:     jani.nikula@intel.com, ville.syrjala@linux.intel.com,
+        seanpaul@chromium.org, robdclark@gmail.com,
+        gregkh@linuxfoundation.org, Jim Cromie <jim.cromie@gmail.com>,
+        Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
+        Nathan Chancellor <nathan@kernel.org>,
+        Nick Desaulniers <ndesaulniers@google.com>,
+        Tom Rix <trix@redhat.com>, linux-sparse@vger.kernel.org,
+        llvm@lists.linux.dev
+Subject: [PATCH v4 18/21] compiler.h: RFC - s/__LINE__/__COUNTER__/ in __UNIQUE_ID fallback
+Date:   Thu, 13 Jul 2023 10:36:23 -0600
+Message-ID: <20230713163626.31338-19-jim.cromie@gmail.com>
+X-Mailer: git-send-email 2.41.0
+In-Reply-To: <20230713163626.31338-1-jim.cromie@gmail.com>
+References: <20230713163626.31338-1-jim.cromie@gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-The kernel is soon going to start using the __cleanup__ attribute so we
-need to add support for it in Sparse.  This patch is a bit ugly, but it
-gives me the minimum that I need to make Smatch work and hopefully it's
-the starts the conversation about how to do this correctly.
+We currently have 3 defns for __UNIQUE_ID(); gcc and clang are using
+__COUNTER__ for real uniqueness, 3rd just uses __LINE__, which should
+fail on this (and harder to avoid situations):
 
-Signed-off-by: Dan Carpenter <dan.carpenter@linaro.org>
+  DECLARE_FOO(); DECLARE_FOO();
+
+Its 2023, can we haz a no-fallback __UNIQUE_ID ?
+
+NOTE:
+
+This also changes __UNIQUE_ID_ to _kaUID_.  Ive been getting
+lkp-reports of collisions on names which should be unique; this
+shouldnt happen on gcc & clang, but does on some older ones, on some
+platforms, on some allyes & rand-configs.  Like this:
+
+mips64-linux-ld:
+drivers/gpu/drm/display/drm_dp_helper.o:(__dyndbg_class_users+0x0):
+multiple definition of `__UNIQUE_ID_ddebug_class_user405';
+drivers/gpu/drm/drm_gem_shmem_helper.o:(__dyndbg_class_users+0x0):
+first defined here
+
+Like above, the collision reports appear to always be 3-digit
+counters, which look like line-numbers.  Changing to _kaUID_ in this
+defn should make it more obvious (in *.i file) when a fallback has
+happened.  To be clear, I havent seen it yet.  Nor have I seen the
+multiple-defn problem above since adding this patch.
+
+Lets see what lkp-robot says about this.
+
+CC: Luc Van Oostenryck <luc.vanoostenryck@gmail.com> (maintainer:SPARSE CHECKER)
+CC: Nathan Chancellor <nathan@kernel.org> (supporter:CLANG/LLVM BUILD SUPPORT)
+CC: Nick Desaulniers <ndesaulniers@google.com> (supporter:CLANG/LLVM BUILD SUPPORT)
+CC: Tom Rix <trix@redhat.com> (reviewer:CLANG/LLVM BUILD SUPPORT)
+CC: linux-sparse@vger.kernel.org (open list:SPARSE CHECKER)
+CC: linux-kernel@vger.kernel.org (open list)
+CC: llvm@lists.linux.dev (open list:CLANG/LLVM BUILD SUPPORT)
+Signed-off-by: Jim Cromie <jim.cromie@gmail.com>
 ---
- parse.c  | 24 +++++++++++++++++++++++-
- symbol.h |  2 ++
- 2 files changed, 25 insertions(+), 1 deletion(-)
+ include/linux/compiler.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/parse.c b/parse.c
-index 3d6fef7cb011..185a4c7f7cfb 100644
---- a/parse.c
-+++ b/parse.c
-@@ -79,7 +79,8 @@ typedef struct token *attr_t(struct token *, struct symbol *,
- 			     struct decl_state *);
+diff --git a/include/linux/compiler.h b/include/linux/compiler.h
+index d7779a18b24f..677d6c47cd9e 100644
+--- a/include/linux/compiler.h
++++ b/include/linux/compiler.h
+@@ -177,9 +177,9 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
+ 	__asm__ ("" : "=r" (var) : "0" (var))
+ #endif
  
- static attr_t
--	attribute_packed, attribute_aligned, attribute_modifier,
-+	attribute_packed, attribute_aligned, attribute_cleanup,
-+	attribute_modifier,
- 	attribute_function,
- 	attribute_bitwise,
- 	attribute_address_space, attribute_context,
-@@ -361,6 +362,10 @@ static struct symbol_op aligned_op = {
- 	.attribute = attribute_aligned,
- };
+-/* Not-quite-unique ID. */
++/* JFTI: to fix Not-quite-unique ID */
+ #ifndef __UNIQUE_ID
+-# define __UNIQUE_ID(prefix) __PASTE(__PASTE(__UNIQUE_ID_, prefix), __LINE__)
++# define __UNIQUE_ID(prefix) __PASTE(__PASTE(_kaUID_, prefix), __COUNTER__)
+ #endif
  
-+static struct symbol_op cleanup_op = {
-+	.attribute = attribute_cleanup,
-+};
-+
- static struct symbol_op attr_mod_op = {
- 	.attribute = attribute_modifier,
- };
-@@ -537,6 +542,7 @@ static struct init_keyword {
- 	/* Attributes */
- 	D("packed",		&packed_op),
- 	D("aligned",		&aligned_op),
-+	D("__cleanup__",	&cleanup_op),
- 	D("nocast",		&attr_mod_op,		.mods = MOD_NOCAST),
- 	D("noderef",		&attr_mod_op,		.mods = MOD_NODEREF),
- 	D("safe",		&attr_mod_op,		.mods = MOD_SAFE),
-@@ -1114,6 +1120,18 @@ static struct token *attribute_aligned(struct token *token, struct symbol *attr,
- 	return token;
- }
- 
-+static struct token *attribute_cleanup(struct token *token, struct symbol *attr, struct decl_state *ctx)
-+{
-+	struct expression *expr = NULL;
-+
-+	if (match_op(token, '(')) {
-+		token = parens_expression(token, &expr, "in attribute");
-+		if (expr && expr->type == EXPR_SYMBOL)
-+			ctx->cleanup = expr;
-+	}
-+	return token;
-+}
-+
- static void apply_mod(struct position *pos, unsigned long *mods, unsigned long mod)
- {
- 	if (*mods & mod & ~MOD_DUP_OK)
-@@ -1910,6 +1928,7 @@ static struct token *declaration_list(struct token *token, struct symbol_list **
- 
- 		decl->ctype = ctx.ctype;
- 		decl->ctype.modifiers |= mod;
-+		decl->cleanup = ctx.cleanup;
- 		decl->endpos = token->pos;
- 		add_symbol(list, decl);
- 		if (!match_op(token, ','))
-@@ -1964,6 +1983,7 @@ struct token *typename(struct token *token, struct symbol **p, int *forced)
- 	token = declarator(token, &ctx);
- 	apply_modifiers(token->pos, &ctx);
- 	sym->ctype = ctx.ctype;
-+	sym->cleanup = ctx.cleanup;
- 	sym->endpos = token->pos;
- 	class = ctx.storage_class;
- 	if (forced)
-@@ -2924,6 +2944,7 @@ struct token *external_declaration(struct token *token, struct symbol_list **lis
- 
- 	decl->ctype = ctx.ctype;
- 	decl->ctype.modifiers |= mod;
-+	decl->cleanup = ctx.cleanup;
- 	decl->endpos = token->pos;
- 
- 	/* Just a type declaration? */
-@@ -3048,6 +3069,7 @@ struct token *external_declaration(struct token *token, struct symbol_list **lis
- 		apply_modifiers(token->pos, &ctx);
- 		decl->ctype = ctx.ctype;
- 		decl->ctype.modifiers |= mod;
-+		decl->cleanup = ctx.cleanup;
- 		decl->endpos = token->pos;
- 		if (!ident) {
- 			sparse_error(token->pos, "expected identifier name in type definition");
-diff --git a/symbol.h b/symbol.h
-index 5270fcd73a10..88130c15d4bd 100644
---- a/symbol.h
-+++ b/symbol.h
-@@ -107,6 +107,7 @@ struct decl_state {
- 	struct ctype ctype;
- 	struct ident **ident;
- 	struct symbol_op *mode;
-+	struct expression *cleanup;
- 	unsigned long f_modifiers;		// function attributes
- 	unsigned long storage_class;
- 	unsigned char prefer_abstract;
-@@ -204,6 +205,7 @@ struct symbol {
- 			struct statement *inline_stmt;
- 			struct symbol_list *inline_symbol_list;
- 			struct expression *initializer;
-+			struct expression *cleanup;
- 			struct entrypoint *ep;
- 			struct symbol *definition;
- 		};
+ /**
 -- 
-2.39.2
+2.41.0
+
