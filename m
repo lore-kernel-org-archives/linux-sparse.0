@@ -2,39 +2,38 @@ Return-Path: <linux-sparse-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BECCFCE79AE
-	for <linux-sparse@archiver.kernel.org>; Wed, 20 Sep 2023 08:10:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E6D54E743F3
+	for <linux-sparse@archiver.kernel.org>; Fri, 29 Sep 2023 08:02:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230447AbjITIKn (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Wed, 20 Sep 2023 04:10:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40776 "EHLO
+        id S232839AbjI2ICA (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Fri, 29 Sep 2023 04:02:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38078 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232575AbjITIKn (ORCPT
+        with ESMTP id S232864AbjI2IBr (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 20 Sep 2023 04:10:43 -0400
-X-Greylist: delayed 555 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Wed, 20 Sep 2023 01:10:35 PDT
-Received: from mail.clydespay.com (mail.clydespay.com [135.125.235.171])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 81F0EA9
-        for <linux-sparse@vger.kernel.org>; Wed, 20 Sep 2023 01:10:35 -0700 (PDT)
-Received: by mail.clydespay.com (Postfix, from userid 1002)
-        id D21A4A2D0A; Wed, 20 Sep 2023 08:01:02 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=clydespay.com;
-        s=mail; t=1695196875;
-        bh=vvfT5KcxKPIjxXFqSm5MOJ+qRY14VuG/yg8Lav3pcWQ=;
+        Fri, 29 Sep 2023 04:01:47 -0400
+Received: from mail.venturelinkbiz.com (mail.venturelinkbiz.com [51.195.119.142])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4D5831A8
+        for <linux-sparse@vger.kernel.org>; Fri, 29 Sep 2023 01:01:39 -0700 (PDT)
+Received: by mail.venturelinkbiz.com (Postfix, from userid 1002)
+        id 55376476A2; Fri, 29 Sep 2023 08:01:26 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=venturelinkbiz.com;
+        s=mail; t=1695974497;
+        bh=JBV4b8UUo1MSngn/QBoedt1Dv52bT8rWeq4R22MtJMs=;
         h=Date:From:To:Subject:From;
-        b=roRvyL0FCxA0g4QAR5Js73KoA7nCC/IddqIx9AXobXKSA4KDJFs7jSx7NqNCcLjiJ
-         ID7YJgt5hwrWzuTK9wjKXme/vVgORmFXq+6jl1xL/m8R4ArtQCJkJ7Is7Yk76DbTB2
-         fEmXo4ucaPIEskRDIgEAe5jpfJ8Ql+878B3mO9IDWfWCbOVjTDH1M+72Q3v1ykmgvW
-         HMCmXJR5CrCi84l90r00m7pdQwgizD8k0+3EqgaE/kddSwSjvJ5F/COI3GBYAAng5H
-         GxM2xjd5Vm0tc1/00DiA0LDM7BDmck8XZ/FvHD05smbUIv8pQL/na4mVmu4fkr/4Uw
-         LoiB3imZ8dqBA==
-Received: by mail.clydespay.com for <linux-sparse@vger.kernel.org>; Wed, 20 Sep 2023 08:01:00 GMT
-Message-ID: <20230920064500-0.1.ab.2kj6z.0.p28bii8yaq@clydespay.com>
-Date:   Wed, 20 Sep 2023 08:01:00 GMT
-From:   "Miguel Garcia" <miguel.garcia@clydespay.com>
+        b=hwIX8Rho41sVoBdhQbL4PagrnVg3lo/7uz7wBTO/CXhKBA5psLgC6l0h85vo8CptT
+         dJUGSFnRYJq0t7FXGqyo7LyONZGlVSzxyZ2UjeaQ4m0UMB5Q76CkdQRXqWAr7uyjF+
+         EIrEXslSCfORcZ2uWfttMdsoxHdUNxZyk1mtmYX0Xc66vfz9xyX3VPIedP8HTxnicO
+         ZK/vgaG1/QP/USoWKTkpC7qzwYrijlar3HOdZ+g9gf1SkXx9DOkjde/FLAi1H6ZfVK
+         tO8NhyEKftM23M2DxGjHulda8pra9VdWpUR17/LyloFp9s7n6nz93bR0HEIjjgUCrH
+         WNwG8GdPJHFOQ==
+Received: by mail.venturelinkbiz.com for <linux-sparse@vger.kernel.org>; Fri, 29 Sep 2023 08:01:20 GMT
+Message-ID: <20230929064500-0.1.2p.7fvz.0.y78eg7qdjv@venturelinkbiz.com>
+Date:   Fri, 29 Sep 2023 08:01:20 GMT
+From:   "Michal Rmoutil" <michal.rmoutil@venturelinkbiz.com>
 To:     <linux-sparse@vger.kernel.org>
-Subject: Consumo de combustible
-X-Mailer: mail.clydespay.com
+Subject: =?UTF-8?Q?Efektivn=C3=AD_sledov=C3=A1n=C3=AD_a_optimalizace_v=C3=BDroby_pro_va=C5=A1i_spole=C4=8Dnost?=
+X-Mailer: mail.venturelinkbiz.com
 MIME-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
@@ -42,22 +41,29 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Buenos dias
+Dobr=C3=A9 r=C3=A1no,
 
-Le escribo sobre la gesti=C3=B3n de los autom=C3=B3viles de la empresa.
+m=C3=A1te mo=C5=BEnost sledovat stav ka=C5=BEd=C3=A9ho stroje a v=C3=BDro=
+bn=C3=ADho procesu z kancel=C3=A1=C5=99e, konferen=C4=8Dn=C3=AD m=C3=ADst=
+nosti nebo dokonce z domova =C4=8Di na cest=C3=A1ch =E2=80=93 na va=C5=A1=
+em telefonu?
 
-Gracias a las abundantes funcionalidades de la herramienta GPS, que monit=
-orea cada autom=C3=B3vil de manera continua, puede registrar la posici=C3=
-=B3n, el tiempo y el kilometraje de los autom=C3=B3viles en tiempo real.
+Poskytujeme rychle implementovateln=C3=BD a snadno pou=C5=BEiteln=C3=BD n=
+=C3=A1stroj, kter=C3=BD zachyt=C3=AD i n=C4=9Bkolikasekundov=C3=BD mikrop=
+rostoj a okam=C5=BEit=C4=9B p=C5=99epo=C4=8D=C3=ADt=C3=A1 vyu=C5=BEit=C3=AD=
+ stroje v kontextu dan=C3=A9 v=C3=BDrobn=C3=AD zak=C3=A1zky.
 
-Como resultado, los costos de mantenimiento de la flota de la compa=C3=B1=
-=C3=ADa se reducen en un 20% y el tiempo de viaje o la planificaci=C3=B3n=
- de la entrega se reduce significativamente. 49 mil est=C3=A1n detr=C3=A1=
-s del =C3=A9xito de nuestras soluciones. Empresas que cooperan con nosotr=
-os.
+Kdykoli vid=C3=ADte stav objedn=C3=A1vky a jste informov=C3=A1ni o p=C5=99=
+=C3=ADpadn=C3=A9m sn=C3=AD=C5=BEen=C3=AD efektivity. Syst=C3=A9m s=C3=A1m=
+ analyzuje data a p=C5=99ipravuje cenn=C3=A9 reporty, co=C5=BE oper=C3=A1=
+tor=C5=AFm umo=C5=BE=C5=88uje soust=C5=99edit se na v=C3=BDrobn=C3=AD c=C3=
+=ADl.
 
-Si el tema le parece interesante, cont=C3=A1ctame.
+C=C3=ADl je jednoduch=C3=BD: jeden pohled =E2=80=93 cel=C3=A1 tov=C3=A1rn=
+a. =C4=8Cek=C3=A1m na odpov=C4=9B=C4=8F, jestli vid=C3=ADte mo=C5=BEnost =
+vyu=C5=BEit=C3=AD takov=C3=A9ho n=C3=A1stroje ve va=C5=A1=C3=AD firm=C4=9B=
+=2E
 
 
-Atentamente,
-Miguel Garcia
+Pozdravy
+Michal Rmoutil
