@@ -2,68 +2,52 @@ Return-Path: <linux-sparse-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E6D54E743F3
-	for <linux-sparse@archiver.kernel.org>; Fri, 29 Sep 2023 08:02:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 25CE0CDB474
+	for <linux-sparse@archiver.kernel.org>; Sat, 21 Oct 2023 02:32:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232839AbjI2ICA (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Fri, 29 Sep 2023 04:02:00 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38078 "EHLO
+        id S229603AbjJUCcE convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-sparse@archiver.kernel.org>);
+        Fri, 20 Oct 2023 22:32:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51298 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232864AbjI2IBr (ORCPT
+        with ESMTP id S229500AbjJUCcD (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 29 Sep 2023 04:01:47 -0400
-Received: from mail.venturelinkbiz.com (mail.venturelinkbiz.com [51.195.119.142])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4D5831A8
-        for <linux-sparse@vger.kernel.org>; Fri, 29 Sep 2023 01:01:39 -0700 (PDT)
-Received: by mail.venturelinkbiz.com (Postfix, from userid 1002)
-        id 55376476A2; Fri, 29 Sep 2023 08:01:26 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=venturelinkbiz.com;
-        s=mail; t=1695974497;
-        bh=JBV4b8UUo1MSngn/QBoedt1Dv52bT8rWeq4R22MtJMs=;
-        h=Date:From:To:Subject:From;
-        b=hwIX8Rho41sVoBdhQbL4PagrnVg3lo/7uz7wBTO/CXhKBA5psLgC6l0h85vo8CptT
-         dJUGSFnRYJq0t7FXGqyo7LyONZGlVSzxyZ2UjeaQ4m0UMB5Q76CkdQRXqWAr7uyjF+
-         EIrEXslSCfORcZ2uWfttMdsoxHdUNxZyk1mtmYX0Xc66vfz9xyX3VPIedP8HTxnicO
-         ZK/vgaG1/QP/USoWKTkpC7qzwYrijlar3HOdZ+g9gf1SkXx9DOkjde/FLAi1H6ZfVK
-         tO8NhyEKftM23M2DxGjHulda8pra9VdWpUR17/LyloFp9s7n6nz93bR0HEIjjgUCrH
-         WNwG8GdPJHFOQ==
-Received: by mail.venturelinkbiz.com for <linux-sparse@vger.kernel.org>; Fri, 29 Sep 2023 08:01:20 GMT
-Message-ID: <20230929064500-0.1.2p.7fvz.0.y78eg7qdjv@venturelinkbiz.com>
-Date:   Fri, 29 Sep 2023 08:01:20 GMT
-From:   "Michal Rmoutil" <michal.rmoutil@venturelinkbiz.com>
-To:     <linux-sparse@vger.kernel.org>
-Subject: =?UTF-8?Q?Efektivn=C3=AD_sledov=C3=A1n=C3=AD_a_optimalizace_v=C3=BDroby_pro_va=C5=A1i_spole=C4=8Dnost?=
-X-Mailer: mail.venturelinkbiz.com
+        Fri, 20 Oct 2023 22:32:03 -0400
+X-Greylist: delayed 2946 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Fri, 20 Oct 2023 19:31:53 PDT
+Received: from mx.concloo.net (mx.concloo.net [188.34.128.18])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 68E53D7C
+        for <linux-sparse@vger.kernel.org>; Fri, 20 Oct 2023 19:31:53 -0700 (PDT)
+Received: from concloo.net (normleiste.de [88.198.220.12])
+        by mx.concloo.net (Postfix) with ESMTP id 210082CD91C
+        for <linux-sparse@vger.kernel.org>; Sat, 21 Oct 2023 01:28:35 +0000 (UTC)
+Received: from [67.211.218.38] ([67.211.218.38])
+          by concloo.net (IBM Domino Release 9.0.1FP10)
+          with ESMTP id 2023102102555221-150920 ;
+          Sat, 21 Oct 2023 02:55:52 +0200 
 MIME-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Subject: HI
+To:     linux-sparse@vger.kernel.org
+From:   "Lena Arvidsson " <info@concloo.net>
+Date:   Fri, 20 Oct 2023 20:55:51 -0400
+Reply-To: lenaar505505@gmail.com
+X-MIMETrack: Itemize by SMTP Server on concloo/rdr(Release 9.0.1FP10|January  15, 2018) at
+ 10.21.2023 02:55:52,
+        Serialize by Router on concloo/rdr(Release 9.0.1FP10|January  15, 2018) at
+ 10.21.2023 03:28:34,
+        Serialize complete at 10.21.2023 03:28:34
+X-TNEFEvaluated: 1
+Message-ID: <OF7EC05EF3.3EDB6992-ONC1258A4F.00051D7E@net>
+Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Description: Mail message body
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Dobr=C3=A9 r=C3=A1no,
+I hope this message finds you well. My name is Lena Arvidsson and I'm from Sweden. I am writing to you today to request a pen pal friendship. I have always been fascinated by the idea of having a pen pal, and I believe that it would be a great opportunity to learn about new cultures and exchange ideas with someone from a different part of the world.If you are open to the idea, I would love to exchange letters and get to know you better. We could talk about anything and everything, from our daily lives to our interests and hobbies. I believe that this could be a truly enriching experience for both of us, and I look forward to hearing back from you.
 
-m=C3=A1te mo=C5=BEnost sledovat stav ka=C5=BEd=C3=A9ho stroje a v=C3=BDro=
-bn=C3=ADho procesu z kancel=C3=A1=C5=99e, konferen=C4=8Dn=C3=AD m=C3=ADst=
-nosti nebo dokonce z domova =C4=8Di na cest=C3=A1ch =E2=80=93 na va=C5=A1=
-em telefonu?
+Thank you for your time and consideration.
 
-Poskytujeme rychle implementovateln=C3=BD a snadno pou=C5=BEiteln=C3=BD n=
-=C3=A1stroj, kter=C3=BD zachyt=C3=AD i n=C4=9Bkolikasekundov=C3=BD mikrop=
-rostoj a okam=C5=BEit=C4=9B p=C5=99epo=C4=8D=C3=ADt=C3=A1 vyu=C5=BEit=C3=AD=
- stroje v kontextu dan=C3=A9 v=C3=BDrobn=C3=AD zak=C3=A1zky.
+Best regards,
 
-Kdykoli vid=C3=ADte stav objedn=C3=A1vky a jste informov=C3=A1ni o p=C5=99=
-=C3=ADpadn=C3=A9m sn=C3=AD=C5=BEen=C3=AD efektivity. Syst=C3=A9m s=C3=A1m=
- analyzuje data a p=C5=99ipravuje cenn=C3=A9 reporty, co=C5=BE oper=C3=A1=
-tor=C5=AFm umo=C5=BE=C5=88uje soust=C5=99edit se na v=C3=BDrobn=C3=AD c=C3=
-=ADl.
-
-C=C3=ADl je jednoduch=C3=BD: jeden pohled =E2=80=93 cel=C3=A1 tov=C3=A1rn=
-a. =C4=8Cek=C3=A1m na odpov=C4=9B=C4=8F, jestli vid=C3=ADte mo=C5=BEnost =
-vyu=C5=BEit=C3=AD takov=C3=A9ho n=C3=A1stroje ve va=C5=A1=C3=AD firm=C4=9B=
-=2E
-
-
-Pozdravy
-Michal Rmoutil
+Lena
