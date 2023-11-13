@@ -2,101 +2,136 @@ Return-Path: <linux-sparse-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 285A5C4332F
-	for <linux-sparse@archiver.kernel.org>; Thu,  9 Nov 2023 17:58:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6C45DC4332F
+	for <linux-sparse@archiver.kernel.org>; Mon, 13 Nov 2023 07:20:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344886AbjKIR6J (ORCPT
-        <rfc822;linux-sparse@archiver.kernel.org>);
-        Thu, 9 Nov 2023 12:58:09 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38556 "EHLO
+        id S230028AbjKMHUK (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Mon, 13 Nov 2023 02:20:10 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51670 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1344898AbjKIR6J (ORCPT
+        with ESMTP id S229716AbjKMHUJ (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 9 Nov 2023 12:58:09 -0500
-Received: from mail-ej1-x62a.google.com (mail-ej1-x62a.google.com [IPv6:2a00:1450:4864:20::62a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A98FD3AA9
-        for <linux-sparse@vger.kernel.org>; Thu,  9 Nov 2023 09:58:06 -0800 (PST)
-Received: by mail-ej1-x62a.google.com with SMTP id a640c23a62f3a-9d2e7726d5bso187962066b.0
-        for <linux-sparse@vger.kernel.org>; Thu, 09 Nov 2023 09:58:06 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linux-foundation.org; s=google; t=1699552685; x=1700157485; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=8wecaRSjJdSteghYXVOtsF+9kjggPC+ACQitgoijs5Y=;
-        b=g2v/ZXtYD0iLdWsYBKnjNJ1cJs0uAsR6qFrp84qXX6LHGK//6hM867JkTrIHuYkFJ7
-         LXwc1ktKgxiwApzns7yHfDu1wNXKbyywYeTyYu5yUxFeKsyeLn6S3ByNxx437mN932ig
-         4Ds9xYD6n8JoEkVWys+wv08pk8lX2Jx/KXsmw=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1699552685; x=1700157485;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=8wecaRSjJdSteghYXVOtsF+9kjggPC+ACQitgoijs5Y=;
-        b=DbWVLPS69aivDevP2rHzLYmV1Cd2oZ+PfJAXzd7/Cr8P/CEAyXxgYfAbBa+q1Ysm8t
-         1eh08mUq5VO8PYOwMW+g8cHuByJTchJCVHQPVmenGcKnIHNToviLtmgvlifZzTNQVBSu
-         xnpTuLL1X6NhVnzAIBO0o/N2PzBTx7Aj1G7UmhmrTqLhF0aykRP9e2VWeww7K5TlgEQ2
-         E6RZbnfsY1d0coAaET7CQEdebvN8yk/R0+OvyCpaDrJ7DApSa60rDQ/t1IhHjIpD/oIB
-         I5kLzJAonUkVOHZ64xD2IXdqNL7USXWKxBhhWxcxntBwhBnD47aFQosCTjA3xFwmiwqw
-         Z4DA==
-X-Gm-Message-State: AOJu0Yyht8LZVWXb82uqNbAeOiXlokA1+PUifA4N+EFUEQ7goA33AOEt
-        R2kVF1uiIdZ1t30Y5Axq9jqraFdSUFzM3lZYgmA3Cg==
-X-Google-Smtp-Source: AGHT+IFgGFJ1in55lKBmQvDKRkurYW1Isb9KdW4+pnRpEqEKpbFWmyu+vDcaLwx7N/8b4ULuof9Zfg==
-X-Received: by 2002:a17:906:7309:b0:9d3:8d1e:ceb with SMTP id di9-20020a170906730900b009d38d1e0cebmr5384665ejc.23.1699552685078;
-        Thu, 09 Nov 2023 09:58:05 -0800 (PST)
-Received: from mail-ej1-f44.google.com (mail-ej1-f44.google.com. [209.85.218.44])
-        by smtp.gmail.com with ESMTPSA id q11-20020a17090622cb00b0098e78ff1a87sm2834437eja.120.2023.11.09.09.58.04
-        for <linux-sparse@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 09 Nov 2023 09:58:04 -0800 (PST)
-Received: by mail-ej1-f44.google.com with SMTP id a640c23a62f3a-9be02fcf268so184328466b.3
-        for <linux-sparse@vger.kernel.org>; Thu, 09 Nov 2023 09:58:04 -0800 (PST)
-X-Received: by 2002:a17:907:7f8f:b0:9bf:f20:8772 with SMTP id
- qk15-20020a1709077f8f00b009bf0f208772mr5537864ejc.26.1699552684177; Thu, 09
- Nov 2023 09:58:04 -0800 (PST)
+        Mon, 13 Nov 2023 02:20:09 -0500
+Received: from bg4.exmail.qq.com (bg4.exmail.qq.com [43.155.65.254])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E62E910E5;
+        Sun, 12 Nov 2023 23:20:04 -0800 (PST)
+X-QQ-mid: bizesmtp63t1699859986trcai2ec
+Received: from main2-ubuntu.tail147f4.ts.net ( [202.201.15.117])
+        by bizesmtp.qq.com (ESMTP) with 
+        id ; Mon, 13 Nov 2023 15:19:43 +0800 (CST)
+X-QQ-SSF: 01200000000000B06000000A0000000
+X-QQ-FEAT: CR3LFp2JE4kJjXOcdkorczscpSzH6+axHpSU32WFVYbv/RGXMGwZNm0mqCz6D
+        gz9/sgtHdEu0Hpdze0GuS3D6Irg4Df8QiNwDsaA6ysM60/Ho50JMfM3UXJDjxhxTAQJmf08
+        2g+pmLbzG6sqegUOfI7Bqk0cBi8wPyNlP79jzi4+2G/4EB+bteo4XqATZZMPqdIZxNerVW7
+        zYzBrU5bsvqnxAgq9RY7WWSKOF4WLCtt1HmqlkFh/RReaAs7ttv7DELAls5+VJ7BadjYxZ5
+        lnXtZ30WpuH37gpQ2xpywx2N6bQQzJWukdBKANUZas2U6RtWXYUj1hf5q4jZyp24XNNb9tI
+        jXfxcsenjYsV+UPuIj2lO0Tur+eydKLmUqICFwU
+X-QQ-GoodBg: 0
+X-BIZMAIL-ID: 17312017847681261293
+From:   Yuan Tan <tanyuan@tinylab.org>
+To:     i@maskray.me
+Cc:     arnd@arndb.de, falcon@tinylab.org, linux-kernel@vger.kernel.org,
+        linux-mips@vger.kernel.org, linux-riscv@lists.infradead.org,
+        linux-sparse@vger.kernel.org, linux@weissschuh.net,
+        luc.vanoostenryck@gmail.com, palmer@rivosinc.com,
+        paul.walmsley@sifive.com, paulburton@kernel.org,
+        paulmck@kernel.org, tanyuan@tinylab.org, tim.bird@sony.com,
+        tsbogend@alpha.franken.de, w@1wt.eu
+Subject: Re: [PATCH v1 09/14] DCE/DSE: inhibit .size directive for SHF_GROUP
+Date:   Mon, 13 Nov 2023 15:19:42 +0800
+Message-Id: <20231113071942.35259-1-tanyuan@tinylab.org>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <DS7PR12MB576503711253C682DCE40524CBABA@DS7PR12MB5765.namprd12.prod.outlook.com>
+References: <DS7PR12MB576503711253C682DCE40524CBABA@DS7PR12MB5765.namprd12.prod.outlook.com>
 MIME-Version: 1.0
-References: <ZUxoJh7NlWw+uBlt@infradead.org> <CAMHZB6G_TZJ_uQGm5an0-bhG8wCxpEQrUCShen7O61Q9arAf+Q@mail.gmail.com>
- <ZUxuY13JnQ8IIFd1@infradead.org> <CAMHZB6H7Y0m2Y-ZD0PMKiGDeo7_sy=scDrzbBbBuUJfuzLK-Lg@mail.gmail.com>
- <ZUxx1kvWH7dSIazw@infradead.org>
-In-Reply-To: <ZUxx1kvWH7dSIazw@infradead.org>
-From:   Linus Torvalds <torvalds@linux-foundation.org>
-Date:   Thu, 9 Nov 2023 09:57:47 -0800
-X-Gmail-Original-Message-ID: <CAHk-=wiq873oXRfSqaM3mZzkoJbncWyWFGyi5yxHAogciRwMBQ@mail.gmail.com>
-Message-ID: <CAHk-=wiq873oXRfSqaM3mZzkoJbncWyWFGyi5yxHAogciRwMBQ@mail.gmail.com>
-Subject: Re: sparse feature request: nocast integer types
-To:     Christoph Hellwig <hch@infradead.org>
-Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
-        linux-sparse@vger.kernel.org, linux-xfs@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+X-QQ-SENDSIZE: 520
+Feedback-ID: bizesmtp:tinylab.org:qybglogicsvrgz:qybglogicsvrgz5a-1
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Wed, 8 Nov 2023 at 21:45, Christoph Hellwig <hch@infradead.org> wrote:
->
-> For my use case it'd treat it exactly like __bitwise except for also
-> allowing arithmetics on it.  Bonus for always allowing 0 withou explicit
-> __force cast just like __bitwise.
+Hi, Fangrui
 
-It's too long for me to really remember, but I think that was the
-*intention* of the "nocast" attribute originally.
+Thank you for your time :)
 
-The whole "nocast" thing goes back to pretty early in sparse (first
-few weeks of it, in fact), and is almost entirely undocumented.
+On 11/6/2023 4:50 AM, Fangrui Song wrote:
+> On Fri, Nov 3, 2023 at 9:01 AM Yuan Tan <tanyuan@tinylab.org> wrote:
+> >
+> > .size directive fails in some functions with SHF_GROUP, this is not
+> > really required for normal building, inhibit it to silence the compiling
+> > failures with SHF_GROUP.
+> >
+> > Signed-off-by: Yuan Tan <tanyuan@tinylab.org>
+> > Signed-off-by: Zhangjin Wu <falcon@tinylab.org>
+> > ---
+> >  Makefile | 3 +++
+> >  1 file changed, 3 insertions(+)
+> >
+> > diff --git a/Makefile b/Makefile
+> > index a4e522b747cb..f67b6e8d2c45 100644
+> > --- a/Makefile
+> > +++ b/Makefile
+> > @@ -936,6 +936,9 @@ endif
+> >  # `rustc`'s `-Zfunction-sections` applies to data too (as of 1.59.0).
+> >  ifdef CONFIG_LD_DEAD_CODE_DATA_ELIMINATION
+> >  KBUILD_CFLAGS_KERNEL += -ffunction-sections -fdata-sections
+> > +ifdef CONFIG_SECTION_SHF_GROUP_SUPPORT
+> > +KBUILD_CFLAGS_KERNEL += -finhibit-size-directive
+> > +endif
+> >  KBUILD_RUSTFLAGS_KERNEL += -Zfunction-sections=y
+> >  LDFLAGS_vmlinux += --gc-sections
+> >  ifdef CONFIG_LD_DEAD_CODE_DATA_ELIMINATION_DEBUG
+> > --
+> > 2.34.1
+> >
+> 
+> Clang doesn't support -finhibit-size-directive, so this would break
+> Clang builds.
 
-The commit that starts parsing it doesn't actually even mention it -
-it mentions the *other* attributes it also starts parsing, but not
-'nocast'.
+Currently, Clang doesn't support LD_DEAD_CODE_DATA_ELIMINATION. So in this
+patch series I didn't take much thought about clang.
 
-Iirc, what happened was that one of the opriginal goals was that I
-really wanted to have that "warn about any implicit integer casts",
-and added "nocast" quite early, before the sparse type system was even
-very strong. But it ended up being almost just a placeholder.
+> 
+> GCC has had this option since 1992, but it is not used in the wild.
+> https://gcc.gnu.org/onlinedocs/gcc/Code-Gen-Options.html#index-finhibit-size-directive
+> says
+> 
+> > ... This option is used when compiling crtstuff.c; you should not need to use it for anything else.
+> 
+> What problem have you seen with .size directives (st_size field in
+> symbol table entries)?
 
-And then later on, Al came in, and he did the much stronger 'bitwise'
-thing, which was immediately useful for all the byte order handling,
-and 'nocast' ended up falling by the wayside.
+$ make ARCH=riscv CROSS_COMPILE=riscv64-linux-gnu- fs/ioctl.o
+/tmp/ccy5E3wN.s: Error: .size expression for __riscv_sys_ioctl does not evaluate to a constant
+make[3]: *** [scripts/Makefile.build:243: fs/ioctl.o] Error 1
+make[2]: *** [scripts/Makefile.build:480: fs] Error 2
+make[1]: *** [/home/tanyuan/projects/linux/Makefile:1916: .] Error 2
+make: *** [Makefile:234: __sub-make] Error 2
 
-Anyway, I think what you ask for is what 'nocast' was always supposed
-to be, but just plain isn't.
+And the fs/ioctl.s is like
+	.section	.text.__riscv_sys_ioctl,"ax",@progbits
+	.align	1
+	.globl	__riscv_sys_ioctl
+	.type	__riscv_sys_ioctl, @function
+__riscv_sys_ioctl:
+        ...
+        ...
+	.size	__riscv_sys_ioctl, .-__riscv_sys_ioctl
 
-                   Linus
+I cannot understand this error and this option just solve the problem :)
+
+> 
+> % cat a.c
+> int v;
+> void f() {}
+> % diff -u0 <(gcc -S a.c -o -) <(gcc -S -finhibit-size-directive a.c -o -)
+> --- /proc/self/fd/11    2023-11-05 12:42:51.298618475 -0800
+> +++ /proc/self/fd/15    2023-11-05 12:42:51.298618475 -0800
+> @@ -7 +6,0 @@
+> -       .size   v, 4
+> @@ -27 +25,0 @@
+> -       .size   f, .-f
+> 
+> 
