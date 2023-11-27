@@ -1,50 +1,30 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="iF2geH0k"
-Received: from mail-wr1-x434.google.com (mail-wr1-x434.google.com [IPv6:2a00:1450:4864:20::434])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DDD9A137
-	for <linux-sparse@vger.kernel.org>; Mon, 27 Nov 2023 04:51:10 -0800 (PST)
-Received: by mail-wr1-x434.google.com with SMTP id ffacd0b85a97d-332e58d4219so2282313f8f.0
-        for <linux-sparse@vger.kernel.org>; Mon, 27 Nov 2023 04:51:10 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1701089469; x=1701694269; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=lkEnJkQ+8Ev6iHNDxxp1hNcEh3zIdT+74ecMOxzL+Rc=;
-        b=iF2geH0kV9npsudi2Kpj/f5nlB3Tio+r06KazJSspbX7gAl0J1PF4JTicwwgrokSrQ
-         QuDtScJUZLCwrd+UwSZ4p5ZqrPg0AGrFaGcMU44puZXPD1TNDvdsA+CDMzXGApZJrINW
-         dWx0w8QRamEVeE3f8Jl/moT0B+3sRHwnhVhJbUrzIWw4qlIyijZz1d4P1RyI85ValrNb
-         OGe3q4Ktpe4M4eRYbKJS/5OgsOG7zF35hR6qf/3FYDuFr+b9P+FlN9jAHs9LxncNM4BU
-         2VPO/bPwWrXy2asc5yAjY4UDOYr98mtHQupP9fozGwaOdZ/zG8Q2JhJet6Fe+hB+6IX+
-         uPKg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1701089469; x=1701694269;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=lkEnJkQ+8Ev6iHNDxxp1hNcEh3zIdT+74ecMOxzL+Rc=;
-        b=Pe/M2bCcYTn/kCL8sz8nRnrC8UcDBJGRnmiQxAtda90ksB882Ljlp8DZlGqF3VU8qf
-         zUhDn5IIFpROcYCgh1cMBmlxPy6isaQ8ebDsfLITl9WkdLqmfqCeJDXLu/6A+G3QQZTC
-         vhUvO2svao/vQbETbgttGOXAOEM8pYQUddFclLhYuDc3bqJ65tirYkMRWht1WaIRhhuu
-         jBbZgbwHDqAWzvFKx3wq9luGO37D7+nUwRXoKVcTvq14T03qclcxjCBo0hPYSaSSmtye
-         iMjlEXNPkYSM0GR9No2cNrZ7lGBDB+tAuwkvpmmJ9+s3d9raHx5DSPBxuVknvyGRGHLz
-         HXmQ==
-X-Gm-Message-State: AOJu0Yxx8855Nq5BWi9fs5SEN1ZSgqpiDm6M16CrDYqOsrsAbAAZN5To
-	5NSOVZIXhh+VeLAb56drrsuPUA==
-X-Google-Smtp-Source: AGHT+IESTXcdj+cFasSB8O6jt39AbGsFvEEJSEIi1tOb8PnF7kDzxKBNbXijkusKpfYHALW6AWqHBg==
-X-Received: by 2002:a5d:4903:0:b0:332:e4fb:6b62 with SMTP id x3-20020a5d4903000000b00332e4fb6b62mr7426566wrq.39.1701089469383;
-        Mon, 27 Nov 2023 04:51:09 -0800 (PST)
-Received: from localhost ([102.36.222.112])
-        by smtp.gmail.com with ESMTPSA id dr22-20020a5d5f96000000b00333018c4b2asm2271798wrb.71.2023.11.27.04.51.07
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 27 Nov 2023 04:51:08 -0800 (PST)
-Date: Mon, 27 Nov 2023 15:51:05 +0300
-From: Dan Carpenter <dan.carpenter@linaro.org>
-To: Christoph Hellwig <hch@infradead.org>
-Cc: linux-sparse@vger.kernel.org, linux-xfs@vger.kernel.org,
-	smatch@vger.kernel.org
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="t+6UwYk0"
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 22E29198;
+	Mon, 27 Nov 2023 08:05:01 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=/KxJlNDgiMvoj6hWMLQPOYzYeXYoJ6pzhezDDs7d1SQ=; b=t+6UwYk0XTYdHg91EIlUpOiQfG
+	UdnQjWKUKwqL+2h//Q3coOJ0qukeLJ8K7Uq+NNKBJHy7B64rxff2JPv1FPJ8pEnO7Y7XqO6Hy7BoT
+	rC5gdYSX/5TpXCcOrmJm8yOICcfEDQAkB0xu8mfS/1OK3rJHbR2E7o5ifQIeKmaCzS07yDWCzQnfj
+	MyJRgpJf231m+WzU5CT7Wmd4TKzZg+pRCWPIuGEjd+A3Pd1H/DCnGMkDE+a0E4YtigW5/paGrAwBH
+	7ozxIgu4nxHsP97H8oxaowDXmw6jVHnDF82cZyjxbf68vlS/scBmNhJ/eePvu097j8sBnWmTcR0HP
+	H7A7gbLg==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.96 #2 (Red Hat Linux))
+	id 1r7e6W-002uVY-39;
+	Mon, 27 Nov 2023 16:05:00 +0000
+Date: Mon, 27 Nov 2023 08:05:00 -0800
+From: Christoph Hellwig <hch@infradead.org>
+To: Dan Carpenter <dan.carpenter@linaro.org>
+Cc: Christoph Hellwig <hch@infradead.org>, linux-sparse@vger.kernel.org,
+	linux-xfs@vger.kernel.org, smatch@vger.kernel.org
 Subject: Re: sparse feature request: nocast integer types
-Message-ID: <3423b42d-fc11-4695-89cc-f1e2d625fa90@suswa.mountain>
+Message-ID: <ZWS+LLCggp70Eav3@infradead.org>
 References: <ZUxoJh7NlWw+uBlt@infradead.org>
+ <3423b42d-fc11-4695-89cc-f1e2d625fa90@suswa.mountain>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
@@ -53,57 +33,34 @@ List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <ZUxoJh7NlWw+uBlt@infradead.org>
+In-Reply-To: <3423b42d-fc11-4695-89cc-f1e2d625fa90@suswa.mountain>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-On Wed, Nov 08, 2023 at 09:03:34PM -0800, Christoph Hellwig wrote:
-> Hi dear spearse developers,
-> 
-> in a lot of kernel code we have integer types that store offsets and
-> length in certain units (typically 512 byte disk "sectors", file systems
-> block sizes, and some weird variations of the same), and we had a fair
-> amount of bugs beause people get confused about which ones to use.
-> 
-> I wonder if it is possible to add an attribute (say nocast) that works
-> similar to __attribute__((bitwise)) in that it disallows mixing this
-> type with other integer types, but unlike __attribute__((bitwise))
-> allows all the normal arithmetics on it?  That way we could annotate
-> all the normal conversion helpers with __force overrides and check
-> where people are otherwise mixing these types.
+On Mon, Nov 27, 2023 at 03:51:05PM +0300, Dan Carpenter wrote:
+> My plan was to go through the false positives and manually edit out
+> stuff like this.  The problem is that it's a lot of work and I haven't
+> done it.  I did a similar thing for tracking user data and that works
+> pretty decently these days.  So it's doable.
 
-I started writing something like this in Smatch for tying variables to
-a specific unit.
+Yes, doing it without specific annotations seems like a pain.  I did a
+little prototype with the existing sparse __nocast for one xfs type that
+is not very heavily used, and it actually worked pretty good.
 
-https://github.com/error27/smatch/blob/master/smatch_units.c
+The major painpoint is that 0 isn't treated special, but with that 
+fixed the amount of churn is mangable.
 
-But unfortunately, it doesn't actually work.  The problem is that once
-I said x is a byte, then if you have y = x then I would store that in
-the database.  If the first "x is a byte" assessment was wrong then the
-misinformation gets amplified times 100 and can't be purged without
-a mass delete.
+The next big thing is our stupid 64-bit divison helpers (do_div & co),
+which require helpers to do that case. I'm actually kinda tempted to
+propose that we drop 32-bit support for xfs to get rid of that and a
+lot of other ugly things because of do_div.  That is unless we can
+finally agree that the libgcc division helpes might not be great but
+good enough that we don't want to inflict do_div on folks unless they
+want to optize that case, which would be even better.
 
-The second problem is that Smatch automatically determines that a struct
-foo->bar is a byte unit or whatever.  Which generally works, but
-sometimes fails catastrophically.  For example, it's not true to
-all the registers are used to store byte units.  But some code does
-store bytes there and now Smatch thinks the everything stored in
-registers is in bytes.
+Linus, any commens on that?
 
-My plan was to go through the false positives and manually edit out
-stuff like this.  The problem is that it's a lot of work and I haven't
-done it.  I did a similar thing for tracking user data and that works
-pretty decently these days.  So it's doable.
+> I'd prefer an annotation that had the type of the unit built in.
 
-I tend to avoid manual annotations, but here it could be good.  Manually
-annotating things would avoid the false positives (at the expense of
-missing bugs).
-
-I'd prefer an annotation that had the type of the unit built in.
-
-Creating an annotation like that is difficult because you have to
-coordinate with GCC and Clang etc.  In the mean time, I could just
-create a table in smatch which has stuff like:
-
-	{ "(struct foo)->member", &byte_units },
-
-regards,
-dan carpenter
+Annotating the type seems really hard.  I think the sparse concept
+of simply not alowing different of these types to be mixed is good
+enough without needing to know the actual unit in the type system.
