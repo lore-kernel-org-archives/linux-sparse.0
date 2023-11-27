@@ -1,53 +1,109 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=clydespay.com header.i=@clydespay.com header.b="W/M2Tgr7"
-X-Greylist: delayed 539 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Tue, 21 Nov 2023 01:06:14 PST
-Received: from mail.clydespay.com (mail.clydespay.com [135.125.235.171])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D2DC9F9
-	for <linux-sparse@vger.kernel.org>; Tue, 21 Nov 2023 01:06:14 -0800 (PST)
-Received: by mail.clydespay.com (Postfix, from userid 1002)
-	id 50377A2AEE; Tue, 21 Nov 2023 08:56:09 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=clydespay.com;
-	s=mail; t=1700556991;
-	bh=vvfT5KcxKPIjxXFqSm5MOJ+qRY14VuG/yg8Lav3pcWQ=;
-	h=Date:From:To:Subject:From;
-	b=W/M2Tgr7YfcqelMH43ggDlPi3QsGXQ08/iZ6mwtQrZMfikBogN1KpyvcHnLf1ol7M
-	 X95U143R61PV3Ba9ns+B4yzALDSRuQDXTBCKipfVEyvyfrrfru1I01CiqKngfnYlcQ
-	 qNmsb0102aep/afcfTBddcIaPgwLlV5RHkAvjvCb1xh8WiTaXvEboPvKAZWcy7heRN
-	 Xb7aW5qeb7BN7z3wtVogswM9Tk6Ueq91+KZIXY+tUZQZcA7/g0hBNiRgxotifH16b+
-	 BxYeKzGM7IKYM4vyOI9pMW1EdvmESZihK0HqZCsCm1nqlqIXtGs3E/y3WqJ6c+F/xE
-	 u1T03gkMk+Ilw==
-Received: by mail.clydespay.com for <linux-sparse@vger.kernel.org>; Tue, 21 Nov 2023 08:55:58 GMT
-Message-ID: <20231121074500-0.1.bj.2qih7.0.cbtp20dad6@clydespay.com>
-Date: Tue, 21 Nov 2023 08:55:58 GMT
-From: "Miguel Garcia" <miguel.garcia@clydespay.com>
-To: <linux-sparse@vger.kernel.org>
-Subject: Consumo de combustible
-X-Mailer: mail.clydespay.com
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="iF2geH0k"
+Received: from mail-wr1-x434.google.com (mail-wr1-x434.google.com [IPv6:2a00:1450:4864:20::434])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DDD9A137
+	for <linux-sparse@vger.kernel.org>; Mon, 27 Nov 2023 04:51:10 -0800 (PST)
+Received: by mail-wr1-x434.google.com with SMTP id ffacd0b85a97d-332e58d4219so2282313f8f.0
+        for <linux-sparse@vger.kernel.org>; Mon, 27 Nov 2023 04:51:10 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1701089469; x=1701694269; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=lkEnJkQ+8Ev6iHNDxxp1hNcEh3zIdT+74ecMOxzL+Rc=;
+        b=iF2geH0kV9npsudi2Kpj/f5nlB3Tio+r06KazJSspbX7gAl0J1PF4JTicwwgrokSrQ
+         QuDtScJUZLCwrd+UwSZ4p5ZqrPg0AGrFaGcMU44puZXPD1TNDvdsA+CDMzXGApZJrINW
+         dWx0w8QRamEVeE3f8Jl/moT0B+3sRHwnhVhJbUrzIWw4qlIyijZz1d4P1RyI85ValrNb
+         OGe3q4Ktpe4M4eRYbKJS/5OgsOG7zF35hR6qf/3FYDuFr+b9P+FlN9jAHs9LxncNM4BU
+         2VPO/bPwWrXy2asc5yAjY4UDOYr98mtHQupP9fozGwaOdZ/zG8Q2JhJet6Fe+hB+6IX+
+         uPKg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1701089469; x=1701694269;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=lkEnJkQ+8Ev6iHNDxxp1hNcEh3zIdT+74ecMOxzL+Rc=;
+        b=Pe/M2bCcYTn/kCL8sz8nRnrC8UcDBJGRnmiQxAtda90ksB882Ljlp8DZlGqF3VU8qf
+         zUhDn5IIFpROcYCgh1cMBmlxPy6isaQ8ebDsfLITl9WkdLqmfqCeJDXLu/6A+G3QQZTC
+         vhUvO2svao/vQbETbgttGOXAOEM8pYQUddFclLhYuDc3bqJ65tirYkMRWht1WaIRhhuu
+         jBbZgbwHDqAWzvFKx3wq9luGO37D7+nUwRXoKVcTvq14T03qclcxjCBo0hPYSaSSmtye
+         iMjlEXNPkYSM0GR9No2cNrZ7lGBDB+tAuwkvpmmJ9+s3d9raHx5DSPBxuVknvyGRGHLz
+         HXmQ==
+X-Gm-Message-State: AOJu0Yxx8855Nq5BWi9fs5SEN1ZSgqpiDm6M16CrDYqOsrsAbAAZN5To
+	5NSOVZIXhh+VeLAb56drrsuPUA==
+X-Google-Smtp-Source: AGHT+IESTXcdj+cFasSB8O6jt39AbGsFvEEJSEIi1tOb8PnF7kDzxKBNbXijkusKpfYHALW6AWqHBg==
+X-Received: by 2002:a5d:4903:0:b0:332:e4fb:6b62 with SMTP id x3-20020a5d4903000000b00332e4fb6b62mr7426566wrq.39.1701089469383;
+        Mon, 27 Nov 2023 04:51:09 -0800 (PST)
+Received: from localhost ([102.36.222.112])
+        by smtp.gmail.com with ESMTPSA id dr22-20020a5d5f96000000b00333018c4b2asm2271798wrb.71.2023.11.27.04.51.07
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 27 Nov 2023 04:51:08 -0800 (PST)
+Date: Mon, 27 Nov 2023 15:51:05 +0300
+From: Dan Carpenter <dan.carpenter@linaro.org>
+To: Christoph Hellwig <hch@infradead.org>
+Cc: linux-sparse@vger.kernel.org, linux-xfs@vger.kernel.org,
+	smatch@vger.kernel.org
+Subject: Re: sparse feature request: nocast integer types
+Message-ID: <3423b42d-fc11-4695-89cc-f1e2d625fa90@suswa.mountain>
+References: <ZUxoJh7NlWw+uBlt@infradead.org>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <ZUxoJh7NlWw+uBlt@infradead.org>
 
-Buenos dias
+On Wed, Nov 08, 2023 at 09:03:34PM -0800, Christoph Hellwig wrote:
+> Hi dear spearse developers,
+> 
+> in a lot of kernel code we have integer types that store offsets and
+> length in certain units (typically 512 byte disk "sectors", file systems
+> block sizes, and some weird variations of the same), and we had a fair
+> amount of bugs beause people get confused about which ones to use.
+> 
+> I wonder if it is possible to add an attribute (say nocast) that works
+> similar to __attribute__((bitwise)) in that it disallows mixing this
+> type with other integer types, but unlike __attribute__((bitwise))
+> allows all the normal arithmetics on it?  That way we could annotate
+> all the normal conversion helpers with __force overrides and check
+> where people are otherwise mixing these types.
 
-Le escribo sobre la gesti=C3=B3n de los autom=C3=B3viles de la empresa.
+I started writing something like this in Smatch for tying variables to
+a specific unit.
 
-Gracias a las abundantes funcionalidades de la herramienta GPS, que monit=
-orea cada autom=C3=B3vil de manera continua, puede registrar la posici=C3=
-=B3n, el tiempo y el kilometraje de los autom=C3=B3viles en tiempo real.
+https://github.com/error27/smatch/blob/master/smatch_units.c
 
-Como resultado, los costos de mantenimiento de la flota de la compa=C3=B1=
-=C3=ADa se reducen en un 20% y el tiempo de viaje o la planificaci=C3=B3n=
- de la entrega se reduce significativamente. 49 mil est=C3=A1n detr=C3=A1=
-s del =C3=A9xito de nuestras soluciones. Empresas que cooperan con nosotr=
-os.
+But unfortunately, it doesn't actually work.  The problem is that once
+I said x is a byte, then if you have y = x then I would store that in
+the database.  If the first "x is a byte" assessment was wrong then the
+misinformation gets amplified times 100 and can't be purged without
+a mass delete.
 
-Si el tema le parece interesante, cont=C3=A1ctame.
+The second problem is that Smatch automatically determines that a struct
+foo->bar is a byte unit or whatever.  Which generally works, but
+sometimes fails catastrophically.  For example, it's not true to
+all the registers are used to store byte units.  But some code does
+store bytes there and now Smatch thinks the everything stored in
+registers is in bytes.
 
+My plan was to go through the false positives and manually edit out
+stuff like this.  The problem is that it's a lot of work and I haven't
+done it.  I did a similar thing for tracking user data and that works
+pretty decently these days.  So it's doable.
 
-Atentamente,
-Miguel Garcia
+I tend to avoid manual annotations, but here it could be good.  Manually
+annotating things would avoid the false positives (at the expense of
+missing bugs).
+
+I'd prefer an annotation that had the type of the unit built in.
+
+Creating an annotation like that is difficult because you have to
+coordinate with GCC and Clang etc.  In the mean time, I could just
+create a table in smatch which has stuff like:
+
+	{ "(struct foo)->member", &byte_units },
+
+regards,
+dan carpenter
