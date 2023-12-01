@@ -1,120 +1,114 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="BJ4UKM7z"
-Received: from mail-ed1-x52c.google.com (mail-ed1-x52c.google.com [IPv6:2a00:1450:4864:20::52c])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 91C9410F1
-	for <linux-sparse@vger.kernel.org>; Fri,  1 Dec 2023 06:10:48 -0800 (PST)
-Received: by mail-ed1-x52c.google.com with SMTP id 4fb4d7f45d1cf-54b450bd014so2508188a12.3
-        for <linux-sparse@vger.kernel.org>; Fri, 01 Dec 2023 06:10:48 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="j5pvzWur"
+Received: from mail-wr1-x434.google.com (mail-wr1-x434.google.com [IPv6:2a00:1450:4864:20::434])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6B276D6C
+	for <linux-sparse@vger.kernel.org>; Fri,  1 Dec 2023 06:51:22 -0800 (PST)
+Received: by mail-wr1-x434.google.com with SMTP id ffacd0b85a97d-33319741ba0so1938827f8f.1
+        for <linux-sparse@vger.kernel.org>; Fri, 01 Dec 2023 06:51:22 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1701439847; x=1702044647; darn=vger.kernel.org;
-        h=content-transfer-encoding:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=r/RCpB3un8WUrdwOP4Jdve+CRS/UkSnLxbVRKJtoTNo=;
-        b=BJ4UKM7zIotwPBUvCJmfbWouZhXkwoPiHT2yKS4Tl33Xc/E6AHb6kMHLBtMqGUt+Jz
-         Ym2FTc4Hy7qj9nWxQhR7Smnf2ZKTfb4tZHVpodb6tkucp8TGyoL0sdsTGrCbQh3TWMpx
-         +vzm2u1C0A3V8KhjP6FpY3JsVmOiyZSHn8WDZ8ZhP5+1qRbFjX4QBlIAYrUGBwPlwDc/
-         DOlf1tD3c192zRrbZNE8MlpXnrnbBjOpAnYiEbpbjGOBKdFrW1LP+oe7yHGxp5u1FGRx
-         Nu9XvodT3OG7BqPCvFeCDybdBs4JNaWC4NjydnOzgg+dabfROl/P2cE1hCCgN7EzPSHl
-         LcpA==
+        d=linaro.org; s=google; t=1701442281; x=1702047081; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=nhujmCbFgl8j0OnD6aZMpmkcYSFfMU69KqtJ2GCEJCc=;
+        b=j5pvzWur70QGl2C3aEVsjT0XQCrhAY44NJw7ltMOUgwV7iTmA0a82nh++MKr8E4LSl
+         X65XUVgdjbXdyOZJ70LdH7oNna5k51ciDDepnE5PovebVVWfEXc5xxoOp3n/vepM2Ea7
+         XX9FY/6DVnLtxvOsnizEhUTQDpPvDVvyVv7Zz/BoRDQxVvLoDTOPaSxtBZmuUEs5iEpA
+         uJDF/c6K4PDJ7Hc43ox6buX9CI6PjCxP2nUyfRUZQiJpSnWE7EqGG5O8o8KJU9AOM239
+         sxhBJIcupX1vOgM+M22IugTXpqspk5U/6LVG2V36FIZvkOgPZZWKA2SFXUmsuOtCoAc4
+         WBzA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1701439847; x=1702044647;
-        h=content-transfer-encoding:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=r/RCpB3un8WUrdwOP4Jdve+CRS/UkSnLxbVRKJtoTNo=;
-        b=r1sHNibYAfqc6cv9SjOFyRfInKKQsto9OEJB8xFCBLu0e/5MMdJBbFsq/+cXPz4T6V
-         GjML3ToP00Kw4a4npvgjjciwyWnpZpAsimj9fFIBPZeuG5uXqQEKCZI0uf5G/di+NM3S
-         om2Cw2OscTDdgh8fCNGyplnCDnrVgpSru6GlqFrsuqBW4mFPhEKHc3xY3yn1nGk60Ce/
-         yDGoL+QrEgbngtNLTasSL9fCxefB5ZO2H0lexWJs9QtMgFUUwy87lPiC+MQfh+COcX3v
-         2/2VexgW+RbnONjmDAVNDdboOSumfsvhWQLoUqTS2oHpHpm6n91vly+cxyzG1kMK7sbq
-         vsGA==
-X-Gm-Message-State: AOJu0YwZI7WD0R0dyydf7w2bEdjJQbQjdE1qxQabpaeR354PvgPSBpN/
-	Mp847o95W6X1udRL/GYeDZo+6bRtPjzgkI0cBDZMqcpk7Dw=
-X-Google-Smtp-Source: AGHT+IGn/+nJUhxpQIeDzrNNXdbRoH/ZVCwmcTH8w1sO+ngaIVqkcDefpu9z+oMnOma7zuy5QpFKVVHx+x9FftVdzOg=
-X-Received: by 2002:a50:cc8d:0:b0:54c:4837:8b6a with SMTP id
- q13-20020a50cc8d000000b0054c48378b6amr921982edi.56.1701439846592; Fri, 01 Dec
- 2023 06:10:46 -0800 (PST)
+        d=1e100.net; s=20230601; t=1701442281; x=1702047081;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=nhujmCbFgl8j0OnD6aZMpmkcYSFfMU69KqtJ2GCEJCc=;
+        b=Tw8Ab1rG/NsTPnASI/9mINddxglCfDyiY9nv1Ezo97bwOUX1JLJ9LAu2OnINdNoTS7
+         +lUdugMB9qU6kgKAvuzMJcp8j6+9iY8Gh8lY0iU95bCW+/HlcKKDUDjHQjv/IMSeZlOu
+         ZHc3HMNoUxtq7bZfiB8S2PlD+2N/rqVN1f888AH14cP0ve92Nr84KrjHiwsejGgymOuO
+         r/y4qp26sSm9d+y76NIz/EHeHaw11cuFqzz+O+OqEf3xuJ4rZejIuqkPZfiBjBzmcuf1
+         plKIT8MKYYQIukHM2oNs8+VgZScW/m+XeTCn/iZ4QoHLr9NRm49ChSZaL3lvOop+gf3c
+         ImWw==
+X-Gm-Message-State: AOJu0YwByXdQooxcTZ7MNHuFtm644dbni+0luzgUIAUnkJdWRW05Cwo/
+	es51zWjYSldCvW01YnwFq/VOKw==
+X-Google-Smtp-Source: AGHT+IHRXXHuL3UXTG0ISrstrpBBPsA794z3wWwhMSdnmjNQywEEfBgcoFlAouyO6jcJ6iJZlx9wJg==
+X-Received: by 2002:adf:e3c4:0:b0:333:149:68f1 with SMTP id k4-20020adfe3c4000000b00333014968f1mr926289wrm.70.1701442280920;
+        Fri, 01 Dec 2023 06:51:20 -0800 (PST)
+Received: from localhost ([102.36.222.112])
+        by smtp.gmail.com with ESMTPSA id m4-20020adff384000000b003333281764bsm1462593wro.17.2023.12.01.06.51.19
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 01 Dec 2023 06:51:20 -0800 (PST)
+Date: Fri, 1 Dec 2023 17:51:17 +0300
+From: Dan Carpenter <dan.carpenter@linaro.org>
+To: Uros Bizjak <ubizjak@gmail.com>
+Cc: linux-sparse@vger.kernel.org
+Subject: Re: sparse: Expected ) at end of cast operator, got __seg_gs
+Message-ID: <17d4d1c1-6b27-4fab-bc94-9b2d734e7b36@suswa.mountain>
+References: <202310080853.UhMe5iWa-lkp@intel.com>
+ <CAFULd4ZgT1dZFz36ZbPeqJa+U2NwusSTudg175sSarhpvEu-Zw@mail.gmail.com>
+ <CAFULd4Zm94W07Rv+0J0E2=dtd3hoc7us_sQi-pOUiomYS1Za-w@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <202310080853.UhMe5iWa-lkp@intel.com> <CAFULd4ZgT1dZFz36ZbPeqJa+U2NwusSTudg175sSarhpvEu-Zw@mail.gmail.com>
-In-Reply-To: <CAFULd4ZgT1dZFz36ZbPeqJa+U2NwusSTudg175sSarhpvEu-Zw@mail.gmail.com>
-From: Uros Bizjak <ubizjak@gmail.com>
-Date: Fri, 1 Dec 2023 15:10:35 +0100
-Message-ID: <CAFULd4Zm94W07Rv+0J0E2=dtd3hoc7us_sQi-pOUiomYS1Za-w@mail.gmail.com>
-Subject: sparse: Expected ) at end of cast operator, got __seg_gs
-To: linux-sparse@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAFULd4Zm94W07Rv+0J0E2=dtd3hoc7us_sQi-pOUiomYS1Za-w@mail.gmail.com>
 
-Forwarded from linux-kernel@vger.kernel.org
+I patched Smatch to just ignore it.  I think Luc is on sabatical and
+it's not clear if anyone is applying patches now.
 
----------- Forwarded message ---------
-From: Uros Bizjak <ubizjak@gmail.com>
-Date: Fri, Dec 1, 2023 at 2:57=E2=80=AFPM
-Subject: Re: [tip:x86/percpu 12/12]
-arch/x86/include/asm/preempt.h:27:55: sparse: sparse: incompatible
-types for operation (&):
-To: kernel test robot <lkp@intel.com>
-Cc: <oe-kbuild-all@lists.linux.dev>, <linux-kernel@vger.kernel.org>,
-<x86@kernel.org>, Ingo Molnar <mingo@kernel.org>, Nadav Amit
-<namit@vmware.com>
+Signed-off-by: Dan Carpenter <dan.carpenter@linaro.org>
+---
+ parse.c | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
 
+diff --git a/parse.c b/parse.c
+index 6803976a1337..2ddc29acbd33 100644
+--- a/parse.c
++++ b/parse.c
+@@ -74,6 +74,7 @@ static struct token *parse_range_statement(struct token *token, struct statement
+ static struct token *parse_asm_statement(struct token *token, struct statement *stmt);
+ static struct token *toplevel_asm_declaration(struct token *token, struct symbol_list **list);
+ static struct token *parse_static_assert(struct token *token, struct symbol_list **unused);
++static struct token *ignore_seg_gs(struct token *token, struct symbol_list **unused);
+ 
+ typedef struct token *attr_t(struct token *, struct symbol *,
+ 			     struct decl_state *);
+@@ -354,6 +355,10 @@ static struct symbol_op static_assert_op = {
+ 	.toplevel = parse_static_assert,
+ };
+ 
++static struct symbol_op seg_gs = {
++	.toplevel = ignore_seg_gs,
++};
++
+ static struct symbol_op packed_op = {
+ 	.attribute = attribute_packed,
+ };
+@@ -521,6 +526,9 @@ static struct init_keyword {
+ 	N("_Float64x",		&spec_op,	.type = &float64x_ctype),
+ 	N("_Float128",		&spec_op,	.type = &float128_ctype),
+ 	N("__float128",		&spec_op,	.type = &float128_ctype),
++
++	N("__seg_gs",		&seg_gs),
++
+ }, keywords[] = {
+ 	/* Statements */
+ 	N("if",			&if_op),
+@@ -2130,6 +2138,11 @@ static struct token *parse_static_assert(struct token *token, struct symbol_list
+ 	return token;
+ }
+ 
++static struct token *ignore_seg_gs(struct token *token, struct symbol_list **unused)
++{
++	return token->next;
++}
++
+ /* Make a statement out of an expression */
+ static struct statement *make_statement(struct expression *expr)
+ {
+-- 
+2.42.0
 
-On Sun, Oct 8, 2023 at 2:43=E2=80=AFAM kernel test robot <lkp@intel.com> wr=
-ote:
->
-> tree:   https://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git x86/p=
-ercpu
-> head:   ca4256348660cb2162668ec3d13d1f921d05374a
-> commit: ca4256348660cb2162668ec3d13d1f921d05374a [12/12] x86/percpu: Use =
-C for percpu read/write accessors
-> config: x86_64-randconfig-122-20231007 (https://download.01.org/0day-ci/a=
-rchive/20231008/202310080853.UhMe5iWa-lkp@intel.com/config)
-> compiler: gcc-12 (Debian 12.2.0-14) 12.2.0
-> reproduce (this is a W=3D1 build): (https://download.01.org/0day-ci/archi=
-ve/20231008/202310080853.UhMe5iWa-lkp@intel.com/reproduce)
->
-> If you fix the issue in a separate patch/commit (i.e. not just a new vers=
-ion of
-> the same patch/commit), kindly add following tags
-> | Reported-by: kernel test robot <lkp@intel.com>
-> | Closes: https://lore.kernel.org/oe-kbuild-all/202310080853.UhMe5iWa-lkp=
-@intel.com/
->
-> sparse warnings: (new ones prefixed by >>)
->    kernel/bpf/percpu_freelist.c: note: in included file (through arch/x86=
-/include/asm/preempt.h, include/linux/preempt.h, include/linux/spinlock.h, =
-...):
->    arch/x86/include/asm/percpu.h:550:49: sparse: sparse: Expected ) at en=
-d of cast operator
->    arch/x86/include/asm/percpu.h:550:49: sparse: sparse: got __seg_gs
->    arch/x86/include/asm/percpu.h:564:33: sparse: sparse: Expected ) at en=
-d of cast operator
->    arch/x86/include/asm/percpu.h:564:33: sparse: sparse: got __seg_gs
-
-sparse is too strict here. The following code is perfectly legal:
-
---cut here--
-int __seg_gs foo;
-
-int bar (int *pcp)
-{
-  return *(typeof (*pcp) __seg_gs *)(unsigned long)(pcp);
-}
---cut here--
-
-$ gcc -O2 -S -Wextra -Wall test.c
-$
-$ sparse test.c
-test.c:1:14: error: Expected ; at end of declaration
-test.c:1:14: error: got foo
-test.c:5:26: error: Expected ) at end of cast operator
-test.c:5:26: error: got __seg_gs
-$
-
-Uros.
