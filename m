@@ -1,119 +1,120 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="ekc7rlBw"
-Received: from mail-ej1-x62f.google.com (mail-ej1-x62f.google.com [IPv6:2a00:1450:4864:20::62f])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 219C3B8
-	for <linux-sparse@vger.kernel.org>; Mon, 27 Nov 2023 09:26:24 -0800 (PST)
-Received: by mail-ej1-x62f.google.com with SMTP id a640c23a62f3a-a0f49b31868so166753066b.3
-        for <linux-sparse@vger.kernel.org>; Mon, 27 Nov 2023 09:26:24 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="BJ4UKM7z"
+Received: from mail-ed1-x52c.google.com (mail-ed1-x52c.google.com [IPv6:2a00:1450:4864:20::52c])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 91C9410F1
+	for <linux-sparse@vger.kernel.org>; Fri,  1 Dec 2023 06:10:48 -0800 (PST)
+Received: by mail-ed1-x52c.google.com with SMTP id 4fb4d7f45d1cf-54b450bd014so2508188a12.3
+        for <linux-sparse@vger.kernel.org>; Fri, 01 Dec 2023 06:10:48 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linux-foundation.org; s=google; t=1701105982; x=1701710782; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=TEU3+aCfiSmQFyVqBrrLYcYFe/sY4vb17c0SHE7wKwE=;
-        b=ekc7rlBwFJAJRDepiogJXDsoOH7hkwTYqduMwpRQsRHKfWSY1DjDWwIm8iGu3VxY/O
-         LTPg9nSBlM3g2Arh7fJKexaOjQAWHNkNkKNXHJhe22rys0iED93kSy5QvEZ2kI6dxm+P
-         IWdK/jxkrpqyf7TmVIffpcM4z29yBUbh+IvY4=
+        d=gmail.com; s=20230601; t=1701439847; x=1702044647; darn=vger.kernel.org;
+        h=content-transfer-encoding:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=r/RCpB3un8WUrdwOP4Jdve+CRS/UkSnLxbVRKJtoTNo=;
+        b=BJ4UKM7zIotwPBUvCJmfbWouZhXkwoPiHT2yKS4Tl33Xc/E6AHb6kMHLBtMqGUt+Jz
+         Ym2FTc4Hy7qj9nWxQhR7Smnf2ZKTfb4tZHVpodb6tkucp8TGyoL0sdsTGrCbQh3TWMpx
+         +vzm2u1C0A3V8KhjP6FpY3JsVmOiyZSHn8WDZ8ZhP5+1qRbFjX4QBlIAYrUGBwPlwDc/
+         DOlf1tD3c192zRrbZNE8MlpXnrnbBjOpAnYiEbpbjGOBKdFrW1LP+oe7yHGxp5u1FGRx
+         Nu9XvodT3OG7BqPCvFeCDybdBs4JNaWC4NjydnOzgg+dabfROl/P2cE1hCCgN7EzPSHl
+         LcpA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1701105982; x=1701710782;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=TEU3+aCfiSmQFyVqBrrLYcYFe/sY4vb17c0SHE7wKwE=;
-        b=bEpQyphAyGbjMq74+v4ZpRV6elnjv/xuO1nYB5hu1YiePKDRo6KTgtIdxZldHM/dVt
-         8KiFJ4QYOV0zBQ6S+XExRAINF6FD0Z96Itj5siIMBUdSwGn9WtHvZcVi/Cl/C2MBgTCe
-         GjA2L3ydB93ENHjq/dc07FBa5TEQ1Lc5Ii7YWT+6bjgSbMWoWCe5Jxmt4hCMlGh2YZ6O
-         yFm62FlDn7Kdg8DORaxvC13m5K1KgUzMJcgV/Ql1nNZ6U8CkCNT7lMQTCSKZC1+zLWma
-         ym5jgIX0xPtw5hF1EqCAD0huAwOO6Zjb1IIdN8uw+1diyl23ePZphox/Fp6IToTthkYq
-         0cew==
-X-Gm-Message-State: AOJu0YwQBJDrn8KGTXySA2SAoLpT2cuunSlKCXVrWAJcThBcbf4UcJn+
-	iqNn7IeRi0vOB8QdZBsKPKs14qkRbeiep50Uy5WgFw==
-X-Google-Smtp-Source: AGHT+IFKCF52aDZIuu88df64ft6jcQ/pFYeHgvwpWjfXpte1K+ErIXAiAwqHfL0Uk81JQJL5RDyBlQ==
-X-Received: by 2002:a17:906:3fc3:b0:9f7:b852:f807 with SMTP id k3-20020a1709063fc300b009f7b852f807mr7149337ejj.9.1701105982314;
-        Mon, 27 Nov 2023 09:26:22 -0800 (PST)
-Received: from mail-ed1-f44.google.com (mail-ed1-f44.google.com. [209.85.208.44])
-        by smtp.gmail.com with ESMTPSA id h4-20020a170906398400b009fd541851f4sm5882970eje.198.2023.11.27.09.26.21
-        for <linux-sparse@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 27 Nov 2023 09:26:21 -0800 (PST)
-Received: by mail-ed1-f44.google.com with SMTP id 4fb4d7f45d1cf-549070a04baso6148071a12.3
-        for <linux-sparse@vger.kernel.org>; Mon, 27 Nov 2023 09:26:21 -0800 (PST)
-X-Received: by 2002:a05:6402:2b85:b0:54b:8958:3a3c with SMTP id
- fj5-20020a0564022b8500b0054b89583a3cmr1821041edb.29.1701105981089; Mon, 27
- Nov 2023 09:26:21 -0800 (PST)
+        d=1e100.net; s=20230601; t=1701439847; x=1702044647;
+        h=content-transfer-encoding:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=r/RCpB3un8WUrdwOP4Jdve+CRS/UkSnLxbVRKJtoTNo=;
+        b=r1sHNibYAfqc6cv9SjOFyRfInKKQsto9OEJB8xFCBLu0e/5MMdJBbFsq/+cXPz4T6V
+         GjML3ToP00Kw4a4npvgjjciwyWnpZpAsimj9fFIBPZeuG5uXqQEKCZI0uf5G/di+NM3S
+         om2Cw2OscTDdgh8fCNGyplnCDnrVgpSru6GlqFrsuqBW4mFPhEKHc3xY3yn1nGk60Ce/
+         yDGoL+QrEgbngtNLTasSL9fCxefB5ZO2H0lexWJs9QtMgFUUwy87lPiC+MQfh+COcX3v
+         2/2VexgW+RbnONjmDAVNDdboOSumfsvhWQLoUqTS2oHpHpm6n91vly+cxyzG1kMK7sbq
+         vsGA==
+X-Gm-Message-State: AOJu0YwZI7WD0R0dyydf7w2bEdjJQbQjdE1qxQabpaeR354PvgPSBpN/
+	Mp847o95W6X1udRL/GYeDZo+6bRtPjzgkI0cBDZMqcpk7Dw=
+X-Google-Smtp-Source: AGHT+IGn/+nJUhxpQIeDzrNNXdbRoH/ZVCwmcTH8w1sO+ngaIVqkcDefpu9z+oMnOma7zuy5QpFKVVHx+x9FftVdzOg=
+X-Received: by 2002:a50:cc8d:0:b0:54c:4837:8b6a with SMTP id
+ q13-20020a50cc8d000000b0054c48378b6amr921982edi.56.1701439846592; Fri, 01 Dec
+ 2023 06:10:46 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <ZUxoJh7NlWw+uBlt@infradead.org> <3423b42d-fc11-4695-89cc-f1e2d625fa90@suswa.mountain>
- <ZWS+LLCggp70Eav3@infradead.org>
-In-Reply-To: <ZWS+LLCggp70Eav3@infradead.org>
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Date: Mon, 27 Nov 2023 09:26:03 -0800
-X-Gmail-Original-Message-ID: <CAHk-=whC6fX5U3kfG9zKxw+_G=n=Y0VJYZ-BBF7EQ1KZM2Zb2g@mail.gmail.com>
-Message-ID: <CAHk-=whC6fX5U3kfG9zKxw+_G=n=Y0VJYZ-BBF7EQ1KZM2Zb2g@mail.gmail.com>
-Subject: Re: sparse feature request: nocast integer types
-To: Christoph Hellwig <hch@infradead.org>
-Cc: Dan Carpenter <dan.carpenter@linaro.org>, linux-sparse@vger.kernel.org, 
-	linux-xfs@vger.kernel.org, smatch@vger.kernel.org
+References: <202310080853.UhMe5iWa-lkp@intel.com> <CAFULd4ZgT1dZFz36ZbPeqJa+U2NwusSTudg175sSarhpvEu-Zw@mail.gmail.com>
+In-Reply-To: <CAFULd4ZgT1dZFz36ZbPeqJa+U2NwusSTudg175sSarhpvEu-Zw@mail.gmail.com>
+From: Uros Bizjak <ubizjak@gmail.com>
+Date: Fri, 1 Dec 2023 15:10:35 +0100
+Message-ID: <CAFULd4Zm94W07Rv+0J0E2=dtd3hoc7us_sQi-pOUiomYS1Za-w@mail.gmail.com>
+Subject: sparse: Expected ) at end of cast operator, got __seg_gs
+To: linux-sparse@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Mon, 27 Nov 2023 at 08:50, Christoph Hellwig <hch@infradead.org> wrote:
+Forwarded from linux-kernel@vger.kernel.org
+
+---------- Forwarded message ---------
+From: Uros Bizjak <ubizjak@gmail.com>
+Date: Fri, Dec 1, 2023 at 2:57=E2=80=AFPM
+Subject: Re: [tip:x86/percpu 12/12]
+arch/x86/include/asm/preempt.h:27:55: sparse: sparse: incompatible
+types for operation (&):
+To: kernel test robot <lkp@intel.com>
+Cc: <oe-kbuild-all@lists.linux.dev>, <linux-kernel@vger.kernel.org>,
+<x86@kernel.org>, Ingo Molnar <mingo@kernel.org>, Nadav Amit
+<namit@vmware.com>
+
+
+On Sun, Oct 8, 2023 at 2:43=E2=80=AFAM kernel test robot <lkp@intel.com> wr=
+ote:
 >
-> Yes, doing it without specific annotations seems like a pain.  I did a
-> little prototype with the existing sparse __nocast for one xfs type that
-> is not very heavily used, and it actually worked pretty good.
+> tree:   https://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git x86/p=
+ercpu
+> head:   ca4256348660cb2162668ec3d13d1f921d05374a
+> commit: ca4256348660cb2162668ec3d13d1f921d05374a [12/12] x86/percpu: Use =
+C for percpu read/write accessors
+> config: x86_64-randconfig-122-20231007 (https://download.01.org/0day-ci/a=
+rchive/20231008/202310080853.UhMe5iWa-lkp@intel.com/config)
+> compiler: gcc-12 (Debian 12.2.0-14) 12.2.0
+> reproduce (this is a W=3D1 build): (https://download.01.org/0day-ci/archi=
+ve/20231008/202310080853.UhMe5iWa-lkp@intel.com/reproduce)
 >
-> The major painpoint is that 0 isn't treated special, but with that
-> fixed the amount of churn is mangable.
-
-I would suggest trying to just treat "__bitwise" as the "nocast" type.
-And note that doing a
-
-   typedef uXX __bitwise new_integer_type;
-
-will make a *specific* new integer type that is only compatible with
-itself (so not other bitwise types).
-
-Of course, that only works if you are then willing to just use
-accessor functions when you actually want to do arithmetic on the
-values. If you use a *lot* of arithmetic - as opposed to just passing
-values around - it is too painful.
-
-> The next big thing is our stupid 64-bit divison helpers (do_div & co),
-> which require helpers to do that case. I'm actually kinda tempted to
-> propose that we drop 32-bit support for xfs to get rid of that and a
-> lot of other ugly things because of do_div.  That is unless we can
-> finally agree that the libgcc division helpes might not be great but
-> good enough that we don't want to inflict do_div on folks unless they
-> want to optize that case, which would be even better.
+> If you fix the issue in a separate patch/commit (i.e. not just a new vers=
+ion of
+> the same patch/commit), kindly add following tags
+> | Reported-by: kernel test robot <lkp@intel.com>
+> | Closes: https://lore.kernel.org/oe-kbuild-all/202310080853.UhMe5iWa-lkp=
+@intel.com/
 >
-> Linus, any commens on that?
+> sparse warnings: (new ones prefixed by >>)
+>    kernel/bpf/percpu_freelist.c: note: in included file (through arch/x86=
+/include/asm/preempt.h, include/linux/preempt.h, include/linux/spinlock.h, =
+...):
+>    arch/x86/include/asm/percpu.h:550:49: sparse: sparse: Expected ) at en=
+d of cast operator
+>    arch/x86/include/asm/percpu.h:550:49: sparse: sparse: got __seg_gs
+>    arch/x86/include/asm/percpu.h:564:33: sparse: sparse: Expected ) at en=
+d of cast operator
+>    arch/x86/include/asm/percpu.h:564:33: sparse: sparse: got __seg_gs
 
-Some architectures do that, but honestly, we've had *horrendous*
-numbers of cases where people did 64x64 divisions without ever
-realizing what they did. Having it cause compile failures on x86 -
-even if it silently works elsewhere - means that they do get caught
-fairly quickly.
+sparse is too strict here. The following code is perfectly legal:
 
-Just go to lore, and search for "__divdi3". You will find *tons* of
-kernel test robot reports for completely idiotic cases that then never
-get to me because of this.
+--cut here--
+int __seg_gs foo;
 
-IOW, you may not see it in the resulting kernel, but the reason you
-don't see it is *exactly* because we require that do_div() dance for
-64-bit divides.
+int bar (int *pcp)
+{
+  return *(typeof (*pcp) __seg_gs *)(unsigned long)(pcp);
+}
+--cut here--
 
-The least one I see is literally from less than a week ago, when media
-code tried to do this:
+$ gcc -O2 -S -Wextra -Wall test.c
+$
+$ sparse test.c
+test.c:1:14: error: Expected ; at end of declaration
+test.c:1:14: error: got foo
+test.c:5:26: error: Expected ) at end of cast operator
+test.c:5:26: error: got __seg_gs
+$
 
-        i = v / (1LL << fraction_bits);
-
-without realizing that a signed 64-bit division is truly *horrendous* here.
-
-So you may never see this, but it's a *constant* churn, and we really
-are better for it.  It's not some historical artifact, it's a "the
-kernel test robot finds stuff weekly".
-
-                 Linus
+Uros.
