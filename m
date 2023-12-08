@@ -1,126 +1,190 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="hjwt4wAu"
-Received: from mail-ed1-x52d.google.com (mail-ed1-x52d.google.com [IPv6:2a00:1450:4864:20::52d])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 66462106
-	for <linux-sparse@vger.kernel.org>; Mon,  4 Dec 2023 07:02:45 -0800 (PST)
-Received: by mail-ed1-x52d.google.com with SMTP id 4fb4d7f45d1cf-54bf9a54fe3so5846716a12.3
-        for <linux-sparse@vger.kernel.org>; Mon, 04 Dec 2023 07:02:45 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="UWYFOG3o"
+Received: from mail-wr1-x436.google.com (mail-wr1-x436.google.com [IPv6:2a00:1450:4864:20::436])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AE86E3251
+	for <linux-sparse@vger.kernel.org>; Fri,  8 Dec 2023 01:49:41 -0800 (PST)
+Received: by mail-wr1-x436.google.com with SMTP id ffacd0b85a97d-332c0c32d19so2250450f8f.3
+        for <linux-sparse@vger.kernel.org>; Fri, 08 Dec 2023 01:49:41 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1701702164; x=1702306964; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=E3KzQIx9Ohkvm02uw6GTEKfHglHoMLN9A9s+VAnkulc=;
-        b=hjwt4wAuwC+T07jf4LRMEh8cG2QkrjErMREokvbZWKAn34cPooBWlDIyr+WIJIVTxf
-         hbz5a/Cnl1HCBzox/O+pfbiduTHpOn+dsyeiT18QbWRupr3y8whvri3Y3MfHac98sKbY
-         4ntCIDgLTv6gmJrYfClnxiOBmIkN17oZFs5DqlztumaxmUR6P9CQzE36oqxN0AgOd3xS
-         5KuyIFGYn5d654uZqfIZwYfmZoMNXoES5o9qnSRAQ3iZUzuJRS5oKsz/cinKmsGfRuA8
-         1ohJ9gcwqTP80FFpj2IIykkqfvF6cGvix4xJ+f0bFYOhFLtfgSUiDWXwa7IqLl/wjbZo
-         kcLQ==
+        d=linaro.org; s=google; t=1702028979; x=1702633779; darn=vger.kernel.org;
+        h=content-disposition:mime-version:message-id:subject:cc:to:from:date
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=nsDFTWmgROVyZ8+wguvsGMplHjG7hkxcbhAtNR+Ddx4=;
+        b=UWYFOG3oZMVQ8BNE/HVscVGmlEHm0Z/+P+7+iXpoPUC3ZtJO5OdvAXaPO1uL/tKO8S
+         f+9+QOnyxidxxVo0+4pm6KkdFjsmLhcwcSISGFrV3AiXB/kUyuMJ0f6Ae+e0apVWNz3R
+         BvNIimugimejWWb95X2McZU49jfVn5Omoz5DgMdai+Vd21TyXrocrC3A9SLbGZ6B3OKI
+         R/ird0GxWuX0vWyycxXuU2LSEOqYYSXsA1jhRJhSGWLtNGSutsZzuTjEVGOF4/vHefmP
+         cNr9Ogd7zAapO/HVkxJaB+Npt0eAne7/uR7LRnC+q8MaARQbVhXkhoUXSSXKH/oJrLgx
+         e2YA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1701702164; x=1702306964;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=E3KzQIx9Ohkvm02uw6GTEKfHglHoMLN9A9s+VAnkulc=;
-        b=VLiD2S94NdH3i5h03d9d4JjY+f7lnfimjTE9BLLFxNe05MDnoAUwQ0vioT/JK1m/AY
-         i8dRpazleSfLeYK3f8xyuYMTBLfzB3YP0o09I5s/svqjoEny1nNUAJcfREdVTO6l2TXq
-         UuSVsBD9PZWGv9yDE4pr0FPjraFhZmnITDxTtAUNlUstKkVDD99uU2vRc1isV6fmlxCE
-         BOrY2T9BrcvGFB6/j/Ac5N1iXxOYDldIcpeivVhl11OKktmcT1IlasgZBdm+gDV74OUN
-         JgdDZLCL1m7xCOo2FyNq6XmkfVN6j93CTSr0Y5isM5OHQdd8s1dZ/V7PMR9Ggt5GL6Sl
-         Cgtw==
-X-Gm-Message-State: AOJu0YyaAJCnpjekj4XWnNVuXlVdtY0V3Ofg257gxeJhj8u/+QFk2WnG
-	t6XxE4xUb2C6iMXMchhVUjloeEjUVMQBd3rgOUs=
-X-Google-Smtp-Source: AGHT+IGIqVLWZM/nhnUdOXE4Niz/99pkPjfKGKEfE2TjzQCWrXxZyYbGnfxqgOshqM0hqdtv21ymfttkPR7gg5AnsWI=
-X-Received: by 2002:a50:c312:0:b0:54c:ff23:7cb6 with SMTP id
- a18-20020a50c312000000b0054cff237cb6mr82994edb.41.1701702163719; Mon, 04 Dec
- 2023 07:02:43 -0800 (PST)
+        d=1e100.net; s=20230601; t=1702028979; x=1702633779;
+        h=content-disposition:mime-version:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=nsDFTWmgROVyZ8+wguvsGMplHjG7hkxcbhAtNR+Ddx4=;
+        b=IQDI8UCRa/MVGtW/taUN+iQdni9UzyHb3yOLG6O6iMJAxcva0lKK1uOcO7g0VY8sbX
+         FT2+tt+L623xHq8h9VBoq/yD0JjoKkUsy2i8VeUbnpeaTsrJqVlXaE3vKP3uEmq65HDm
+         EJtfiOOVBvAk9Z2DgZxqYPvOdS3+0AUpWlWmHwsB5Mo1K3wOvMC1RgYmUzOcmnAoD9ea
+         6Uf8T1ZYLQltIrk87CLPZxmQXf3chu8MMMOnXu+5XHoUkg/id2quKJrWHruFrZFFj4Wb
+         jgG9kkcikMXfT3p4ZHb28Tgd1xPHlqBVs1WlsHw+eVuQFww7pY0nmV4l0CIDMrJE19BU
+         vnkg==
+X-Gm-Message-State: AOJu0Yyu/ElzAQpavwBlrJFJKu/TqB4rGgvzCVgf3XXsoKTEYvpPHWbA
+	VuJKUWVQWt53flsOsO9JZzTQ5ha/M6jEWXOKPho=
+X-Google-Smtp-Source: AGHT+IE2z0hPh/iAw/reMr28ag7VN7lzDks8EV4C43GuxVFyVY0oEUmR4BhtcK2+HqV6SmwGIko/yQ==
+X-Received: by 2002:a7b:c3d3:0:b0:40c:357e:273 with SMTP id t19-20020a7bc3d3000000b0040c357e0273mr183802wmj.142.1702028978722;
+        Fri, 08 Dec 2023 01:49:38 -0800 (PST)
+Received: from localhost ([102.36.222.112])
+        by smtp.gmail.com with ESMTPSA id j16-20020a5d5650000000b0033344e2522dsm1633451wrw.37.2023.12.08.01.49.37
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 08 Dec 2023 01:49:38 -0800 (PST)
+Date: Fri, 8 Dec 2023 12:49:34 +0300
+From: Dan Carpenter <dan.carpenter@linaro.org>
+To: linux-sparse@vger.kernel.org
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH v2] parse: handle __cleanup__ attribute
+Message-ID: <8d596a06-9f25-4d9f-8282-deb2d03a6b0a@moroto.mountain>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <202310080853.UhMe5iWa-lkp@intel.com> <CAFULd4ZgT1dZFz36ZbPeqJa+U2NwusSTudg175sSarhpvEu-Zw@mail.gmail.com>
- <CAFULd4Zm94W07Rv+0J0E2=dtd3hoc7us_sQi-pOUiomYS1Za-w@mail.gmail.com>
- <v3beizdy56kqr4jv4zhmy6slriifuqcqll2eucqykqjilxfdya@s5v5jaflavwh>
- <CAFULd4YMcHhkSR4P5tq3ghLQyUCkiTOKS6PQd1Bec-2NicUiwQ@mail.gmail.com>
- <oz64jus6uqtwj76jvc5imywhwnrur4s6vuvcg3lntpj4s7dqna@fd4pecivhf2u> <CAFULd4YJ2vC-3Yj648XRquz0rh5jUgJEw6S89JC-h8p5A4-WTg@mail.gmail.com>
-In-Reply-To: <CAFULd4YJ2vC-3Yj648XRquz0rh5jUgJEw6S89JC-h8p5A4-WTg@mail.gmail.com>
-From: Uros Bizjak <ubizjak@gmail.com>
-Date: Mon, 4 Dec 2023 16:02:32 +0100
-Message-ID: <CAFULd4buj4yX9Rgef1H3F4Sk042CaP1v=DwZBi=LHg1oEvQ2Sw@mail.gmail.com>
-Subject: Re: sparse: Expected ) at end of cast operator, got __seg_gs
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: linux-sparse@vger.kernel.org, Dan Carpenter <dan.carpenter@linaro.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-On Mon, Dec 4, 2023 at 3:50=E2=80=AFPM Uros Bizjak <ubizjak@gmail.com> wrot=
-e:
->
-> On Mon, Dec 4, 2023 at 3:37=E2=80=AFPM Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
-> >
-> > On Mon, Dec 04, 2023 at 02:57:53PM +0100, Uros Bizjak wrote:
-> > > On Mon, Dec 4, 2023 at 2:05=E2=80=AFPM Luc Van Oostenryck <luc.vanoos=
-tenryck@gmail.com> wrote:
-> > >
-> > > __seg_gs qualified variables can be referenced anywhere in the code, =
-e.g.:
-> > >
-> > > --cut here--
-> > > __seg_gs int m;
-> > >
-> > > int foo (void)
-> > > {
-> > >  return m + m;
-> > > }
-> >
-> > Yes, of course. But my point was not if they *can* be dereferenced but =
-rather
-> > if *in the kernel, do want or not to use 'naked' __seg_gs qualified var=
-iable*.
-> > In other words, do we want to be warned if someone, somewhere try to
-> > dereference such qualified variable without using the accessor function=
-?
-> > And I think the answer to this question should be 'yes'.
->
-> Not really - when used as e.g.:
->
-> extern const struct pcpu_hot __seg_gs const_pcpu_hot;
->
-> we can use variable directly, e.g.:
->
-> return const_pcpu_hot.current_task;
->
-> This way, the compiler is able to significantly reduce the number of
-> loads from current_task, which is not achievable when the accessor is
-> used to dereference the structure. In the x86/percpu branch, the
-> number of loads from current_task were reduced from ~4700 to 3201 by
-> using 'naked' __seg_gs qualified variable. IOW, the benefit of using
-> __seg_gs is to be able to access the naked variable.
+The kernel has recently started using the __cleanup__ attribute.  Save
+a pointer to cleanup function.
 
-Additionally, the compiler checks access to this internal ("named")
-address space, and will prevent dereference from "generic" address
-space without appropriate casts. So, compiling:
+Signed-off-by: Dan Carpenter <dan.carpenter@linaro.org>
+---
+v2:  The first version of this patch had a bug handling a list of
+     declarations.  I had to add a .cleanup = NULL at the start of
+     the loops iterations in declaration_list() and
+     external_declaration().
 
---cut here--
-__seg_gs int *m;
+ parse.c  | 26 +++++++++++++++++++++++++-
+ symbol.h |  2 ++
+ 2 files changed, 27 insertions(+), 1 deletion(-)
 
-int *foo (void)
-{
-  return m;
-}
---cut here--
+diff --git a/parse.c b/parse.c
+index 3d6fef7cb011..e5b5e6acc062 100644
+--- a/parse.c
++++ b/parse.c
+@@ -79,7 +79,8 @@ typedef struct token *attr_t(struct token *, struct symbol *,
+ 			     struct decl_state *);
+ 
+ static attr_t
+-	attribute_packed, attribute_aligned, attribute_modifier,
++	attribute_packed, attribute_aligned, attribute_cleanup,
++	attribute_modifier,
+ 	attribute_function,
+ 	attribute_bitwise,
+ 	attribute_address_space, attribute_context,
+@@ -361,6 +362,10 @@ static struct symbol_op aligned_op = {
+ 	.attribute = attribute_aligned,
+ };
+ 
++static struct symbol_op cleanup_op = {
++	.attribute = attribute_cleanup,
++};
++
+ static struct symbol_op attr_mod_op = {
+ 	.attribute = attribute_modifier,
+ };
+@@ -537,6 +542,7 @@ static struct init_keyword {
+ 	/* Attributes */
+ 	D("packed",		&packed_op),
+ 	D("aligned",		&aligned_op),
++	D("__cleanup__",	&cleanup_op),
+ 	D("nocast",		&attr_mod_op,		.mods = MOD_NOCAST),
+ 	D("noderef",		&attr_mod_op,		.mods = MOD_NODEREF),
+ 	D("safe",		&attr_mod_op,		.mods = MOD_SAFE),
+@@ -1114,6 +1120,18 @@ static struct token *attribute_aligned(struct token *token, struct symbol *attr,
+ 	return token;
+ }
+ 
++static struct token *attribute_cleanup(struct token *token, struct symbol *attr, struct decl_state *ctx)
++{
++	struct expression *expr = NULL;
++
++	if (match_op(token, '(')) {
++		token = parens_expression(token, &expr, "in attribute");
++		if (expr && expr->type == EXPR_SYMBOL)
++			ctx->cleanup = expr;
++	}
++	return token;
++}
++
+ static void apply_mod(struct position *pos, unsigned long *mods, unsigned long mod)
+ {
+ 	if (*mods & mod & ~MOD_DUP_OK)
+@@ -1899,6 +1917,7 @@ static struct token *declaration_list(struct token *token, struct symbol_list **
+ 	saved = ctx.ctype;
+ 	for (;;) {
+ 		struct symbol *decl = alloc_symbol(token->pos, SYM_NODE);
++		ctx.cleanup = NULL;
+ 		ctx.ident = &decl->ident;
+ 
+ 		token = declarator(token, &ctx);
+@@ -1910,6 +1929,7 @@ static struct token *declaration_list(struct token *token, struct symbol_list **
+ 
+ 		decl->ctype = ctx.ctype;
+ 		decl->ctype.modifiers |= mod;
++		decl->cleanup = ctx.cleanup;
+ 		decl->endpos = token->pos;
+ 		add_symbol(list, decl);
+ 		if (!match_op(token, ','))
+@@ -1964,6 +1984,7 @@ struct token *typename(struct token *token, struct symbol **p, int *forced)
+ 	token = declarator(token, &ctx);
+ 	apply_modifiers(token->pos, &ctx);
+ 	sym->ctype = ctx.ctype;
++	sym->cleanup = ctx.cleanup;
+ 	sym->endpos = token->pos;
+ 	class = ctx.storage_class;
+ 	if (forced)
+@@ -2924,6 +2945,7 @@ struct token *external_declaration(struct token *token, struct symbol_list **lis
+ 
+ 	decl->ctype = ctx.ctype;
+ 	decl->ctype.modifiers |= mod;
++	decl->cleanup = ctx.cleanup;
+ 	decl->endpos = token->pos;
+ 
+ 	/* Just a type declaration? */
+@@ -3041,6 +3063,7 @@ struct token *external_declaration(struct token *token, struct symbol_list **lis
+ 		ident = NULL;
+ 		decl = alloc_symbol(token->pos, SYM_NODE);
+ 		ctx.ctype = saved;
++		ctx.cleanup = NULL;
+ 		token = handle_attributes(token, &ctx);
+ 		token = declarator(token, &ctx);
+ 		token = handle_asm_name(token, &ctx);
+@@ -3048,6 +3071,7 @@ struct token *external_declaration(struct token *token, struct symbol_list **lis
+ 		apply_modifiers(token->pos, &ctx);
+ 		decl->ctype = ctx.ctype;
+ 		decl->ctype.modifiers |= mod;
++		decl->cleanup = ctx.cleanup;
+ 		decl->endpos = token->pos;
+ 		if (!ident) {
+ 			sparse_error(token->pos, "expected identifier name in type definition");
+diff --git a/symbol.h b/symbol.h
+index 5270fcd73a10..88130c15d4bd 100644
+--- a/symbol.h
++++ b/symbol.h
+@@ -107,6 +107,7 @@ struct decl_state {
+ 	struct ctype ctype;
+ 	struct ident **ident;
+ 	struct symbol_op *mode;
++	struct expression *cleanup;
+ 	unsigned long f_modifiers;		// function attributes
+ 	unsigned long storage_class;
+ 	unsigned char prefer_abstract;
+@@ -204,6 +205,7 @@ struct symbol {
+ 			struct statement *inline_stmt;
+ 			struct symbol_list *inline_symbol_list;
+ 			struct expression *initializer;
++			struct expression *cleanup;
+ 			struct entrypoint *ep;
+ 			struct symbol *definition;
+ 		};
+-- 
+2.42.0
 
-will generate "error: return from pointer to non-enclosed address space".
-
-But the following is allowed:
-
-int *foo (void)
-{
-  return (int *)(unsigned long) m;
-}
-
-Uros.
