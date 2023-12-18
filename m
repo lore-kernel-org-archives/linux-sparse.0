@@ -1,58 +1,47 @@
-Received: from riemann.telenet-ops.be (riemann.telenet-ops.be [195.130.137.80])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1ECBD2C6A3
-	for <linux-sparse@vger.kernel.org>; Fri, 15 Dec 2023 12:46:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=linux-m68k.org
-Received: from baptiste.telenet-ops.be (baptiste.telenet-ops.be [IPv6:2a02:1800:120:4::f00:13])
-	by riemann.telenet-ops.be (Postfix) with ESMTPS id 4Ss7yp4HDbz4x1PY
-	for <linux-sparse@vger.kernel.org>; Fri, 15 Dec 2023 13:37:22 +0100 (CET)
-Received: from ramsan.of.borg ([IPv6:2a02:1810:ac12:ed40:28e5:a835:e0b1:5291])
-	by baptiste.telenet-ops.be with bizsmtp
-	id NcdE2B00H29mzEW01cdEqC; Fri, 15 Dec 2023 13:37:15 +0100
-Received: from geert (helo=localhost)
-	by ramsan.of.borg with local-esmtp (Exim 4.95)
-	(envelope-from <geert@linux-m68k.org>)
-	id 1rE7RK-00C6sX-Nr;
-	Fri, 15 Dec 2023 13:37:14 +0100
-Date: Fri, 15 Dec 2023 13:37:14 +0100 (CET)
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-To: Conor Dooley <conor.dooley@microchip.com>
-cc: Palmer Dabbelt <palmer@rivosinc.com>, luc.vanoostenryck@gmail.com, 
-    linux-sparse@vger.kernel.org
-Subject: Re: [PATCH] RISC-V: Add support for the zicbom extension
-In-Reply-To: <YvYOc9Mk8y1dFvnp@wendy>
-Message-ID: <6bc5bd6-afde-3d5f-6780-97d26f58a33@linux-m68k.org>
-References: <20220811033138.20676-1-palmer@rivosinc.com> <YvYOc9Mk8y1dFvnp@wendy>
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 56F021D12F
+	for <linux-sparse@vger.kernel.org>; Mon, 18 Dec 2023 13:51:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="nqDUizqL"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1C3A1C433C8;
+	Mon, 18 Dec 2023 13:51:38 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1702907499;
+	bh=zni6E0geUBEa+VcgoWM3lbO9/Qz0g9vGcSa1egY7ThU=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=nqDUizqLTkKUQaHA4gkYPAqOtUJGLN2pAN++G2VEwEbU3QzIkfkrDNj2b5CdzsbPk
+	 nlLPMDIry/lRDm4oDci1BOM/PaZCCfNb91gYQObBjniSuW9dRcdEyHzNx1TMYebhe5
+	 BLdseKCLNdbTVF1HTSGXgBBNU2vPY2CYcQDtaCAxJ+XzzZXPF3O+jSMBP1mYVpe0J+
+	 vkDgdYXoKditZRhOuZKP40NqMwUZEfgX/M42nRDqA0YuyFdQuU8l2lNhhZZLEBQ7lL
+	 kZMZ2lBbeQtN+Yr+6JMP5KTyfsBgFOzVcH/Wx8cUtt4bvPid6rJ938tQGjUxUToklO
+	 yw7MYMiERxqrw==
+Date: Mon, 18 Dec 2023 14:51:32 +0100
+From: Luc Van Oostenryck <lucvoo@kernel.org>
+To: Dan Carpenter <dan.carpenter@linaro.org>
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, 
+	linux-sparse@vger.kernel.org
+Subject: Re: [PATCH v2] parse: handle __cleanup__ attribute
+Message-ID: <troz4beymvsw2m4y4ocghwiidohi4nbj45ry2tfmbekanu2ray@ooravawiynxr>
+References: <8d596a06-9f25-4d9f-8282-deb2d03a6b0a@moroto.mountain>
+ <i4s2gnr6rlq3yhmfiy7lkbsahnaioilksvmx3eocdjfh2434zo@zhxhwwgqpxt2>
+ <44e22df1-734e-49c5-b20b-4f4cdbce24a6@suswa.mountain>
+ <75ee8bd3-aa80-46dc-9f0c-874a8f4e9d48@suswa.mountain>
+ <k6ztyjq24ik24qtsu3aqpipodzgq37i2ko42ag7wzn4t2ryrzf@i4gbxu7kvslt>
+ <c3884893-44fe-4622-8e8e-576a0bdff19f@suswa.mountain>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII; format=flowed
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <c3884893-44fe-4622-8e8e-576a0bdff19f@suswa.mountain>
 
-On Fri, 12 Aug 2022, Conor Dooley wrote:
-> On Wed, Aug 10, 2022 at 08:31:38PM -0700, Palmer Dabbelt wrote:
->> This was recently added to binutils and with any luck will soon be in
->> Linux, without it sparse will fail when trying to build new kernels on
->> systems with new toolchains.
->>
->
-> In passing while testing the zihintpause one:
-> Tested-by: Conor Dooley <conor.dooley@microchip.com>
+On Thu, Dec 14, 2023 at 04:20:20PM +0300, Dan Carpenter wrote:
+> Yep.  Perfect.  Thanks so much!
 
-Likewise:
-Tested-by: Geert Uytterhoeven <geert+renesas@glider.be>
-
-Gr{oetje,eeting}s,
-
- 						Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
- 							    -- Linus Torvalds
+Pushed now.
+-- Luc 
