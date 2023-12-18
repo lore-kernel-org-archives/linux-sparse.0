@@ -1,35 +1,29 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 56F021D12F
-	for <linux-sparse@vger.kernel.org>; Mon, 18 Dec 2023 13:51:40 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 79CB8129EE3
+	for <linux-sparse@vger.kernel.org>; Mon, 18 Dec 2023 13:56:09 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="nqDUizqL"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1C3A1C433C8;
-	Mon, 18 Dec 2023 13:51:38 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="qwPweDJf"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 74B17C433C7;
+	Mon, 18 Dec 2023 13:56:08 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1702907499;
-	bh=zni6E0geUBEa+VcgoWM3lbO9/Qz0g9vGcSa1egY7ThU=;
+	s=k20201202; t=1702907769;
+	bh=5IdRCz7/D9wGkD7IchHWqXNzEpBmJT5RSbRa9EQ5Uko=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=nqDUizqLTkKUQaHA4gkYPAqOtUJGLN2pAN++G2VEwEbU3QzIkfkrDNj2b5CdzsbPk
-	 nlLPMDIry/lRDm4oDci1BOM/PaZCCfNb91gYQObBjniSuW9dRcdEyHzNx1TMYebhe5
-	 BLdseKCLNdbTVF1HTSGXgBBNU2vPY2CYcQDtaCAxJ+XzzZXPF3O+jSMBP1mYVpe0J+
-	 vkDgdYXoKditZRhOuZKP40NqMwUZEfgX/M42nRDqA0YuyFdQuU8l2lNhhZZLEBQ7lL
-	 kZMZ2lBbeQtN+Yr+6JMP5KTyfsBgFOzVcH/Wx8cUtt4bvPid6rJ938tQGjUxUToklO
-	 yw7MYMiERxqrw==
-Date: Mon, 18 Dec 2023 14:51:32 +0100
+	b=qwPweDJfI078tF20LBpCTSotM3Ys1xloR0KOceBY7K18ZuhhVbE89dQ+pq+36S8vV
+	 ixd4/iWFCv1HC3zoRgkAfc410FTwNNcIfg5sn0hFRTpig1jG+smLPzmG2ofuW53Z/D
+	 fjD5HhnfeOcTZzkPLUHF9QFBHTxmOFSe3CSwR/ri1y1zLSe/b14H/nKgtuZtvsfjb+
+	 nLvzl3UDeLg+eY0kmgU8bTMHSvMVyQoexgGTIor40ZDAOpcIVkZTMTkzM9GmaFYZXY
+	 MOIa0ctyeLVsivz+zdJdwx2YUk/x3BGoJ2HYJn328cAcPMmFLY7THfIZ5PSPA8WvGC
+	 Vf2rbhEiC6UDA==
+Date: Mon, 18 Dec 2023 14:56:01 +0100
 From: Luc Van Oostenryck <lucvoo@kernel.org>
-To: Dan Carpenter <dan.carpenter@linaro.org>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, 
-	linux-sparse@vger.kernel.org
-Subject: Re: [PATCH v2] parse: handle __cleanup__ attribute
-Message-ID: <troz4beymvsw2m4y4ocghwiidohi4nbj45ry2tfmbekanu2ray@ooravawiynxr>
-References: <8d596a06-9f25-4d9f-8282-deb2d03a6b0a@moroto.mountain>
- <i4s2gnr6rlq3yhmfiy7lkbsahnaioilksvmx3eocdjfh2434zo@zhxhwwgqpxt2>
- <44e22df1-734e-49c5-b20b-4f4cdbce24a6@suswa.mountain>
- <75ee8bd3-aa80-46dc-9f0c-874a8f4e9d48@suswa.mountain>
- <k6ztyjq24ik24qtsu3aqpipodzgq37i2ko42ag7wzn4t2ryrzf@i4gbxu7kvslt>
- <c3884893-44fe-4622-8e8e-576a0bdff19f@suswa.mountain>
+To: Jeff Layton <jlayton@kernel.org>
+Cc: linux-sparse@vger.kernel.org, luc.vanoostenryck@gmail.com
+Subject: Re: [PATCH] linearize.c: fix potential buffer overrun
+Message-ID: <q5nxyfe6t4mguhtxtvh7a6wbct4bctj6ynrvd3pftvmiw5rymg@fl4cprexyjhm>
+References: <20230222155244.133890-1-jlayton@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
@@ -38,10 +32,14 @@ List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <c3884893-44fe-4622-8e8e-576a0bdff19f@suswa.mountain>
+In-Reply-To: <20230222155244.133890-1-jlayton@kernel.org>
 
-On Thu, Dec 14, 2023 at 04:20:20PM +0300, Dan Carpenter wrote:
-> Yep.  Perfect.  Thanks so much!
+On Wed, Feb 22, 2023 at 10:52:44AM -0500, Jeff Layton wrote:
+> The resulting string won't be nearly 64 bytes, but "buf" is only 16
+> bytes long here, and this causes FORTIFY_SOURCE to barf when given the
+> right options.
+> 
+> Signed-off-by: Jeff Layton <jlayton@kernel.org>
 
-Pushed now.
--- Luc 
+Pushed to mainline now. Sorry for this very long delay.
+-- Luc
