@@ -1,29 +1,29 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 79CB8129EE3
-	for <linux-sparse@vger.kernel.org>; Mon, 18 Dec 2023 13:56:09 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3F0F0129EF7
+	for <linux-sparse@vger.kernel.org>; Mon, 18 Dec 2023 13:57:13 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="qwPweDJf"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 74B17C433C7;
-	Mon, 18 Dec 2023 13:56:08 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="dqZbKCmd"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 56044C433CB;
+	Mon, 18 Dec 2023 13:57:12 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1702907769;
-	bh=5IdRCz7/D9wGkD7IchHWqXNzEpBmJT5RSbRa9EQ5Uko=;
+	s=k20201202; t=1702907833;
+	bh=BSTxTcaEnwmT8dt0UDsIrEH/8TEKruSfHYWev9jEHrI=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=qwPweDJfI078tF20LBpCTSotM3Ys1xloR0KOceBY7K18ZuhhVbE89dQ+pq+36S8vV
-	 ixd4/iWFCv1HC3zoRgkAfc410FTwNNcIfg5sn0hFRTpig1jG+smLPzmG2ofuW53Z/D
-	 fjD5HhnfeOcTZzkPLUHF9QFBHTxmOFSe3CSwR/ri1y1zLSe/b14H/nKgtuZtvsfjb+
-	 nLvzl3UDeLg+eY0kmgU8bTMHSvMVyQoexgGTIor40ZDAOpcIVkZTMTkzM9GmaFYZXY
-	 MOIa0ctyeLVsivz+zdJdwx2YUk/x3BGoJ2HYJn328cAcPMmFLY7THfIZ5PSPA8WvGC
-	 Vf2rbhEiC6UDA==
-Date: Mon, 18 Dec 2023 14:56:01 +0100
+	b=dqZbKCmd1NkBOXJADnDkl74QZyU5CfR4aI/zPSJrD4EMcRgMF1BPXECoTjJcR9U+Q
+	 OWB/ffpw+Eek0bTr8DCNfPthE272QrPqvB8R3MqHGC9W7rM4Ytge1sOVl3k/AGgNCC
+	 Ss3dHHJ+Hsv9j7nHBYkYcw3wX1bJosnqn8llbU/40vzZbohKehmh4ac9RYEL2aVGOE
+	 Qa8INhCBxB1JDKeBwMmLPb6iJvPDOBM+gPl9Dhe7ZVfSl6AnD7Vcag8XPbUC4vtega
+	 pPXzeWqFkbLAlOduKO+lYcnH6p2G9GhBQUBmsRv1pmg5kGxowX2P+YshTlB27fLdAu
+	 NXkDGANDIFdcQ==
+Date: Mon, 18 Dec 2023 14:57:05 +0100
 From: Luc Van Oostenryck <lucvoo@kernel.org>
-To: Jeff Layton <jlayton@kernel.org>
-Cc: linux-sparse@vger.kernel.org, luc.vanoostenryck@gmail.com
-Subject: Re: [PATCH] linearize.c: fix potential buffer overrun
-Message-ID: <q5nxyfe6t4mguhtxtvh7a6wbct4bctj6ynrvd3pftvmiw5rymg@fl4cprexyjhm>
-References: <20230222155244.133890-1-jlayton@kernel.org>
+To: Guennadi Liakhovetski <guennadi.liakhovetski@linux.intel.com>
+Cc: linux-sparse@vger.kernel.org
+Subject: Re: [PATCH] xtensa: switch to little endianness
+Message-ID: <dyhz44tm67zxgdqau7zv4kwpwfphhw6tb2jyhe3ck2uwglt7pv@rk3ycau5cqb7>
+References: <44d1263-fe1-17b6-82d-fd2bbaa55cd@intel.com>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
@@ -32,14 +32,13 @@ List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230222155244.133890-1-jlayton@kernel.org>
+In-Reply-To: <44d1263-fe1-17b6-82d-fd2bbaa55cd@intel.com>
 
-On Wed, Feb 22, 2023 at 10:52:44AM -0500, Jeff Layton wrote:
-> The resulting string won't be nearly 64 bytes, but "buf" is only 16
-> bytes long here, and this causes FORTIFY_SOURCE to barf when given the
-> right options.
+On Wed, Nov 16, 2022 at 05:55:25PM +0100, Guennadi Liakhovetski wrote:
+> Current gcc options only support the little endian mode on Xtensa,
+> switch over to it.
 > 
-> Signed-off-by: Jeff Layton <jlayton@kernel.org>
+> Signed-off-by: Guennadi Liakhovetski <guennadi.liakhovetski@linux.intel.com>
 
 Pushed to mainline now. Sorry for this very long delay.
 -- Luc
