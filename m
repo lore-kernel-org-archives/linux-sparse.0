@@ -1,89 +1,100 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f42.google.com (mail-wm1-f42.google.com [209.85.128.42])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2847B134A0;
-	Sun,  7 Jan 2024 13:03:41 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B9C2D13AE9
+	for <linux-sparse@vger.kernel.org>; Mon, 15 Jan 2024 10:32:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Nmaaoaaf"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 14C9AC433C7;
-	Sun,  7 Jan 2024 13:03:39 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1704632621;
-	bh=JQUOkY7pGDbzmZACx5v6FcY10tfDTJxeBz0eqhJQOFs=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=Nmaaoaafir2w9oojohBMa85RUSZbLgmAllYnvNNYv0+Np2+VC9N/d3ZttJgPVWDAE
-	 dFzbnpajB+dddDJlZCexo5udEEO9NPlipCYB4V3r43urL7OhUPIxSJQHsNMjmAfjpI
-	 lWN0emjSK+u0hVC4BKO28l7MJm+VjfODV5R0osjPIO7z0FDDlJhMRh79mQlKPAhpP9
-	 uoOkk8we9HA+CTZqXVEvMjqxbUkeUkbRYeLrCRnkeoU5yLr5OwSX/mCuVLe5vw+UbN
-	 20ge22SMMNKGhNMWFoINKRsTSoSMySj5TwrovqSKgIILqM2pat4eMQk2jovNxps12q
-	 cwczWkwcdXkxw==
-Date: Sun, 7 Jan 2024 14:03:32 +0100
-From: Luc Van Oostenryck <lucvoo@kernel.org>
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Dmitry Torokhov <dmitry.torokhov@gmail.com>, 
-	kernel test robot <lkp@intel.com>, Arnd Bergmann <arnd@arndb.de>, linux-sparse@vger.kernel.org, 
-	Chris Morgan <macromorgan@hotmail.com>, oe-kbuild-all@lists.linux.dev, linux-kernel@vger.kernel.org
-Subject: Re: include/asm-generic/unaligned.h:119:16: sparse: sparse: cast
- truncates bits from constant value (aa01a0 becomes a0)
-Message-ID: <7yxju53lhprhihayiue3dp4xnmzpugygl47tt4w56pyscsf6tx@2w3eytgeav7u>
-References: <202401070147.gqwVulOn-lkp@intel.com>
- <ZZnzd3s2L-ZwGOlz@google.com>
- <CAHk-=wjLaBe3Y_H5WArWdQ6d36+UOQ7NSbga1w+esGYJZaVfVg@mail.gmail.com>
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="EZVZyi1d"
+Received: by mail-wm1-f42.google.com with SMTP id 5b1f17b1804b1-40e800461baso1116825e9.3
+        for <linux-sparse@vger.kernel.org>; Mon, 15 Jan 2024 02:32:10 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1705314729; x=1705919529; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-disposition:mime-version
+         :message-id:subject:to:from:date:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=RFn6tdE7ltotd+nh7DX9t7GuTBKXZfbeZSU2UvI8+r8=;
+        b=EZVZyi1dQ2IRJdBMYZ6+CqonsUqfLqssqoH3woCxnEezvYtvGa4DGmuFmpJ1HNoVw3
+         We++wa+VLMWsDHh0IfD+Gwmj5aXm/wHlqLXH3oDqLVUifSy6G1t7rWJA2RMWvKrErzQd
+         x4+tiE3sjZqT8tgl8Izqb51odgLhP0WqLB+mZQt8/5phca6xjlkXoQnbrd36ap7HgLLP
+         hshCFN/iBL5nKp21j8Rew7/EuMY4vR04v0EjVKaS+JIsfiJnKz4egqs2kRTXY2kPPp2B
+         s6JoCrkB4f4E10hXldVUp+FTZW3GLWuRkPQZ6uxYy1rb40Y+TzyZBMr01PkTCex20bSm
+         oYmA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1705314729; x=1705919529;
+        h=content-transfer-encoding:content-disposition:mime-version
+         :message-id:subject:to:from:date:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=RFn6tdE7ltotd+nh7DX9t7GuTBKXZfbeZSU2UvI8+r8=;
+        b=nXGV+9Qzap0Q0wIGWuBmdDKu0SzlNlovxXnmrcJt/F+L4kCiBwcYiPy4q+OAP2Pq/b
+         nMdfEw/ASLoQOtdHOytWJDsHJmc5b7Cgwry2Ydu+iQE/pmS18vT+zSaqdPuzR8NxcwbH
+         2YZT62oITsLHnclbrNSv0a6Rr65iUwYBCzfv+XfFJVpapJSu8S9fn0nfZyV64xMcgAT8
+         WE7AsXtN4bd1RGvDvIYi0AxB8kNP/+Fp73WpfF4WsMnEMVIVBVCJe72OoH/BeQHWsDEH
+         CRuhCljvghLGVH8c8r3qSeUUP1zCu5i6ytvBXikygzyn6uXGQbRWUIYhT/plZGnVz0hA
+         lbYA==
+X-Gm-Message-State: AOJu0YycakbtczfLLojt64fKfpnSGMn43RtukVagqrLxRDa+IQrK/8W5
+	j7OOu0+cHEgB39eqQjCidouSJ3ht1L2RnA==
+X-Google-Smtp-Source: AGHT+IFAK4iKNDC5v52b5pCvfQPOn5rkgnbxY2Q3L5wEfSUSQg25HqPe6kmHG6Lsqt17jpO/cTvihA==
+X-Received: by 2002:a05:600c:6a19:b0:40e:67e9:af0 with SMTP id jj25-20020a05600c6a1900b0040e67e90af0mr1463679wmb.252.1705314728993;
+        Mon, 15 Jan 2024 02:32:08 -0800 (PST)
+Received: from localhost ([102.140.209.237])
+        by smtp.gmail.com with ESMTPSA id n16-20020a5d4c50000000b00337464bf71bsm11456719wrt.39.2024.01.15.02.32.08
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 15 Jan 2024 02:32:08 -0800 (PST)
+Date: Mon, 15 Jan 2024 13:32:05 +0300
+From: Dan Carpenter <dan.carpenter@linaro.org>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
+	linux-sparse@vger.kernel.org
+Subject: Compile errors with LLVM v17
+Message-ID: <91bbfbf8-d84d-4b4e-861d-c1cdbfcd56e6@moroto.mountain>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <CAHk-=wjLaBe3Y_H5WArWdQ6d36+UOQ7NSbga1w+esGYJZaVfVg@mail.gmail.com>
+Content-Transfer-Encoding: 8bit
 
-On Sat, Jan 06, 2024 at 09:54:05PM -0800, Linus Torvalds wrote:
-> On Sat, 6 Jan 2024 at 16:42, Dmitry Torokhov <dmitry.torokhov@gmail.com> wrote:
-> >
-> > This is not really a kernel/driver bug, just sparse being over-eager
-> > with truncation detection. I wonder if we could make sparse skip this
-> > check on forced casts like this:
-> 
-> No, please don't.
-> 
-> Just face the fact that using integer casts to mask bits off is a bad idea.
-> 
-> ...
-> 
-> The *natural* thing to do is to simply make the masking itself be
-> explicit - not the cast. IOW, just write it as
-> 
->         *p++ = (val >> 16) & 0xff;
->         *p++ = (val >> 8) & 0xff;
->         *p++ = val & 0xff;
-> 
-> ...
-> 
-> And while the code is a bit more to read, I think it is actually to
-> some degree more obvious to a human too what is going on.
+I upgraded my Debian system and started getting compile errors with LLVM
+version 17.  Apparently those APIs will need to be changed.
+https://llvm.org/docs/OpaquePointers.html
 
+regards,
+dan carpenter
 
-I fully agree.
+sparse-llvm.c: In function ‘get_sym_value’:
+sparse-llvm.c:305:34: warning: implicit declaration of function ‘LLVMConstGEP’; did you mean ‘LLVMConstGEP2’? [-Wimplicit-function-declaration]
+  305 |                         result = LLVMConstGEP(data, indices, ARRAY_SIZE(indices));
+      |                                  ^~~~~~~~~~~~
+      |                                  LLVMConstGEP2
+sparse-llvm.c:305:32: warning: assignment to ‘LLVMValueRef’ {aka ‘struct LLVMOpaqueValue *’} from ‘int’ makes pointer from integer without a cast [-Wint-conversion]
+  305 |                         result = LLVMConstGEP(data, indices, ARRAY_SIZE(indices));
+      |                                ^
+sparse-llvm.c: In function ‘calc_gep’:
+sparse-llvm.c:488:16: warning: implicit declaration of function ‘LLVMBuildInBoundsGEP’; did you mean ‘LLVMBuildInBoundsGEP2’? [-Wimplicit-function-declaration]
+  488 |         addr = LLVMBuildInBoundsGEP(builder, base, &off, 1, name);
+      |                ^~~~~~~~~~~~~~~~~~~~
+      |                LLVMBuildInBoundsGEP2
+sparse-llvm.c:488:14: warning: assignment to ‘LLVMValueRef’ {aka ‘struct LLVMOpaqueValue *’} from ‘int’ makes pointer from integer without a cast [-Wint-conversion]
+  488 |         addr = LLVMBuildInBoundsGEP(builder, base, &off, 1, name);
+      |              ^
+sparse-llvm.c: In function ‘output_op_load’:
+sparse-llvm.c:714:18: warning: implicit declaration of function ‘LLVMBuildLoad’; did you mean ‘LLVMBuildLoad2’? [-Wimplicit-function-declaration]
+  714 |         target = LLVMBuildLoad(fn->builder, addr, name);
+      |                  ^~~~~~~~~~~~~
+      |                  LLVMBuildLoad2
+sparse-llvm.c:714:16: warning: assignment to ‘LLVMValueRef’ {aka ‘struct LLVMOpaqueValue *’} from ‘int’ makes pointer from integer without a cast [-Wint-conversion]
+  714 |         target = LLVMBuildLoad(fn->builder, addr, name);
+      |                ^
+sparse-llvm.c: In function ‘output_op_call’:
+sparse-llvm.c:822:18: warning: implicit declaration of function ‘LLVMBuildCall’; did you mean ‘LLVMBuildCall2’? [-Wimplicit-function-declaration]
+  822 |         target = LLVMBuildCall(fn->builder, func, args, n_arg, name);
+      |                  ^~~~~~~~~~~~~
+      |                  LLVMBuildCall2
+sparse-llvm.c:822:16: warning: assignment to ‘LLVMValueRef’ {aka ‘struct LLVMOpaqueValue *’} from ‘int’ makes pointer from integer without a cast [-Wint-conversion]
+  822 |         target = LLVMBuildCall(fn->builder, func, args, n_arg, name);
+      |                ^
 
-It's kinda sad is that there is more than 800 occurrences of this
-"cast truncates bits from constant value" warning and almost all of
-them are of the kind:
-	"a 32bit constant must be written in 2 steps via 16bit IO registers"
-
-In these cases, no bits are lost, they're just written in the other write,
-and real problems, when present, are drown/lost into these 800 harmless ones.
-It's in fact the 4th most common warning in the kernel, the top 10 being:
-   2858 incorrect type in assignment (different base types)
-   2715 cast to restricted type
-    923 incorrect type in argument (different address spaces)
-    818 cast truncates bits from constant value
-    739 restricted type degrades to integer
-    549 context imbalance - unexpected unlock
-    500 symbol was not declared. Should it be static?
-    407 cast removes address space '__iomem' of expression
-    344 incompatible types in comparison expression (different address spaces)
-    323 context imbalance - different lock contexts for basic block
-
--- Luc
