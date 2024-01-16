@@ -1,100 +1,130 @@
-Received: from mail-wm1-f42.google.com (mail-wm1-f42.google.com [209.85.128.42])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from avasout-peh-003.plus.net (avasout-peh-003.plus.net [212.159.14.19])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B9C2D13AE9
-	for <linux-sparse@vger.kernel.org>; Mon, 15 Jan 2024 10:32:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 15F728480
+	for <linux-sparse@vger.kernel.org>; Tue, 16 Jan 2024 00:53:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=ramsayjones.plus.com
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=ramsayjones.plus.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="EZVZyi1d"
-Received: by mail-wm1-f42.google.com with SMTP id 5b1f17b1804b1-40e800461baso1116825e9.3
-        for <linux-sparse@vger.kernel.org>; Mon, 15 Jan 2024 02:32:10 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1705314729; x=1705919529; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-disposition:mime-version
-         :message-id:subject:to:from:date:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=RFn6tdE7ltotd+nh7DX9t7GuTBKXZfbeZSU2UvI8+r8=;
-        b=EZVZyi1dQ2IRJdBMYZ6+CqonsUqfLqssqoH3woCxnEezvYtvGa4DGmuFmpJ1HNoVw3
-         We++wa+VLMWsDHh0IfD+Gwmj5aXm/wHlqLXH3oDqLVUifSy6G1t7rWJA2RMWvKrErzQd
-         x4+tiE3sjZqT8tgl8Izqb51odgLhP0WqLB+mZQt8/5phca6xjlkXoQnbrd36ap7HgLLP
-         hshCFN/iBL5nKp21j8Rew7/EuMY4vR04v0EjVKaS+JIsfiJnKz4egqs2kRTXY2kPPp2B
-         s6JoCrkB4f4E10hXldVUp+FTZW3GLWuRkPQZ6uxYy1rb40Y+TzyZBMr01PkTCex20bSm
-         oYmA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1705314729; x=1705919529;
-        h=content-transfer-encoding:content-disposition:mime-version
-         :message-id:subject:to:from:date:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=RFn6tdE7ltotd+nh7DX9t7GuTBKXZfbeZSU2UvI8+r8=;
-        b=nXGV+9Qzap0Q0wIGWuBmdDKu0SzlNlovxXnmrcJt/F+L4kCiBwcYiPy4q+OAP2Pq/b
-         nMdfEw/ASLoQOtdHOytWJDsHJmc5b7Cgwry2Ydu+iQE/pmS18vT+zSaqdPuzR8NxcwbH
-         2YZT62oITsLHnclbrNSv0a6Rr65iUwYBCzfv+XfFJVpapJSu8S9fn0nfZyV64xMcgAT8
-         WE7AsXtN4bd1RGvDvIYi0AxB8kNP/+Fp73WpfF4WsMnEMVIVBVCJe72OoH/BeQHWsDEH
-         CRuhCljvghLGVH8c8r3qSeUUP1zCu5i6ytvBXikygzyn6uXGQbRWUIYhT/plZGnVz0hA
-         lbYA==
-X-Gm-Message-State: AOJu0YycakbtczfLLojt64fKfpnSGMn43RtukVagqrLxRDa+IQrK/8W5
-	j7OOu0+cHEgB39eqQjCidouSJ3ht1L2RnA==
-X-Google-Smtp-Source: AGHT+IFAK4iKNDC5v52b5pCvfQPOn5rkgnbxY2Q3L5wEfSUSQg25HqPe6kmHG6Lsqt17jpO/cTvihA==
-X-Received: by 2002:a05:600c:6a19:b0:40e:67e9:af0 with SMTP id jj25-20020a05600c6a1900b0040e67e90af0mr1463679wmb.252.1705314728993;
-        Mon, 15 Jan 2024 02:32:08 -0800 (PST)
-Received: from localhost ([102.140.209.237])
-        by smtp.gmail.com with ESMTPSA id n16-20020a5d4c50000000b00337464bf71bsm11456719wrt.39.2024.01.15.02.32.08
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 15 Jan 2024 02:32:08 -0800 (PST)
-Date: Mon, 15 Jan 2024 13:32:05 +0300
-From: Dan Carpenter <dan.carpenter@linaro.org>
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
-	linux-sparse@vger.kernel.org
-Subject: Compile errors with LLVM v17
-Message-ID: <91bbfbf8-d84d-4b4e-861d-c1cdbfcd56e6@moroto.mountain>
+	dkim=pass (2048-bit key) header.d=plus.com header.i=@plus.com header.b="Ushim5Jw"
+Received: from [10.0.2.15] ([195.213.6.126])
+	by smtp with ESMTPA
+	id PXezrFEhWEaYuPXf0ryAkF; Tue, 16 Jan 2024 00:50:35 +0000
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=plus.com; s=042019;
+	t=1705366235; bh=SljzJ4vZql+XeEHS2z4GMDmdnC2bXe5nVCsTyVaOSnk=;
+	h=Date:Subject:To:References:From:In-Reply-To;
+	b=Ushim5Jw5ahJduCtCyPlEiIuXVBs84vYVVlhf2I3N7cpravGIe6jSdjalqZg/fzBM
+	 qJ3JUfWJVEEEz9RU7CMPTEP8Okg8NuLqw3b54SSY1eAUk4cBPMSy+w0Z17Fx1PYFWD
+	 8zmEgRFpoHWkhVKFDM4sOWf+gZNG32fRQzHxAPOYvdxRqOLEA7DGUi9mTZuhJHkQ4M
+	 JSE9zZWSOvqDy4WxGNMPCHbDHL0Z5Wr6fYjMA2KsuZq9PsnFDIvGyrVIPn/uqaZNJg
+	 o9aJzlFecAEtCH/2D4hjDcPYRa3XZwnwn/tFLChWMZdvLGP9cNblicGmMxug+LnJ0V
+	 Xvnc9CH+SNdNQ==
+X-Clacks-Overhead: "GNU Terry Pratchett"
+X-CM-Score: 0.00
+X-CNFS-Analysis: v=2.4 cv=YJqMdDKx c=1 sm=1 tr=0 ts=65a5d2db
+ a=I2fX/nZaHmMJGYqJQXdKfg==:117 a=I2fX/nZaHmMJGYqJQXdKfg==:17
+ a=IkcTkHD0fZMA:10 a=Twlkf-z8AAAA:8 a=PU-skFq93H-bw-dHlDYA:9 a=QEXdDO2ut3YA:10
+ a=xO_kOj_IbHwA:10 a=-74SuR6ZdpOK_LpdRCUo:22
+X-AUTH: ramsayjones@:2500
+Message-ID: <8d6c2b91-87cc-4252-bc4e-13cce7c9ff6c@ramsayjones.plus.com>
+Date: Tue, 16 Jan 2024 00:50:33 +0000
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
+User-Agent: Mozilla Thunderbird
+Subject: Re: Compile errors with LLVM v17
+To: Dan Carpenter <dan.carpenter@linaro.org>,
+ Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
+ linux-sparse@vger.kernel.org
+References: <91bbfbf8-d84d-4b4e-861d-c1cdbfcd56e6@moroto.mountain>
+Content-Language: en-GB
+From: Ramsay Jones <ramsay@ramsayjones.plus.com>
+In-Reply-To: <91bbfbf8-d84d-4b4e-861d-c1cdbfcd56e6@moroto.mountain>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
+X-CMAE-Envelope: MS4xfDOhG0pMno3hs3HmW1Ejnvp0xgeO2DhYsAB4IOScLXEY2e1etdAPEnmgijJrCGzyEYtVmw/IXNY63lRsOzycNbr4F69hAKp011Of83iP1GEbM5y+8uJi
+ y0V7yw8GgVqYE33lsF3uIystqN+MAYGqJkr7OF4S45vkIrkdVQLfQb2IvPpNx3dw2nJ1GWPJ21OREYgWLHqTiHyCzCfOl3WPD04=
 
-I upgraded my Debian system and started getting compile errors with LLVM
-version 17.  Apparently those APIs will need to be changed.
-https://llvm.org/docs/OpaquePointers.html
 
-regards,
-dan carpenter
 
-sparse-llvm.c: In function ‘get_sym_value’:
-sparse-llvm.c:305:34: warning: implicit declaration of function ‘LLVMConstGEP’; did you mean ‘LLVMConstGEP2’? [-Wimplicit-function-declaration]
-  305 |                         result = LLVMConstGEP(data, indices, ARRAY_SIZE(indices));
-      |                                  ^~~~~~~~~~~~
-      |                                  LLVMConstGEP2
-sparse-llvm.c:305:32: warning: assignment to ‘LLVMValueRef’ {aka ‘struct LLVMOpaqueValue *’} from ‘int’ makes pointer from integer without a cast [-Wint-conversion]
-  305 |                         result = LLVMConstGEP(data, indices, ARRAY_SIZE(indices));
-      |                                ^
-sparse-llvm.c: In function ‘calc_gep’:
-sparse-llvm.c:488:16: warning: implicit declaration of function ‘LLVMBuildInBoundsGEP’; did you mean ‘LLVMBuildInBoundsGEP2’? [-Wimplicit-function-declaration]
-  488 |         addr = LLVMBuildInBoundsGEP(builder, base, &off, 1, name);
-      |                ^~~~~~~~~~~~~~~~~~~~
-      |                LLVMBuildInBoundsGEP2
-sparse-llvm.c:488:14: warning: assignment to ‘LLVMValueRef’ {aka ‘struct LLVMOpaqueValue *’} from ‘int’ makes pointer from integer without a cast [-Wint-conversion]
-  488 |         addr = LLVMBuildInBoundsGEP(builder, base, &off, 1, name);
-      |              ^
-sparse-llvm.c: In function ‘output_op_load’:
-sparse-llvm.c:714:18: warning: implicit declaration of function ‘LLVMBuildLoad’; did you mean ‘LLVMBuildLoad2’? [-Wimplicit-function-declaration]
-  714 |         target = LLVMBuildLoad(fn->builder, addr, name);
-      |                  ^~~~~~~~~~~~~
-      |                  LLVMBuildLoad2
-sparse-llvm.c:714:16: warning: assignment to ‘LLVMValueRef’ {aka ‘struct LLVMOpaqueValue *’} from ‘int’ makes pointer from integer without a cast [-Wint-conversion]
-  714 |         target = LLVMBuildLoad(fn->builder, addr, name);
-      |                ^
-sparse-llvm.c: In function ‘output_op_call’:
-sparse-llvm.c:822:18: warning: implicit declaration of function ‘LLVMBuildCall’; did you mean ‘LLVMBuildCall2’? [-Wimplicit-function-declaration]
-  822 |         target = LLVMBuildCall(fn->builder, func, args, n_arg, name);
-      |                  ^~~~~~~~~~~~~
-      |                  LLVMBuildCall2
-sparse-llvm.c:822:16: warning: assignment to ‘LLVMValueRef’ {aka ‘struct LLVMOpaqueValue *’} from ‘int’ makes pointer from integer without a cast [-Wint-conversion]
-  822 |         target = LLVMBuildCall(fn->builder, func, args, n_arg, name);
-      |                ^
+On 15/01/2024 10:32, Dan Carpenter wrote:
+> I upgraded my Debian system and started getting compile errors with LLVM
+> version 17.  Apparently those APIs will need to be changed.
+> https://llvm.org/docs/OpaquePointers.html
+
+Yep, I recently updated to LLVM version 14 and these APIs are shown
+as deprecated (sparse-llvm is still built):
+
+  $ make
+  Makefile:170: Your system does not have sqlite3, disabling semind
+  Makefile:192: Your system does not have gtk3/gtk2, disabling test-inspect
+    CC      compile.o
+    ...
+    CC      sparse-llvm.o
+  sparse-llvm.c: In function ‘get_sym_value’:
+  sparse-llvm.c:305:25: warning: ‘LLVMConstGEP’ is deprecated [-Wdeprecated-declarations]
+    305 |                         result = LLVMConstGEP(data, indices, ARRAY_SIZE(indices));
+        |                         ^~~~~~
+  In file included from /usr/lib/llvm-14/include/llvm-c/Core.h:18,
+                   from sparse-llvm.c:6:
+  /usr/lib/llvm-14/include/llvm-c/Core.h:2157:18: note: declared here
+   2157 |     LLVMValueRef LLVMConstGEP(LLVMValueRef ConstantVal,
+        |                  ^~~~~~~~~~~~
+  /usr/lib/llvm-14/include/llvm-c/Deprecated.h:29:3: note: in definition of macro ‘LLVM_ATTRIBUTE_C_DEPRECATED’
+     29 |   decl __attribute__((deprecated))
+        |   ^~~~
+  sparse-llvm.c: In function ‘calc_gep’:
+  sparse-llvm.c:488:9: warning: ‘LLVMBuildInBoundsGEP’ is deprecated [-Wdeprecated-declarations]
+    488 |         addr = LLVMBuildInBoundsGEP(builder, base, &off, 1, name);
+        |         ^~~~
+  In file included from /usr/lib/llvm-14/include/llvm-c/Core.h:18,
+                   from sparse-llvm.c:6:
+  /usr/lib/llvm-14/include/llvm-c/Core.h:3904:18: note: declared here
+   3904 |     LLVMValueRef LLVMBuildInBoundsGEP(LLVMBuilderRef B, LLVMValueRef Pointer,
+        |                  ^~~~~~~~~~~~~~~~~~~~
+  /usr/lib/llvm-14/include/llvm-c/Deprecated.h:29:3: note: in definition of macro ‘LLVM_ATTRIBUTE_C_DEPRECATED’
+     29 |   decl __attribute__((deprecated))
+        |   ^~~~
+  sparse-llvm.c: In function ‘output_op_load’:
+  sparse-llvm.c:714:9: warning: ‘LLVMBuildLoad’ is deprecated [-Wdeprecated-declarations]
+    714 |         target = LLVMBuildLoad(fn->builder, addr, name);
+        |         ^~~~~~
+  In file included from /usr/lib/llvm-14/include/llvm-c/Core.h:18,
+                   from sparse-llvm.c:6:
+  /usr/lib/llvm-14/include/llvm-c/Core.h:3892:18: note: declared here
+   3892 |     LLVMValueRef LLVMBuildLoad(LLVMBuilderRef, LLVMValueRef PointerVal,
+        |                  ^~~~~~~~~~~~~
+  /usr/lib/llvm-14/include/llvm-c/Deprecated.h:29:3: note: in definition of macro ‘LLVM_ATTRIBUTE_C_DEPRECATED’
+     29 |   decl __attribute__((deprecated))
+        |   ^~~~
+  sparse-llvm.c: In function ‘output_op_call’:
+  sparse-llvm.c:822:9: warning: ‘LLVMBuildCall’ is deprecated [-Wdeprecated-declarations]
+    822 |         target = LLVMBuildCall(fn->builder, func, args, n_arg, name);
+        |         ^~~~~~
+  In file included from /usr/lib/llvm-14/include/llvm-c/Core.h:18,
+                   from sparse-llvm.c:6:
+  /usr/lib/llvm-14/include/llvm-c/Core.h:3992:18: note: declared here
+   3992 |     LLVMValueRef LLVMBuildCall(LLVMBuilderRef, LLVMValueRef Fn,
+        |                  ^~~~~~~~~~~~~
+  /usr/lib/llvm-14/include/llvm-c/Deprecated.h:29:3: note: in definition of macro ‘LLVM_ATTRIBUTE_C_DEPRECATED’
+     29 |   decl __attribute__((deprecated))
+        |   ^~~~
+    LD      sparse-llvm
+  $ 
+
+Since I don't know anything about LLVM, I have been compiling like so:
+
+  $ make LLVM_CONFIG=false
+
+just to suppress the warnings (and it runs 42 less tests!). I have been
+meaning to implement a make variable to suppress the sparse-llvm build
+which can be placed into 'local.mk' ... but, well I never seem to have
+enough round tuits! :)
+
+ATB,
+Ramsay Jones
+
 
