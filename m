@@ -1,130 +1,115 @@
-Received: from avasout-peh-003.plus.net (avasout-peh-003.plus.net [212.159.14.19])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pf1-f172.google.com (mail-pf1-f172.google.com [209.85.210.172])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 15F728480
-	for <linux-sparse@vger.kernel.org>; Tue, 16 Jan 2024 00:53:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=ramsayjones.plus.com
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=ramsayjones.plus.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 08A3E249F2;
+	Wed, 17 Jan 2024 20:20:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.172
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1705522818; cv=none; b=ijde2wumr/Y7VfcEA/KySrLrxv93mplEDSjxMIzgWjkFqfOhDWPEukLiyoEIDeSXA+ZgMenLPbWy4oqnnOcm74Et8fAT5hsHV8E5vvjcEi87JPeHVmP61fM23Ur1EqhOAMD9yEebVPQNo3pv2QgmITuEWesS6N9SuqNV5XmldME=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1705522818; c=relaxed/simple;
+	bh=yU5KYoYcpqhPgvWZkidKsRuW99AW6JOnQpIXjtHc1XE=;
+	h=Received:DKIM-Signature:X-Google-DKIM-Signature:
+	 X-Gm-Message-State:X-Google-Smtp-Source:X-Received:Received:Date:
+	 From:To:Cc:Subject:Message-ID:References:MIME-Version:Content-Type:
+	 Content-Disposition:In-Reply-To; b=A0DoHMHqt8//5t1T8aiCP3HJCP8CrUMRdplgNS9jqdeGIXJK91oybzATXNZvG4ZW2OW88WQC5QvlelhBH4BeZW2r55gsoI5ecjl9JyiBH1S6xIZ8zM7sScaB3Gux5h6WFvMH9uA9XI3QN+Su+Xa4ZjreELSRuQI/bBDpMMsly7o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=CoTRl9gx; arc=none smtp.client-ip=209.85.210.172
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=plus.com header.i=@plus.com header.b="Ushim5Jw"
-Received: from [10.0.2.15] ([195.213.6.126])
-	by smtp with ESMTPA
-	id PXezrFEhWEaYuPXf0ryAkF; Tue, 16 Jan 2024 00:50:35 +0000
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=plus.com; s=042019;
-	t=1705366235; bh=SljzJ4vZql+XeEHS2z4GMDmdnC2bXe5nVCsTyVaOSnk=;
-	h=Date:Subject:To:References:From:In-Reply-To;
-	b=Ushim5Jw5ahJduCtCyPlEiIuXVBs84vYVVlhf2I3N7cpravGIe6jSdjalqZg/fzBM
-	 qJ3JUfWJVEEEz9RU7CMPTEP8Okg8NuLqw3b54SSY1eAUk4cBPMSy+w0Z17Fx1PYFWD
-	 8zmEgRFpoHWkhVKFDM4sOWf+gZNG32fRQzHxAPOYvdxRqOLEA7DGUi9mTZuhJHkQ4M
-	 JSE9zZWSOvqDy4WxGNMPCHbDHL0Z5Wr6fYjMA2KsuZq9PsnFDIvGyrVIPn/uqaZNJg
-	 o9aJzlFecAEtCH/2D4hjDcPYRa3XZwnwn/tFLChWMZdvLGP9cNblicGmMxug+LnJ0V
-	 Xvnc9CH+SNdNQ==
-X-Clacks-Overhead: "GNU Terry Pratchett"
-X-CM-Score: 0.00
-X-CNFS-Analysis: v=2.4 cv=YJqMdDKx c=1 sm=1 tr=0 ts=65a5d2db
- a=I2fX/nZaHmMJGYqJQXdKfg==:117 a=I2fX/nZaHmMJGYqJQXdKfg==:17
- a=IkcTkHD0fZMA:10 a=Twlkf-z8AAAA:8 a=PU-skFq93H-bw-dHlDYA:9 a=QEXdDO2ut3YA:10
- a=xO_kOj_IbHwA:10 a=-74SuR6ZdpOK_LpdRCUo:22
-X-AUTH: ramsayjones@:2500
-Message-ID: <8d6c2b91-87cc-4252-bc4e-13cce7c9ff6c@ramsayjones.plus.com>
-Date: Tue, 16 Jan 2024 00:50:33 +0000
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="CoTRl9gx"
+Received: by mail-pf1-f172.google.com with SMTP id d2e1a72fcca58-6d9b267007fso6816920b3a.3;
+        Wed, 17 Jan 2024 12:20:16 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1705522816; x=1706127616; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=qtaH76ip/clCvPSFl26veZ3HUaWTqTmbLlQ2wykDAiU=;
+        b=CoTRl9gx44TS0L/ZBA/2aiHckWV1bJjQ3KeLWc2saYoaWHaUaX9uoNPw5N/KR0PyPm
+         CdFIUPA4yj20mlXvHKh6kgdGMQUk7CdzlUEmOLwpAIITEMHJPdxwV5msm3Bk+EyQ46ym
+         x47uJQEvwhLXQFBQE5Uig3w/XF+X00fLjopkL1kTNosW54QOYRMk+dwZ8OzCFcvyUbMV
+         vVL5sLNKmt8Mh3oLu5saQZnAXb53yX+BqWF3mJEDlAMLYD5mb0PW2gkVO3JegIwHg9nC
+         ROjUwdbwJchiMuwh3SxLSsdbegTD84cldqSxBEWwJD6EXSNcsMqjrPUktu2jJQACxqKE
+         Fc+A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1705522816; x=1706127616;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=qtaH76ip/clCvPSFl26veZ3HUaWTqTmbLlQ2wykDAiU=;
+        b=KSKXxROwo/jPJy2PJWXI9lQG5n3j03gFXMFovbhItcatWnJdEqhtL6r/2uvgKcXymu
+         TsTaYARwPX+0AoIaxisTEDivl5QgcMW232TJ5OwLG+YykGvKTdkmG7gW0i/lvymqPJbu
+         bWPzDpsZVcBRQLM9tSfrKdlQJ5DaN8tjiYrJ9/DRSFjRnooBDHJwOSQcw2+DJ8Lm/Yxe
+         qE2SYNEajS5SWu4oBUNv9W2dew+GcMPo0oqIQ5w0C3KhSKmIKTGVinHfTwjdAzH48g1m
+         i+9rmtrbs6oqEPx55+MyvR7e5sBbo2BhwgYNgMY+D7eA8CznbOlxmHGI+w1kokcd98db
+         eodA==
+X-Gm-Message-State: AOJu0Yw8/SQL7H48TCO/6IPOEnyclQF5e9JXYMF3JJyb/r9YQq0JK9I5
+	Y0abah/l0F/3tRarlmyYa0w=
+X-Google-Smtp-Source: AGHT+IGqhdn4paLmJN9bvMsAaycnDzvpN4ohri/gF9864NhVgIZ7FK5xXhNeslJeM+GOHNEC3DUMmg==
+X-Received: by 2002:a05:6a00:2443:b0:6da:7eb5:eed3 with SMTP id d3-20020a056a00244300b006da7eb5eed3mr6100133pfj.5.1705522816081;
+        Wed, 17 Jan 2024 12:20:16 -0800 (PST)
+Received: from google.com ([2620:15c:9d:2:77ac:1fe8:3f5:523d])
+        by smtp.gmail.com with ESMTPSA id u11-20020a056a00098b00b006daed66b540sm1846040pfg.219.2024.01.17.12.20.15
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 17 Jan 2024 12:20:15 -0800 (PST)
+Date: Wed, 17 Jan 2024 12:20:13 -0800
+From: Dmitry Torokhov <dmitry.torokhov@gmail.com>
+To: Luc Van Oostenryck <lucvoo@kernel.org>
+Cc: Dan Carpenter <dan.carpenter@linaro.org>,
+	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
+	linux-sparse@vger.kernel.org, Peter Zijlstra <peterz@infradead.org>,
+	linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v2] parse: handle __cleanup__ attribute
+Message-ID: <Zag2fYsyJDtDR7a6@google.com>
+References: <8d596a06-9f25-4d9f-8282-deb2d03a6b0a@moroto.mountain>
+ <i4s2gnr6rlq3yhmfiy7lkbsahnaioilksvmx3eocdjfh2434zo@zhxhwwgqpxt2>
+ <44e22df1-734e-49c5-b20b-4f4cdbce24a6@suswa.mountain>
+ <75ee8bd3-aa80-46dc-9f0c-874a8f4e9d48@suswa.mountain>
+ <k6ztyjq24ik24qtsu3aqpipodzgq37i2ko42ag7wzn4t2ryrzf@i4gbxu7kvslt>
+ <c3884893-44fe-4622-8e8e-576a0bdff19f@suswa.mountain>
+ <troz4beymvsw2m4y4ocghwiidohi4nbj45ry2tfmbekanu2ray@ooravawiynxr>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: Compile errors with LLVM v17
-To: Dan Carpenter <dan.carpenter@linaro.org>,
- Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
- linux-sparse@vger.kernel.org
-References: <91bbfbf8-d84d-4b4e-861d-c1cdbfcd56e6@moroto.mountain>
-Content-Language: en-GB
-From: Ramsay Jones <ramsay@ramsayjones.plus.com>
-In-Reply-To: <91bbfbf8-d84d-4b4e-861d-c1cdbfcd56e6@moroto.mountain>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
-X-CMAE-Envelope: MS4xfDOhG0pMno3hs3HmW1Ejnvp0xgeO2DhYsAB4IOScLXEY2e1etdAPEnmgijJrCGzyEYtVmw/IXNY63lRsOzycNbr4F69hAKp011Of83iP1GEbM5y+8uJi
- y0V7yw8GgVqYE33lsF3uIystqN+MAYGqJkr7OF4S45vkIrkdVQLfQb2IvPpNx3dw2nJ1GWPJ21OREYgWLHqTiHyCzCfOl3WPD04=
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <troz4beymvsw2m4y4ocghwiidohi4nbj45ry2tfmbekanu2ray@ooravawiynxr>
 
+Hi,
 
+On Mon, Dec 18, 2023 at 02:51:32PM +0100, Luc Van Oostenryck wrote:
+> On Thu, Dec 14, 2023 at 04:20:20PM +0300, Dan Carpenter wrote:
+> > Yep.  Perfect.  Thanks so much!
+> 
+> Pushed now.
 
-On 15/01/2024 10:32, Dan Carpenter wrote:
-> I upgraded my Debian system and started getting compile errors with LLVM
-> version 17.  Apparently those APIs will need to be changed.
-> https://llvm.org/docs/OpaquePointers.html
+Any chance someone is looking at making context tracking working for
+code annotated as __cleanup? We already have a bunch of code using
+constructs like:
 
-Yep, I recently updated to LLVM version 14 and these APIs are shown
-as deprecated (sparse-llvm is still built):
+	...
+	guard(spinlock_irqsave)(&gpio_lock);
 
-  $ make
-  Makefile:170: Your system does not have sqlite3, disabling semind
-  Makefile:192: Your system does not have gtk3/gtk2, disabling test-inspect
-    CC      compile.o
-    ...
-    CC      sparse-llvm.o
-  sparse-llvm.c: In function ‘get_sym_value’:
-  sparse-llvm.c:305:25: warning: ‘LLVMConstGEP’ is deprecated [-Wdeprecated-declarations]
-    305 |                         result = LLVMConstGEP(data, indices, ARRAY_SIZE(indices));
-        |                         ^~~~~~
-  In file included from /usr/lib/llvm-14/include/llvm-c/Core.h:18,
-                   from sparse-llvm.c:6:
-  /usr/lib/llvm-14/include/llvm-c/Core.h:2157:18: note: declared here
-   2157 |     LLVMValueRef LLVMConstGEP(LLVMValueRef ConstantVal,
-        |                  ^~~~~~~~~~~~
-  /usr/lib/llvm-14/include/llvm-c/Deprecated.h:29:3: note: in definition of macro ‘LLVM_ATTRIBUTE_C_DEPRECATED’
-     29 |   decl __attribute__((deprecated))
-        |   ^~~~
-  sparse-llvm.c: In function ‘calc_gep’:
-  sparse-llvm.c:488:9: warning: ‘LLVMBuildInBoundsGEP’ is deprecated [-Wdeprecated-declarations]
-    488 |         addr = LLVMBuildInBoundsGEP(builder, base, &off, 1, name);
-        |         ^~~~
-  In file included from /usr/lib/llvm-14/include/llvm-c/Core.h:18,
-                   from sparse-llvm.c:6:
-  /usr/lib/llvm-14/include/llvm-c/Core.h:3904:18: note: declared here
-   3904 |     LLVMValueRef LLVMBuildInBoundsGEP(LLVMBuilderRef B, LLVMValueRef Pointer,
-        |                  ^~~~~~~~~~~~~~~~~~~~
-  /usr/lib/llvm-14/include/llvm-c/Deprecated.h:29:3: note: in definition of macro ‘LLVM_ATTRIBUTE_C_DEPRECATED’
-     29 |   decl __attribute__((deprecated))
-        |   ^~~~
-  sparse-llvm.c: In function ‘output_op_load’:
-  sparse-llvm.c:714:9: warning: ‘LLVMBuildLoad’ is deprecated [-Wdeprecated-declarations]
-    714 |         target = LLVMBuildLoad(fn->builder, addr, name);
-        |         ^~~~~~
-  In file included from /usr/lib/llvm-14/include/llvm-c/Core.h:18,
-                   from sparse-llvm.c:6:
-  /usr/lib/llvm-14/include/llvm-c/Core.h:3892:18: note: declared here
-   3892 |     LLVMValueRef LLVMBuildLoad(LLVMBuilderRef, LLVMValueRef PointerVal,
-        |                  ^~~~~~~~~~~~~
-  /usr/lib/llvm-14/include/llvm-c/Deprecated.h:29:3: note: in definition of macro ‘LLVM_ATTRIBUTE_C_DEPRECATED’
-     29 |   decl __attribute__((deprecated))
-        |   ^~~~
-  sparse-llvm.c: In function ‘output_op_call’:
-  sparse-llvm.c:822:9: warning: ‘LLVMBuildCall’ is deprecated [-Wdeprecated-declarations]
-    822 |         target = LLVMBuildCall(fn->builder, func, args, n_arg, name);
-        |         ^~~~~~
-  In file included from /usr/lib/llvm-14/include/llvm-c/Core.h:18,
-                   from sparse-llvm.c:6:
-  /usr/lib/llvm-14/include/llvm-c/Core.h:3992:18: note: declared here
-   3992 |     LLVMValueRef LLVMBuildCall(LLVMBuilderRef, LLVMValueRef Fn,
-        |                  ^~~~~~~~~~~~~
-  /usr/lib/llvm-14/include/llvm-c/Deprecated.h:29:3: note: in definition of macro ‘LLVM_ATTRIBUTE_C_DEPRECATED’
-     29 |   decl __attribute__((deprecated))
-        |   ^~~~
-    LD      sparse-llvm
-  $ 
+	if (!test_bit(FLAG_REQUESTED, &desc->flags))
+		return NULL;
+	...
 
-Since I don't know anything about LLVM, I have been compiling like so:
+which resuls in:
 
-  $ make LLVM_CONFIG=false
+$ make C=1 W=1 drivers/gpio/gpiolib.o
+  CALL    scripts/checksyscalls.sh
+  DESCEND objtool
+  INSTALL libsubcmd_headers
+  CC      drivers/gpio/gpiolib.o
+  CHECK   drivers/gpio/gpiolib.c
+drivers/gpio/gpiolib.c:2359:6: warning: context imbalance in 'gpiochip_dup_line_label' - different lock contexts for basic block
 
-just to suppress the warnings (and it runs 42 less tests!). I have been
-meaning to implement a make variable to suppress the sparse-llvm build
-which can be placed into 'local.mk' ... but, well I never seem to have
-enough round tuits! :)
+and I expect we'll see more and more of this.
 
-ATB,
-Ramsay Jones
+Thanks.
 
-
+-- 
+Dmitry
