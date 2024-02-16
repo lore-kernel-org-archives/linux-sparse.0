@@ -1,65 +1,108 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lj1-f174.google.com (mail-lj1-f174.google.com [209.85.208.174])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5C2FC76C6E
-	for <linux-sparse@vger.kernel.org>; Mon, 29 Jan 2024 17:39:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6FABC1350DA
+	for <linux-sparse@vger.kernel.org>; Fri, 16 Feb 2024 18:44:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.174
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706549948; cv=none; b=hws/yjDOaAjDNSWui4imeERgBmKxrAQpL8R9SxjDVAJTvcLSeTjgukwyPWdR8qBhLuxxzPIXKk2jFjZJxMkYNP4aTGAphG7DK+zn8rZTPUrV42oMVtCwLoV5oZ6T8A1B/k45WuhUoj/Wd/JrRTkiIi92AV/NEFntP7v8xRoeRnc=
+	t=1708109077; cv=none; b=QP9gkVeMXCCU6c4Mef+2h68zCLCN3XXo/pnbtrsrBNk9wb9JDyZueIxQv4fSOEjPmKESXYdx2h6LltsByDVOat8CtRaVt+0FGw7rTbjVJNhu+HNHcGimW1IoSvxTBTjaLhYsWGL4v4PcbGbMgX+7QExzTvzwq8W6uebelmvWmio=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706549948; c=relaxed/simple;
-	bh=XGl0H6G8dXCFNl+aZogBOyimc8nFpBCBsEW4D+H6Tiw=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=LEETwQ4lo+KOS5hWt65oBdTh+12LgPTHeeIF7QH+7Xqt2iqk8fQWTQ3glul4lmTYsv8VXrKXKdKxm95DrbYW1kSTYiX/KdWQ+eUcXp47bpKMJcxyo4KCtDu4NHUBHND+z06GsMPxQ7dZoZ0nKB46KdDfkpMAKSPEf4FqxbmqgwY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Mc7KCIjM; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1708109077; c=relaxed/simple;
+	bh=RxSvM42ptBx1y8D71rdVpJdsIr3A+SJ8/+vC6w0mZNg=;
+	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
+	 Content-Disposition; b=oDpATlil8sYL/I67AdeniCqXEVcfKlNjp5AYFLgIHMlvIxN0QGfs4TeSwi8/MMDli5AA+pYeSnicK4p6cNIOvN2qERfDYVSFJQ6lS+IqpcSqaSIvuYH7s6++roJ89flSd4QhTbRoSm9mSI23xLGJ5UbNARD479j0FnRCaZW9YEQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=hvECyugS; arc=none smtp.client-ip=209.85.208.174
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Mc7KCIjM"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 70A38C43390;
-	Mon, 29 Jan 2024 17:39:06 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1706549947;
-	bh=XGl0H6G8dXCFNl+aZogBOyimc8nFpBCBsEW4D+H6Tiw=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=Mc7KCIjMGFgm95sWgnaK/qt27d1UP5WZGpF0uBqy73petXYwvdd3BBy41NpiWc4GZ
-	 N2di+8oB/tv9Bj7S4aLORso4h8huv7dU6ymgshHkemb0gyKPL9FKAXZRt9lYQkO+Yh
-	 kA+XKtw+aE8LllRM4GurJM72Oo4pdHXomVcnnxzepkTN4GUXlOqPCqVok/rcV+rQmL
-	 rVfqFAreyAjffRBmhk5S6Mcggjd2voc0YKlkcjiomCdx+TjaXXBSBV24wUDJPJ6otR
-	 dVrS5JCeSw+8jcDcAui2vy8FYCfzTEzTEPphfV65DJBRwh1N1z5hK1KizHrvxFNkh4
-	 YOtT8On56O89w==
-Date: Mon, 29 Jan 2024 18:38:59 +0100
-From: Luc Van Oostenryck <lucvoo@kernel.org>
-To: linux-sparse@vger.kernel.org
-Cc: Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <uwe@kleine-koenig.org>, 
-	Vladimir Petko <vladimir.petko@canonical.com>, Dan Carpenter <dan.carpenter@linaro.org>, 
-	Geliang Tang <geliang@kernel.org>, Ramsay Jones <ramsay@ramsayjones.plus.com>
-Subject: Re: [PATCH 0/5] Support LLVM-15 and later
-Message-ID: <olxwlte2utzht7xbmcti74t7hrjoxy6k4dywa5lyx6zt36mzgk@44tsqsejw33z>
-References: <20240120005514.90873-1-lucvoo@kernel.org>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="hvECyugS"
+Received: by mail-lj1-f174.google.com with SMTP id 38308e7fff4ca-2d10ad265d5so14575661fa.0
+        for <linux-sparse@vger.kernel.org>; Fri, 16 Feb 2024 10:44:35 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1708109073; x=1708713873; darn=vger.kernel.org;
+        h=content-disposition:mime-version:message-id:subject:cc:to:from:date
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=hP3FKG7Ee7SjeEbNeOAgsR2xkYncynbIig6BNw0KceI=;
+        b=hvECyugSgmOXWtjU2nEdVmgYgptfiF3RFeTBwvwE2nL78D+HlXJbNKh4+AlhPvz5O+
+         sKYtizewGRTIu1IPz9LFdf31t+jqf+1QEySUgwl+XRk2Wj8lX3enHkL7l8/NNRciZaRL
+         pQqp7gq/7BwORgezjrMzJnj4fP3jhgEoKjS/aUR/ef6yrKn0lXFr5byMyXatPVzTH7N3
+         DHUcgxhfOFnpzU7JGc6KoOYiG3vsuCzzWGEYnNWMgBEo9h2HM+qU9mDl+lorFaLYuIUs
+         bvmIMO/hiu7fQ7DjYzdqy3KpHdyO/5yAz2NXz4R1aQxr4TRyqphjyKvaYgTi9Wsoa8+3
+         PwGg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1708109073; x=1708713873;
+        h=content-disposition:mime-version:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=hP3FKG7Ee7SjeEbNeOAgsR2xkYncynbIig6BNw0KceI=;
+        b=F5O6d7cF5KZaZ+aot2UlJpprNJ6Ei3ZSzYWMlTsfcWZPxyKHCuN6QW5D1nLnqsn6/B
+         N6IFrZhCxxbBEN9BFYLIhJRHIwQEGAieb4MKoXep7BDlFTHvkCm9vL/4fob0tSGmTnk8
+         Q08p+WlD+azNafgAIDhQ6aXU/tU0suB/XsjyL7FiFmSsR6SEYjsbcWHK6Ir4tBJNRUvQ
+         NVvx1pvhfxXapeWBMpiZbe6GBJ9KNWHJJGfAyRxuE/DWXI82E/jl7CCGCUVSMGYuSmLB
+         ul0B7D0Gr1GiDA+s8s4apmDBBEomNDDKKJrWHwp1a3oqR6FyE24y9UIEqwh6ClARHaMk
+         HYUw==
+X-Gm-Message-State: AOJu0YxjXTIrpvK51X6H2KrnrK8dX8a1jqAf735/WrXoIcqHT8UYy/fu
+	ud13cn8PHccVXQZMiPFcfUp2MdM6RlHIk+PqTlr233pLxZho9aE=
+X-Google-Smtp-Source: AGHT+IGItgl8srFdT1ctRVDNnEmcTJIjLboDYc68aSxJbErb6Pa4ZQHzZ78dOwQae23MAf3nv77PyA==
+X-Received: by 2002:a2e:9607:0:b0:2d2:1107:3a3 with SMTP id v7-20020a2e9607000000b002d2110703a3mr3402301ljh.10.1708109073200;
+        Fri, 16 Feb 2024 10:44:33 -0800 (PST)
+Received: from p183 ([46.53.252.171])
+        by smtp.gmail.com with ESMTPSA id f5-20020a7bc8c5000000b00410bca333b7sm3021918wml.27.2024.02.16.10.44.32
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 16 Feb 2024 10:44:32 -0800 (PST)
+Date: Fri, 16 Feb 2024 21:44:30 +0300
+From: Alexey Dobriyan <adobriyan@gmail.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: linux-sparse@vger.kernel.org
+Subject: [PATCH] fix {pp-number} ## ...
+Message-ID: <d67f161a-acb5-4cda-a51a-69a4178e9c9f@p183>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20240120005514.90873-1-lucvoo@kernel.org>
 
-On Sat, Jan 20, 2024 at 01:55:02AM +0100, lucvoo@kernel.org wrote:
-> From: Luc Van Oostenryck <lucvoo@kernel.org>
-> 
-> With the introduction of opaque pointers in LLVM-15, some of the
-> LLVM builder functions' signature have changed in order to add
-> the now missing type information.
-> 
-> sparse-llvm still uses the old API and thus can't work with LLVM-15 and later.
-> 
-> This series, based on a previous patch by Vladimir Petko, not counting a few
-> preparatory patches, contains 2 patches to:
-> 	* suppressing the deprecated warnings issued with LLVM-14
-> 	* conditionally use the old API with LLVM-15 or later.
+pp-number token may have arbitrary number of dots after first digit
 
-Upstreamed now.
+	pp-number:
+		digit
+		. digit
+		pp-number .
 
-Best regards,
--- Luc
+which means that merging any pp-number with ... is valid operation and
+should yield pp-number:
+
+	#define M(a,b) a##b
+	M(1,...)
+
+should preprocess to
+
+	1...
+
+Signed-off-by: Alexey Dobriyan <adobriyan@gmail.com>
+---
+
+ pre-process.c |    3 +++
+ 1 file changed, 3 insertions(+)
+
+--- a/pre-process.c
++++ b/pre-process.c
+@@ -482,6 +482,7 @@ static void expand_arguments(int count, struct arg *args)
+  *  - number + number -> number
+  *  - number + ident -> number
+  *  - number + '.' -> number
++ *  - number + '...' -> number
+  *  - number + '+' or '-' -> number, if number used to end on [eEpP].
+  *  - '.' + number -> number, if number used to start with a digit.
+  *  - special + special -> either special or an error.
+@@ -524,6 +525,8 @@ static enum token_type combine(struct token *left, struct token *right, char *p)
+ 			switch (right->special) {
+ 			case '.':
+ 				break;
++			case SPECIAL_ELLIPSIS:
++				break;
+ 			case '+': case '-':
+ 				if (strchr("eEpP", p[len - 2]))
+ 					break;
