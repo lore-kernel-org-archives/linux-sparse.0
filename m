@@ -1,163 +1,119 @@
-Received: from galois.linutronix.de (Galois.linutronix.de [193.142.43.55])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lj1-f173.google.com (mail-lj1-f173.google.com [209.85.208.173])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 75A3A2C1B1;
-	Sun,  3 Mar 2024 23:49:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=193.142.43.55
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 125EAAD5E;
+	Mon,  4 Mar 2024 05:43:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709509763; cv=none; b=djAStygAmbycZ7mtNUwRzafscTx4Jwxy6hiCgOXaZxBV1NC8GEqoYVEAXidI57yla5QF86yxtCy4sv4/nlWRrup4hBBku3JQ/W5mREZypW9atYf7aIDYttypbCaSwDfc7R8B07LS8cS1MR3JLm9tIOs3Rcf2jzLMGLjDJABCghc=
+	t=1709530992; cv=none; b=UumKhGOy/kBXw5NJSRC733ABpuEGStJDunSUfJShWXG6xtDxRxkKEKWP07Tc64LQr/rahtMOpsZtUKsYE38hHOO82ZBepDZLkNc1P1y3b6UJu58oMAphuczlS9wJmEvyBF/aXkxqpn9GFoMRnzwW8IuHLgYblmnCCCNrAYq5wAM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709509763; c=relaxed/simple;
-	bh=v5ar+tdN7/lYRRRUenodLkDikwASd1JhTisMy47kCzU=;
-	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
-	 MIME-Version:Content-Type; b=R3hicFenP1/L9E9aWYmLpHvT9n7RDF7joBycNHlddE/IYZ1I1BiopNOtLrzIWkLY6rxXu7UgApDrELpL+Z4dxO1lbKmctDZlqDShSV2Dr7pSl0KJVPbyYdqvc8wAyqhC0inLl20RviwFGo37QNH6WQvgaJqa8ghigBbgkbpBnKw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linutronix.de; spf=pass smtp.mailfrom=linutronix.de; dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b=b6hPQNSO; dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b=oQFmOUAz; arc=none smtp.client-ip=193.142.43.55
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linutronix.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linutronix.de
+	s=arc-20240116; t=1709530992; c=relaxed/simple;
+	bh=WGkZHzlyAWQ8ISw8UICIlbevVxrfqlLQ1gYQEskJp5s=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=XkQ04pq5oo0RLQyUvmwD5lqCqVHTspfKTbu5uoaztttvmsExCvXJL7rx+fTTzQWYKxlSbP3dUKaxnBDHKrPX2O3n81lP5TXl2sTUyvk0kq0gBZvqe3Od4FrDnhT+ipabv5x92S/VjIIB5D82EkUo6p/JHGR1YhgD2/L45+yDpNQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=W41nBSLf; arc=none smtp.client-ip=209.85.208.173
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="b6hPQNSO";
-	dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="oQFmOUAz"
-From: Thomas Gleixner <tglx@linutronix.de>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linutronix.de;
-	s=2020; t=1709509759;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=NIqVj5QDEFMwPaAVH8zc/FziwYScHdoN6hh4zSkLtiM=;
-	b=b6hPQNSOv9Xd2HqKeB9R7CvmHIvdYEU5vg5UMHXIY0KaUDjknpJXr8pU4fB80nnr9KIesf
-	KLiWQCSGoo8oRcXAqPmeU3H5S/6Yxh4e2mlHSPceM2khm7C6KVC99NBjhOIMM+4yy5I3JR
-	Q2y5NZ/h6XuWJSzqy4u0xSLYbVPLzpEMfGV0jQcOAbn1NTIV+YXh740bnn6Xdl+F/sDVGD
-	KteJtHrLKdMUZ6K7Ne/91jK08CeMluba3R2CDkuPHct6cs/qxAPOMJu0mP6f5K5Zu8cDpI
-	Uzpo4M019waBhrVENLc215bNxxKKC1mxi8gn6RSDw9OdtCygIB+2M9NbzVI2rg==
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=linutronix.de;
-	s=2020e; t=1709509759;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=NIqVj5QDEFMwPaAVH8zc/FziwYScHdoN6hh4zSkLtiM=;
-	b=oQFmOUAzNABJMPQ1wG1zUHQ+0PjksQAHfuYGGkDf0PD7+YmJCQ8/8ntg8xcS6Gs3tHOj2Z
-	rKSxQAP0HZtS/HCQ==
-To: Uros Bizjak <ubizjak@gmail.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, kernel test robot
- <lkp@intel.com>, oe-kbuild-all@lists.linux.dev,
- linux-kernel@vger.kernel.org, Arjan van de Ven <arjan@linux.intel.com>,
- x86@kernel.org, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Sparse
- Mailing-list <linux-sparse@vger.kernel.org>, "Paul E. McKenney"
- <paulmck@kernel.org>
-Subject: Re: arch/x86/include/asm/processor.h:698:16: sparse: sparse:
- incorrect type in initializer (different address spaces)
-In-Reply-To: <CAFULd4b0HN6eUJsOW6po8Hf16T3eMhjdKUvw-TS8yncNn-+Vyw@mail.gmail.com>
-References: <202403020457.RCJoQ3ts-lkp@intel.com> <87edctwr6y.ffs@tglx>
- <87a5nhwpus.ffs@tglx> <87y1b0vp8m.ffs@tglx> <87sf18vdsq.ffs@tglx>
- <87le70uwf0.ffs@tglx>
- <CAHk-=wiWhfdc4Sw2VBq_2nL2NDxmZS32xG4P7mBVwABGqUoJnw@mail.gmail.com>
- <87edcruvja.ffs@tglx>
- <CAFULd4bVEUBEidTLbHNzRaJbSjXm99yC8LT=jdzFWb7xnuFH7g@mail.gmail.com>
- <87bk7vuldh.ffs@tglx>
- <CAFULd4arHT+_fy9_oUNpmsvyfVPGaeB_pdeuqVS3UTpP5R757A@mail.gmail.com>
- <CAFULd4b0HN6eUJsOW6po8Hf16T3eMhjdKUvw-TS8yncNn-+Vyw@mail.gmail.com>
-Date: Mon, 04 Mar 2024 00:49:18 +0100
-Message-ID: <87bk7ux4e9.ffs@tglx>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="W41nBSLf"
+Received: by mail-lj1-f173.google.com with SMTP id 38308e7fff4ca-2d26227d508so46181651fa.2;
+        Sun, 03 Mar 2024 21:43:10 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1709530989; x=1710135789; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=WGkZHzlyAWQ8ISw8UICIlbevVxrfqlLQ1gYQEskJp5s=;
+        b=W41nBSLf62H1Iwy/YE1u8aUptPHHnHW0NoD5wu9R12u0oe3iPpApy5DYSj6VAW4YXu
+         gCgkA5RfzrzUNlILm0CiE23b4JtBNs/d5MueuAVtKjH9qrcDHXkTTlTcV8PE8up1dALe
+         BtCpY0L01wJgNqIURUAAXxYlu5hbHIBUsTXPkDqnCQkjcP+9kPNDnCsFdZFobnviczTs
+         6FJQ5jw63oCe1GXgJBeBKmALOe1i8hmGCZSSBHKk989Gk0iOVaptGawchYEOBXvAFB8Y
+         TivS0dNkMNC9Tl0/WI5/OfX+hzftdBeMlZyKSLjsKpJ/HXrUTaVZ/gtCk249IK02mjc2
+         S6fA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1709530989; x=1710135789;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=WGkZHzlyAWQ8ISw8UICIlbevVxrfqlLQ1gYQEskJp5s=;
+        b=cWV11LBTw6/ooIkwauxMg8nUSeJZcmziZe8+JtpoQXgk4LybleUDyVQe9jvho6i6nC
+         63/RSeRzW0oYzwQbOj+SGJOavPKWpg7xW7LI0j1rAcIKCy8CIimupJIH2RB+fDLYKdp4
+         CCOjg1f292PXQNXaQq0mH7obeSmGLYZLRmRW6xbVcL4+rJGW6uwFdHgstQbmOsnX0d3h
+         +wvPeTv9bcq98KEnjBdejVe3VwOfR9iYu2QqubhRl7krC2+3PkCe/QI0iPtPuQ4rrTMY
+         JnNp0S2bZ7aukkoc21NinYM9sjeyAg+Q0gTcbI5kk48ugZoCWTSnaTAbO1RIM/BYjGRT
+         YrFg==
+X-Forwarded-Encrypted: i=1; AJvYcCWQaFqDssw06GOh/rRuA/0xByVyztAXhS1+KLW/m8BEI59XkJzHzFl13CEKOFy60tFHLxrktuhep+MjECqElXEP81r1mRx93UTLl1O9zh6PTW9p4k5mb+Sg4+SNGxPyV+1JjM9W+7p2K3zy
+X-Gm-Message-State: AOJu0YzUVVWTbc4c+hqEn+1HQPlYNDoq4lg1Bzjuunkj7uHqrNnRqy+A
+	kC2DCPelvv+UiASYBG2rfKkm/EH5rglqkPVp7jQurBzVQJai8NQBC+C6nABIqeg4nFkBY+dgad+
+	uefA6oEtovC2hjS4Iz4fPR6oWTLGnMtwLRZQ=
+X-Google-Smtp-Source: AGHT+IHPkr8MXlXnsTqDQUAH848oUd/FhdaH0EQep/6PvORXBzYeJvj04y1lheh/RMMA5J9aeAhTYUSvWrrqiOjfQ9Q=
+X-Received: by 2002:a2e:86d0:0:b0:2d2:b337:f55d with SMTP id
+ n16-20020a2e86d0000000b002d2b337f55dmr5260411ljj.16.1709530988812; Sun, 03
+ Mar 2024 21:43:08 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+References: <202403020457.RCJoQ3ts-lkp@intel.com> <87edctwr6y.ffs@tglx>
+ <87a5nhwpus.ffs@tglx> <87y1b0vp8m.ffs@tglx> <87sf18vdsq.ffs@tglx>
+ <87le70uwf0.ffs@tglx> <CAHk-=wiWhfdc4Sw2VBq_2nL2NDxmZS32xG4P7mBVwABGqUoJnw@mail.gmail.com>
+ <87edcruvja.ffs@tglx> <CAFULd4bVEUBEidTLbHNzRaJbSjXm99yC8LT=jdzFWb7xnuFH7g@mail.gmail.com>
+ <87bk7vuldh.ffs@tglx> <CAFULd4arHT+_fy9_oUNpmsvyfVPGaeB_pdeuqVS3UTpP5R757A@mail.gmail.com>
+ <CAFULd4b0HN6eUJsOW6po8Hf16T3eMhjdKUvw-TS8yncNn-+Vyw@mail.gmail.com> <87bk7ux4e9.ffs@tglx>
+In-Reply-To: <87bk7ux4e9.ffs@tglx>
+From: Uros Bizjak <ubizjak@gmail.com>
+Date: Mon, 4 Mar 2024 06:42:57 +0100
+Message-ID: <CAFULd4aEe2KU=UXEt2=GeLQq2uTSFvydBiwAdSa7B6T61Am=5w@mail.gmail.com>
+Subject: Re: arch/x86/include/asm/processor.h:698:16: sparse: sparse:
+ incorrect type in initializer (different address spaces)
+To: Thomas Gleixner <tglx@linutronix.de>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, kernel test robot <lkp@intel.com>, 
+	oe-kbuild-all@lists.linux.dev, linux-kernel@vger.kernel.org, 
+	Arjan van de Ven <arjan@linux.intel.com>, x86@kernel.org, 
+	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, 
+	Sparse Mailing-list <linux-sparse@vger.kernel.org>, "Paul E. McKenney" <paulmck@kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Sun, Mar 03 2024 at 21:24, Uros Bizjak wrote:
-> On Sun, Mar 3, 2024 at 9:21=E2=80=AFPM Uros Bizjak <ubizjak@gmail.com> wr=
-ote:
->> On Sun, Mar 3, 2024 at 9:10=E2=80=AFPM Thomas Gleixner <tglx@linutronix.=
-de> wrote:
->> > That's so sad because it would provide us compiler based __percpu
->> > validation.
->>
->> Unfortunately, the c compiler can't strip qualifiers, so typeof() is
->> of limited use also when const and volatile qualifiers are used.
->> Perhaps some extension could be introduced to c standard to provide an
->> unqualified type, e.g. typeof_unqual().
+On Mon, Mar 4, 2024 at 12:49=E2=80=AFAM Thomas Gleixner <tglx@linutronix.de=
+> wrote:
 >
-> Oh, there is one in C23 [1].
+> On Sun, Mar 03 2024 at 21:24, Uros Bizjak wrote:
+> > On Sun, Mar 3, 2024 at 9:21=E2=80=AFPM Uros Bizjak <ubizjak@gmail.com> =
+wrote:
+> >> On Sun, Mar 3, 2024 at 9:10=E2=80=AFPM Thomas Gleixner <tglx@linutroni=
+x.de> wrote:
+> >> > That's so sad because it would provide us compiler based __percpu
+> >> > validation.
+> >>
+> >> Unfortunately, the c compiler can't strip qualifiers, so typeof() is
+> >> of limited use also when const and volatile qualifiers are used.
+> >> Perhaps some extension could be introduced to c standard to provide an
+> >> unqualified type, e.g. typeof_unqual().
+> >
+> > Oh, there is one in C23 [1].
+>
+> Yes. I found it right after ranting.
+>
+> gcc >=3D 14 and clang >=3D 16 have support for it of course only when add=
+ing
+> -std=3Dc2x to the command line.
+>
+> Sigh. The name space qualifiers are non standard and then the thing
+> which makes them more useful is hidden behind a standard.
 
-Yes. I found it right after ranting.
+With GCC, you can use __typeof_unqual__ (please note underscores)
+without -std=3Dc2x [1]:
 
-gcc >=3D 14 and clang >=3D 16 have support for it of course only when adding
--std=3Dc2x to the command line.
+"... Alternate spelling __typeof_unqual__ is available in all C modes
+and provides non-atomic unqualified version of what __typeof__
+operator returns..."
 
-Sigh. The name space qualifiers are non standard and then the thing
-which makes them more useful is hidden behind a standard.
+Please also see the example in my last post. It can be compiled without -st=
+d=3D...
 
-Why can't we have useful tools?
+[1] https://gcc.gnu.org/onlinedocs/gcc/Typeof.html
 
-Though the whole thing looks worthwhile:
-
-#define verify_per_cpu_ptr(ptr)						\
-do {									\
-	const void __seg_gs *__vpp_verify =3D (typeof((ptr) + 0))NULL;    \
-	(void)__vpp_verify;						\
-} while (0)
-
-#define per_cpu_ptr(ptr, cpu)						\
-({									\
-	verify_per_cpu_ptr(ptr);					\
-	(typeof_unqual(*(ptr)) *)(uintptr_t)ptr + per_cpu_offset(cpu);	\
-})
-
-unsigned int __seg_gs test;
-
-unsigned int foo1(unsigned int cpu)
-{
-	return *per_cpu_ptr(&test, cpu);
-}
-
-unsigned int foo2(unsigned int cpu)
-{
-	unsigned int x, *p =3D per_cpu_ptr(&x, cpu);
-
-	return *p;
-}
-
-x.c:29:23: error: initializing 'const __attribute__((address_space(256))) v=
-oid *' with an expression of type 'typeof ((&x) + 0)' (aka 'unsigned int *'=
-) changes address space of pointer
-        unsigned int x, *p =3D per_cpu_ptr(&x, cpu);
-
-That's exactly what we want. It would have caught all the long standing
-and ignored __percpu sparse warnings right away.
-
-This also simplifies all the other per cpu accessors. The most trivial
-is read()
-
-#define verify_per_cpu(variable)					\
-{									\
-	const unsigned int __s =3D sizeof(variable);			\
-									\
-	verify_per_cpu_ptr(&(variable));				\
-	BUILD_BUG_ON(__s =3D=3D 1 || __s =3D=3D 2 || __s =3D=3D 4 || __s =3D=3D 8,=
-	\
-		     "Wrong size for per CPU variable");		\
-}
-
-#define __pcpu_read(variable)						\
-({									\
-	verify_per_cpu(variable);					\
-	READ_ONCE(variable);						\
-})
-
-which in turn catches all the mistakes, i.e. wrong namespace and wrong
-size.
-
-I'm really tempted to implement this as an alternative to the current
-pile of macro horrors. Of course this requires to figure out first what
-kind of damage -std=3Dc2x will do.
-
-I get to that in my copious spare time some day.
-
-Thanks,
-
-        tglx
+Uros.
