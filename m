@@ -1,165 +1,91 @@
-Received: from galois.linutronix.de (Galois.linutronix.de [193.142.43.55])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lf1-f44.google.com (mail-lf1-f44.google.com [209.85.167.44])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 50D0517E9;
-	Sat, 16 Mar 2024 01:11:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=193.142.43.55
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8A3A14A28
+	for <linux-sparse@vger.kernel.org>; Sat, 16 Mar 2024 01:23:32 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.44
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710551473; cv=none; b=OR4MzYaDzenGtAqksLB7AIw0E56ETl/JmJLinCaF4OpKUHftRkxq0fCwwwNkQP1WPaMucPkLslpaOZeYaJL78ogiZcZfLB5cJy+VEud7Q0u662fyfeyE/RxN/ndGiPl1Bu4bb1JgZa3+uWZlGBlr+XqpSzvZjxtG5ezWh5AyhZQ=
+	t=1710552214; cv=none; b=OOD6WonoId+1hxglhNuWE17IzAyPMQjO5VtcL1kR79H7AW4LwP7IIfeN8GEz3R/v5gQynztnu6aaR5rkE4BENbK/OivBvXp9kUcRaiFpxDpZg4wUHuONFbYNyuu89+ck0vQY8bnjNk4erfdLzyaJOAvYHAFppQljZX4snuw78p0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710551473; c=relaxed/simple;
-	bh=0x+7dm1ig6PJcpF1GUOtIfcHHMjn4K89eyUR1yOWBjw=;
-	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
-	 MIME-Version:Content-Type; b=mqsZkiNDy5k/XQJmXuP8xBSvYshAlg1FMFmtHAL1Au1fIUw03MloRZOJkJtaAl3UdZi5h0ZVE1aLd93pTz7IdU4MnOEVxCZn8rMgc2csUXKhpykOW19ERihvUtHu+P0b7Sn78Hv7ohUNZVYXRbHwO4+LqlEHexEmwV9H8C4ebek=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linutronix.de; spf=pass smtp.mailfrom=linutronix.de; dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b=rh505mqi; dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b=StuDEB3w; arc=none smtp.client-ip=193.142.43.55
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linutronix.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linutronix.de
+	s=arc-20240116; t=1710552214; c=relaxed/simple;
+	bh=zrk0mlljUXq6JrTr3qaP5fW3ShetdUZodGHSY6f3a6o=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=M+lmu7QCCoxICXTswlNmx16wswiE9If5BPSkU1Fq5yLqeyj02gNSX7QQPLQMRnDII45XbcWGKk7Ca0hOTddwS8u35N2nTFoitp82O958zQv8gazcbqedBop3BmSKyTnxEd5Cq7SHAYy+eEikvuSgt/ZPoOCdYT8vRvvXytPpLOY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linuxfoundation.org; spf=pass smtp.mailfrom=linuxfoundation.org; dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b=N9ojlGze; arc=none smtp.client-ip=209.85.167.44
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linuxfoundation.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linuxfoundation.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="rh505mqi";
-	dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="StuDEB3w"
-From: Thomas Gleixner <tglx@linutronix.de>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linutronix.de;
-	s=2020; t=1710551468;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=ZeOBxiT9OJ2ujhiixfzKfCr6Amo1IfVgJ8QNhCy+nqU=;
-	b=rh505mqi7MOOOw/hLQty3SDFS/ucKfDds03oZSo/TZRFCmN+HL0lLM2WlBYW5Jo5pL6KCU
-	S03y3ts1KSMZjI1U2hAJk8BsRk/Dhay9+AXZwk7VUbxB0e6GHGsTyitxH8tIFi+nlDG0Zd
-	KPYuryxc/aZW/H0EclBnfMQAkl9lXQdHQF92/s9WR54aJCpd0nCd7EKcokUpKtCdolebPu
-	h/7vOnoKbr26Dka+9ADvFNHABkbAWMQu0mMajcZA6zvjHRZtN3O8R9fnGvVXolZrZI050a
-	QbTAP0XjT+AsH+OF59collBJYIfZUYALm8xnTJ6x3fwrAWhzNMLmPsabfa9O/w==
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=linutronix.de;
-	s=2020e; t=1710551468;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=ZeOBxiT9OJ2ujhiixfzKfCr6Amo1IfVgJ8QNhCy+nqU=;
-	b=StuDEB3w4uHRL8P9KxpQznaP/wNlQdzmkhCwQRU2XJivKCnYML6JMQPDqqg9KPKdrgF1Tp
-	CUuSUgzDZ7K4awCQ==
-To: Linus Torvalds <torvalds@linuxfoundation.org>
-Cc: Guenter Roeck <linux@roeck-us.net>, LKML <linux-kernel@vger.kernel.org>,
- x86@kernel.org, Uros Bizjak <ubizjak@gmail.com>,
- linux-sparse@vger.kernel.org, lkp@intel.com,
- oe-kbuild-all@lists.linux.dev, Arnd Bergmann <arnd@kernel.org>
-Subject: Re: [patch 5/9] x86: Cure per CPU madness on UP
-In-Reply-To: <CAHk-=wiP+XMGHr8NU13sSOG_oasNZN02O9_c1PzCJNG7+O-GPw@mail.gmail.com>
-References: <20240303235029.555787150@linutronix.de>
- <20240304005104.622511517@linutronix.de>
- <e20d88d0-5fb9-4307-be67-88b04ae9a188@roeck-us.net>
- <CAHk-=whK=G1o6RtS9DS3wEGF1KU7WLgLL1+6Se86bj8m7wwqrQ@mail.gmail.com>
- <87y1ajjsv9.ffs@tglx> <87o7bfjeae.ffs@tglx>
- <CAHk-=wiP+XMGHr8NU13sSOG_oasNZN02O9_c1PzCJNG7+O-GPw@mail.gmail.com>
-Date: Sat, 16 Mar 2024 02:11:07 +0100
-Message-ID: <877ci3j80k.ffs@tglx>
+	dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b="N9ojlGze"
+Received: by mail-lf1-f44.google.com with SMTP id 2adb3069b0e04-513d212f818so2980449e87.2
+        for <linux-sparse@vger.kernel.org>; Fri, 15 Mar 2024 18:23:32 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linuxfoundation.org; s=google; t=1710552210; x=1711157010; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=69cI/hdQb0CMrhhOHzUcjMzxCnMmxWubP/uXkL4m1gc=;
+        b=N9ojlGze6DfF2yy0ie+4jvUiWOhTWE2Emqd5XhR5TRA75MiQdbNH7q+5hA8SoxY5EY
+         0HMxoeFwtvPUxIQZYskqqOifKTqSTC1gj0MB64uJ4feEXCR58C4EMsvrj2OQM8bdSBVD
+         CKZxyPE3h/9jWpI8OnjkINJZPcUucz7MDNQA4=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1710552210; x=1711157010;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=69cI/hdQb0CMrhhOHzUcjMzxCnMmxWubP/uXkL4m1gc=;
+        b=c8KuZMi9+5PoW1RXJayRKJ+A7lOr73mWd1Q6jVW1VdB9u1XZWxZR4oRKYNHib11sOS
+         50f0ZoFczf7ABKv9OEjxcsXryfC70pNc+eVW3+CphS1cR5p3pBeWHhFSyWWCJ3cInDDd
+         7SvmKVgkNKBV5LJ/ynP8ipEjSsgNgkPlHr3r/PZfGe40jlK33Xc2EMSkbz1Kxf4oRZ6J
+         Zl2P3wUj0Hoy+SZY3o0vXiQHVwjqgRzPnITEDIhxNcROxIL6RCE0L224qgZRwD9X5cF2
+         ZLvPem18mWZtdAIucgDF+tsH6rl3PRmVSGeg3xiRwpvUrZ/IK3COSkcGOWviGCAd/E27
+         CWYA==
+X-Forwarded-Encrypted: i=1; AJvYcCWt69KNICDUMBxzbm9taBGSVrRQvVsc6q/kxT6gAZMjvI3xMucVNghLsljRECHrgyPyRjusve4gAAuIPjksYgFSxDs4hScUsm+6ey/A
+X-Gm-Message-State: AOJu0YzsX+0BAs4Mjk7Vwa9P2NnU/GrqIM9OdYiRVa8cdzD9Q35154rC
+	IwPoe1uEcFkkT1fFd2vwXoYob38cPNj1SjV50IYQanISV2qT9Y3Mf35hFjglgq/Ebl6Isd906Rc
+	wETT/VA==
+X-Google-Smtp-Source: AGHT+IEm1VKwPzE15O2yNlhNxcThijArMnWsU8SYuWEoXSxq3CvuTouR+AjiEyvqqCRI0s4xDsCp8g==
+X-Received: by 2002:ac2:5ec3:0:b0:513:dcc9:50dc with SMTP id d3-20020ac25ec3000000b00513dcc950dcmr1366775lfq.47.1710552210368;
+        Fri, 15 Mar 2024 18:23:30 -0700 (PDT)
+Received: from mail-ed1-f42.google.com (mail-ed1-f42.google.com. [209.85.208.42])
+        by smtp.gmail.com with ESMTPSA id gf9-20020a170906e20900b00a46a27794f6sm205247ejb.123.2024.03.15.18.23.29
+        for <linux-sparse@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 15 Mar 2024 18:23:29 -0700 (PDT)
+Received: by mail-ed1-f42.google.com with SMTP id 4fb4d7f45d1cf-5689ebef670so3100573a12.1
+        for <linux-sparse@vger.kernel.org>; Fri, 15 Mar 2024 18:23:29 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCWgqsh41mjzwEvdKoY+KQPkVq3qQUlkOsKwnbOVHLkOyQUE57yOwe8IJs09YieU+38wM6qRezITZqdQZTMFaHyVwbM4cTFJqrc47coK
+X-Received: by 2002:a17:906:3654:b0:a46:9711:4f04 with SMTP id
+ r20-20020a170906365400b00a4697114f04mr1417533ejb.13.1710552209212; Fri, 15
+ Mar 2024 18:23:29 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain
+References: <20240303235029.555787150@linutronix.de> <20240304005104.622511517@linutronix.de>
+ <e20d88d0-5fb9-4307-be67-88b04ae9a188@roeck-us.net> <CAHk-=whK=G1o6RtS9DS3wEGF1KU7WLgLL1+6Se86bj8m7wwqrQ@mail.gmail.com>
+ <87y1ajjsv9.ffs@tglx> <87o7bfjeae.ffs@tglx> <CAHk-=wiP+XMGHr8NU13sSOG_oasNZN02O9_c1PzCJNG7+O-GPw@mail.gmail.com>
+ <877ci3j80k.ffs@tglx>
+In-Reply-To: <877ci3j80k.ffs@tglx>
+From: Linus Torvalds <torvalds@linuxfoundation.org>
+Date: Fri, 15 Mar 2024 18:23:12 -0700
+X-Gmail-Original-Message-ID: <CAHk-=wg50AGnzhmOK0TNqDN99T3dWd747h3y-ZFuv4bNZ4Q0tw@mail.gmail.com>
+Message-ID: <CAHk-=wg50AGnzhmOK0TNqDN99T3dWd747h3y-ZFuv4bNZ4Q0tw@mail.gmail.com>
+Subject: Re: [patch 5/9] x86: Cure per CPU madness on UP
+To: Thomas Gleixner <tglx@linutronix.de>
+Cc: Guenter Roeck <linux@roeck-us.net>, LKML <linux-kernel@vger.kernel.org>, x86@kernel.org, 
+	Uros Bizjak <ubizjak@gmail.com>, linux-sparse@vger.kernel.org, lkp@intel.com, 
+	oe-kbuild-all@lists.linux.dev, Arnd Bergmann <arnd@kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 
-On Fri, Mar 15 2024 at 16:23, Linus Torvalds wrote:
-> On Fri, 15 Mar 2024 at 15:55, Thomas Gleixner <tglx@linutronix.de> wrote:
->> So the proper thing to do is to check for num_possible_cpus() == 1 in
->> that function.
+On Fri, 15 Mar 2024 at 18:11, Thomas Gleixner <tglx@linutronix.de> wrote:
 >
-> I think that's _one_ proper thing. I still think that the deeper
-> problem is that it still looks at local apic rules even when those
-> rules are completely nonsensical.
->
-> For example, that MAX_LOCAL_APIC range test may not matter simply
-> because it's testing a constant value, but it still smells entirely
-> wrong to even check for that, when the system doesn't necessarily have
-> one.
+> You wish. We still support 486 and some of the still produced 486 clones
+> do not have a local APIC.
 
-cpu_info.apic_id defaults to 0, so unless the calling code is completely
-broken it will be correct. And I rather catch the case of calling code
-being broken in the !APIC case if we still want to support systems
-without a local APIC.
+Ouch. I was _sure_ we had dropped i486 support too due to cmpxchg8b.
 
-> So I think your patch may fix the immediate bug, but I think it's
-> still just a band-aid.
->
-> Either we should just make all machines look like they have the proper
-> local apic mappings, or we shouldn't look at any local apic rules AT
-> ALL.
+But apparently that was just a discussion, and my wishful thinking,
+and we never actually followed through.
 
-Sure. I can simply check if there was an APIC registered instead.
-
->> Sure you can argue that we could avoid it for SMP=n builds completely,
->> but I think the right thing to do is to aim for removing CONFIG_SMP and
->> make the UP build a subset of a generic SMP capable build which has
->> CONFIG_NR_CPUS=1, i.e. num_possible_cpus() = 1. Why?
->
-> I wouldn't be entirely opposed to just doing that. UP has become
-> fairly irrelevant.
->
-> That said, UP is *not* entirely irrelevant on other architectures, and
-> if we drop UP support on x86, we'll be effectively dropping a lot of
-> coverage testing. The number of people who do cross-compilers is
-> pretty small.
->
-> End result: I'd *much* rather get rid of X86_UP_APIC and the "nolapic"
-> kernel command line, and say "even UP has to have a local APIC".
->
-> We already require a Pentium-class CPU, so in practice we already
-> require that local APIC setup. And yes, machines existed where it
-> could be turned off, but I don't think that is relevant any more.
-
-You wish. We still support 486 and some of the still produced 486 clones
-do not have a local APIC.
-
-Not that I care and yes I'm all for getting rid of CONFIG_.*_APIC and of
-the related config/command line options. If we refuse to boot on
-hardware which does not enumerate an APIC then even better.
-
-But that is only a part of the overall problem.
-
-> Put another way: I think "UP config for wider build testing" is a
-> _lot_ more relevant than "no LAPIC support".
-
-I really have to disagree here.
-
-The concept of making UP a proper subset of SMP has absolutely nothing
-to do with x86 and UP test coverage.
-
-We want SMP as a general concept and overhaul the whole kernel to get
-rid of this ever increasing non-sensical UP burden. The real world UP
-small system use cases have moved over to other OSes like Zephyr & Co
-long ago.
-
-Just because some esoteric architectures (m68k comes to my mind) will
-have serious issues with that for the very wrong reasons does not mean
-that we should not go there.
-
-It's going to be quite some effort, but the overall benefit is worth it.
-
-OTOH, it's absolutely not rocket science to pretend to be SMP capable
-and if some architectures fail to accomodate on the way then we just
-should remove them as that's a clear sign of being unmaintained and
-irrelevant.
-
-The amount of untested SMP=n code in the kernel becomes frigthening and
-your argument that build coverage is making a difference is wishful
-thinking at best.
-
-Anything else than making the kernel SMP capable and making UP builds a
-well defined subset via CONFIG_NR_CPUS=1 is a complete waste of time and
-effort.
-
-If your intention is to indulge in the historical glory of Linux running
-on any (by now) irrelevant hardware on the planet, then I stop arguing
-right here.
-
-If not, can we please have a serious discussion about going SMP only and
-making UP the simple and obvious NR_CPUS=1 subset?
-
-The amount of subtle SMP=n fallout has been kinda exponentially
-increasing over the years and it's just putting burden on the wrong
-people. TBH, I'm tired of this nonsense.
-
-Thanks,
-
-        tglx
+         Linus
