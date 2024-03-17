@@ -1,68 +1,42 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from eu-smtp-delivery-151.mimecast.com (eu-smtp-delivery-151.mimecast.com [185.58.85.151])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7D8321799F
-	for <linux-sparse@vger.kernel.org>; Sat, 16 Mar 2024 21:37:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 00ACF1EB36
+	for <linux-sparse@vger.kernel.org>; Sun, 17 Mar 2024 21:03:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.58.85.151
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710625032; cv=none; b=e/4n0Z8OIyWqGOxFV8iH/xnAPGX3Bmuc3IaZ5YJaCZm/CtnL5pCXbPRZjDH9X6oxF2XaIBwo7+/N6eY4v5jyvpLRoJgWLoZrej/S8/I8ZY/ceWUUlCK/EFMo+Uh1Ks6Pfs8ucE63O1rLqOyfFp0aE4ZOyQ7yLz5OUKPXw4zTB44=
+	t=1710709425; cv=none; b=biEcTqKO+ED440KLGtOc8wl28h07QwMSbmP8IyApUcegsau1m1aDpvInAyoe3antotsJl+W23uGK6Hm6sDfluOrgN7dMUhtsjCzRsuhUoFYZKVDqHZo9pCcTy5j3p5DhLI9OBUO32GymtvdgN4T5NdCPMkQIQy5dfz29RfWV8S0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710625032; c=relaxed/simple;
-	bh=GKKge2ecLnpGrZsiljqV2+mUEsMSfr3X5lirRlPQE+k=;
-	h=MIME-Version:Message-Id:In-Reply-To:References:Date:From:To:Cc:
-	 Subject:Content-Type; b=ogSmR9o9kTCPT5eAm8QXWT9jGiIUgeyhocTZgJ9GOmLINJih15V3OeJmqFz/HDkSaPpHv0CpYndrign3f2hWyNhu33yO7dMxhB7jMqnlo7mMpesKRVM5Cx30YBPnVqEAtSuIlcPH75T2Oda4f93WA3aKzLeJq0k1T95+st7Fk/0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Kl4fgSWF; arc=none smtp.client-ip=10.30.226.201
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Kl4fgSWF"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D051CC43390
-	for <linux-sparse@vger.kernel.org>; Sat, 16 Mar 2024 21:37:11 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1710625032;
-	bh=GKKge2ecLnpGrZsiljqV2+mUEsMSfr3X5lirRlPQE+k=;
-	h=In-Reply-To:References:Date:From:To:Cc:Subject:From;
-	b=Kl4fgSWFgWtaVAOeHm1HAn//iH9iEyrNUF5aUPW6UOF1jIDY5CtIEqD1IYHKfgTdP
-	 pR6hN95eyokzTS0ojBfdov1NBid0Ni3N8w00NZvrxFCb3XvOVMbtHHFNyKrvfYUy2N
-	 05lJRMVxypa1q7gfNzrLr8EyU6oBxVJCZRXSuxEHwuMAKeICQOqBESuOo+qzUiWgJ1
-	 Eg6TkM2ZyikbJrvG6TkbB2ZmTWmUQs4Rtni8JXoHo9CE3wE8H0tZl0/et6sGgfctzO
-	 fwzipZoNv3676sIwo8GmNiApnTAa22L5Rj/EnFhqj1H+E0lXTEj3yknPWETVdo2KJF
-	 PGGXoRMpxqaUw==
-Received: from compute5.internal (compute5.nyi.internal [10.202.2.45])
-	by mailfauth.nyi.internal (Postfix) with ESMTP id C94B11200068;
-	Sat, 16 Mar 2024 17:37:10 -0400 (EDT)
-Received: from imap51 ([10.202.2.101])
-  by compute5.internal (MEProxy); Sat, 16 Mar 2024 17:37:10 -0400
-X-ME-Sender: <xms:BhH2ZemPk5LCSrTUfoBHrvsrAzb9r8iYilzL1wGunHX_ew0rrF0gdg>
-    <xme:BhH2ZV244fw9phq3i96tQU00JJgUp9XLj_WqgCD0W7sIDtRVDw703o0MIThKqZQrR
-    dT5vC9JjMuuCGG9Q6A>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvledrkedvgdduvdejucetufdoteggodetrfdotf
-    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
-    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
-    cujfgurhepofgfggfkjghffffhvfevufgtsehttdertderredtnecuhfhrohhmpedftehr
-    nhguuceuvghrghhmrghnnhdfuceorghrnhgusehkvghrnhgvlhdrohhrgheqnecuggftrf
-    grthhtvghrnhepleevgfduieehfeeltdettdfhfffgkedugeeklefftdeivdfgveeiteet
-    keehffevnecuffhomhgrihhnpehkvghrnhgvlhdrohhrghenucevlhhushhtvghrufhiii
-    gvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpegrrhhnugdomhgvshhmthhprghuthhh
-    phgvrhhsohhnrghlihhthidquddvkeehudejtddvgedqvdekjedttddvieegqdgrrhhnug
-    eppehkvghrnhgvlhdrohhrghesrghrnhgusgdruggv
-X-ME-Proxy: <xmx:BhH2Zcpl2woLcQtdi-mH7wrnnwll9EwDMxcqCyAeb1uJ_gX5xV8aHg>
-    <xmx:BhH2ZSk_-QPWPf6NYNuSo0ko8xRrZDNd-Hn4AoF2FqEH0THhYBVaUg>
-    <xmx:BhH2Zc1-7qN4NjTdcFD16628Zh0gqRTV-XxP1pjAkzoh_mK2ooN1NQ>
-    <xmx:BhH2ZZvHWj5L5ISJTH3gxKwZlmEENcjogaxWoB4foyjZ6mgwpNvMJQ>
-    <xmx:BhH2ZdJUt4_xLTp5NgMQPpuXm1xcJO4j_zwHsI0A6xO9JXxPHjRv2IW8Yr8>
-Feedback-ID: i36794607:Fastmail
-Received: by mailuser.nyi.internal (Postfix, from userid 501)
-	id 365F2B6008D; Sat, 16 Mar 2024 17:37:10 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
-User-Agent: Cyrus-JMAP/3.11.0-alpha0-300-gdee1775a43-fm-20240315.001-gdee1775a
-Precedence: bulk
-X-Mailing-List: linux-sparse@vger.kernel.org
-List-Id: <linux-sparse.vger.kernel.org>
-List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
-List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Message-Id: <dd494544-6dbf-4e83-8060-1f8b7b07a8c4@app.fastmail.com>
-In-Reply-To: 
- <CAHk-=wg50AGnzhmOK0TNqDN99T3dWd747h3y-ZFuv4bNZ4Q0tw@mail.gmail.com>
+	s=arc-20240116; t=1710709425; c=relaxed/simple;
+	bh=gzAePpCELiWiEVfOVWT+m6Mi8Uw5yBEyROgjtW+MVi8=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 MIME-Version:Content-Type; b=Bf6JRkxgcFiLDFbzh7e46OGI9HHfrLUSavc3EiFEmAFv8aysacUssx9IKEvzOn2wU3x4tblxXnaHpAFB5LlgTtmaOp9XyyH/B6G9CACjmbrPgTaHPoeOKTH07m34fjq5Z2QKWWeouWvYU2wUuQVw59K3zHhRZf4SK1zPiJ/OMWk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ACULAB.COM; spf=pass smtp.mailfrom=aculab.com; arc=none smtp.client-ip=185.58.85.151
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ACULAB.COM
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=aculab.com
+Received: from AcuMS.aculab.com (156.67.243.121 [156.67.243.121]) by
+ relay.mimecast.com with ESMTP with both STARTTLS and AUTH (version=TLSv1.2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id
+ uk-mta-74-WNWPfMjyMNWwIlf9U6Qn3A-1; Sun, 17 Mar 2024 21:03:34 +0000
+X-MC-Unique: WNWPfMjyMNWwIlf9U6Qn3A-1
+Received: from AcuMS.Aculab.com (10.202.163.6) by AcuMS.aculab.com
+ (10.202.163.6) with Microsoft SMTP Server (TLS) id 15.0.1497.48; Sun, 17 Mar
+ 2024 21:03:16 +0000
+Received: from AcuMS.Aculab.com ([::1]) by AcuMS.aculab.com ([::1]) with mapi
+ id 15.00.1497.048; Sun, 17 Mar 2024 21:03:16 +0000
+From: David Laight <David.Laight@ACULAB.COM>
+To: 'Thomas Gleixner' <tglx@linutronix.de>, Linus Torvalds
+	<torvalds@linuxfoundation.org>
+CC: Guenter Roeck <linux@roeck-us.net>, LKML <linux-kernel@vger.kernel.org>,
+	"x86@kernel.org" <x86@kernel.org>, Uros Bizjak <ubizjak@gmail.com>,
+	"linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>,
+	"lkp@intel.com" <lkp@intel.com>, "oe-kbuild-all@lists.linux.dev"
+	<oe-kbuild-all@lists.linux.dev>, Arnd Bergmann <arnd@kernel.org>
+Subject: RE: [patch 5/9] x86: Cure per CPU madness on UP
+Thread-Topic: [patch 5/9] x86: Cure per CPU madness on UP
+Thread-Index: AQHadz7YjtRKJ7LFXkWK5JDSHprIDbE8T4UQ
+Date: Sun, 17 Mar 2024 21:03:16 +0000
+Message-ID: <285eeccc46bb4d5bb471071964ddce48@AcuMS.aculab.com>
 References: <20240303235029.555787150@linutronix.de>
  <20240304005104.622511517@linutronix.de>
  <e20d88d0-5fb9-4307-be67-88b04ae9a188@roeck-us.net>
@@ -70,43 +44,66 @@ References: <20240303235029.555787150@linutronix.de>
  <87y1ajjsv9.ffs@tglx> <87o7bfjeae.ffs@tglx>
  <CAHk-=wiP+XMGHr8NU13sSOG_oasNZN02O9_c1PzCJNG7+O-GPw@mail.gmail.com>
  <877ci3j80k.ffs@tglx>
- <CAHk-=wg50AGnzhmOK0TNqDN99T3dWd747h3y-ZFuv4bNZ4Q0tw@mail.gmail.com>
-Date: Sat, 16 Mar 2024 22:34:55 +0100
-From: "Arnd Bergmann" <arnd@kernel.org>
-To: "Linus Torvalds" <torvalds@linuxfoundation.org>,
- "Thomas Gleixner" <tglx@linutronix.de>
-Cc: "Guenter Roeck" <linux@roeck-us.net>, LKML <linux-kernel@vger.kernel.org>,
- x86@kernel.org, "Uros Bizjak" <ubizjak@gmail.com>,
- linux-sparse@vger.kernel.org, "kernel test robot" <lkp@intel.com>,
- oe-kbuild-all@lists.linux.dev
-Subject: Re: [patch 5/9] x86: Cure per CPU madness on UP
-Content-Type: text/plain
+In-Reply-To: <877ci3j80k.ffs@tglx>
+Accept-Language: en-GB, en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-ms-exchange-transport-fromentityheader: Hosted
+Precedence: bulk
+X-Mailing-List: linux-sparse@vger.kernel.org
+List-Id: <linux-sparse.vger.kernel.org>
+List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
+List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+X-Mimecast-Spam-Score: 0
+X-Mimecast-Originator: aculab.com
+Content-Language: en-US
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
-On Sat, Mar 16, 2024, at 02:23, Linus Torvalds wrote:
-> On Fri, 15 Mar 2024 at 18:11, Thomas Gleixner <tglx@linutronix.de> wrote:
->>
->> You wish. We still support 486 and some of the still produced 486 clones
->> do not have a local APIC.
->
-> Ouch. I was _sure_ we had dropped i486 support too due to cmpxchg8b.
->
-> But apparently that was just a discussion, and my wishful thinking,
-> and we never actually followed through.
+From: Thomas Gleixner
+> Sent: 16 March 2024 01:11
+...
+> We want SMP as a general concept and overhaul the whole kernel to get
+> rid of this ever increasing non-sensical UP burden. The real world UP
+> small system use cases have moved over to other OSes like Zephyr & Co
+> long ago.
+>=20
+> Just because some esoteric architectures (m68k comes to my mind) will
+> have serious issues with that for the very wrong reasons does not mean
+> that we should not go there.
+>=20
+> It's going to be quite some effort, but the overall benefit is worth it.
+>=20
+> OTOH, it's absolutely not rocket science to pretend to be SMP capable
+> and if some architectures fail to accomodate on the way then we just
+> should remove them as that's a clear sign of being unmaintained and
+> irrelevant.
 
-Maciej Rozycki still cares about i486 type hardware, and he was
-asking for it to be kept around in the thread following [1]
+There are fpga soft-cpu (eg Nios & Risc-V) that can run linux.
+They are definitely memory constrained and really wouldn't want
+most of the SMP overhead.
 
-I think the best suggestion at the time was to make cmpxchg8b
-a compile-time feature and I had expected Maciej to follow up with
-a patch for that, but this never happend, and nobody sent a patch
-to remove support 486 and the early 586 clones either.
+I'm not what it involves apart from simplified startup, compiling
+out IPI and spinlocks and optimising per-cpu data.
+But you wouldn't want to be running an SMP capable kernel on such systems.
+x86 is a different beast - except perhaps 486.
 
-I saw recently that there are still distros that advertise 486
-support on modern kernels: Tiny Core Linux and Damn Small
-Linux. Both ship with a 486 SMP kernel but fail to boot
-on qemu unless an APIC is enabled (DSL also requires i686 or
-higher to run userspace).
+It has to be said that I've never understood why anyone would run
+Linux on a Nios-II cpu. Far too slow for anything useful (you might
+get 100MHz if you are lucky), caches will be small and external memory
+accesses slow.
+I doubt soft RISC-V are any better (and I suspect they are worse).
+We do have 4 Nios-II in the fpga image for a PCIe card.
+They run very small programs (one has 2kB of code memory) to do things
+that would be impossible to write (sensibly) in VHDL.
+There are fpga with embedded ARM (and probably RISC-V) cores for
+running real OS.
 
-       Arnd
+=09David
 
-[1] https://lore.kernel.org/all/20220815071332.627393-9-yuzhao@google.com/
+-
+Registered Address Lakeside, Bramley Road, Mount Farm, Milton Keynes, MK1 1=
+PT, UK
+Registration No: 1397386 (Wales)
+
