@@ -1,42 +1,49 @@
-Received: from eu-smtp-delivery-151.mimecast.com (eu-smtp-delivery-151.mimecast.com [185.58.85.151])
+Received: from galois.linutronix.de (Galois.linutronix.de [193.142.43.55])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 00ACF1EB36
-	for <linux-sparse@vger.kernel.org>; Sun, 17 Mar 2024 21:03:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.58.85.151
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3746F3717F;
+	Mon, 18 Mar 2024 11:11:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=193.142.43.55
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710709425; cv=none; b=biEcTqKO+ED440KLGtOc8wl28h07QwMSbmP8IyApUcegsau1m1aDpvInAyoe3antotsJl+W23uGK6Hm6sDfluOrgN7dMUhtsjCzRsuhUoFYZKVDqHZo9pCcTy5j3p5DhLI9OBUO32GymtvdgN4T5NdCPMkQIQy5dfz29RfWV8S0=
+	t=1710760305; cv=none; b=HzKgJbV3uK6dd2YGKJUx94kP2Jm+vmMHKQiW3WrZ1oSm5URIwE+0/INCFiBtaKwkRcn6z6pQf/s/YFFtTwBfuIOcD95y0YvUkKi191zUEcVJK/M94TKKoI3WnqtYmDuBRou726JK9vyfKjTHTFpk5XvbpQfz+RyIeg7O6T13vKI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710709425; c=relaxed/simple;
-	bh=gzAePpCELiWiEVfOVWT+m6Mi8Uw5yBEyROgjtW+MVi8=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 MIME-Version:Content-Type; b=Bf6JRkxgcFiLDFbzh7e46OGI9HHfrLUSavc3EiFEmAFv8aysacUssx9IKEvzOn2wU3x4tblxXnaHpAFB5LlgTtmaOp9XyyH/B6G9CACjmbrPgTaHPoeOKTH07m34fjq5Z2QKWWeouWvYU2wUuQVw59K3zHhRZf4SK1zPiJ/OMWk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ACULAB.COM; spf=pass smtp.mailfrom=aculab.com; arc=none smtp.client-ip=185.58.85.151
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ACULAB.COM
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=aculab.com
-Received: from AcuMS.aculab.com (156.67.243.121 [156.67.243.121]) by
- relay.mimecast.com with ESMTP with both STARTTLS and AUTH (version=TLSv1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id
- uk-mta-74-WNWPfMjyMNWwIlf9U6Qn3A-1; Sun, 17 Mar 2024 21:03:34 +0000
-X-MC-Unique: WNWPfMjyMNWwIlf9U6Qn3A-1
-Received: from AcuMS.Aculab.com (10.202.163.6) by AcuMS.aculab.com
- (10.202.163.6) with Microsoft SMTP Server (TLS) id 15.0.1497.48; Sun, 17 Mar
- 2024 21:03:16 +0000
-Received: from AcuMS.Aculab.com ([::1]) by AcuMS.aculab.com ([::1]) with mapi
- id 15.00.1497.048; Sun, 17 Mar 2024 21:03:16 +0000
-From: David Laight <David.Laight@ACULAB.COM>
-To: 'Thomas Gleixner' <tglx@linutronix.de>, Linus Torvalds
-	<torvalds@linuxfoundation.org>
-CC: Guenter Roeck <linux@roeck-us.net>, LKML <linux-kernel@vger.kernel.org>,
-	"x86@kernel.org" <x86@kernel.org>, Uros Bizjak <ubizjak@gmail.com>,
-	"linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>,
-	"lkp@intel.com" <lkp@intel.com>, "oe-kbuild-all@lists.linux.dev"
-	<oe-kbuild-all@lists.linux.dev>, Arnd Bergmann <arnd@kernel.org>
-Subject: RE: [patch 5/9] x86: Cure per CPU madness on UP
-Thread-Topic: [patch 5/9] x86: Cure per CPU madness on UP
-Thread-Index: AQHadz7YjtRKJ7LFXkWK5JDSHprIDbE8T4UQ
-Date: Sun, 17 Mar 2024 21:03:16 +0000
-Message-ID: <285eeccc46bb4d5bb471071964ddce48@AcuMS.aculab.com>
+	s=arc-20240116; t=1710760305; c=relaxed/simple;
+	bh=z5VR/SCFO4fju311eNKwJ63qRf/aHwz2D5n4iQqSiBc=;
+	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
+	 MIME-Version:Content-Type; b=qpGvhHVBc1qATxPX4whZPGF8T7jP57IHJvIkPBH3rHNdckL7n6efKWDpdWa7oz9f5mbcWOcKWF+Xa0/oxvmR721uTMM4imEM95XJnVH2KgNNojeno7dfRkAooOjD6LzBDKEQ5z+jRCj+BmsGn4J8RAoXwvoiQfeazuUmkGDEkqs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linutronix.de; spf=pass smtp.mailfrom=linutronix.de; dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b=DsRh2wPZ; dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b=2rXzzq0j; arc=none smtp.client-ip=193.142.43.55
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linutronix.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linutronix.de
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="DsRh2wPZ";
+	dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="2rXzzq0j"
+From: Thomas Gleixner <tglx@linutronix.de>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linutronix.de;
+	s=2020; t=1710760300;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=Kz9iUiUQcoOz3awzuNQ4c0iM+L+HbF9KJgq1+b8ISwY=;
+	b=DsRh2wPZKF+ZU54Ol3+3tkG/vZylyJKaZweh1MbTMk/lURjsHdIIxR9igCB9VHwjgkxD8a
+	gQYsU5LPNq2+1Al2TIP9sSnKu2NbYbkdsewheKEY/AnZUJmCVi3AKiUn6h+IhdxT/snRIb
+	ej5HcPt2e8UzOp7tPCSdLosji5ZhlQP8dyxLwV3TlUerZc6wKsq4dkfHuXMwWq7Iyep5js
+	/YgKUt/0Lnm9kv/9dw9hRxSzq9sMEw7b38IAz5P7sfwz+gNxeuFeVrbAEUueNJ97JkK3v3
+	iScWXdApPrwJwhOZlgmxSmolkbFc2qbTJK1oMkT2xsaPjSPLM9tk0m2FMRoa+Q==
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=linutronix.de;
+	s=2020e; t=1710760300;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=Kz9iUiUQcoOz3awzuNQ4c0iM+L+HbF9KJgq1+b8ISwY=;
+	b=2rXzzq0jJ81Gok9ryRYJKmRQDOliceDGov4GITW3TRUy+rv/y+7Ff0yLJIQxjp1Rt4Gemp
+	yIEWeVdtMHkqiWCQ==
+To: Linus Torvalds <torvalds@linuxfoundation.org>
+Cc: Guenter Roeck <linux@roeck-us.net>, LKML <linux-kernel@vger.kernel.org>,
+ x86@kernel.org, Uros Bizjak <ubizjak@gmail.com>,
+ linux-sparse@vger.kernel.org, lkp@intel.com,
+ oe-kbuild-all@lists.linux.dev, Arnd Bergmann <arnd@kernel.org>
+Subject: Re: [patch 5/9] x86: Cure per CPU madness on UP
+In-Reply-To: <877ci3j80k.ffs@tglx>
 References: <20240303235029.555787150@linutronix.de>
  <20240304005104.622511517@linutronix.de>
  <e20d88d0-5fb9-4307-be67-88b04ae9a188@roeck-us.net>
@@ -44,66 +51,60 @@ References: <20240303235029.555787150@linutronix.de>
  <87y1ajjsv9.ffs@tglx> <87o7bfjeae.ffs@tglx>
  <CAHk-=wiP+XMGHr8NU13sSOG_oasNZN02O9_c1PzCJNG7+O-GPw@mail.gmail.com>
  <877ci3j80k.ffs@tglx>
-In-Reply-To: <877ci3j80k.ffs@tglx>
-Accept-Language: en-GB, en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-ms-exchange-transport-fromentityheader: Hosted
+Date: Mon, 18 Mar 2024 12:11:39 +0100
+Message-ID: <87zfuviyl0.ffs@tglx>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Mimecast-Spam-Score: 0
-X-Mimecast-Originator: aculab.com
-Content-Language: en-US
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain
 
-From: Thomas Gleixner
-> Sent: 16 March 2024 01:11
-...
-> We want SMP as a general concept and overhaul the whole kernel to get
-> rid of this ever increasing non-sensical UP burden. The real world UP
-> small system use cases have moved over to other OSes like Zephyr & Co
-> long ago.
->=20
-> Just because some esoteric architectures (m68k comes to my mind) will
-> have serious issues with that for the very wrong reasons does not mean
-> that we should not go there.
->=20
-> It's going to be quite some effort, but the overall benefit is worth it.
->=20
-> OTOH, it's absolutely not rocket science to pretend to be SMP capable
-> and if some architectures fail to accomodate on the way then we just
-> should remove them as that's a clear sign of being unmaintained and
-> irrelevant.
+On Sat, Mar 16 2024 at 02:11, Thomas Gleixner wrote:
+> On Fri, Mar 15 2024 at 16:23, Linus Torvalds wrote:
+>> Either we should just make all machines look like they have the proper
+>> local apic mappings, or we shouldn't look at any local apic rules AT
+>> ALL.
+>
+> Sure. I can simply check if there was an APIC registered instead.
 
-There are fpga soft-cpu (eg Nios & Risc-V) that can run linux.
-They are definitely memory constrained and really wouldn't want
-most of the SMP overhead.
+Like the below. I'm not entirely sure though whether the sanity checks
+should return an error code, which is what caused the crash Guenter
+observed, but I couldn't come up with something sensible either.
 
-I'm not what it involves apart from simplified startup, compiling
-out IPI and spinlocks and optimising per-cpu data.
-But you wouldn't want to be running an SMP capable kernel on such systems.
-x86 is a different beast - except perhaps 486.
+Returning 0 might keep the machine alive, but does it make sense?
 
-It has to be said that I've never understood why anyone would run
-Linux on a Nios-II cpu. Far too slow for anything useful (you might
-get 100MHz if you are lucky), caches will be small and external memory
-accesses slow.
-I doubt soft RISC-V are any better (and I suspect they are worse).
-We do have 4 Nios-II in the fpga image for a PCIe card.
-They run very small programs (one has 2kB of code memory) to do things
-that would be impossible to write (sensibly) in VHDL.
-There are fpga with embedded ARM (and probably RISC-V) cores for
-running real OS.
+Thanks,
 
-=09David
+        tglx
+---
+ arch/x86/kernel/cpu/topology.c |   15 +++++++++++++--
+ 1 file changed, 13 insertions(+), 2 deletions(-)
 
--
-Registered Address Lakeside, Bramley Road, Mount Farm, Milton Keynes, MK1 1=
-PT, UK
-Registration No: 1397386 (Wales)
-
+--- a/arch/x86/kernel/cpu/topology.c
++++ b/arch/x86/kernel/cpu/topology.c
+@@ -277,10 +277,21 @@ int topology_get_logical_id(u32 apicid,
+ 	/* Remove the bits below @at_level to get the proper level ID of @apicid */
+ 	unsigned int lvlid = topo_apicid(apicid, at_level);
+ 
+-	if (lvlid >= MAX_LOCAL_APIC)
++	if (WARN_ON_ONCE(lvlid >= MAX_LOCAL_APIC))
+ 		return -ERANGE;
+-	if (!test_bit(lvlid, apic_maps[at_level].map))
++
++	/*
++	 * If there was no APIC registered, then the map check below would
++	 * fail. With no APIC this is guaranteed to be an UP system and
++	 * therefore all topology levels have only one entry and their
++	 * logical ID is obviously 0.
++	 */
++	if (topo_info.boot_cpu_apic_id == BAD_APICID)
++		return 0;
++
++	if (WARN_ON_ONCE(!test_bit(lvlid, apic_maps[at_level].map)))
+ 		return -ENODEV;
++
+ 	/* Get the number of set bits before @lvlid. */
+ 	return bitmap_weight(apic_maps[at_level].map, lvlid);
+ }
