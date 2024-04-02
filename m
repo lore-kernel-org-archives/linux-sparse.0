@@ -1,130 +1,140 @@
-Received: from galois.linutronix.de (Galois.linutronix.de [193.142.43.55])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lj1-f169.google.com (mail-lj1-f169.google.com [209.85.208.169])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ADB4B137759;
-	Thu, 21 Mar 2024 16:49:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=193.142.43.55
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B10412032C;
+	Tue,  2 Apr 2024 11:43:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.169
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711039775; cv=none; b=JyNSXYQVroxwgR9rWQDcImpLfQwiKYBe1aZYvC2JD31Pfg6UtzByDJPxQv2s3+7Alg4SM9nl2LSLeTsT2iMXYJLIwMnH84vUUzIxS2WnVEqhNpflU9OqDv//uDV3zWnGG9rssiLL1Djb9YcfLqN1z8BIMhg51P8X5kaqyvwI4oM=
+	t=1712058196; cv=none; b=CJC9H1adWXjWmw5rkyxmH/C72/lLY3uGh+PVm1m6hfHNm5uyyxunB3jb4QofOT2m7hBrj/7Jua7pmG1s4YCOEj+6xdOWQVcANSelLU04rCq7TnGnlMjtSPi9U+pjdOZJeU3ZzA7Iz02euuF5/FsuI64dwp3FAtXzStkdJQcJLko=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711039775; c=relaxed/simple;
-	bh=DNdeAKw7uELy4zMBalpWTXvLgNXIKhXj6p88O9pPK+A=;
-	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
-	 MIME-Version:Content-Type; b=G+ZQR8S1YLjILy2vDfYmV5aBjqL4e3gk78gn5ZXX8stIHPHF4eVmIdD0mj+DIF2Kfn6ccfseChId6+EzPJSqq5yESUKqqtE70sKLa/NKkyGCGcehDAIGk3YmCJj8aT3lPinNf3LR2JcmqoLGW4VRIMGeFbjpqg0zOxtKGm38fJk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linutronix.de; spf=pass smtp.mailfrom=linutronix.de; dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b=vIULKn7g; dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b=yQGTe0bF; arc=none smtp.client-ip=193.142.43.55
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linutronix.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linutronix.de
+	s=arc-20240116; t=1712058196; c=relaxed/simple;
+	bh=wfh9sdADz/bkMRKMGA3whYn+hr88GJ3D+Zq/YxNJhsk=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=Pyufxuymcf3wU+agYEV78iXxwOBD8WsObFb+pe7oMGMJocaf6g5knoJEcJUn8E7UAy1iEit+i1zQmcUdNAc4bfISLN8hJh/Xe9tB/vYY79bmBVyQmBUGm6K8cN2ipIKX8qsr903fIoe4FFhmHK8mbm/WmGgumeUWXkvt8jCA8UE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=hKXZCc0t; arc=none smtp.client-ip=209.85.208.169
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="vIULKn7g";
-	dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="yQGTe0bF"
-From: Thomas Gleixner <tglx@linutronix.de>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linutronix.de;
-	s=2020; t=1711039770;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=pRTKoYKpDL9uP3VmcYe9zAlkKfXwqveFCpdlfcoPKqY=;
-	b=vIULKn7gGYUlHYUr5NGRuXsOBuv2sYqRHn1ixq/RV7f1SFRJlb8IBLu4m5KosJ3fG+k8xM
-	B9ZXsnqQnFOj859bZUXT8IrxRxNlIrvl/Nj/RJAkkb0FA/3L3l/JiZ+XeWQi43t5wkz8/Y
-	VrzJSvH5LahtIpx2ygq5wnY3Uo+JCN+lO3seergnxOdlS2fQLdNEylFSJW+WJaxqyiIudQ
-	3pX1esf5oJuLmUpSdVqiezb0Y0ep3islMEBlGY2CTCgVer8QNXO/FqaZd+9da8EBsGvZFp
-	4VGbkU/3f+9gwvrbFyuCa++KTn+yKxa5Vdth24ZIs1AtdXU07vN/isGsuyH2kQ==
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=linutronix.de;
-	s=2020e; t=1711039770;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=pRTKoYKpDL9uP3VmcYe9zAlkKfXwqveFCpdlfcoPKqY=;
-	b=yQGTe0bFW9Vrf8XcmSDjcK4H4swmy/xSLqKu7PgW82bS5G5ATik3xigt0icjawEUzYWKwk
-	jwVAAQZdJ/N6IUCg==
-To: Guenter Roeck <linux@roeck-us.net>
-Cc: LKML <linux-kernel@vger.kernel.org>, x86@kernel.org, Linus Torvalds
- <torvalds@linuxfoundation.org>, Uros Bizjak <ubizjak@gmail.com>,
- linux-sparse@vger.kernel.org, lkp@intel.com, oe-kbuild-all@lists.linux.dev
-Subject: Re: [patch 5/9] x86: Cure per CPU madness on UP
-In-Reply-To: <86796005-f1d9-4c8c-80d8-f1f88ca220ba@roeck-us.net>
-References: <20240303235029.555787150@linutronix.de>
- <20240304005104.622511517@linutronix.de>
- <e20d88d0-5fb9-4307-be67-88b04ae9a188@roeck-us.net> <87bk79i8km.ffs@tglx>
- <d51ec9a1-5221-4005-9980-8258df8b5102@roeck-us.net> <87r0g3hm5o.ffs@tglx>
- <86796005-f1d9-4c8c-80d8-f1f88ca220ba@roeck-us.net>
-Date: Thu, 21 Mar 2024 17:49:30 +0100
-Message-ID: <87il1fh6n9.ffs@tglx>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="hKXZCc0t"
+Received: by mail-lj1-f169.google.com with SMTP id 38308e7fff4ca-2d80baf621eso31992451fa.1;
+        Tue, 02 Apr 2024 04:43:14 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1712058193; x=1712662993; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=wfh9sdADz/bkMRKMGA3whYn+hr88GJ3D+Zq/YxNJhsk=;
+        b=hKXZCc0tQNtMYBw2U6B3BDHsI8YoIv8aGK4TYW+2P6AarNaWssprfB5FMggn+6XhCQ
+         5H6cOxVZTy3th16LG/vH9y3My61ol1xt2o4UCEiyr+luHOxGvgAINst33VkGIXn6CuCc
+         rLbWThQGTWqFpYM68SSLvOKC4ZT7RSAX/jLitd7Thin0NLLuKA2BNhnejme7on4W//6b
+         JhrbtZf56L48ygv5cTZ8t4AX6iBLGeP2Ky+lhDIoSMnoasoTCwkvm+4JKWkdF/xE9Zdu
+         t1SqVT2jBRbemPFh9+ZF4l2II8TMaIP8zJUZX1AfdDulVl1gpO8GqSZM5JJ6b+dP9Vb5
+         qc1g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1712058193; x=1712662993;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=wfh9sdADz/bkMRKMGA3whYn+hr88GJ3D+Zq/YxNJhsk=;
+        b=kHGMUcclIqxaf6A+DSW3MrG6/LrVOPApiAP6noOJpZhuOnh462lt/uvzBRa7h2XV+L
+         3dkOSGE9st1wPKa6ORFaG2JmCu46QwJR+vcl2uitrSRjuUsLvPDQs2p0cC21jctUJlHH
+         ZDCngLR8/z3r1ZaUN+dLzVvoHR1z/81ZFT7mJ07DqWEsyPyPgrMUR0F3FaiuQVcHztur
+         Cp1UwGKI63cRY0aDiMkIF7aqvu9Dwkq0mo+B4ljea16Dd4PVp5C3gxMV7C+QDfidy4H7
+         tj1juUBy7BPL7zvDTTqmVdimdvphqqu+kXZd5kyv7d7BLdgxkO5V5wEk04+mYaOPr5rX
+         VXaQ==
+X-Forwarded-Encrypted: i=1; AJvYcCVxtNDeKGZU7K06TzZl8/WzV5gBWDi/AeBLA6UC76BvxIQ1AJAaZ3NvYXJkSnp07EpxhRFXCLDjC53cWpwdLxlJd7ivgbBx/TrpuvoykZvlxzCMvW3YcCGUVv9O41XuuhISNyJiWkFB5jgJ
+X-Gm-Message-State: AOJu0YyGh+KbTJ0aCBGUZgtZKWYx3ryalIgf6HUzTpBjbuIyX9+DlTWs
+	Eq+SvOv2sLf5BwYv0gyBU0SoQDN1J6D10IohzgUTs4ol0ie1aUYr6vk12NVEtRNdAM5Jb5k7NKP
+	JeFFuYoNxEEzVTOPjP0zsBgqyX+c=
+X-Google-Smtp-Source: AGHT+IHMiuP3xigqbDcdZMSkqQncGuzQsCB3N3dWLYh/ZbqrYdtCqXXL5aPE//+dkVXzg2TC0TA5QtrXngsIwZkdIH8=
+X-Received: by 2002:a2e:7a13:0:b0:2d4:2958:6daf with SMTP id
+ v19-20020a2e7a13000000b002d429586dafmr7478985ljc.20.1712058192551; Tue, 02
+ Apr 2024 04:43:12 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain
+References: <202403020457.RCJoQ3ts-lkp@intel.com> <87edctwr6y.ffs@tglx>
+ <87a5nhwpus.ffs@tglx> <87y1b0vp8m.ffs@tglx> <87sf18vdsq.ffs@tglx>
+ <87le70uwf0.ffs@tglx> <CAHk-=wiWhfdc4Sw2VBq_2nL2NDxmZS32xG4P7mBVwABGqUoJnw@mail.gmail.com>
+ <87edcruvja.ffs@tglx> <CAFULd4bVEUBEidTLbHNzRaJbSjXm99yC8LT=jdzFWb7xnuFH7g@mail.gmail.com>
+ <87bk7vuldh.ffs@tglx> <CAFULd4arHT+_fy9_oUNpmsvyfVPGaeB_pdeuqVS3UTpP5R757A@mail.gmail.com>
+ <CAFULd4b0HN6eUJsOW6po8Hf16T3eMhjdKUvw-TS8yncNn-+Vyw@mail.gmail.com>
+ <87bk7ux4e9.ffs@tglx> <CAFULd4aEe2KU=UXEt2=GeLQq2uTSFvydBiwAdSa7B6T61Am=5w@mail.gmail.com>
+ <878r2ywk3k.ffs@tglx>
+In-Reply-To: <878r2ywk3k.ffs@tglx>
+From: Uros Bizjak <ubizjak@gmail.com>
+Date: Tue, 2 Apr 2024 13:43:00 +0200
+Message-ID: <CAFULd4YG21NdF_qNVBGDtXO6xnaYFeRPvKicB=gpgUUqYE=4jw@mail.gmail.com>
+Subject: Re: arch/x86/include/asm/processor.h:698:16: sparse: sparse:
+ incorrect type in initializer (different address spaces)
+To: Thomas Gleixner <tglx@linutronix.de>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, kernel test robot <lkp@intel.com>, 
+	oe-kbuild-all@lists.linux.dev, linux-kernel@vger.kernel.org, 
+	Arjan van de Ven <arjan@linux.intel.com>, x86@kernel.org, 
+	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, 
+	Sparse Mailing-list <linux-sparse@vger.kernel.org>, "Paul E. McKenney" <paulmck@kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Thu, Mar 21 2024 at 07:06, Guenter Roeck wrote:
-> On 3/21/24 04:14, Thomas Gleixner wrote:
->> If so can you please provide a full dmesg and then apply the patch below
->> and provide the resulting full dmesg too?
+On Mon, Mar 4, 2024 at 8:07=E2=80=AFAM Thomas Gleixner <tglx@linutronix.de>=
+ wrote:
 >
-> You'll find everything at http://server.roeck-us.net/qemu/x86-nosmp/
-
-Thanks for providing this.
-
-> The crash is gone after applying your patch. The difference is:
+> On Mon, Mar 04 2024 at 06:42, Uros Bizjak wrote:
 >
-> +       /*
-> +        * If there was no APIC registered, then the map check below would
-> +        * fail. With no APIC this is guaranteed to be an UP system and
-> +        * therefore all topology levels have only one entry and their
-> +        * logical ID is obviously 0.
-> +        */
-> +       if (topo_info.boot_cpu_apic_id == BAD_APICID) {
-> +               pr_info("#### topo_info.boot_cpu_apic_id == BAD_APICID\n");
->                  ^^^^ I added this
-> +               return 0;
-> +       }
-> +
+> > On Mon, Mar 4, 2024 at 12:49=E2=80=AFAM Thomas Gleixner <tglx@linutroni=
+x.de> wrote:
+> >>
+> >> On Sun, Mar 03 2024 at 21:24, Uros Bizjak wrote:
+> >> > On Sun, Mar 3, 2024 at 9:21=E2=80=AFPM Uros Bizjak <ubizjak@gmail.co=
+m> wrote:
+> >> >> On Sun, Mar 3, 2024 at 9:10=E2=80=AFPM Thomas Gleixner <tglx@linutr=
+onix.de> wrote:
+> >> >> > That's so sad because it would provide us compiler based __percpu
+> >> >> > validation.
+> >> >>
+> >> >> Unfortunately, the c compiler can't strip qualifiers, so typeof() i=
+s
+> >> >> of limited use also when const and volatile qualifiers are used.
+> >> >> Perhaps some extension could be introduced to c standard to provide=
+ an
+> >> >> unqualified type, e.g. typeof_unqual().
+> >> >
+> >> > Oh, there is one in C23 [1].
+> >>
+> >> Yes. I found it right after ranting.
+> >>
+> >> gcc >=3D 14 and clang >=3D 16 have support for it of course only when =
+adding
+> >> -std=3Dc2x to the command line.
+> >>
+> >> Sigh. The name space qualifiers are non standard and then the thing
+> >> which makes them more useful is hidden behind a standard.
+> >
+> > With GCC, you can use __typeof_unqual__ (please note underscores)
+> > without -std=3Dc2x [1]:
+> >
+> > "... Alternate spelling __typeof_unqual__ is available in all C modes
+> > and provides non-atomic unqualified version of what __typeof__
+> > operator returns..."
+> >
+> > Please also see the example in my last post. It can be compiled without=
+ -std=3D...
 >
-> I see the "#### topo_info.boot_cpu_apic_id == BAD_APICID" message
-> twice in the log. See patched.log at the page pointed to above.
+> With gcc >=3D 14. Not so with clang...
 
-I can see why this is emitted. That happens on the initial CPUID
-evaluation of the boot CPU very early during boot.
+Please note that clang-17.0.6 currently fails to compile kernel with
+named address spaces [1]. So perhaps kernel can use __typeof_unqual__
+(available without -std=3Dc2x) in the hope that clang implements
+__typeof_unqual__ in one of its next releases, following the examples
+of GCC [2] and MSVC[3].
 
-[    0.000000] Command line: console=ttyS0
-[    0.000000] CPU topo: APIC logical ID: 0 0 6
-[    0.000000] CPU topo: #### topo_info.boot_cpu_apic_id == BAD_APICID
-[    0.000000] CPU topo: APIC logical ID: 0 0 4
-[    0.000000] CPU topo: #### topo_info.boot_cpu_apic_id == BAD_APICID
+[1] https://lore.kernel.org/lkml/20240320173758.GA3017166@dev-arch.thelio-3=
+990X/
+[2] https://gcc.gnu.org/onlinedocs/gcc/Typeof.html
+[3] https://learn.microsoft.com/en-us/cpp/c-language/typeof-unqual-c?view=
+=3Dmsvc-170
 
-The later full CPUID evaluation happens after the ACPI enumeration and
-way before the affected RAPL driver is initialized:
-
-[    0.088029] CPU topo: APIC logical ID: 0 0 6
-[    0.088084] CPU topo: APIC logical ID: 0 0 4
-
-This invocation has the boot APIC registered as your extra print does
-not show up.
-
-...
-
-[    0.585850] RAPL PMU: API unit is 2^-32 Joules, 0 fixed counters, 10737418240 ms ovfl timer
-
-So even without that guard (which we need anyway for the non APIC case)
-topology_logical_die_id() == cpu_data(cpu).topo.logical_die_id must have
-the correct value in that RAPL initialization and CPU hotplug callback
-code.
-
-But our absolutely convoluted startup logic prevents that because:
-
-    identify_cpu_early()      operates on boot_cpu_data
-    smp_prepare_boot_cpu()    copies boot_cpu_data to per CPU cpu data
-    identify_boot_cpu()       operates on boot_cpu_data
-
-identify_boot_cpu() is the one which gets the correct logical die info,
-but that never gets copied over to the per CPU data instance on which
-the RAPL code and everything else works on.
-
-I'll cook up a patch later.
-
-Thanks for providing the info!
-
-       tglx
-
+Uros.
