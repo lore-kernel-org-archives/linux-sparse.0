@@ -1,120 +1,142 @@
-Received: from mail-qt1-f170.google.com (mail-qt1-f170.google.com [209.85.160.170])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D85C254744;
-	Wed,  3 Apr 2024 07:15:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.170
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 424221DFD6;
+	Wed,  3 Apr 2024 17:57:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1712128502; cv=none; b=ii7seJsx23ocy9CVdj7iKqLz/VIrJCCWr6K4ukLqzJZnVsPBactruUDJdrl1CMz7gADJNtjd1/EVCGZ3Cqxd6M+ZbdNk6eV6OzvHu3FiDNutFD/hnHxv3CRdo0BzwbOFrcBO+fEAB/MZY0zhCpALqCR9vh+/Pai1mlYVVC4y2a8=
+	t=1712167046; cv=none; b=UE24PMMsTN6kWzCDeoiSl2SB4eJE+pgjlOSTQehEUwdY9yNOZAsLLMfhq2bIkL811whDWtdDpfjpq+rSInMb2hiwBUJoQhK8yA8z3qMumbE8oCRjUrxNDjBArBTbWWqvHyu3GPNWMObuvBQZIZBGqsr92/9xcJK2FjH/AnjBv+I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1712128502; c=relaxed/simple;
-	bh=eZE1WUPObM6XWEfXi56fAhtr6YphZUwOjMKiQg1rT28=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=GOy0eAJgkQ4q8UpMfC13gEj001GsVU8PgC/VI5CU72nEnIiCj4oTOs4ysG8mkYwJlMCmJpTEzKwr8cvg+YELm/cxSBr0HTmfL8RON5o1QWit4PJIZ45Dqa6ISQ/T8RABXGTMbo6ksw1UTYOE1BmirrzXSHNJXKR9rgcaHh2wVHs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=hB6P/Cqu; arc=none smtp.client-ip=209.85.160.170
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1712167046; c=relaxed/simple;
+	bh=d+ZUMUm1KAc8rkyq6ddYBLNSuuaZzHkrsJHewdp8CGc=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=YClaAySQJpoP1jcxva1w3EXgG/Lnfr/oIZxo3nC/FfRpbad9fDTsgN1Jyynd210RCh9TlUEhj5NPa7AZbVYf/2WDHMcUHLI/hONw1+pedrd3bnqaz8vlS/dDGfoh6EqwjoL4ceiUdEEvniCbdRhY7Ts5xbxsA3Y8X/3HByZ9Knw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Ybs71K4C; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="hB6P/Cqu"
-Received: by mail-qt1-f170.google.com with SMTP id d75a77b69052e-430b7b22b17so37627531cf.2;
-        Wed, 03 Apr 2024 00:15:00 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1712128499; x=1712733299; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=eZE1WUPObM6XWEfXi56fAhtr6YphZUwOjMKiQg1rT28=;
-        b=hB6P/CquWNi/TK2xZ+et35ftWJgMjjRho+IILv1njB3Yr03KyghHGW2SIEoZWDJHX/
-         n9Ec2oVB8ih/hGOJDUYCJy3st/sx8w3oN3Zbs9z/0A2ofrTcnxCbaQkD9+2FyTT2RD+E
-         iFQDMk2k6/w0A5qdQ95YvIUASlvZpZDQ4+TGYAxv8J7rAYUY+EHxOQU5Z/Ha1vnJY0vP
-         Vm5d7d96uZOCorx2dG+Zrs2BoaK2ifuXRns7eqNQqvIPaahShe1trhbhKfTBv/1d+Kv7
-         BdlyWlUDLoQmUQ5RnLT2kfXeWUdbOyJ32/tH0rgdP1ja8BEhRDBfkFclWLlGaERmGN1R
-         gyww==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1712128499; x=1712733299;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=eZE1WUPObM6XWEfXi56fAhtr6YphZUwOjMKiQg1rT28=;
-        b=E2ThMqm4jW8ks2bBrbM/rEqcV2HVvkf2AKwfzmDoAPlVeKrGgfNtXQ8nTh+Eq8ud+T
-         BZMGG9fBiQ/XwikA62xSz68e2J8T+XTLUidBsE0Tp8VeJCozTmDLRntxcsH0a69DUQ4d
-         YsH9L10wZ2KGd027x6tGJW8lpjKq7Kal6fRJ85e5xN5Y/ckRXS2nhR5bVrj9IZPqAKcn
-         Q+N0T7jUp6oK1/1TCYBVaTvLp63EELq4njS2KmEtSZIyMbQya5G8fP9jkea1UVuH6CMY
-         25Q9kbBYaOEZs0Q/qR1Jma4Hfbx+nwXM3W7MP0lb7TQ88p0bUO1VMsZe/8nlyLBJhNo5
-         qk8A==
-X-Forwarded-Encrypted: i=1; AJvYcCWbQccPNl+mHD0HugBeXXddmuugqbyflfNCicqYuFD8b4jXGvvQnCNV8fjWfddJsYJSSzDg3L9WO+iCMi+/1Mlmi+bGF/XD3JyVJxV6kP/jdTraGPYdXdZcmr3uS6gP1QciYuorOo0HZOBo
-X-Gm-Message-State: AOJu0YygUSrI/UL70rbyggzYvp45FMdBPp6bnnoFCFGXLRoMvAciCm7Q
-	5boljRcjVE7/OJwSUA1uMksfNl1l6kjnxBc/Te0PDwGb38je2LjZZ7Mi6XNShK/HSyhlf9VKYcK
-	EsP1XR+8ZAHe7fGu4+S2vBa7oIi8=
-X-Google-Smtp-Source: AGHT+IHyKNZwWr3vJFxmQHM+hwOlCqtBzmYisGR8eSHQwTIUZCsyuedimo1clXd+K+pFzqShHBl24vI+Dd+SmaEA0pI=
-X-Received: by 2002:a05:622a:50b:b0:431:2a50:e15 with SMTP id
- l11-20020a05622a050b00b004312a500e15mr17564848qtx.39.1712128499583; Wed, 03
- Apr 2024 00:14:59 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Ybs71K4C"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1EF24C433F1;
+	Wed,  3 Apr 2024 17:57:25 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1712167045;
+	bh=d+ZUMUm1KAc8rkyq6ddYBLNSuuaZzHkrsJHewdp8CGc=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=Ybs71K4CaHKCzezTzi0rrbC9vZx7neRUWRqt0aX2rOcjTwvDoefIzHsDVku6laGq7
+	 uMP5K+CXvfXbI5o1I/ywjXvdPXxOWxkisQwEODDMRC1ggUb76Nf5ZnlZ5dYrNaNwAr
+	 H8rBZRb9iAdZGfr1wTRJ8Kw39dNDmcDLFW2juM1zHafyo4Nx3KuQ3ldxH4piv0Cd8w
+	 VU5iHl0yU8wHyQJg2aR4g/w2IKiOwhTK+EDAwgvUt6gjsAPEvZ3YjYVtqp65oAbz9Y
+	 Irsm/lDhIrVYlVVk8QBeI65oL0h5mgEYc7s4WrdLVZN1q12s/YPasYkhGEinwr/fCq
+	 fwxyPPYmRu75w==
+Date: Wed, 3 Apr 2024 10:57:23 -0700
+From: Nathan Chancellor <nathan@kernel.org>
+To: Uros Bizjak <ubizjak@gmail.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>,
+	Linus Torvalds <torvalds@linux-foundation.org>,
+	kernel test robot <lkp@intel.com>, oe-kbuild-all@lists.linux.dev,
+	linux-kernel@vger.kernel.org,
+	Arjan van de Ven <arjan@linux.intel.com>, x86@kernel.org,
+	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
+	Sparse Mailing-list <linux-sparse@vger.kernel.org>,
+	"Paul E. McKenney" <paulmck@kernel.org>, llvm@lists.linux.dev
+Subject: Re: arch/x86/include/asm/processor.h:698:16: sparse: sparse:
+ incorrect type in initializer (different address spaces)
+Message-ID: <20240403175723.GA2667607@dev-arch.thelio-3990X>
+References: <CAHk-=wiWhfdc4Sw2VBq_2nL2NDxmZS32xG4P7mBVwABGqUoJnw@mail.gmail.com>
+ <87edcruvja.ffs@tglx>
+ <CAFULd4bVEUBEidTLbHNzRaJbSjXm99yC8LT=jdzFWb7xnuFH7g@mail.gmail.com>
+ <87bk7vuldh.ffs@tglx>
+ <CAFULd4arHT+_fy9_oUNpmsvyfVPGaeB_pdeuqVS3UTpP5R757A@mail.gmail.com>
+ <CAFULd4b0HN6eUJsOW6po8Hf16T3eMhjdKUvw-TS8yncNn-+Vyw@mail.gmail.com>
+ <87bk7ux4e9.ffs@tglx>
+ <CAFULd4aEe2KU=UXEt2=GeLQq2uTSFvydBiwAdSa7B6T61Am=5w@mail.gmail.com>
+ <878r2ywk3k.ffs@tglx>
+ <CAFULd4YG21NdF_qNVBGDtXO6xnaYFeRPvKicB=gpgUUqYE=4jw@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <CAFGhKbzev7W4aHwhFPWwMZQEHenVgZUj7=aunFieVqZg3mt14A@mail.gmail.com>
- <CAFULd4a75kS=3cJzYKsOcJ3ULjW8k5M1cvPYZQ25zZqTo3QX9Q@mail.gmail.com>
- <CAFGhKbx3dzrMC0euRMNe5=sAhM87v=6gLwOT+c9HwWKZrWc5Gg@mail.gmail.com>
- <CAFULd4ZNi7eONVu8syiWyA5ek2TgHTf6jTM+Pf7SaSG6WyHoNw@mail.gmail.com>
- <CAFGhKbwqrr=_bOnKW+wqtX2OyW0xpS_9wkJnHpwxmwx7MHGhfg@mail.gmail.com>
- <CAFGhKbzdWLw7fmRTLYPhEycWZvfjE-OCvnWct2A_kWVe94-p-A@mail.gmail.com> <CAFULd4ahxmEiJ37hLXUg3RwZMW9GnkN=38ZuirSq_cu3VHMU0g@mail.gmail.com>
-In-Reply-To: <CAFULd4ahxmEiJ37hLXUg3RwZMW9GnkN=38ZuirSq_cu3VHMU0g@mail.gmail.com>
-From: Charlemagne Lasse <charlemagnelasse@gmail.com>
-Date: Wed, 3 Apr 2024 09:14:48 +0200
-Message-ID: <CAFGhKbzJ-icVy-YmPVSNd4O4AA-4QGiaYZWM+2T=xq5_-MB4MA@mail.gmail.com>
-Subject: Re: warning: cast removes address space '__percpu' of expression
-To: Uros Bizjak <ubizjak@gmail.com>, linux-sparse@vger.kernel.org
-Cc: x86@kernel.org, LKML <linux-kernel@vger.kernel.org>, 
-	Luc Van Oostenryck <lucvoo@kernel.org>, Andy Lutomirski <luto@kernel.org>, Ingo Molnar <mingo@kernel.org>, 
-	Brian Gerst <brgerst@gmail.com>, Denys Vlasenko <dvlasenk@redhat.com>, 
-	"H . Peter Anvin" <hpa@zytor.com>, Peter Zijlstra <peterz@infradead.org>, 
-	Thomas Gleixner <tglx@linutronix.de>, Borislav Petkov <bp@alien8.de>, Josh Poimboeuf <jpoimboe@redhat.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAFULd4YG21NdF_qNVBGDtXO6xnaYFeRPvKicB=gpgUUqYE=4jw@mail.gmail.com>
 
-Am Di., 2. Apr. 2024 um 22:40 Uhr schrieb Uros Bizjak <ubizjak@gmail.com>:
-[snip]
-> > ```
-> > git reset --hard ed2f752e0e0a21d941ca0ee539ef3d4cd576bc5e
-> > git cherry-pick 3a1d3829e193c091475ceab481c5f8deab385023
-> > patch -p1 -i ~/p.diff.txt
-> > git clean -dfx
-> > make allnoconfig -j$(nproc)
-> > make kvm_guest.config
-> > echo CONFIG_MODULES=y >> .config
-> > echo CONFIG_NET_9P_VIRTIO=m >> .config
-> > make olddefconfig
-> > make prepare -j$(nproc)
-> > touch net/9p/trans_virtio.c
-> > make C=1 M=net/9p/ trans_virtio.o CHECK="sparse -Wconstexpr-not-const"
-> > ```
+On Tue, Apr 02, 2024 at 01:43:00PM +0200, Uros Bizjak wrote:
+> On Mon, Mar 4, 2024 at 8:07 AM Thomas Gleixner <tglx@linutronix.de> wrote:
 > >
-> > This now shows the warning:
+> > On Mon, Mar 04 2024 at 06:42, Uros Bizjak wrote:
 > >
-> > ```
-> > net/9p/trans_virtio.c:831:1: warning: non-constant initializer for static object
-> > net/9p/trans_virtio.c:832:1: warning: non-constant initializer for static object
-> > ```
-[snip]
-> It's this part:
->
-> diff --git a/include/linux/compiler.h b/include/linux/compiler.h
-> index d7779a18b24fc3..bf9815eaf4aabf 100644
-> --- a/include/linux/compiler.h
-> +++ b/include/linux/compiler.h
-> @@ -212,7 +212,7 @@ void ftrace_likely_update(struct
-> ftrace_likely_data *f, int val,
-> */
-> #define ___ADDRESSABLE(sym, __attrs) \
-> static void * __used __attrs \
-> - __UNIQUE_ID(__PASTE(__addressable_,sym)) = (void *)&sym;
-> + __UNIQUE_ID(__PASTE(__addressable_,sym)) = (void *)(uintptr_t)&sym;
-> #define __ADDRESSABLE(sym) \
-> ___ADDRESSABLE(sym, __section(".discard.addressable"))
->
-> But ... how is this not const?
+> > > On Mon, Mar 4, 2024 at 12:49 AM Thomas Gleixner <tglx@linutronix.de> wrote:
+> > >>
+> > >> On Sun, Mar 03 2024 at 21:24, Uros Bizjak wrote:
+> > >> > On Sun, Mar 3, 2024 at 9:21 PM Uros Bizjak <ubizjak@gmail.com> wrote:
+> > >> >> On Sun, Mar 3, 2024 at 9:10 PM Thomas Gleixner <tglx@linutronix.de> wrote:
+> > >> >> > That's so sad because it would provide us compiler based __percpu
+> > >> >> > validation.
+> > >> >>
+> > >> >> Unfortunately, the c compiler can't strip qualifiers, so typeof() is
+> > >> >> of limited use also when const and volatile qualifiers are used.
+> > >> >> Perhaps some extension could be introduced to c standard to provide an
+> > >> >> unqualified type, e.g. typeof_unqual().
+> > >> >
+> > >> > Oh, there is one in C23 [1].
+> > >>
+> > >> Yes. I found it right after ranting.
+> > >>
+> > >> gcc >= 14 and clang >= 16 have support for it of course only when adding
+> > >> -std=c2x to the command line.
+> > >>
+> > >> Sigh. The name space qualifiers are non standard and then the thing
+> > >> which makes them more useful is hidden behind a standard.
+> > >
+> > > With GCC, you can use __typeof_unqual__ (please note underscores)
+> > > without -std=c2x [1]:
+> > >
+> > > "... Alternate spelling __typeof_unqual__ is available in all C modes
+> > > and provides non-atomic unqualified version of what __typeof__
+> > > operator returns..."
+> > >
+> > > Please also see the example in my last post. It can be compiled without -std=...
+> >
+> > With gcc >= 14. Not so with clang...
+> 
+> Please note that clang-17.0.6 currently fails to compile kernel with
+> named address spaces [1]. So perhaps kernel can use __typeof_unqual__
+> (available without -std=c2x) in the hope that clang implements
+> __typeof_unqual__ in one of its next releases, following the examples
+> of GCC [2] and MSVC[3].
 
-@Luc Van Oostenryck Do you have any idea how to correctly implement it
-to make sparse happy?
+This is now supported in clang 19.0.0 (main):
+
+https://github.com/llvm/llvm-project/commit/cc308f60d41744b5920ec2e2e5b25e1273c8704b
+
+I have inquired about applying this to the 18.x series, such that it
+would either make 18.1.3 or 18.1.4, but that is still open for
+discussion.
+
+I think the error that I mentioned at [1] is resolved with using
+__typeof_unqual__, I tested this diff, which is likely incorrect but
+allows me to continue testing without that warning/error due to -Werror:
+
+diff --git a/arch/x86/include/asm/percpu.h b/arch/x86/include/asm/percpu.h
+index 20696df5d567..fc77c99d2e80 100644
+--- a/arch/x86/include/asm/percpu.h
++++ b/arch/x86/include/asm/percpu.h
+@@ -95,7 +95,7 @@
+ 
+ #endif /* CONFIG_SMP */
+ 
+-#define __my_cpu_type(var)	typeof(var) __percpu_seg_override
++#define __my_cpu_type(var)	__typeof_unqual__(var) __percpu_seg_override
+ #define __my_cpu_ptr(ptr)	(__my_cpu_type(*ptr)*)(__force uintptr_t)(ptr)
+ #define __my_cpu_var(var)	(*__my_cpu_ptr(&(var)))
+ #define __percpu_arg(x)		__percpu_prefix "%" #x
+
+However, I get a crash in LLVM's backend with that diff applied on top
+of commit 034dd140a6d8 ("Merge branch into tip/master: 'x86/shstk'"),
+which appears to be another tangential issue. I've filed
+https://github.com/ClangBuiltLinux/linux/issues/2013 so that we don't
+lose track of this.
+
+Cheers,
+Nathan
