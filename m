@@ -1,140 +1,120 @@
-Received: from mail-lj1-f169.google.com (mail-lj1-f169.google.com [209.85.208.169])
+Received: from mail-qt1-f170.google.com (mail-qt1-f170.google.com [209.85.160.170])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B10412032C;
-	Tue,  2 Apr 2024 11:43:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.169
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D85C254744;
+	Wed,  3 Apr 2024 07:15:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.170
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1712058196; cv=none; b=CJC9H1adWXjWmw5rkyxmH/C72/lLY3uGh+PVm1m6hfHNm5uyyxunB3jb4QofOT2m7hBrj/7Jua7pmG1s4YCOEj+6xdOWQVcANSelLU04rCq7TnGnlMjtSPi9U+pjdOZJeU3ZzA7Iz02euuF5/FsuI64dwp3FAtXzStkdJQcJLko=
+	t=1712128502; cv=none; b=ii7seJsx23ocy9CVdj7iKqLz/VIrJCCWr6K4ukLqzJZnVsPBactruUDJdrl1CMz7gADJNtjd1/EVCGZ3Cqxd6M+ZbdNk6eV6OzvHu3FiDNutFD/hnHxv3CRdo0BzwbOFrcBO+fEAB/MZY0zhCpALqCR9vh+/Pai1mlYVVC4y2a8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1712058196; c=relaxed/simple;
-	bh=wfh9sdADz/bkMRKMGA3whYn+hr88GJ3D+Zq/YxNJhsk=;
+	s=arc-20240116; t=1712128502; c=relaxed/simple;
+	bh=eZE1WUPObM6XWEfXi56fAhtr6YphZUwOjMKiQg1rT28=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Pyufxuymcf3wU+agYEV78iXxwOBD8WsObFb+pe7oMGMJocaf6g5knoJEcJUn8E7UAy1iEit+i1zQmcUdNAc4bfISLN8hJh/Xe9tB/vYY79bmBVyQmBUGm6K8cN2ipIKX8qsr903fIoe4FFhmHK8mbm/WmGgumeUWXkvt8jCA8UE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=hKXZCc0t; arc=none smtp.client-ip=209.85.208.169
+	 To:Cc:Content-Type; b=GOy0eAJgkQ4q8UpMfC13gEj001GsVU8PgC/VI5CU72nEnIiCj4oTOs4ysG8mkYwJlMCmJpTEzKwr8cvg+YELm/cxSBr0HTmfL8RON5o1QWit4PJIZ45Dqa6ISQ/T8RABXGTMbo6ksw1UTYOE1BmirrzXSHNJXKR9rgcaHh2wVHs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=hB6P/Cqu; arc=none smtp.client-ip=209.85.160.170
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="hKXZCc0t"
-Received: by mail-lj1-f169.google.com with SMTP id 38308e7fff4ca-2d80baf621eso31992451fa.1;
-        Tue, 02 Apr 2024 04:43:14 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="hB6P/Cqu"
+Received: by mail-qt1-f170.google.com with SMTP id d75a77b69052e-430b7b22b17so37627531cf.2;
+        Wed, 03 Apr 2024 00:15:00 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1712058193; x=1712662993; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=wfh9sdADz/bkMRKMGA3whYn+hr88GJ3D+Zq/YxNJhsk=;
-        b=hKXZCc0tQNtMYBw2U6B3BDHsI8YoIv8aGK4TYW+2P6AarNaWssprfB5FMggn+6XhCQ
-         5H6cOxVZTy3th16LG/vH9y3My61ol1xt2o4UCEiyr+luHOxGvgAINst33VkGIXn6CuCc
-         rLbWThQGTWqFpYM68SSLvOKC4ZT7RSAX/jLitd7Thin0NLLuKA2BNhnejme7on4W//6b
-         JhrbtZf56L48ygv5cTZ8t4AX6iBLGeP2Ky+lhDIoSMnoasoTCwkvm+4JKWkdF/xE9Zdu
-         t1SqVT2jBRbemPFh9+ZF4l2II8TMaIP8zJUZX1AfdDulVl1gpO8GqSZM5JJ6b+dP9Vb5
-         qc1g==
+        d=gmail.com; s=20230601; t=1712128499; x=1712733299; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=eZE1WUPObM6XWEfXi56fAhtr6YphZUwOjMKiQg1rT28=;
+        b=hB6P/CquWNi/TK2xZ+et35ftWJgMjjRho+IILv1njB3Yr03KyghHGW2SIEoZWDJHX/
+         n9Ec2oVB8ih/hGOJDUYCJy3st/sx8w3oN3Zbs9z/0A2ofrTcnxCbaQkD9+2FyTT2RD+E
+         iFQDMk2k6/w0A5qdQ95YvIUASlvZpZDQ4+TGYAxv8J7rAYUY+EHxOQU5Z/Ha1vnJY0vP
+         Vm5d7d96uZOCorx2dG+Zrs2BoaK2ifuXRns7eqNQqvIPaahShe1trhbhKfTBv/1d+Kv7
+         BdlyWlUDLoQmUQ5RnLT2kfXeWUdbOyJ32/tH0rgdP1ja8BEhRDBfkFclWLlGaERmGN1R
+         gyww==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1712058193; x=1712662993;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=wfh9sdADz/bkMRKMGA3whYn+hr88GJ3D+Zq/YxNJhsk=;
-        b=kHGMUcclIqxaf6A+DSW3MrG6/LrVOPApiAP6noOJpZhuOnh462lt/uvzBRa7h2XV+L
-         3dkOSGE9st1wPKa6ORFaG2JmCu46QwJR+vcl2uitrSRjuUsLvPDQs2p0cC21jctUJlHH
-         ZDCngLR8/z3r1ZaUN+dLzVvoHR1z/81ZFT7mJ07DqWEsyPyPgrMUR0F3FaiuQVcHztur
-         Cp1UwGKI63cRY0aDiMkIF7aqvu9Dwkq0mo+B4ljea16Dd4PVp5C3gxMV7C+QDfidy4H7
-         tj1juUBy7BPL7zvDTTqmVdimdvphqqu+kXZd5kyv7d7BLdgxkO5V5wEk04+mYaOPr5rX
-         VXaQ==
-X-Forwarded-Encrypted: i=1; AJvYcCVxtNDeKGZU7K06TzZl8/WzV5gBWDi/AeBLA6UC76BvxIQ1AJAaZ3NvYXJkSnp07EpxhRFXCLDjC53cWpwdLxlJd7ivgbBx/TrpuvoykZvlxzCMvW3YcCGUVv9O41XuuhISNyJiWkFB5jgJ
-X-Gm-Message-State: AOJu0YyGh+KbTJ0aCBGUZgtZKWYx3ryalIgf6HUzTpBjbuIyX9+DlTWs
-	Eq+SvOv2sLf5BwYv0gyBU0SoQDN1J6D10IohzgUTs4ol0ie1aUYr6vk12NVEtRNdAM5Jb5k7NKP
-	JeFFuYoNxEEzVTOPjP0zsBgqyX+c=
-X-Google-Smtp-Source: AGHT+IHMiuP3xigqbDcdZMSkqQncGuzQsCB3N3dWLYh/ZbqrYdtCqXXL5aPE//+dkVXzg2TC0TA5QtrXngsIwZkdIH8=
-X-Received: by 2002:a2e:7a13:0:b0:2d4:2958:6daf with SMTP id
- v19-20020a2e7a13000000b002d429586dafmr7478985ljc.20.1712058192551; Tue, 02
- Apr 2024 04:43:12 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1712128499; x=1712733299;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=eZE1WUPObM6XWEfXi56fAhtr6YphZUwOjMKiQg1rT28=;
+        b=E2ThMqm4jW8ks2bBrbM/rEqcV2HVvkf2AKwfzmDoAPlVeKrGgfNtXQ8nTh+Eq8ud+T
+         BZMGG9fBiQ/XwikA62xSz68e2J8T+XTLUidBsE0Tp8VeJCozTmDLRntxcsH0a69DUQ4d
+         YsH9L10wZ2KGd027x6tGJW8lpjKq7Kal6fRJ85e5xN5Y/ckRXS2nhR5bVrj9IZPqAKcn
+         Q+N0T7jUp6oK1/1TCYBVaTvLp63EELq4njS2KmEtSZIyMbQya5G8fP9jkea1UVuH6CMY
+         25Q9kbBYaOEZs0Q/qR1Jma4Hfbx+nwXM3W7MP0lb7TQ88p0bUO1VMsZe/8nlyLBJhNo5
+         qk8A==
+X-Forwarded-Encrypted: i=1; AJvYcCWbQccPNl+mHD0HugBeXXddmuugqbyflfNCicqYuFD8b4jXGvvQnCNV8fjWfddJsYJSSzDg3L9WO+iCMi+/1Mlmi+bGF/XD3JyVJxV6kP/jdTraGPYdXdZcmr3uS6gP1QciYuorOo0HZOBo
+X-Gm-Message-State: AOJu0YygUSrI/UL70rbyggzYvp45FMdBPp6bnnoFCFGXLRoMvAciCm7Q
+	5boljRcjVE7/OJwSUA1uMksfNl1l6kjnxBc/Te0PDwGb38je2LjZZ7Mi6XNShK/HSyhlf9VKYcK
+	EsP1XR+8ZAHe7fGu4+S2vBa7oIi8=
+X-Google-Smtp-Source: AGHT+IHyKNZwWr3vJFxmQHM+hwOlCqtBzmYisGR8eSHQwTIUZCsyuedimo1clXd+K+pFzqShHBl24vI+Dd+SmaEA0pI=
+X-Received: by 2002:a05:622a:50b:b0:431:2a50:e15 with SMTP id
+ l11-20020a05622a050b00b004312a500e15mr17564848qtx.39.1712128499583; Wed, 03
+ Apr 2024 00:14:59 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <202403020457.RCJoQ3ts-lkp@intel.com> <87edctwr6y.ffs@tglx>
- <87a5nhwpus.ffs@tglx> <87y1b0vp8m.ffs@tglx> <87sf18vdsq.ffs@tglx>
- <87le70uwf0.ffs@tglx> <CAHk-=wiWhfdc4Sw2VBq_2nL2NDxmZS32xG4P7mBVwABGqUoJnw@mail.gmail.com>
- <87edcruvja.ffs@tglx> <CAFULd4bVEUBEidTLbHNzRaJbSjXm99yC8LT=jdzFWb7xnuFH7g@mail.gmail.com>
- <87bk7vuldh.ffs@tglx> <CAFULd4arHT+_fy9_oUNpmsvyfVPGaeB_pdeuqVS3UTpP5R757A@mail.gmail.com>
- <CAFULd4b0HN6eUJsOW6po8Hf16T3eMhjdKUvw-TS8yncNn-+Vyw@mail.gmail.com>
- <87bk7ux4e9.ffs@tglx> <CAFULd4aEe2KU=UXEt2=GeLQq2uTSFvydBiwAdSa7B6T61Am=5w@mail.gmail.com>
- <878r2ywk3k.ffs@tglx>
-In-Reply-To: <878r2ywk3k.ffs@tglx>
-From: Uros Bizjak <ubizjak@gmail.com>
-Date: Tue, 2 Apr 2024 13:43:00 +0200
-Message-ID: <CAFULd4YG21NdF_qNVBGDtXO6xnaYFeRPvKicB=gpgUUqYE=4jw@mail.gmail.com>
-Subject: Re: arch/x86/include/asm/processor.h:698:16: sparse: sparse:
- incorrect type in initializer (different address spaces)
-To: Thomas Gleixner <tglx@linutronix.de>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, kernel test robot <lkp@intel.com>, 
-	oe-kbuild-all@lists.linux.dev, linux-kernel@vger.kernel.org, 
-	Arjan van de Ven <arjan@linux.intel.com>, x86@kernel.org, 
-	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, 
-	Sparse Mailing-list <linux-sparse@vger.kernel.org>, "Paul E. McKenney" <paulmck@kernel.org>
+References: <CAFGhKbzev7W4aHwhFPWwMZQEHenVgZUj7=aunFieVqZg3mt14A@mail.gmail.com>
+ <CAFULd4a75kS=3cJzYKsOcJ3ULjW8k5M1cvPYZQ25zZqTo3QX9Q@mail.gmail.com>
+ <CAFGhKbx3dzrMC0euRMNe5=sAhM87v=6gLwOT+c9HwWKZrWc5Gg@mail.gmail.com>
+ <CAFULd4ZNi7eONVu8syiWyA5ek2TgHTf6jTM+Pf7SaSG6WyHoNw@mail.gmail.com>
+ <CAFGhKbwqrr=_bOnKW+wqtX2OyW0xpS_9wkJnHpwxmwx7MHGhfg@mail.gmail.com>
+ <CAFGhKbzdWLw7fmRTLYPhEycWZvfjE-OCvnWct2A_kWVe94-p-A@mail.gmail.com> <CAFULd4ahxmEiJ37hLXUg3RwZMW9GnkN=38ZuirSq_cu3VHMU0g@mail.gmail.com>
+In-Reply-To: <CAFULd4ahxmEiJ37hLXUg3RwZMW9GnkN=38ZuirSq_cu3VHMU0g@mail.gmail.com>
+From: Charlemagne Lasse <charlemagnelasse@gmail.com>
+Date: Wed, 3 Apr 2024 09:14:48 +0200
+Message-ID: <CAFGhKbzJ-icVy-YmPVSNd4O4AA-4QGiaYZWM+2T=xq5_-MB4MA@mail.gmail.com>
+Subject: Re: warning: cast removes address space '__percpu' of expression
+To: Uros Bizjak <ubizjak@gmail.com>, linux-sparse@vger.kernel.org
+Cc: x86@kernel.org, LKML <linux-kernel@vger.kernel.org>, 
+	Luc Van Oostenryck <lucvoo@kernel.org>, Andy Lutomirski <luto@kernel.org>, Ingo Molnar <mingo@kernel.org>, 
+	Brian Gerst <brgerst@gmail.com>, Denys Vlasenko <dvlasenk@redhat.com>, 
+	"H . Peter Anvin" <hpa@zytor.com>, Peter Zijlstra <peterz@infradead.org>, 
+	Thomas Gleixner <tglx@linutronix.de>, Borislav Petkov <bp@alien8.de>, Josh Poimboeuf <jpoimboe@redhat.com>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Mon, Mar 4, 2024 at 8:07=E2=80=AFAM Thomas Gleixner <tglx@linutronix.de>=
- wrote:
->
-> On Mon, Mar 04 2024 at 06:42, Uros Bizjak wrote:
->
-> > On Mon, Mar 4, 2024 at 12:49=E2=80=AFAM Thomas Gleixner <tglx@linutroni=
-x.de> wrote:
-> >>
-> >> On Sun, Mar 03 2024 at 21:24, Uros Bizjak wrote:
-> >> > On Sun, Mar 3, 2024 at 9:21=E2=80=AFPM Uros Bizjak <ubizjak@gmail.co=
-m> wrote:
-> >> >> On Sun, Mar 3, 2024 at 9:10=E2=80=AFPM Thomas Gleixner <tglx@linutr=
-onix.de> wrote:
-> >> >> > That's so sad because it would provide us compiler based __percpu
-> >> >> > validation.
-> >> >>
-> >> >> Unfortunately, the c compiler can't strip qualifiers, so typeof() i=
-s
-> >> >> of limited use also when const and volatile qualifiers are used.
-> >> >> Perhaps some extension could be introduced to c standard to provide=
- an
-> >> >> unqualified type, e.g. typeof_unqual().
-> >> >
-> >> > Oh, there is one in C23 [1].
-> >>
-> >> Yes. I found it right after ranting.
-> >>
-> >> gcc >=3D 14 and clang >=3D 16 have support for it of course only when =
-adding
-> >> -std=3Dc2x to the command line.
-> >>
-> >> Sigh. The name space qualifiers are non standard and then the thing
-> >> which makes them more useful is hidden behind a standard.
+Am Di., 2. Apr. 2024 um 22:40 Uhr schrieb Uros Bizjak <ubizjak@gmail.com>:
+[snip]
+> > ```
+> > git reset --hard ed2f752e0e0a21d941ca0ee539ef3d4cd576bc5e
+> > git cherry-pick 3a1d3829e193c091475ceab481c5f8deab385023
+> > patch -p1 -i ~/p.diff.txt
+> > git clean -dfx
+> > make allnoconfig -j$(nproc)
+> > make kvm_guest.config
+> > echo CONFIG_MODULES=y >> .config
+> > echo CONFIG_NET_9P_VIRTIO=m >> .config
+> > make olddefconfig
+> > make prepare -j$(nproc)
+> > touch net/9p/trans_virtio.c
+> > make C=1 M=net/9p/ trans_virtio.o CHECK="sparse -Wconstexpr-not-const"
+> > ```
 > >
-> > With GCC, you can use __typeof_unqual__ (please note underscores)
-> > without -std=3Dc2x [1]:
+> > This now shows the warning:
 > >
-> > "... Alternate spelling __typeof_unqual__ is available in all C modes
-> > and provides non-atomic unqualified version of what __typeof__
-> > operator returns..."
-> >
-> > Please also see the example in my last post. It can be compiled without=
- -std=3D...
+> > ```
+> > net/9p/trans_virtio.c:831:1: warning: non-constant initializer for static object
+> > net/9p/trans_virtio.c:832:1: warning: non-constant initializer for static object
+> > ```
+[snip]
+> It's this part:
 >
-> With gcc >=3D 14. Not so with clang...
+> diff --git a/include/linux/compiler.h b/include/linux/compiler.h
+> index d7779a18b24fc3..bf9815eaf4aabf 100644
+> --- a/include/linux/compiler.h
+> +++ b/include/linux/compiler.h
+> @@ -212,7 +212,7 @@ void ftrace_likely_update(struct
+> ftrace_likely_data *f, int val,
+> */
+> #define ___ADDRESSABLE(sym, __attrs) \
+> static void * __used __attrs \
+> - __UNIQUE_ID(__PASTE(__addressable_,sym)) = (void *)&sym;
+> + __UNIQUE_ID(__PASTE(__addressable_,sym)) = (void *)(uintptr_t)&sym;
+> #define __ADDRESSABLE(sym) \
+> ___ADDRESSABLE(sym, __section(".discard.addressable"))
+>
+> But ... how is this not const?
 
-Please note that clang-17.0.6 currently fails to compile kernel with
-named address spaces [1]. So perhaps kernel can use __typeof_unqual__
-(available without -std=3Dc2x) in the hope that clang implements
-__typeof_unqual__ in one of its next releases, following the examples
-of GCC [2] and MSVC[3].
-
-[1] https://lore.kernel.org/lkml/20240320173758.GA3017166@dev-arch.thelio-3=
-990X/
-[2] https://gcc.gnu.org/onlinedocs/gcc/Typeof.html
-[3] https://learn.microsoft.com/en-us/cpp/c-language/typeof-unqual-c?view=
-=3Dmsvc-170
-
-Uros.
+@Luc Van Oostenryck Do you have any idea how to correctly implement it
+to make sparse happy?
