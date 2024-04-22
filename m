@@ -1,92 +1,126 @@
-Received: from mail-ed1-f45.google.com (mail-ed1-f45.google.com [209.85.208.45])
+Received: from mail-qt1-f178.google.com (mail-qt1-f178.google.com [209.85.160.178])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7797713BC15
-	for <linux-sparse@vger.kernel.org>; Tue,  9 Apr 2024 15:47:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.45
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 005BE4F213;
+	Mon, 22 Apr 2024 07:22:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.178
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1712677632; cv=none; b=syo2B+flvWUU+4UeAERSLelmNHgD85bripRtbNqzwphMKAr+UNkzgzoRvngTHoqFjp4VDVjs8TW3j79Bpx7C7qbgNjBm2U8fLYQujYomMH+DqxSCEiPxG4Yu+vFokq+jq9cMWerMLW3aLujroGGt5LdenlaRxRGPZ2t2v6s8ASg=
+	t=1713770573; cv=none; b=OfZJl3E6Liu14eLeQ+3uiAbMrMhYZOpqhPAXWBs4XEM9/aRlgP10xHEaz/e5IcwsdGYyi9Q2U94h9+/Xl++EDkHPNKXXrEHPYA2Fn09iJsdZOIbHklbhP5jEccYo6ZCxw2H+2G6+K7Q0c+DUz5NOxzTn0uE6Cudv6f67k6SieWM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1712677632; c=relaxed/simple;
-	bh=kjJfIRkcWjD4d/a8pBP5UFxEbKD7w/PFPgvdNrBqNOQ=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=M/SFUxGfHEPBpVSghCAGwQxbkDUYh2m7VH/eUpcU9AwOtoUN10HE9BvvRFWhjvl5APOkCH6j5HRSBYLOWxzG8ih77EBj1exGkSl0rwepxMecKh4RVKvyAJZx69gvYIUUUbnulUWr3o16yrLiZZqxcaxRtv2+ZAIutrCCGv8a9Tg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toblux.com; spf=none smtp.mailfrom=toblux.com; dkim=pass (2048-bit key) header.d=toblux-com.20230601.gappssmtp.com header.i=@toblux-com.20230601.gappssmtp.com header.b=vJJQ40nB; arc=none smtp.client-ip=209.85.208.45
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toblux.com
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=toblux.com
+	s=arc-20240116; t=1713770573; c=relaxed/simple;
+	bh=jhzuF9QA/7POdNqr5VvYVdizlPwxZzZbm6rVCf02xj8=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=taDVppRy5r+tGazVMcLkJwCgutEQ9pft7uFyqse5sBnf0R1HpYdz77ErUMtE4YzQ5O2RrJFx/dGQ3EddQoJUQ0gzgN8uf58jM8FXCCtiPDjgpW5CSXBmN9KqEMYpFxPn7iPfwrVkRnj2P+LiggNQDTRC4FnPE+yF1zgqDcexS6s=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=G5DZ/D1H; arc=none smtp.client-ip=209.85.160.178
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=toblux-com.20230601.gappssmtp.com header.i=@toblux-com.20230601.gappssmtp.com header.b="vJJQ40nB"
-Received: by mail-ed1-f45.google.com with SMTP id 4fb4d7f45d1cf-55a179f5fa1so6597804a12.0
-        for <linux-sparse@vger.kernel.org>; Tue, 09 Apr 2024 08:47:09 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="G5DZ/D1H"
+Received: by mail-qt1-f178.google.com with SMTP id d75a77b69052e-439656c1b4fso13375151cf.1;
+        Mon, 22 Apr 2024 00:22:51 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toblux-com.20230601.gappssmtp.com; s=20230601; t=1712677628; x=1713282428; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=4203k0MNU0Fkt9KNemdvsHXqtx/8jnD0MSO6/g9ASP8=;
-        b=vJJQ40nBwXSM0563d+h2sICVkvf/ZKTykmtMukj+6+8ODli98r4bJsqLEepr+KTz03
-         8yFRtGUr7XcWMC2IaWBrJCEWtFjKmv9lT0uVUpGjSgjx4hzwn1EFkckTe1g+8sqGRrJr
-         5wsSpVGeXN1vjVTTmbckq0NogU3d3aFpMiwAQP1a+cPMOWUtct1Az9GdrmTNbU593PXI
-         sD8ICxCPmyDD2p0cIvfO6r4ShtztwH3k30kMGVSkvvJiIiFsEcdfEhrYkoQCF1b144Qt
-         ujROY6/ugZWyo7tvvdf1RmWIkV7JfQkDOd4d/a/2Zve2yQDaBb4R0y9+zbVJ4lWTCxOC
-         xI2w==
+        d=gmail.com; s=20230601; t=1713770571; x=1714375371; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=jhzuF9QA/7POdNqr5VvYVdizlPwxZzZbm6rVCf02xj8=;
+        b=G5DZ/D1HiahtnUnPqjM+XHuaqBWXxzoti7RHpF6/7ysA1i0OyyNxM7Pvi7SkjfsZIZ
+         hKupamAzi4EbwYIe7D/uJplphKh68Sm5Wv0xPNTSn0sRBH3FGxSmHp88bfl+U1dEWUXw
+         Nou/fDvRr6h26tFNDkYoXthKopgf8HhXhfjLLaWWzrWQP72HY7FdRb5owwwqu5zyyBnJ
+         +5Sabk9IMP64MVMU/Xn3YoM/lgOLQ6SGYNDI+/gO/i+sQ4LPzpGJmrJs7y/SMwIjnQC9
+         HS0UgctlTK4xZT6BWlgJRjsdr1R5+jXhhQA3+JEIhh6zpLQ7dyT7aTC5k3tOpug6+uHC
+         IFtA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1712677628; x=1713282428;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+        d=1e100.net; s=20230601; t=1713770571; x=1714375371;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=4203k0MNU0Fkt9KNemdvsHXqtx/8jnD0MSO6/g9ASP8=;
-        b=kBxPKeVPesGSdV9H1yduSx+yrOTaQ+zg7PJwujgo9blJ+S0/P6XHG/QTQh6sLoUXIy
-         PiYiuzI9mstRf/me5Awon3E+57YCN7fPv57t7+dKj23ItLBfG+Gv5IkzCdVRSeDSawhP
-         4Lcm9R73Cn8cuq2y2qtOxRYR3hSEfdg6Ctj10KIHSHnSsa2tZuAGNln+kVSQmdoo3liq
-         4Wj8RX+Yt2GAs8gitiDTC7G2NDmsgomSPW2emLvaeyU/QuYQErH6zQ2toePbnZoj9VdO
-         ORUmQ+RaLMmNV8RATeKd31WB7wsCX226vXmo48Rm40vapxX+00QMl9VfDJuKvrnR4EGE
-         IM2g==
-X-Gm-Message-State: AOJu0Yw8bKsqx395lFavUnhyiYMZm06H3pnfqBXgEt8Ro3mcshhIqGwF
-	ZSPsXgLVvsRfdiBMa/VWudwrVM96gziUmkOcpKGL21gh/2TyF6H/OvWV2pPVAVUEtEk85J6XJNK
-	y
-X-Google-Smtp-Source: AGHT+IEl+n0rpgPm8cfDPldPrbHhnQWaxn0ZzPLoB5/WAvh5CKYozK0O5M/N9gg8TNXebyyMOttA3g==
-X-Received: by 2002:a50:c056:0:b0:565:6c72:40a9 with SMTP id u22-20020a50c056000000b005656c7240a9mr9158168edd.28.1712677627742;
-        Tue, 09 Apr 2024 08:47:07 -0700 (PDT)
-Received: from fedora.fritz.box (aftr-82-135-80-212.dynamic.mnet-online.de. [82.135.80.212])
-        by smtp.gmail.com with ESMTPSA id 12-20020a0564021f4c00b0056e62c8e3bcsm2415595edz.54.2024.04.09.08.47.06
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 09 Apr 2024 08:47:07 -0700 (PDT)
-From: Thorsten Blum <thorsten.blum@toblux.com>
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: linux-sparse@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Thorsten Blum <thorsten.blum@toblux.com>
-Subject: [PATCH] compiler.h: Add missing quote in macro comment
-Date: Tue,  9 Apr 2024 17:46:23 +0200
-Message-ID: <20240409154622.292163-2-thorsten.blum@toblux.com>
-X-Mailer: git-send-email 2.44.0
+        bh=jhzuF9QA/7POdNqr5VvYVdizlPwxZzZbm6rVCf02xj8=;
+        b=l22AYsmtxhk7xJDRsEO8Yt0izTtZ919or9sHm5G5YC9YTq7cFZg0b5FtHPSCoVXDAC
+         UVCLPW5xcOV2IqBzjcNIFuCPOnhvU4goSa43zgJqcwH4fgzLGJcgjiVfS6wEO9hNcWby
+         I/Jtrw3fktufK0ADzs9I8GBmS+uPUNc5SVWEQNkM/CZIAjSRdXGeJjcM5LFWwTRrIjcZ
+         lifu6XuW3YkoJQPlh3a+C8CoMmh+r6izQtMh2dzaSqeYd2qe+awl+zGrUJxc/r6+mcGF
+         GUbpHOSgD27C7ko69piPiFCeP7s+cZvp+HFFu/n0E6zbarOoIBt75V4ddK94dvPhdwl4
+         jCaA==
+X-Forwarded-Encrypted: i=1; AJvYcCVlWTUROYPPdnlh0v1NxW4NA9nQNXXrlFz5cAdHw+q5I4bMaCmHRDSjpku+FM3gG78ptJ6Fvw3EWhb+0VCiIqUjpOPL1WWGILDgDzyjhQnA7MPez4OR/2GfhIdGvfFPdHmD3SqmeHklnGDV
+X-Gm-Message-State: AOJu0Yx2Lf3vezkQ2laYnDNN1W7P+5ZCflxNzRl4zWUJz576H2kMlKRQ
+	tcERYzhxSaIqlxdW/APke9haBcosb96v3SG2bzpyxiz4nfdltImlc/SOsj6A78HswweCUvbhiSQ
+	u3uPV5RuH3ncZdDNAr8lxYccuHQVL8t5b
+X-Google-Smtp-Source: AGHT+IE5Os4sthxTtZBmRXVrUAXCWOk8CxEjvCuf0zQcLW7KWRYNpoC0BqYmBPpmgQUu7RbyvgckzngUXtVU4Jz78u4=
+X-Received: by 2002:a05:622a:1346:b0:439:88ea:6e7f with SMTP id
+ w6-20020a05622a134600b0043988ea6e7fmr5196724qtk.2.1713770570838; Mon, 22 Apr
+ 2024 00:22:50 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <CAFGhKbzev7W4aHwhFPWwMZQEHenVgZUj7=aunFieVqZg3mt14A@mail.gmail.com>
+ <CAFULd4a75kS=3cJzYKsOcJ3ULjW8k5M1cvPYZQ25zZqTo3QX9Q@mail.gmail.com>
+ <CAFGhKbx3dzrMC0euRMNe5=sAhM87v=6gLwOT+c9HwWKZrWc5Gg@mail.gmail.com>
+ <CAFULd4ZNi7eONVu8syiWyA5ek2TgHTf6jTM+Pf7SaSG6WyHoNw@mail.gmail.com>
+ <CAFGhKbwqrr=_bOnKW+wqtX2OyW0xpS_9wkJnHpwxmwx7MHGhfg@mail.gmail.com>
+ <CAFGhKbzdWLw7fmRTLYPhEycWZvfjE-OCvnWct2A_kWVe94-p-A@mail.gmail.com>
+ <CAFULd4ahxmEiJ37hLXUg3RwZMW9GnkN=38ZuirSq_cu3VHMU0g@mail.gmail.com> <CAFGhKbzJ-icVy-YmPVSNd4O4AA-4QGiaYZWM+2T=xq5_-MB4MA@mail.gmail.com>
+In-Reply-To: <CAFGhKbzJ-icVy-YmPVSNd4O4AA-4QGiaYZWM+2T=xq5_-MB4MA@mail.gmail.com>
+From: Charlemagne Lasse <charlemagnelasse@gmail.com>
+Date: Mon, 22 Apr 2024 09:22:39 +0200
+Message-ID: <CAFGhKbwXOpR4GaQF11BA2viCTa6Zbcmd=fF+2yxvPiROmF+yVw@mail.gmail.com>
+Subject: Re: warning: cast removes address space '__percpu' of expression
+To: Uros Bizjak <ubizjak@gmail.com>, linux-sparse@vger.kernel.org
+Cc: x86@kernel.org, LKML <linux-kernel@vger.kernel.org>, 
+	Luc Van Oostenryck <lucvoo@kernel.org>, Andy Lutomirski <luto@kernel.org>, Ingo Molnar <mingo@kernel.org>, 
+	Brian Gerst <brgerst@gmail.com>, Denys Vlasenko <dvlasenk@redhat.com>, 
+	"H . Peter Anvin" <hpa@zytor.com>, Peter Zijlstra <peterz@infradead.org>, 
+	Thomas Gleixner <tglx@linutronix.de>, Borislav Petkov <bp@alien8.de>, Josh Poimboeuf <jpoimboe@redhat.com>
+Content-Type: text/plain; charset="UTF-8"
 
-Add a missing doublequote in the __is_constexpr() macro comment.
+Am Mi., 3. Apr. 2024 um 09:14 Uhr schrieb Charlemagne Lasse
+<charlemagnelasse@gmail.com>:
+>
+> Am Di., 2. Apr. 2024 um 22:40 Uhr schrieb Uros Bizjak <ubizjak@gmail.com>:
+> [snip]
+> > > ```
+> > > git reset --hard ed2f752e0e0a21d941ca0ee539ef3d4cd576bc5e
+> > > git cherry-pick 3a1d3829e193c091475ceab481c5f8deab385023
+> > > patch -p1 -i ~/p.diff.txt
+> > > git clean -dfx
+> > > make allnoconfig -j$(nproc)
+> > > make kvm_guest.config
+> > > echo CONFIG_MODULES=y >> .config
+> > > echo CONFIG_NET_9P_VIRTIO=m >> .config
+> > > make olddefconfig
+> > > make prepare -j$(nproc)
+> > > touch net/9p/trans_virtio.c
+> > > make C=1 M=net/9p/ trans_virtio.o CHECK="sparse -Wconstexpr-not-const"
+> > > ```
+> > >
+> > > This now shows the warning:
+> > >
+> > > ```
+> > > net/9p/trans_virtio.c:831:1: warning: non-constant initializer for static object
+> > > net/9p/trans_virtio.c:832:1: warning: non-constant initializer for static object
+> > > ```
+> [snip]
+> > It's this part:
+> >
+> > diff --git a/include/linux/compiler.h b/include/linux/compiler.h
+> > index d7779a18b24fc3..bf9815eaf4aabf 100644
+> > --- a/include/linux/compiler.h
+> > +++ b/include/linux/compiler.h
+> > @@ -212,7 +212,7 @@ void ftrace_likely_update(struct
+> > ftrace_likely_data *f, int val,
+> > */
+> > #define ___ADDRESSABLE(sym, __attrs) \
+> > static void * __used __attrs \
+> > - __UNIQUE_ID(__PASTE(__addressable_,sym)) = (void *)&sym;
+> > + __UNIQUE_ID(__PASTE(__addressable_,sym)) = (void *)(uintptr_t)&sym;
+> > #define __ADDRESSABLE(sym) \
+> > ___ADDRESSABLE(sym, __section(".discard.addressable"))
+> >
+> > But ... how is this not const?
+>
+> @Luc Van Oostenryck Do you have any idea how to correctly implement it
+> to make sparse happy?
 
-Signed-off-by: Thorsten Blum <thorsten.blum@toblux.com>
----
- include/linux/compiler.h | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/include/linux/compiler.h b/include/linux/compiler.h
-index c00cc6c0878a..8c252e073bd8 100644
---- a/include/linux/compiler.h
-+++ b/include/linux/compiler.h
-@@ -268,7 +268,7 @@ static inline void *offset_to_ptr(const int *off)
-  *   - When one operand is a null pointer constant (i.e. when x is an integer
-  *     constant expression) and the other is an object pointer (i.e. our
-  *     third operand), the conditional operator returns the type of the
-- *     object pointer operand (i.e. "int *). Here, within the sizeof(), we
-+ *     object pointer operand (i.e. "int *"). Here, within the sizeof(), we
-  *     would then get:
-  *       sizeof(*((int *)(...))  == sizeof(int)  == 4
-  *   - When one operand is a void pointer (i.e. when x is not an integer
--- 
-2.44.0
-
+ping?
