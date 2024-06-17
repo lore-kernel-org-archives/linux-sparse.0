@@ -1,90 +1,146 @@
-Received: from mail-wr1-f51.google.com (mail-wr1-f51.google.com [209.85.221.51])
+Received: from mail-wr1-f47.google.com (mail-wr1-f47.google.com [209.85.221.47])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 58BD3199EB6
-	for <linux-sparse@vger.kernel.org>; Fri, 14 Jun 2024 13:28:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.51
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 01BF08836;
+	Mon, 17 Jun 2024 12:31:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.47
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718371740; cv=none; b=J9MDbNumnFafzeLNtGzbZk4K1BujHYumPOhIJqt65bJ4zDQv7LgR4d35uhvfNF0GX2jy2FKtEvGwO1Z7srYHGQ/nwUBS/1Mq/qwinHGUcLgRUCgq6jWwErpWCRXBbjweUQIZRsJPVgcuaa/J2KGdnN1d85LjjrEvSq5zaE73sBk=
+	t=1718627501; cv=none; b=mauFb5h8NoNbct9amxbLU+e1430lfRJo45BPuYtbvoY0313pnQZCHoYUukGCIL4yixxf0ygf8XOVh96rSMmB6/wgJP7lM5MDoBV9Qe4HD1ak79DM1GqnZyYrq6vFG/FItaZSzuOcL4cTwgA9lScHHdm0KNgEPnBQrXssnUAzsc0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718371740; c=relaxed/simple;
-	bh=VgPLVV+rWJY1/4ggiTDotX1RclssqWGF4A2bfPcMHMc=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=sDuy+cXLdoZ47GwwZ/P3mAxoXds5HL5SGP0G8K4NzwLo+ESxSpt9ToPWOp/Vy80+KVwJdNEC6R1sACtZzUuH17pmXMf62+bnJIh16v5QJDn8eFtVT0gomQSx63BoMX4/AgmNkD1LHK+OXLTA+CMibIJpiq78K1HZ2X6GquCYLLY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=ZLI6ivKo; arc=none smtp.client-ip=209.85.221.51
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1718627501; c=relaxed/simple;
+	bh=6U6NvOSkC8C59/JMyqKN4L4RgtHGHT7QgPMlgHn0nzM=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=GdHU5mPJ39BoLQOyR+GsHtEzBzudF+gJj7GaFzm+eT+mkyJbkpW2gQNHMzWVnj1Pad2MDS2mbHBWmf39INrDLEFiaEmQu1oV2IvsvwfcwjryEFAwkWUVsG9ewABOOj/5o98/LY8+RVnyFlwxf8uTU4iW/+n1guwADf4DdfL2d4o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=iu7xjcs7; arc=none smtp.client-ip=209.85.221.47
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ZLI6ivKo"
-Received: by mail-wr1-f51.google.com with SMTP id ffacd0b85a97d-35f2d723ef0so1988665f8f.1
-        for <linux-sparse@vger.kernel.org>; Fri, 14 Jun 2024 06:28:58 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="iu7xjcs7"
+Received: by mail-wr1-f47.google.com with SMTP id ffacd0b85a97d-35f275c7286so3860441f8f.2;
+        Mon, 17 Jun 2024 05:31:38 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1718371736; x=1718976536; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=NEMNF56withKPeocU2VwLEQo/3Awb8CaeGLcfj7+MKs=;
-        b=ZLI6ivKoKHra9a9X4xtjaHDu9tFByLn4lVDs5jIF/3pedJD2Sq1E+XBse2DQxg/7k7
-         Qdo+yqOKZcDSuetzX5zdBKStBNFn3MEBrKtsQvE8d7Vw2cVT5+iLUQIq5tXzKmTBFWBJ
-         UGpQLAP/0AaZzb7OyTfcsxpmvzp1DehrWsFedR1cyrGhtaoSHnvgYLa54bNWf4xIEMZh
-         c2RtMO1RlfipPqFJjl9abpvCg9xSEoupi/oZSl8yK6+ZtU9PqrScN7ta7icGaVd119Va
-         ACRTX/5B/5tcX6gpxoWxzMrOCjhxFsX/EzzKFsZujnS1yhIH8d7+KR6eAqYIQdT2yuOM
-         XhIw==
+        d=gmail.com; s=20230601; t=1718627497; x=1719232297; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=xUt11Ucr8oA7ZjPMc4FTL3rN5QlM3txPngNirdWjMlg=;
+        b=iu7xjcs74jcc1fKgv42n+MwNlaw9k/vQ0oaHwNudHVzDdCjUeWoMymG6CWl9rtJyXX
+         EtpnQdkYn6jTyv6JA2AYzr4nQ1OcYOBNDTTsTBrl3FV2KIpo6vuLaA6RxqCpoBQtd+lU
+         w5Gvw9rrRPY4+Cz7H1vnjUkiATc0uQ2aNmvugqVFjg2E5umOtFoY3LBmrFeh2oZUcIIs
+         FGNIdPM1/sDWsvH4u3FqLl5QBXgNtuMrB4at1vqLQSE35MJbAGU1jJTn4pq68QA7ImU/
+         mPID1CPgRhjYMVoNIe8zeMOoG/Z3Xz8QoLVuKRjFHs3N9Orsmw6WKJiNEBxoL9WxTXBG
+         vULw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1718371736; x=1718976536;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=NEMNF56withKPeocU2VwLEQo/3Awb8CaeGLcfj7+MKs=;
-        b=hjqWpxMQPOJQ6GDaAfRUAYOJlFT7R+rmIZjagzjvS+ppNQAyc+nKobob9mKc+wSZfa
-         SdLy5JnElz6LGCUDzs465mnwT72Yrt1WPkswM+6JbwA3hDLu+uXiNYRuSEDtmYp7s7Kt
-         tp+XqAPFqbGMIg6Fw1pXgYisUeKL40HCTdhHG42YELPgFufp81O1IYIPGWLtX00A3s2O
-         n6UljG7CZwWl7LTCSCwY3JYpLqXv4o0Zir3uQOoCbX2yLAG/uF5RONusSytTmBfO7DEs
-         QK5d2l2MyBC9uNhP4CjIstj8jScF3rKpAHzVGi4bgAnvfuPsXF5gJ4il5qMkZAETusoL
-         jP7Q==
-X-Forwarded-Encrypted: i=1; AJvYcCVjuAdnYrIuoDEU3g8HbCF/fYC8LijHU8XaZE7Wa+N2vWCE66EcdtPpUDBTXcDg3iePp7ZDBYPthRXQshS8HmH++/TFD4zlRqKkgWQ+
-X-Gm-Message-State: AOJu0Yzd32wg1UKIRGMD38FoOwrPrjhTTPjJA53sTE/6WPmNX8Ie4cmO
-	CoY59mcj6ADDDgQrNQMMRXvSHppZUyF09qaci/WXSQMkQUvV3yNJdTylM4+XulA=
-X-Google-Smtp-Source: AGHT+IEFBwl3wR8gDYlbOGuM7VvKD2Eb/JCNcdEsfhZrpHBLeC7TmMrK/7vrQHX7qtx+2sHMnhu6bw==
-X-Received: by 2002:a5d:51c8:0:b0:35f:a0c:7cf2 with SMTP id ffacd0b85a97d-3607a77fa42mr1958155f8f.51.1718371736404;
-        Fri, 14 Jun 2024 06:28:56 -0700 (PDT)
-Received: from localhost ([102.222.70.76])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-360750f2271sm4403695f8f.85.2024.06.14.06.28.55
+        d=1e100.net; s=20230601; t=1718627497; x=1719232297;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=xUt11Ucr8oA7ZjPMc4FTL3rN5QlM3txPngNirdWjMlg=;
+        b=keAOZVafczaOHiQbPxuPJ2z9uPUO3R+RqOltOvWrQkzLrZFGQ/GnjYVzhW3/mczrBQ
+         EQccHCMakMhdWpy2emPyXcHl3GY6EL6P39QaJZpu3WhSGcBDnresjHoT8Cbs3RlEP6wX
+         G1nTywxBEot2DvaWlhEtu9ilrjDnHDwJ3pMYeBIUC7vJ10I27sHyZfVO+Rq98l2VNK+o
+         PciscOeoCe0CAXpCei1+0v2jOObaCCAMiziWveDX0fnxllYhBB2pgsNeDnnvLEvkz6No
+         HO2WgnW+SuaVnkkKp6ANKl5QHqnkAxCTVtjUoKc/OJzf/5KSVWwHDA1HNG7xzwpGPB5r
+         RTKw==
+X-Forwarded-Encrypted: i=1; AJvYcCUMMTLhAM5Fu7NPzoJtB9YStToYE9fZ9wpLpTlThq44KVszjsH7fzjOcB6yqTjGbcWu6dTJRlW1thDO2qtuMpQWMWm/xp/Kkqd7b5XJ7d8evRtl/IRnBPOyXb6eAgJy569dEhqY5bVd/QHj
+X-Gm-Message-State: AOJu0YxmfgmW5u3MuTwtGZccA9nKTGOfSPCuAymNoJZvkHWPsPFhWi/D
+	lMjObYYsvpJalIf5jRqBS8TgseAA0PmlrTZZ19OnyW8AE/eSW9QY6jgLyQ==
+X-Google-Smtp-Source: AGHT+IG+Gyzd9jk0zBnxIbSHolF/P9F4z8vzRrnNDQaRBjpYSl+ZQ3C0xZVPvwGVSO4q+LGvLtF3Hg==
+X-Received: by 2002:adf:fc82:0:b0:360:79d4:b098 with SMTP id ffacd0b85a97d-3607a76609emr5759650f8f.29.1718627496944;
+        Mon, 17 Jun 2024 05:31:36 -0700 (PDT)
+Received: from hometw-NUC11PAHi5.locataire.student-village.local ([185.25.192.3])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-36075093531sm11753879f8f.15.2024.06.17.05.31.36
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 14 Jun 2024 06:28:56 -0700 (PDT)
-Date: Fri, 14 Jun 2024 16:28:52 +0300
-From: Dan Carpenter <dan.carpenter@linaro.org>
-To: j.granados@samsung.com
-Cc: smatch@vger.kernel.org, linux-sparse@vger.kernel.org
-Subject: Re: [PATCH] sentinel_ctltable: Add a check for sentinel elements in
- ctl_table arrays
-Message-ID: <b8162eb2-eeb2-44e0-9f3f-13af426a8a53@moroto.mountain>
-References: <20240614-master-v1-1-c652f5aa15fb@samsung.com>
+        Mon, 17 Jun 2024 05:31:36 -0700 (PDT)
+From: Chun-Hung Tseng <henrybear327@gmail.com>
+To: luc.vanoostenryck@gmail.com,
+	linux-sparse@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Cc: Chun-Hung Tseng <henrybear327@gmail.com>,
+	Jim Huang <jserv@ccns.ncku.edu.tw>
+Subject: [PATCH] compiler.h: Improve __branch_check__ by using __UNIQUE_ID()
+Date: Mon, 17 Jun 2024 14:29:35 +0200
+Message-Id: <20240617122934.2650453-1-henrybear327@gmail.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240614-master-v1-1-c652f5aa15fb@samsung.com>
+Content-Transfer-Encoding: 8bit
 
-On Fri, Jun 14, 2024 at 02:29:41PM +0200, Joel Granados via B4 Relay wrote:
-> From: Joel Granados <j.granados@samsung.com>
-> 
-> Added a new check named check_sentinel_ctltable that prints a warning
-> when a sentinel element is detected in a ctl_table struct array.
-> Sentinels marking the end of a ctl_table array where completely removed
-> from the linux kernel in [1]. We add this warning to avoid cases where a
-> sentinel gets added by mistake.
-> 
-> [1] https://lore.kernel.org/20240604-jag-sysctl_remset-v1-0-2df7ecdba0bd@samsung.com
-> 
-> Signed-off-by: Joel Granados <j.granados@samsung.com>
-> ---
+This commit replaced two hard-to-distinguish variables ______r and
+______f to improve code readability and reduce variable name shadowing
+issue.
 
-Applied, thanks!
+______r is renamed by leveraging __UNIQUE_ID(branch_check) in
+___branch_check__, and callers of the affected macros are adjusted.
 
-regards,
-dan carpenter
+__UNIQUE_ID(branch_check) will generate unique variable names during
+compilation, which eliminates the need for ______r. This avoids the
+variable name shadowing issue, or at least makes those wishing to cause
+shadowing problems work much harder to do so.
+
+______f in ftrace_likely_data struct is renamed using
+__UNIQUE_ID(branch_check_data), following the same rationale above.
+
+The same idea is used for the commit 589a9785ee3a ("min/max: remove sparse
+warnings when they're nested"), and commit 24ba53017e18 ("rcu: Replace
+________p1 and _________p1 with __UNIQUE_ID(rcu)").
+
+Signed-off-by: Chun-Hung Tseng <henrybear327@gmail.com>
+Signed-off-by: Jim Huang <jserv@ccns.ncku.edu.tw>
+---
+ include/linux/compiler.h | 20 ++++++++++++--------
+ 1 file changed, 12 insertions(+), 8 deletions(-)
+
+diff --git a/include/linux/compiler.h b/include/linux/compiler.h
+index 8c252e073bd8..b95e0990d52f 100644
+--- a/include/linux/compiler.h
++++ b/include/linux/compiler.h
+@@ -19,20 +19,20 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
+ #define likely_notrace(x)	__builtin_expect(!!(x), 1)
+ #define unlikely_notrace(x)	__builtin_expect(!!(x), 0)
+ 
+-#define __branch_check__(x, expect, is_constant) ({			\
+-			long ______r;					\
++#define __branch_check__(x, local, local_data, expect, is_constant) ({	\
++			long local;					\
+ 			static struct ftrace_likely_data		\
+ 				__aligned(4)				\
+ 				__section("_ftrace_annotated_branch")	\
+-				______f = {				\
++				local_data = {				\
+ 				.data.func = __func__,			\
+ 				.data.file = __FILE__,			\
+ 				.data.line = __LINE__,			\
+ 			};						\
+-			______r = __builtin_expect(!!(x), expect);	\
+-			ftrace_likely_update(&______f, ______r,		\
++			local = __builtin_expect(!!(x), expect);	\
++			ftrace_likely_update(&local_data, local,	\
+ 					     expect, is_constant);	\
+-			______r;					\
++			local;						\
+ 		})
+ 
+ /*
+@@ -41,10 +41,14 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
+  * written by Daniel Walker.
+  */
+ # ifndef likely
+-#  define likely(x)	(__branch_check__(x, 1, __builtin_constant_p(x)))
++#  define likely(x)	(__branch_check__(x, __UNIQUE_ID(branch_check), \
++			__UNIQUE_ID(branch_check_data), 1,		\
++			__builtin_constant_p(x)))
+ # endif
+ # ifndef unlikely
+-#  define unlikely(x)	(__branch_check__(x, 0, __builtin_constant_p(x)))
++#  define unlikely(x)	(__branch_check__(x, __UNIQUE_ID(branch_check), \
++			__UNIQUE_ID(branch_check_data), 0,		\
++			__builtin_constant_p(x)))
+ # endif
+ 
+ #ifdef CONFIG_PROFILE_ALL_BRANCHES
+-- 
+2.34.1
 
