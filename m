@@ -1,81 +1,108 @@
-Received: from mail-lj1-f172.google.com (mail-lj1-f172.google.com [209.85.208.172])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5AA164436A
-	for <linux-sparse@vger.kernel.org>; Tue, 13 Aug 2024 06:33:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.172
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4A3538488;
+	Fri, 23 Aug 2024 00:04:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1723530841; cv=none; b=qadgY/VeXxacBSHpONS3/H2otTYyrs5Tm/V4NZq98luWFua5rZ0N3osawXKCP0lJIkYTkYxANvGYkbcUp6C36L83xGxDpgpXLhMmE3pe1LcDYWadJN6AoUQVUP+wd5JI0dJMy6OgIiq3DDcTeHcNWFbiIKewAxGDqpbijJbp8R8=
+	t=1724371449; cv=none; b=G4cb+PyUkpFZ1nB8kzp/OkTU1YhWiS9CK8eUw+HUJUqp3yr1A04byuYitq0XKNGzvQ4KHALVXuvNfeMbqZNTMENnnNdmU1dwtAaSU7nb5RvCRke7sdjmpfN9V+uSJmJofrghd93FENiPi6uOTjYa/UsXOMPe4DQ67zw7uMBV7pY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1723530841; c=relaxed/simple;
-	bh=lq9zdQwq9QYoXi3kNAzMmIxc74ryyJ2h1pSyE5ATEtw=;
-	h=MIME-Version:From:Date:Message-ID:Subject:To:Content-Type; b=Fz6mC9SfdJvvigSns8i6LyVqBkWWJsfehZSDnNGO/WoHoseCTV6UFoeHMDt/+mwhXfAAazXfCz1NmFF2ITo3GhsjADMuM6MB18H0Ntx8rtLhcwnDvdaLJYCmBzncFSvVJq9v0hb2P511EMgLRF+a4Ehwkh+u3CR3THoKCBENIOo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=IQGlgmi1; arc=none smtp.client-ip=209.85.208.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1724371449; c=relaxed/simple;
+	bh=d1RmSg+pZiyUSkvTppKDhWCAqCi7WQkLhQlgan+A8/c=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=aeNJC9xN8+JehjKT6CEJ1ZJymU9Cp/tKDkZvPs1kh1YEgt24Jl0rRWu3MqPd1u/Kfx84pJyOXkaoyIPAUERW/Xl26J0cndsDdajPNSyKSJcCSCpvBwQnTrCVRPOOppdvAAmGhddGzzPf2nZ0qjhGR+h8N9XbXVGZPxNHHsUCJCA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=mgpGbe4u; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="IQGlgmi1"
-Received: by mail-lj1-f172.google.com with SMTP id 38308e7fff4ca-2f149845d81so57389001fa.0
-        for <linux-sparse@vger.kernel.org>; Mon, 12 Aug 2024 23:33:59 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1723530837; x=1724135637; darn=vger.kernel.org;
-        h=to:subject:message-id:date:from:mime-version:from:to:cc:subject
-         :date:message-id:reply-to;
-        bh=lq9zdQwq9QYoXi3kNAzMmIxc74ryyJ2h1pSyE5ATEtw=;
-        b=IQGlgmi1Le54gX+p+W9sMcIIGpaFEq/FIfeTIe7PT0HTTTXLHKK6RDu/vMw+EyhbnP
-         0AHuQdczG/sF8LH1dn2hiG50JVJC4nY5KPDxQVkj1ryPWIOouukPWeYkudoe6ajwzk43
-         g9amRr0d0SzhYDrEKGb2vLxirHT6uYmuvlYH0zem/bATAbwpl3U9zrSz+nGEXtRA6tKA
-         it18hG8jkZ6CwqyyeJLq22kBrqJ2G0I53CMg5worvyyCMRbrFfEnSO2ZLnX5C7gxb03k
-         XBfHGcUYWyn3rkQk528xk8Dc4XEa7bJIl8++AE7tHndOGaPXrgVO6NZSZFzfJsC/eFWf
-         +whA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1723530837; x=1724135637;
-        h=to:subject:message-id:date:from:mime-version:x-gm-message-state
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=lq9zdQwq9QYoXi3kNAzMmIxc74ryyJ2h1pSyE5ATEtw=;
-        b=Ye1LaZzxRnLBuI4EQxeK6ND6gKc+ihL7QF/I5paltgSPKS9qc4kCYeTXFkzfBooao7
-         EK5sgToSC4DcC+5X90Uu1DaM4TOggvZxJBfUhF2GW9PXzs3vPt5zdEwBNzmmFysRExRF
-         TkWwp7W31CKdQZUjQ+31zslsxNfeKxV132F7a6s9nLixMNJUTXLx3pt0nra/ZTf29EJF
-         TtDCPdCz4AQdcvzrd5Nl+wf6lgUNg+A5japP2slY3V1YHGX55WP4Gec52qeheMK41CtS
-         TS7Ggtwapk0SQJ5o3HI6us89wIIAhsxDm7Fj6Q/eMVDhaJuVayqI33Zv2ULhJmPEXG2E
-         XKMg==
-X-Gm-Message-State: AOJu0YzgaSqv5Z9+kCAaVOUYC7BhZtf1LH4sawSuJiSjfC/FMlkQGhlj
-	sg97xPzCC82G6qzWMi8SzVTam0ec/LHY7tQF+RTaP9DLGd/wMQKNmoyKw8hFUYJ77GEGEYNlEga
-	7WBRJ+9MuK/4NyWbSJ+b7nXHSWt2jwhDsBww=
-X-Google-Smtp-Source: AGHT+IERZSoVsLiaXpOjXF8hl7iIAGn/qSEaksIUwSJryklI1EN6d5KeoBVdESigOWdh0OXgo/A+95iTYUq8afUQlmg=
-X-Received: by 2002:a2e:be93:0:b0:2ef:2bb4:2ea1 with SMTP id
- 38308e7fff4ca-2f2b712cfedmr22440631fa.4.1723530836749; Mon, 12 Aug 2024
- 23:33:56 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="mgpGbe4u"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 218F5C32782;
+	Fri, 23 Aug 2024 00:04:09 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1724371449;
+	bh=d1RmSg+pZiyUSkvTppKDhWCAqCi7WQkLhQlgan+A8/c=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=mgpGbe4uQqi/w4yJc6MgDLLeqX8P77dSmuEvji1/3yZwLxT1WGUZ2MRlBxLdIBulA
+	 UdU+X/wwOYMLl74i+S2lWSlDKLC2nHD8NVvYSy4n8ELYikPW4BqshuRi1tqxlGcnc+
+	 udeVklItjOwkSA4FE9/PMpUfqIN5ZH18yFi3VJn5jM2Ctdi3iTnmaYp38jgS9iXjIy
+	 ZX+vJQG2umAM2u6NThiTc9GhW5TuSO63rzKHBQbNegn20DWNkOuoTns/BB2KcD7Kr0
+	 zW351l7IUdD8SuIDyeJ91zwfEDgzJJx/I3CdncSWlOrc6GobrwO2ybUT0VdmqqXe7/
+	 QJ7XsPO73q5DQ==
+Date: Thu, 22 Aug 2024 17:04:08 -0700
+From: Kees Cook <kees@kernel.org>
+To: Przemek Kitszel <przemyslaw.kitszel@intel.com>
+Cc: Justin Stitt <justinstitt@google.com>,
+	Andy Shevchenko <andy@kernel.org>,
+	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
+	Nick Desaulniers <ndesaulniers@google.com>,
+	Miguel Ojeda <ojeda@kernel.org>, Marco Elver <elver@google.com>,
+	Nathan Chancellor <nathan@kernel.org>, Hao Luo <haoluo@google.com>,
+	linux-sparse@vger.kernel.org, linux-hardening@vger.kernel.org,
+	Bill Wendling <morbo@google.com>,
+	Mark Rutland <mark.rutland@arm.com>,
+	Jakub Kicinski <kuba@kernel.org>,
+	Alexander Lobakin <aleksander.lobakin@intel.com>,
+	Tony Ambardar <tony.ambardar@gmail.com>,
+	Petr Pavlu <petr.pavlu@suse.com>, linux-kernel@vger.kernel.org,
+	llvm@lists.linux.dev
+Subject: Re: [PATCH] string: Check for "nonstring" attribute on strscpy()
+ arguments
+Message-ID: <202408221701.62773B4E1@keescook>
+References: <20240805214340.work.339-kees@kernel.org>
+ <1724c53c-5a02-4816-a688-cae18db443d2@intel.com>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-From: Uros Bizjak <ubizjak@gmail.com>
-Date: Tue, 13 Aug 2024 08:33:45 +0200
-Message-ID: <CAFULd4a70uMBT0mby98ocEUy3OiA1U83a9zB+qHmq-eY7AkuTw@mail.gmail.com>
-Subject: Feature request: typeof_unqual keyword support
-To: Sparse Mailing-list <linux-sparse@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1724c53c-5a02-4816-a688-cae18db443d2@intel.com>
 
-Hello!
+On Tue, Aug 06, 2024 at 12:29:30PM +0200, Przemek Kitszel wrote:
+> On 8/5/24 23:43, Kees Cook wrote:
+> > GCC already checks for arguments that are marked with the "nonstring"[1]
+> > attribute when used on standard C String API functions (e.g. strcpy). Gain
+> > this compile-time checking also for the kernel's primary string copying
+> > function, strscpy().
+> > 
+> > Note that Clang has neither "nonstring" nor __builtin_has_attribute().
+> > 
+> > Link: https://gcc.gnu.org/onlinedocs/gcc/Common-Variable-Attributes.html#index-nonstring-variable-attribute [1]
+> > Signed-off-by: Kees Cook <kees@kernel.org>
+> 
+> 
+> 
+> > diff --git a/include/linux/string.h b/include/linux/string.h
+> > index 9edace076ddb..95b3fc308f4f 100644
+> > --- a/include/linux/string.h
+> > +++ b/include/linux/string.h
+> > @@ -76,12 +76,16 @@ ssize_t sized_strscpy(char *, const char *, size_t);
+> >    * known size.
+> >    */
+> >   #define __strscpy0(dst, src, ...)	\
+> > -	sized_strscpy(dst, src, sizeof(dst) + __must_be_array(dst))
+> > -#define __strscpy1(dst, src, size)	sized_strscpy(dst, src, size)
+> > +	sized_strscpy(dst, src, sizeof(dst) + __must_be_array(dst) +	\
+> > +				__must_be_cstr(dst) + __must_be_cstr(src))
+> > +#define __strscpy1(dst, src, size)	\
+> > +	sized_strscpy(dst, src, size + __must_be_cstr(dst) + __must_be_cstr(src))
+> >   #define __strscpy_pad0(dst, src, ...)	\
+> > -	sized_strscpy_pad(dst, src, sizeof(dst) + __must_be_array(dst))
+> > -#define __strscpy_pad1(dst, src, size)	sized_strscpy_pad(dst, src, size)
+> > +	sized_strscpy_pad(dst, src, sizeof(dst) + __must_be_array(dst) +	\
+> > +				    __must_be_cstr(dst) + __must_be_cstr(src))
+> > +#define __strscpy_pad1(dst, src, size)	\
+> > +	sized_strscpy_pad(dst, src, size + __must_be_cstr(dst) + __must_be_cstr(src))
+> 
+> any way to avoid the usual caveat of repeating macro argument?
+> 
+> a variant of BUILD_BUG that is checking argument and otherwise pasting
+> it would nail it, but I didn't pondered how to implement such
 
-C23 introduced a new typeof operator, typeof_unqual [1], same as
-typeof, but removes qualifiers. gcc-14 [2] and clang (19?) also
-introduced __typeof_unqual__ and __typeof_unqual alternate spelling,
-available in all C modes.
+The use of __must_be_cstr() shouldn't cause side-effects, so from what I
+can tell this is all okay. And since BUILD_BUG_ON_ZERO() resolves to a
+constant expression, it shouldn't change the processing of the "size"
+argument in the strscpy internals...
 
-A recent kernel patch [3] would like to introduce __typeof_unqual__ to
-kernel sources. Since this keyword is not known to the sparse checker,
-it breaks C=1 checking.
-
-It would be nice if sparse supports this new keyword and its alternate
-spellings.
-
-[1] https://en.cppreference.com/w/c/language/typeof
-[2] https://gcc.gnu.org/onlinedocs/gcc/Typeof.html
-[3] https://lore.kernel.org/lkml/20240812115945.484051-2-ubizjak@gmail.com/
-
-Thanks,
-Uros.
+-- 
+Kees Cook
