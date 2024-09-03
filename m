@@ -1,97 +1,113 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.13])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f50.google.com (mail-wm1-f50.google.com [209.85.128.50])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 828B818452D
-	for <linux-sparse@vger.kernel.org>; Tue,  3 Sep 2024 06:13:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.13
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 05B9B1EC000
+	for <linux-sparse@vger.kernel.org>; Tue,  3 Sep 2024 21:15:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1725344024; cv=none; b=FsJQVoP1B3GXUUBD0T56YuC6+YDL0U0Lhd5biiEBdP71Me0yYOZqcMXrjW8q9sern2DmzCfJu33BUXU9FoM2Ps7eSPxrYYvEy6MJuc6RtHGXDwXnNOLYwVtwADL66zUoCkDKtV72SurWoUW4o33AvtC50r5Ts4hinEnV3z/owIY=
+	t=1725398126; cv=none; b=uojGxPF0iDdU+Khflvaa5D+Vh24KcB7HozbDy11dUb4sXokqQ6ziwDegrayveHVK2lkFOncOuNBH7MkDhK4fib/rS18y0/8ghJmvAh4iNcaIu8WarOF5b3GZWs97LVSVFjETaSPgRLG3JhweCwriDDLYe24zK/oiiyojizZRh40=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1725344024; c=relaxed/simple;
-	bh=vg0mnb+xpP2nzfOjHEOu7/eYP0B1JIrquPfgYKcE3VA=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version:Content-Type; b=CEgqbMbURN8YBzSUaoN90ES3LyPPCU7UZCpivCGfAAP26Dmq7AWGS7P+SmI3lmnWY95Zu0ryXyqezNCTB8PVlk2W7WX7mxan8vV3my2Lv6pZqerBnYHKcOVnnHh+8Gf4RxtUNOogCOxCMvpe4gtrxCCnHyDl0Rsy8nCDnibkAKg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=V+NL074Q; arc=none smtp.client-ip=192.198.163.13
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1725398126; c=relaxed/simple;
+	bh=VzkHPVRUAdxGEDQH3hgp2U925w1iXPxabGAkC9rReog=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=td4u+U9rCRxqt8qHQYjjS7b4WZdyWnla8tBOx3wa4+/1sjdy+gWi9osodgT3LQJa4FOBa2cukjepGrUCQPHqtyBNnDR6wloGwaVFEYoKzBelbUGHbphS7j2V50X3EPDgw5rO1b63T/jsiRf07N3msBJLKX/fdSLDsrbvUuNkRSY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b=rfVWVP+7; arc=none smtp.client-ip=209.85.128.50
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=baylibre.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="V+NL074Q"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1725344023; x=1756880023;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=vg0mnb+xpP2nzfOjHEOu7/eYP0B1JIrquPfgYKcE3VA=;
-  b=V+NL074Q50LAVPVgWjPESeVuxLTV9TQYJ99v4bg02CSYmfncGB7LwNii
-   jQyRhZdj62A+ay95PBkDqgDU+9HGe7/xGumygtu3Y40y+qVl3HP4VTKeN
-   0NN6AJg3Npcu9HKKctPcbXov2bpsKgkLIn4deU+w2basBVniNq7+RuZB4
-   MtcJvwhtD6GgaiaOjiUIcvT1Zf4Z3CpXDopCCFNbaXH0HF6ZSnJOL6fVi
-   s0ePa7Nj4S/wSo0m4tb2ZIt728+I0hRRbOj8kZlFEttAMH4SuC5OuJZOk
-   ba6Xy4nHUGI95UkfLeVBygucabE6qcFwj6UfE3atiuWXOPuU+j4W23Pyu
-   Q==;
-X-CSE-ConnectionGUID: N/ImUdbGRc2SCMASY2/k0Q==
-X-CSE-MsgGUID: cwLwOnjBTXSDPzUox+k7lw==
-X-IronPort-AV: E=McAfee;i="6700,10204,11183"; a="26833563"
-X-IronPort-AV: E=Sophos;i="6.10,197,1719903600"; 
-   d="scan'208";a="26833563"
-Received: from fmviesa008.fm.intel.com ([10.60.135.148])
-  by fmvoesa107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Sep 2024 23:13:42 -0700
-X-CSE-ConnectionGUID: TsRYs+ZGThy2eSxjefBXsQ==
-X-CSE-MsgGUID: Qx0vHrVlTwKP7Jk6bO7okw==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.10,197,1719903600"; 
-   d="scan'208";a="64798006"
-Received: from rgavrus-mobl1.ger.corp.intel.com (HELO soc-CND1340XR6.clients.intel.com) ([10.245.120.243])
-  by fmviesa008.fm.intel.com with ESMTP; 02 Sep 2024 23:13:41 -0700
-From: Dmitrii Golovanov <dmitrii.golovanov@intel.com>
+	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="rfVWVP+7"
+Received: by mail-wm1-f50.google.com with SMTP id 5b1f17b1804b1-42bc19e94bdso33067395e9.3
+        for <linux-sparse@vger.kernel.org>; Tue, 03 Sep 2024 14:15:22 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1725398121; x=1726002921; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=VzkHPVRUAdxGEDQH3hgp2U925w1iXPxabGAkC9rReog=;
+        b=rfVWVP+7l+cJ+BeIoc5LuyTA5SZ752HrQ5ntx5wIIAQWZc7OnNtaWoMJwrpCnA4PIC
+         dMe1hKN+hFAWnY2Qng77cd36d7MsyPAgJn3N5a6x4Y3IntZn9rtNwb1CmgS/yQQakWfK
+         dmGMPyW4ew4J9IwnS3ytcLCSZyuEVL/oyjUEYgZVHZQV9PiKzLTzuMPNXn+kHHlIE3TB
+         yt3yneM/5QjWPF0/EtRRrkSoEgDGngKykqkA6VNEuqfDNYJW0gN8YLW1sjuNNBZa2bSD
+         uHU/U4iGowceIrtzHvKQe1KZlvW8eVyUyc1IWG5twMLIwpz+/DADftWrAsCHO6shoWa2
+         pyHw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1725398121; x=1726002921;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=VzkHPVRUAdxGEDQH3hgp2U925w1iXPxabGAkC9rReog=;
+        b=G+xiXsp2k97zVMolLDYRFhdSilwVNWJi0HdBzDn6T6GTfhG1SX6RWbIbsjPAutaWES
+         6mvM7OTaim7zeLpxA9/Mpk8kj/9PK2ZDnmmJZchgjy4CsBoM3htvRjRKiOhBkKFf2f4g
+         4e/kmNm423uGAD3TlpsrZuRi8OJ3jtKANfa4TMU3Z6p9mDj/NL9B9t5BHY4xC8LmTHAR
+         d6tGCAFZYq4GfOemXm6+uZ/oPpgM+83SgbGV2BeRiM9GOs8fXDcleG4LMCQuFHSMioiK
+         RWH/Z5UQa8CciVaz492ruvw7M5oBOtf61m40bWbIIMiiPsUgFEj12XsoVExnTh4hBRUB
+         Scwg==
+X-Gm-Message-State: AOJu0YzJi/CZKLU6w1DDt1xxBP4oxKT5vXRGALYyeTC7YnNxYl3X7Iwp
+	64o13aDehpD/HU8+t60z2Zc5VI5iL22Tl7T+PFQIq5uLryyuviZ/x2IUHevlGqItlYPmGqsK8De
+	W
+X-Google-Smtp-Source: AGHT+IEoy2wGCCisayAkfEpFgH10fuCipUnH0AsQA5jHDgC8LNNuwqhmVtOmxc7+V3g5LAtlL9WwkQ==
+X-Received: by 2002:a05:600c:4689:b0:428:29d:4b59 with SMTP id 5b1f17b1804b1-42c8de87c08mr15184785e9.20.1725398121085;
+        Tue, 03 Sep 2024 14:15:21 -0700 (PDT)
+Received: from localhost ([2a02:8071:b783:6940:36f3:9aff:fec2:7e46])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-42baa08d9f9sm207091685e9.32.2024.09.03.14.15.20
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 03 Sep 2024 14:15:20 -0700 (PDT)
+Date: Tue, 3 Sep 2024 23:15:18 +0200
+From: Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@baylibre.com>
 To: linux-sparse@vger.kernel.org
-Cc: Dmitrii Golovanov <dmitrii.golovanov@intel.com>
-Subject: [PATCH] cgcc: check sparse options fmax-errors and fmax-warnings
-Date: Tue,  3 Sep 2024 08:12:57 +0200
-Message-Id: <20240903061257.648402-1-dmitrii.golovanov@intel.com>
-X-Mailer: git-send-email 2.25.1
+Cc: wuruilong <wuruilong@loongson.cn>
+Subject: Re: [ Patch 001 ] feature: add support for loongarch
+Message-ID: <zdaqtziz6ubedttclybzgoso7b4q6jqma73om77pldkspkygif@xmqbwhzsgoqf>
+References: <c35dc58e-444f-0809-67cc-113d6b4b29be@loongson.cn>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="pjdohm755vo3xew2"
+Content-Disposition: inline
+In-Reply-To: <c35dc58e-444f-0809-67cc-113d6b4b29be@loongson.cn>
 
-Recognize sparse command-line options `-fmax-errors` and `-fmax-warnings`
-as "check" options:
 
-  `-fmax-warnings` - dont pass it to CC neither with integer value,
-    nor as 'unlimited'.
-  `-fmax-errors` - only as 'unlimited' value to avoid 'unrecognized
-    command-line option' GCC error which also accepts it as numeric.
+--pjdohm755vo3xew2
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Signed-off-by: Dmitrii Golovanov <dmitrii.golovanov@intel.com>
----
- cgcc | 2 ++
- 1 file changed, 2 insertions(+)
+On Fri, May 24, 2024 at 10:47:23AM +0800, wuruilong wrote:
+> =A0 sparse compiles incorrectly on loongarch, the attached patch compiles
+> successfully after local testing.
 
-diff --git a/cgcc b/cgcc
-index 618ba08a..b90e9428 100755
---- a/cgcc
-+++ b/cgcc
-@@ -129,6 +129,8 @@ sub check_only_option {
-     return 1 if $arg =~ /^-W(no-?)?(address-space|bitwise|cast-to-as|cast-truncate|constant-suffix|context|decl|default-bitfield-sign|designated-init|do-while|enum-mismatch|external-function-has-definition|init-cstring|memcpy-max-count|non-pointer-null|old-initializer|one-bit-signed-bitfield|override-init-all|paren-string|ptr-subtraction-blows|return-void|sizeof-bool|sparse-all|sparse-error|transparent-union|typesign|undef|unknown-attribute)$/;
-     return 1 if $arg =~ /^-v(no-?)?(entry|dead)$/;
-     return 1 if $arg =~ /^-f(dump-ir|memcpy-max-count|diagnostic-prefix)(=\S*)?$/;
-+    return 1 if $arg =~ /^-fmax-errors=unlimited$/;  # don't pass it to GCC
-+    return 1 if $arg =~ /^-fmax-warnings=(unlimited|[0-9]+)$/;
-     return 1 if $arg =~ /^-f(mem2reg|optim)(-enable|-disable|=last)?$/;
-     return 1 if $arg =~ /^-msize-(long|llp64)$/;
-     return 0;
--- 
-2.25.1
+This patch has some relevance to Debian because currently sparse doesn't
+compile for loongson and so also the packages that depend on sparse
+cannot be built.
 
----------------------------------------------------------------------
-Intel Technology Poland sp. z o.o.
-ul. Slowackiego 173 | 80-298 Gdansk | Sad Rejonowy Gdansk Polnoc | VII Wydzial Gospodarczy Krajowego Rejestru Sadowego - KRS 101882 | NIP 957-07-52-316 | Kapital zakladowy 200.000 PLN.
-Spolka oswiadcza, ze posiada status duzego przedsiebiorcy w rozumieniu ustawy z dnia 8 marca 2013 r. o przeciwdzialaniu nadmiernym opoznieniom w transakcjach handlowych.
+I'd like to cherry-pick this patch, but would have a better feeling to
+do so if it was applied already.
 
-Ta wiadomosc wraz z zalacznikami jest przeznaczona dla okreslonego adresata i moze zawierac informacje poufne. W razie przypadkowego otrzymania tej wiadomosci, prosimy o powiadomienie nadawcy oraz trwale jej usuniecie; jakiekolwiek przegladanie lub rozpowszechnianie jest zabronione.
-This e-mail and any attachments may contain confidential material for the sole use of the intended recipient(s). If you are not the intended recipient, please contact the sender and delete all copies; any review or distribution by others is strictly prohibited.
+With my innocent knowledge the patch looks ok, but I don't feel very
+qualified.
 
+FTR: There is a Debian bug report (https://bugs.debian.org/1071605) with
+this patch.
+
+Best regards
+Uwe
+
+--pjdohm755vo3xew2
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCgAdFiEEP4GsaTp6HlmJrf7Tj4D7WH0S/k4FAmbXfGMACgkQj4D7WH0S
+/k4HMggAu+byHNs73/h0qVJbWpznMTcJTO9ShBK6/p0BQv3kfsFddbFGlslhgKcI
+DXifx3hlTX28WqTsdbj1KoUvIWPvV6JbRV63AB5sO1pMy7Tu47kPhJYxjyRIiabS
+2a7tEFVAqdbyTdlYGTUIujZf0UTbyEeO6W4J9RhUrqk2h3IWzwVWJHAaqiEw53en
+vXL4Ot+i/KUZAaBHJrJ6wHo4mjEHXPOJGEX3ZtvjAu4vkVhlFJbi7LMx2DJFC0Hq
+xurG3apdhz+pctaWoQ0NBh9MhLth2FYtOyRa6Ksx7rxqVT1MrCpiEXgezNNVZSIZ
+x1d+LFD4F7FrrVDzcjCAhLCGUoY5KQ==
+=xa3/
+-----END PGP SIGNATURE-----
+
+--pjdohm755vo3xew2--
