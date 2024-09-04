@@ -1,62 +1,61 @@
-Received: from mail-wm1-f50.google.com (mail-wm1-f50.google.com [209.85.128.50])
+Received: from mail-wm1-f47.google.com (mail-wm1-f47.google.com [209.85.128.47])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 05B9B1EC000
-	for <linux-sparse@vger.kernel.org>; Tue,  3 Sep 2024 21:15:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.50
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 77D8E824BB
+	for <linux-sparse@vger.kernel.org>; Wed,  4 Sep 2024 05:39:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.47
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1725398126; cv=none; b=uojGxPF0iDdU+Khflvaa5D+Vh24KcB7HozbDy11dUb4sXokqQ6ziwDegrayveHVK2lkFOncOuNBH7MkDhK4fib/rS18y0/8ghJmvAh4iNcaIu8WarOF5b3GZWs97LVSVFjETaSPgRLG3JhweCwriDDLYe24zK/oiiyojizZRh40=
+	t=1725428392; cv=none; b=WsWVycikbD/Og6wXq2Q9czHQ53YJ2+rNEax4eDD1zqZMTnvveh1uT8jaOjXZfaT7z4kqGZrCBupyIQsCtCG+Dg63BDuJq7V33wjlUuvKeFs583sezWs+0TBzecZsSn0x5nv8jUT2lS1oT2b4w03wkPs/dvEai1YJoPkE5Eg6w9k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1725398126; c=relaxed/simple;
-	bh=VzkHPVRUAdxGEDQH3hgp2U925w1iXPxabGAkC9rReog=;
+	s=arc-20240116; t=1725428392; c=relaxed/simple;
+	bh=nnhIwY2u7o1V7vOw//GQ9erXlyrbJp+mLJ7gw6UHuAc=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=td4u+U9rCRxqt8qHQYjjS7b4WZdyWnla8tBOx3wa4+/1sjdy+gWi9osodgT3LQJa4FOBa2cukjepGrUCQPHqtyBNnDR6wloGwaVFEYoKzBelbUGHbphS7j2V50X3EPDgw5rO1b63T/jsiRf07N3msBJLKX/fdSLDsrbvUuNkRSY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b=rfVWVP+7; arc=none smtp.client-ip=209.85.128.50
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=baylibre.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=r+TDy+OXyK5UrJjO4LDnvBj+kEl8eBtP4c0JRN3n0TL/QeRfs/jgKJxzWx4ysO4wWWKsQWFTWhV1G5Lfr2xqZzo9MmoE4HP2kEd0LuAHpBdErFaI4Ya0EgmUD06KSBErATft0XfvTPtVNa/MvqUrdNK+Qz/N+YUzxqB9HWUx+vE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=JuRt5Z37; arc=none smtp.client-ip=209.85.128.47
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="rfVWVP+7"
-Received: by mail-wm1-f50.google.com with SMTP id 5b1f17b1804b1-42bc19e94bdso33067395e9.3
-        for <linux-sparse@vger.kernel.org>; Tue, 03 Sep 2024 14:15:22 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="JuRt5Z37"
+Received: by mail-wm1-f47.google.com with SMTP id 5b1f17b1804b1-42c7a49152aso42352285e9.2
+        for <linux-sparse@vger.kernel.org>; Tue, 03 Sep 2024 22:39:50 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1725398121; x=1726002921; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1725428389; x=1726033189; darn=vger.kernel.org;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=VzkHPVRUAdxGEDQH3hgp2U925w1iXPxabGAkC9rReog=;
-        b=rfVWVP+7l+cJ+BeIoc5LuyTA5SZ752HrQ5ntx5wIIAQWZc7OnNtaWoMJwrpCnA4PIC
-         dMe1hKN+hFAWnY2Qng77cd36d7MsyPAgJn3N5a6x4Y3IntZn9rtNwb1CmgS/yQQakWfK
-         dmGMPyW4ew4J9IwnS3ytcLCSZyuEVL/oyjUEYgZVHZQV9PiKzLTzuMPNXn+kHHlIE3TB
-         yt3yneM/5QjWPF0/EtRRrkSoEgDGngKykqkA6VNEuqfDNYJW0gN8YLW1sjuNNBZa2bSD
-         uHU/U4iGowceIrtzHvKQe1KZlvW8eVyUyc1IWG5twMLIwpz+/DADftWrAsCHO6shoWa2
-         pyHw==
+        bh=jRh+/TP0JEwE5mdrUeswu9P+i1T5h6zEuzd/EBL7aS8=;
+        b=JuRt5Z37MIUmLSS0qHhUAJNenlq5Uy8cqRswTwJK5sXvUgSNarZzsQT5msTiX22A8h
+         iXG263XqgXXHqep6jYjNiM21Gen+o1EdVZKUdamnqCr/uic0Ips+tN1lIFrokt72WxRd
+         m2VOEproFV0EJ+2PBx18FkZlfLe2a68pMB5mPwOa9tTFQK8grC5SbplGDvvZ6TWsNiUm
+         x68K4B6l+iT9p0ooms6g9XA2zwiiv3ZHaqp2HOAATzzFwP2aQMCDdbB4At70CaleqcIp
+         2XETeINXKhahApzfZXIC7IV8lzHfHyFj7lM4AsQQtPL1983aVz47uEZWgRHWIN7kBmdg
+         MiBg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1725398121; x=1726002921;
+        d=1e100.net; s=20230601; t=1725428389; x=1726033189;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=VzkHPVRUAdxGEDQH3hgp2U925w1iXPxabGAkC9rReog=;
-        b=G+xiXsp2k97zVMolLDYRFhdSilwVNWJi0HdBzDn6T6GTfhG1SX6RWbIbsjPAutaWES
-         6mvM7OTaim7zeLpxA9/Mpk8kj/9PK2ZDnmmJZchgjy4CsBoM3htvRjRKiOhBkKFf2f4g
-         4e/kmNm423uGAD3TlpsrZuRi8OJ3jtKANfa4TMU3Z6p9mDj/NL9B9t5BHY4xC8LmTHAR
-         d6tGCAFZYq4GfOemXm6+uZ/oPpgM+83SgbGV2BeRiM9GOs8fXDcleG4LMCQuFHSMioiK
-         RWH/Z5UQa8CciVaz492ruvw7M5oBOtf61m40bWbIIMiiPsUgFEj12XsoVExnTh4hBRUB
-         Scwg==
-X-Gm-Message-State: AOJu0YzJi/CZKLU6w1DDt1xxBP4oxKT5vXRGALYyeTC7YnNxYl3X7Iwp
-	64o13aDehpD/HU8+t60z2Zc5VI5iL22Tl7T+PFQIq5uLryyuviZ/x2IUHevlGqItlYPmGqsK8De
-	W
-X-Google-Smtp-Source: AGHT+IEoy2wGCCisayAkfEpFgH10fuCipUnH0AsQA5jHDgC8LNNuwqhmVtOmxc7+V3g5LAtlL9WwkQ==
-X-Received: by 2002:a05:600c:4689:b0:428:29d:4b59 with SMTP id 5b1f17b1804b1-42c8de87c08mr15184785e9.20.1725398121085;
-        Tue, 03 Sep 2024 14:15:21 -0700 (PDT)
-Received: from localhost ([2a02:8071:b783:6940:36f3:9aff:fec2:7e46])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-42baa08d9f9sm207091685e9.32.2024.09.03.14.15.20
+        bh=jRh+/TP0JEwE5mdrUeswu9P+i1T5h6zEuzd/EBL7aS8=;
+        b=EfMopwMK3ZlLQqARnSNxayHgpIzeXpsudqqbipUUHtoP3RkYDFQCXy/F4H7E9qdzz7
+         Jt/SVbqJscOzJKvGUX/gzxQv5L79RA2RMwQ382xo85cSS0nQbJnL/ZryrORyvgr3UNw7
+         0XRujzu57eazmXA6yreZBhWWuiGJdJWFJlyy5BAM5QW7vAG2sceWsQud0pUjPam0N3SR
+         M3prBEndymfF8B1eYxa6O89MvUMH9fZ6i0ZNn5fVnRJ82wwpb50OthO0GMEhEUUoE1lc
+         +1EUfWhW9GS2LsL+WConXjz9sPe9Qy9V+9AYadCshtw/oeDE610Oc2nmdllfXvrftwXx
+         6mIw==
+X-Gm-Message-State: AOJu0YzUBP6aZlUqAKXiRPY1EMs0nQA1crHTb+BFLX7kBIouwIYFZCb9
+	vHV0gPN6WhypvmNJdG7w2RiXnkz0mQNqxLWdu9qdoBDRgSmVBMPj3LH5bnD3KWs=
+X-Google-Smtp-Source: AGHT+IFbWmSS3neLY5ZjXvG+6zh0K8ShOeWaA8Nf0YQblBzKKvWdOKoJB3bMt45wfEqYPEHjQN8PRw==
+X-Received: by 2002:a5d:5591:0:b0:374:c847:867 with SMTP id ffacd0b85a97d-374c8470b71mr7055597f8f.47.1725428388439;
+        Tue, 03 Sep 2024 22:39:48 -0700 (PDT)
+Received: from localhost ([196.207.164.177])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-3749ee4a5edsm15998161f8f.1.2024.09.03.22.39.47
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 03 Sep 2024 14:15:20 -0700 (PDT)
-Date: Tue, 3 Sep 2024 23:15:18 +0200
-From: Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@baylibre.com>
-To: linux-sparse@vger.kernel.org
-Cc: wuruilong <wuruilong@loongson.cn>
+        Tue, 03 Sep 2024 22:39:47 -0700 (PDT)
+Date: Wed, 4 Sep 2024 08:39:43 +0300
+From: Dan Carpenter <dan.carpenter@linaro.org>
+To: wuruilong <wuruilong@loongson.cn>
+Cc: linux-sparse@vger.kernel.org
 Subject: Re: [ Patch 001 ] feature: add support for loongarch
-Message-ID: <zdaqtziz6ubedttclybzgoso7b4q6jqma73om77pldkspkygif@xmqbwhzsgoqf>
+Message-ID: <f687e64e-d653-46a3-a302-68aa4a021215@stanley.mountain>
 References: <c35dc58e-444f-0809-67cc-113d6b4b29be@loongson.cn>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
@@ -64,50 +63,82 @@ List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="pjdohm755vo3xew2"
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 In-Reply-To: <c35dc58e-444f-0809-67cc-113d6b4b29be@loongson.cn>
 
-
---pjdohm755vo3xew2
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
 On Fri, May 24, 2024 at 10:47:23AM +0800, wuruilong wrote:
-> =A0 sparse compiles incorrectly on loongarch, the attached patch compiles
-> successfully after local testing.
+> +const struct target target_loongarch64 = {
+> +	.mach = MACH_LOONGARCH64,
+> +	.bitness = ARCH_LP64,
+> +
+> +	.big_endian = 0,
 
-This patch has some relevance to Debian because currently sparse doesn't
-compile for loongson and so also the packages that depend on sparse
-cannot be built.
+No need to initialize things to zero.
 
-I'd like to cherry-pick this patch, but would have a better feeling to
-do so if it was applied already.
+> +	.unsigned_char = 1,
 
-With my innocent knowledge the patch looks ok, but I don't feel very
-qualified.
+According to
+https://loongson.github.io/LoongArch-Documentation/LoongArch-ELF-ABI-EN.html
+"For all base ABI types of LoongArch, the char datatype is signed by default."
+Is the webpage wrong?
 
-FTR: There is a Debian bug report (https://bugs.debian.org/1071605) with
-this patch.
+> +	.has_int128 = 1,
+> +
+> +	.predefine = predefine_loongarch64,
+> +};
+> diff --git a/target.c b/target.c
+> index 8ae22d74..0e075d59 100644
+> --- a/target.c
+> +++ b/target.c
+> @@ -94,6 +94,7 @@ static const struct target *targets[] = {
+>  	[MACH_PPC64] =		&target_ppc64,
+>  	[MACH_RISCV32] =	&target_riscv32,
+>  	[MACH_RISCV64] =	&target_riscv64,
+> +	[MACH_LOONGARCH64] =    &target_loongarch64,
+>  	[MACH_S390] =		&target_s390,
+>  	[MACH_S390X] =		&target_s390x,
+>  	[MACH_SH] =		&target_sh,
+> @@ -112,29 +113,30 @@ enum machine target_parse(const char *name)
+>  		enum machine mach;
+>  		char bits;
+>  	} archs[] = {
+> -		{ "alpha",	MACH_ALPHA,	64, },
+> -		{ "aarch64",	MACH_ARM64,	64, },
+> -		{ "arm64",	MACH_ARM64,	64, },
+> -		{ "arm",	MACH_ARM,	32, },
+> -		{ "bfin",	MACH_BFIN,	32, },
+> -		{ "h8300",	MACH_H8300,	32, },
+> -		{ "i386",	MACH_I386,	32, },
+> -		{ "m68k",	MACH_M68K,	32, },
+> -		{ "microblaze",	MACH_MICROBLAZE,32, },
+> -		{ "mips",	MACH_MIPS32,	0,  },
+> -		{ "nds32",	MACH_NDS32,	32, },
+> -		{ "nios2",	MACH_NIOS2,	32, },
+> -		{ "openrisc",	MACH_OPENRISC,	32, },
+> -		{ "powerpc",	MACH_PPC32,	0,  },
+> -		{ "ppc",	MACH_PPC32,	0,  },
+> -		{ "riscv",	MACH_RISCV32,	0,  },
+> -		{ "s390x",	MACH_S390X,	64, },
+> -		{ "s390",	MACH_S390,	32, },
+> -		{ "sparc",	MACH_SPARC32,	0,  },
+> -		{ "x86_64",	MACH_X86_64,	64, },
+> -		{ "x86-64",	MACH_X86_64,	64, },
+> -		{ "sh",		MACH_SH,	32, },
+> -		{ "xtensa",	MACH_XTENSA,	32, },
+> +		{ "alpha",	MACH_ALPHA,	 64, },
+> +		{ "aarch64",	MACH_ARM64,	 64, },
+> +		{ "arm64",	MACH_ARM64,	 64, },
+> +		{ "arm",	MACH_ARM,	 32, },
+> +		{ "bfin",	MACH_BFIN,	 32, },
+> +		{ "h8300",	MACH_H8300,	 32, },
+> +		{ "i386",	MACH_I386,	 32, },
+> +		{ "loongarch64",MACH_LOONGARCH64,64, },
 
-Best regards
-Uwe
+Add spaces after the commas, especially if we're going to re-indent the whole
+table anyway.
 
---pjdohm755vo3xew2
-Content-Type: application/pgp-signature; name="signature.asc"
+regards,
+dan carpenter
 
------BEGIN PGP SIGNATURE-----
 
-iQEzBAABCgAdFiEEP4GsaTp6HlmJrf7Tj4D7WH0S/k4FAmbXfGMACgkQj4D7WH0S
-/k4HMggAu+byHNs73/h0qVJbWpznMTcJTO9ShBK6/p0BQv3kfsFddbFGlslhgKcI
-DXifx3hlTX28WqTsdbj1KoUvIWPvV6JbRV63AB5sO1pMy7Tu47kPhJYxjyRIiabS
-2a7tEFVAqdbyTdlYGTUIujZf0UTbyEeO6W4J9RhUrqk2h3IWzwVWJHAaqiEw53en
-vXL4Ot+i/KUZAaBHJrJ6wHo4mjEHXPOJGEX3ZtvjAu4vkVhlFJbi7LMx2DJFC0Hq
-xurG3apdhz+pctaWoQ0NBh9MhLth2FYtOyRa6Ksx7rxqVT1MrCpiEXgezNNVZSIZ
-x1d+LFD4F7FrrVDzcjCAhLCGUoY5KQ==
-=xa3/
------END PGP SIGNATURE-----
-
---pjdohm755vo3xew2--
