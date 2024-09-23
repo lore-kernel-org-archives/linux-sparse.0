@@ -1,73 +1,81 @@
-Received: from stravinsky.debian.org (stravinsky.debian.org [82.195.75.108])
+Received: from smtpbgbr2.qq.com (smtpbgbr2.qq.com [54.207.22.56])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 82CFA1474A9
-	for <linux-sparse@vger.kernel.org>; Wed,  4 Sep 2024 09:49:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=82.195.75.108
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 80DC240855
+	for <linux-sparse@vger.kernel.org>; Mon, 23 Sep 2024 08:40:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=54.207.22.56
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1725443359; cv=none; b=Y8y7mxt2OD69fyFemR6FFWmE8PyHAq/yxj+LoLwJaVVmtUH+QdCj1rdFqOYnJ5rizmz2bJFSm/XbW86UEQSblZitx/jgwtoG3HgMJqi/u0h9h8UmLjjjZCSbbU1KOMrhf6Jo8jpRGtio64pucwgyPP+DX/DO2h2G5ypuPneLRxE=
+	t=1727080827; cv=none; b=rAsebJdvODFOSWyZzpbRBJNmMMee9Kj2JVEn5gWNrGiO4eOczbWLqEH7pstcwE7IRIwIEzFfEan/93xCcCSX4qguiWSuZKw1BQvzmuN1brwLT++DUISmlPGr2I9QOHXkwHfv2RvqX7l/nCpDARaQv6HVBEJ07zcmf2bN8FwIRCM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1725443359; c=relaxed/simple;
-	bh=4UGpj5MYNoysU3Yw7iIE5j1/gh8Jy/erHDgnQ7067tk=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=ACo4D+q2l3arOzRmwSlkHIA8p7nBklcGeBezF1XTWU8gnZQkXYr1znlexbMIwV//SUae2eH38IXQdfZOZaEMskiGc5r6fGGY2xzB4dT4XVKHSvwqkk921BKGU18TYg2oBUtYXYIrXRWzp/TeFyQ/fbzPbM+kqHQBSmBa/BAo0i0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=debian.org; spf=none smtp.mailfrom=debian.org; dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b=CsQoWzLj; arc=none smtp.client-ip=82.195.75.108
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=debian.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=debian.org
+	s=arc-20240116; t=1727080827; c=relaxed/simple;
+	bh=UUI/3HZ9uiIeRDL+8be+g6lckTwI8z1BjOvEgWnmU2Q=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=ac8oc+cIf8AQQQ4nBDT0+IO2xqv1bCKHfYGVPpwokGUq4Ujn+QFazCo5nUr4TgAXZ9Ccz87dr6QGNMwlF5B/NPCkCMwu0SNzlfkXrMl6P17jvgKKHVXcC5urnDaPJjEh+uNe/JAXXBZGm4H/cRtTdEXyh2GUeiZ5W3igMbFXrRo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=uniontech.com; spf=pass smtp.mailfrom=uniontech.com; dkim=pass (1024-bit key) header.d=uniontech.com header.i=@uniontech.com header.b=mdjhY50h; arc=none smtp.client-ip=54.207.22.56
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=uniontech.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=uniontech.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=debian.org header.i=@debian.org header.b="CsQoWzLj"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=debian.org;
-	s=smtpauto.stravinsky; h=X-Debian-User:Content-Transfer-Encoding:Content-Type
-	:In-Reply-To:From:References:Cc:To:Subject:MIME-Version:Date:Message-ID:
-	Reply-To:Content-ID:Content-Description;
-	bh=PWKFBKSWC/uFjStoZBpzoea1vU2a1UmxuNyKUMnJ7rk=; b=CsQoWzLj/qz8lhoDxI7c/zasr7
-	lY04Jz94bIfHI+SuLwq2svSl+nAtrN2Xp/6UR9ZMC933oTLdBTqFHeHSclqep5+YbtGpFFb2SZAuy
-	X0OFVKEZ3xjGT48igJwN/vwuKHtMbxRRAUaHgPre/XYnlVTRWIUQ+NORdBpD2GPiAkNrTGkHQSJ6f
-	7u6jtS6qpRd/D0e5hElHBhCpd5xWp8dMaTciKcezMbmRsPaGviGGCmYW/SjwIjrvBM8zBpDE5rD7j
-	8zAkWod01MpN6vm1n+z9YgS4Cb7knHZiwEnGTehOMq4X1r0I6+rVQkq+qUh24xqPVfkyVAxI6FOFQ
-	tMlvcBgw==;
-Received: from authenticated user
-	by stravinsky.debian.org with esmtpsa (TLS1.3:ECDHE_X25519__RSA_PSS_RSAE_SHA256__AES_128_GCM:128)
-	(Exim 4.94.2)
-	(envelope-from <ukleinek@debian.org>)
-	id 1slmCx-003IMa-E9; Wed, 04 Sep 2024 09:21:47 +0000
-Message-ID: <b973fec7-7722-45b4-91df-c540a6e91c9d@debian.org>
-Date: Wed, 4 Sep 2024 11:21:45 +0200
+	dkim=pass (1024-bit key) header.d=uniontech.com header.i=@uniontech.com header.b="mdjhY50h"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=uniontech.com;
+	s=onoh2408; t=1727080817;
+	bh=TKojGQo5efZPVPhdbfLGFXdP1X1sJLA7NWhICEw5iS4=;
+	h=From:To:Subject:Date:Message-Id:MIME-Version;
+	b=mdjhY50hyPqO34IJtBam/cB5F1Y4Yl0G/26+LnPqgBmhpalE4aiAxP8wKaWscNIFZ
+	 zYaSmZQOgWFM/5WVzyDiW0LzXeeaaPx4O5gd9OX6Iq48eUpqoHQ3mx7zjZMbg6/gYM
+	 UYXHuCeK6jBJWv93hBq0j5UflbNiL9M/bcXD05Go=
+X-QQ-mid: bizesmtp83t1727080813tqdo9n6k
+X-QQ-Originating-IP: Q/YpEDnwgrIuSpgjVuwTVdN4vCqR1lEU04pD1jEO2oE=
+Received: from localhost.localdomain ( [113.57.152.160])
+	by bizesmtp.qq.com (ESMTP) with 
+	id ; Mon, 23 Sep 2024 16:40:12 +0800 (CST)
+X-QQ-SSF: 0000000000000000000000000000000
+X-QQ-GoodBg: 1
+X-BIZMAIL-ID: 1424971217008246655
+From: wenlunpeng <wenlunpeng@uniontech.com>
+To: linux-sparse@vger.kernel.org
+Cc: wenlunpeng <wenlunpeng@uniontech.com>
+Subject: [PATCH] fix: Skip if symbol have no op when handle_qualifiers
+Date: Mon, 23 Sep 2024 16:39:44 +0800
+Message-Id: <20240923083944.2263208-1-wenlunpeng@uniontech.com>
+X-Mailer: git-send-email 2.20.1
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [ Patch 001 ] feature: add support for loongarch
-To: Dan Carpenter <dan.carpenter@linaro.org>,
- wuruilong <wuruilong@loongson.cn>
-Cc: linux-sparse@vger.kernel.org
-References: <c35dc58e-444f-0809-67cc-113d6b4b29be@loongson.cn>
- <f687e64e-d653-46a3-a302-68aa4a021215@stanley.mountain>
-Content-Language: en-US, de-DE
-From: =?UTF-8?Q?Uwe_Kleine-K=C3=B6nig?= <ukleinek@debian.org>
-In-Reply-To: <f687e64e-d653-46a3-a302-68aa4a021215@stanley.mountain>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Debian-User: ukleinek
+Content-Transfer-Encoding: 8bit
+X-QQ-SENDSIZE: 520
+Feedback-ID: bizesmtp:uniontech.com:qybglogicsvrgz:qybglogicsvrgz7a-0
 
-Hello Dan,
+Missing s->op will cause a SIGSEGV when trying to get s->op->type.
 
-On 9/4/24 07:39, Dan Carpenter wrote:
-> On Fri, May 24, 2024 at 10:47:23AM +0800, wuruilong wrote:
->> +const struct target target_loongarch64 = {
->> +	.mach = MACH_LOONGARCH64,
->> +	.bitness = ARCH_LP64,
->> +
->> +	.big_endian = 0,
-> 
-> No need to initialize things to zero.
+I encountered the issue when building with sparse in a linux kernel tree
+containing a vendor network driver. A simple `make` will success but a
+`make C=2` will exit with exit-code 139. The coredump shows that s->op
+here is NULL when dealing with a source code line like:
+	u8 *byte;
 
-While your concern is technically correct, mentioning it explicitly for 
-a human reader is still nice IMHO.
+Lines like this exist everywhere. I cannot figure out why just this file
+breaks sparse. But I think the NULL judge is needed here.
 
-Best regards
-Uwe
+Signed-off-by: wenlunpeng <wenlunpeng@uniontech.com>
+---
+ parse.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/parse.c b/parse.c
+index 3d6fef7c..66d0be04 100644
+--- a/parse.c
++++ b/parse.c
+@@ -1505,7 +1505,7 @@ static struct token *handle_qualifiers(struct token *t, struct decl_state *ctx)
+ {
+ 	while (token_type(t) == TOKEN_IDENT) {
+ 		struct symbol *s = lookup_keyword(t->ident, NS_TYPEDEF);
+-		if (!s)
++		if (!s || !s->op)
+ 			break;
+ 		if (!(s->op->type & (KW_ATTRIBUTE | KW_QUALIFIER)))
+ 			break;
+-- 
+2.20.1
 
