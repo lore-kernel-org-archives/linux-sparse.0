@@ -1,54 +1,54 @@
-Received: from mail-yw1-f202.google.com (mail-yw1-f202.google.com [209.85.128.202])
+Received: from mail-wr1-f74.google.com (mail-wr1-f74.google.com [209.85.221.74])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1F9D9194C95
-	for <linux-sparse@vger.kernel.org>; Wed, 25 Sep 2024 15:02:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.202
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 600E8198A08
+	for <linux-sparse@vger.kernel.org>; Wed, 25 Sep 2024 15:02:48 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.74
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727276568; cv=none; b=tdJcWbitqfm3q4+bmHxmgBj5BNIn8OncniZ88HcYH4TWcuz+26LAR5bWKak8+IOJuWa4kIxgi4dx4yBQkY+qEGTdAMLuFRm6erM690jTGvQl/rHFIqWa1nwcWxIL4Ox4LWUPWIXeHSrf+aEUJCgA4Mo9fROjFcy1n8oaSYAecm4=
+	t=1727276571; cv=none; b=jta8gMTfyHQQ0MT0OiFGXCe9F5JVP0ewE+nvaG510jSOvw+TemzXsOp/8eyzfuZuB/o/WojKdMQ0TtcfASKDodIZnx/6sfilm8PB9CuXairI2x4qWElWbCXRi1f6HaBXTDvxKLkEEAZvO5ifHARO+jWpSiSQ7HjVnnMFQ+cbpCg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727276568; c=relaxed/simple;
-	bh=3JGT0Gp6Mz6RRG9jsRwcVhBESThd+LENzWfNaIpsWgo=;
+	s=arc-20240116; t=1727276571; c=relaxed/simple;
+	bh=4t4Zd7d88HUB4IQR7hyWqg3RF4QpMaNzLYFQ0q/SbWM=;
 	h=Date:In-Reply-To:Mime-Version:References:Message-ID:Subject:From:
-	 To:Cc:Content-Type; b=n5nqr8rXolvN14idCeQwlAYxIhG8alR7VLTcT4qzykVpbB5ypIYo04AqjaRoJ1OStfxLxgtlP6PDvNXcRUk26BeE8KQhrhQ6yKVPZoqanUNmgMuRZVlVJLTVhCZGrK614T5/+wcGKgKlCWWfCTFBnCMETAHHE1BqcYRVGDAm5hQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=TsAdLtYA; arc=none smtp.client-ip=209.85.128.202
+	 To:Cc:Content-Type; b=Sof7DKK/oSANXLxclLMPhjSAVI0+w+CYaDkZgQ1pMsW5/auZ8wLGObtMKpGShtPeq+ccueGA+b/DXqpq6mIDrqxnQ/RRWIj0lqaR4ySdAwXQ+oofElrYOqnpnfi90Jyg9EONI6mY/a+4762VA5ZYEagWLr0gimbaqWRMNbFpLgk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=xpdc7b0r; arc=none smtp.client-ip=209.85.221.74
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="TsAdLtYA"
-Received: by mail-yw1-f202.google.com with SMTP id 00721157ae682-6d683cfa528so87593177b3.0
-        for <linux-sparse@vger.kernel.org>; Wed, 25 Sep 2024 08:02:45 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="xpdc7b0r"
+Received: by mail-wr1-f74.google.com with SMTP id ffacd0b85a97d-3780c8d689bso3486776f8f.2
+        for <linux-sparse@vger.kernel.org>; Wed, 25 Sep 2024 08:02:48 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20230601; t=1727276564; x=1727881364; darn=vger.kernel.org;
+        d=google.com; s=20230601; t=1727276567; x=1727881367; darn=vger.kernel.org;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:from:to:cc:subject:date:message-id:reply-to;
-        bh=EvnpcmFQxcsGZvvXdDVNifJH/U/gKUWuX4k9X0rnjWY=;
-        b=TsAdLtYAaeJGU3uxeCnFRgjYC3zywHtu6kW+6MWpOyRNzrSw08zUCHdh6CU0oPm8gr
-         54tOTeHyOuanpEbdNRoeq8LiHt0Ly0sdjAsUk0tK4vAtiLDvGVLI4ChjS1/H1NP68DS/
-         wSfZ51QMisCY3gLGmgurQEDRdSja9nk83ak8rOou2KXBBOUOMoZvo6HyUrCUqmKGFclq
-         X79FiB7c9maDv32TWuRLLqa01GBzHCXym8JqphMQrvk/vyTCKLoJG/bfAtxBkbCui/JW
-         prbpIXqx2mZ0S0rjKfDQ90v+oF35A3ySYc1z/4V/6oMFpYVBD7CNN2WPxnCQcpMGvSPl
-         uaDQ==
+        bh=pNx8CgL2JjB1FACn8gZOCDgH3XlG/cZ7BMhQN82yM0M=;
+        b=xpdc7b0reBbwnnjkdvySuBhqxCUup4ROen4arCBet5tBUn/jAPZrevZ0XydaQWVEdR
+         NptfvC2h5L3r3+buanOYePlkab/2vDQbYR/I2i9wuWm4TvkCnKkf9vNjvdgt80uJ8+SW
+         iLr4Wbpv+HxRref707wqaz2SoYCW0MfU9uJo8GCadxjy+7NiRAnESsNrx2pnflAkCsms
+         o7NuB+N+ESfhIaXEtIqiTN+f95AS/6k7Spad2NqYoV//cdCFL0JwjorjV7Fhr1bPSoQ6
+         6GKDsf/GGwmOOxvTmd0CsCY8/y/kVK0718CGugnH/HehdzmKjcWznuNpm26kPgWMkSJ9
+         d2Gg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1727276564; x=1727881364;
+        d=1e100.net; s=20230601; t=1727276567; x=1727881367;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=EvnpcmFQxcsGZvvXdDVNifJH/U/gKUWuX4k9X0rnjWY=;
-        b=PzcbCvrs/T2Rb/ZoJoWGKl6uf1aEVSTxrT7E7q1yJnd2IMEwE/CR6+Jtdhg0b2V7Q9
-         yfqTO5FeAn2PsDPOWhr+IjD2qjRpV6a8wBnnizMqPJTt7meSASMSzb96LtiztrtWHwSA
-         359XwMS/QStQHq11VKZQDj2Du/4I2T/LiEACRhDpCWndlorGfqtTxpp/vFsfp01mcyca
-         w/zlJnJMXhNREaEOSkYaX1Y1r9ZCafeqdtCx2MjvzK0YTeSG8P2mTP6dnQvPbgogl3kv
-         xYlT0qSLOxLbVL6WlzbRG06kuq32rTQ7iBfp/psbkgcTnws1fZWpblPnvH5VuWIf8IGW
-         RhSg==
-X-Forwarded-Encrypted: i=1; AJvYcCXPp7cJEtCw+JK+/WpWrNcHLADSNmNvQzukBlWcZvODgjI9/ON5Wo2fDmfGUe3YBfrcBqL0ECjibz3s92Y=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx/N875IP6WzlJjZgeyH1g40RvDFnkNvfEfokgDKSvOMviveThk
-	bZ+NI4FAlXjArCVRrYlRSkduugxRjuXD3ktvWkRxu3MOyvGkRa923ZgD4M6tvJdusbuWPg==
-X-Google-Smtp-Source: AGHT+IG8l7xPrwiQoCJNQ/ba3EMloi9V99YK0VEhh/KbnKIqVODzSQX4+kTe9p6XHA3xEE581cvXY/7/
+        bh=pNx8CgL2JjB1FACn8gZOCDgH3XlG/cZ7BMhQN82yM0M=;
+        b=Mkyxrp7Gwbcp7Hxtphs2muRJmbVEOov/s/PKtVzJtDU9BaRfd7s0wynRs7lT0/vQ1H
+         7nXylre0QAW7Sq7suju11X0afXeCirqPcRM/KO9JSSCeywP+Zbf8g7QdpDXdEZ6tFohm
+         06zWyMcoOdzpVHz/GsVqhbgvwhDL2ICAknjUvpct5JSS+aHEEFVH4ntOkX1lkcrWmyw+
+         fFZ/MODv/HPXqdeUFd8/NN+Mx0zHj3fJ1hprL99mAq2/UhXp/V3fJUOY8WnHCWXFjEp+
+         QZlMZTqdYLIRyFMeo+bFsRiTQe0KPTJX1/op/1Yavda5gMcgmdASVxh4vvFCBmyXHEqy
+         xfZQ==
+X-Forwarded-Encrypted: i=1; AJvYcCUviNWSPTUv0PMz6gE3a4XYuVpTkNMKNTjvesz/bf6vzbBpWoBvA5iycnefw/XLws0fvY02Fj6bW7dHOj0=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzpwP1yzr6i0v9pMlyOHeJ8LqrDs1a0IysWngvokZBIh6zUzfE9
+	KNvrfbwHxv3leRLGeZqeCTzAxXSbcvj+Xy2EQQb6x0AH/htVgN4CFAK71piOppBqdNExAw==
+X-Google-Smtp-Source: AGHT+IHtZA65C9eNefhgBWqmYh0kGm6u7UMHidCQ+DZrqbEOemMqvMt90MEtVjIphkQcIFg1qUNObHvF
 X-Received: from palermo.c.googlers.com ([fda3:e722:ac3:cc00:7b:198d:ac11:8138])
- (user=ardb job=sendgmr) by 2002:a25:fc20:0:b0:e25:17cb:352e with SMTP id
- 3f1490d57ef6-e2517cb37ebmr1573276.9.1727276563646; Wed, 25 Sep 2024 08:02:43
+ (user=ardb job=sendgmr) by 2002:a5d:5e04:0:b0:37c:c51b:d07f with SMTP id
+ ffacd0b85a97d-37cc51bd43bmr945f8f.9.1727276566478; Wed, 25 Sep 2024 08:02:46
  -0700 (PDT)
-Date: Wed, 25 Sep 2024 17:01:21 +0200
+Date: Wed, 25 Sep 2024 17:01:22 +0200
 In-Reply-To: <20240925150059.3955569-30-ardb+git@google.com>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
@@ -58,15 +58,14 @@ List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 Mime-Version: 1.0
 References: <20240925150059.3955569-30-ardb+git@google.com>
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2665; i=ardb@kernel.org;
- h=from:subject; bh=aFznGPhrIJfcYbFW/zJm7PxtyN4XPqpBJvJpRLs7DOQ=;
- b=owGbwMvMwCFmkMcZplerG8N4Wi2JIe2L6smrOU/sUlwy2LTW237rV4pUONJ8T3XtdLO2DQ3bj
- 80/F1nfUcrCIMbBICumyCIw+++7nacnStU6z5KFmcPKBDKEgYtTACYyyZHhn8LWprti0g+tdKf9
- /bStUjGJXy/+qc4H120n962eP03h1yKG/wHHj7aK75zgynumw7x0V1PPmh2muXNy98WcvvZ74cO kJi4A
+X-Developer-Signature: v=1; a=openpgp-sha256; l=4300; i=ardb@kernel.org;
+ h=from:subject; bh=LZda20wnQiwQiTXt6tiHm30A1wODb0KBnxm/teE+Lu4=;
+ b=owGbwMvMwCFmkMcZplerG8N4Wi2JIe2L6unSO+7/NsayfzpQ7uW+6/sf035bm8SjMXouItt6v
+ vsqNLN3lLIwiHEwyIopsgjM/vtu5+mJUrXOs2Rh5rAygQxh4OIUgIlUFzIyLClfembn6Wlfb79Z
+ nLiyrmmade3VvmNH2xq0FwTP8FnOwsHwmyXhPONLDfu9MQfFQ+MyCsJWuy/VFOpa8t9x77FzLsv /8AAA
 X-Mailer: git-send-email 2.46.0.792.g87dc391469-goog
-Message-ID: <20240925150059.3955569-51-ardb+git@google.com>
-Subject: [RFC PATCH 21/28] x86/head: Use PIC-compatible symbol references in
- startup code
+Message-ID: <20240925150059.3955569-52-ardb+git@google.com>
+Subject: [RFC PATCH 22/28] asm-generic: Treat PIC .data.rel.ro sections as .rodata
 From: Ard Biesheuvel <ardb+git@google.com>
 To: linux-kernel@vger.kernel.org
 Cc: Ard Biesheuvel <ardb@kernel.org>, x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>, 
@@ -91,85 +90,108 @@ Content-Type: text/plain; charset="UTF-8"
 
 From: Ard Biesheuvel <ardb@kernel.org>
 
-Use RIP-relative symbol references to make them compatible with running
-the linker in PIE mode.
+When running the compiler in PIC/PIE mode, it will emit data objects
+that are 'const' in the context of the program into the .data.rel.ro
+section if they contain absolute addresses of statically allocated
+global objects. This helps the dynamic loader distinguish between
+objects that are truly const from objects that will need to be fixed up
+by the loader before starting the program.
+
+This is not a concern for the kernel, but it does mean those
+.data.rel.ro input sections need to be handled. So treat them as
+.rodata.
+
+It also means some explicit uses of .rodata for global structures
+containing absolute addresses need to be changed to .data.rel.ro to
+prevent the linker from warning about incompatible section flags.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/kernel/head_64.S            | 14 +++++++++-----
- arch/x86/kernel/relocate_kernel_64.S |  6 ++++--
- 2 files changed, 13 insertions(+), 7 deletions(-)
+ include/asm-generic/vmlinux.lds.h       |  2 +-
+ include/linux/compiler.h                |  2 +-
+ scripts/kallsyms.c                      |  2 +-
+ tools/objtool/check.c                   | 11 ++++++-----
+ tools/objtool/include/objtool/special.h |  2 +-
+ 5 files changed, 10 insertions(+), 9 deletions(-)
 
-diff --git a/arch/x86/kernel/head_64.S b/arch/x86/kernel/head_64.S
-index db71cf64204b..cc2fec3de4b7 100644
---- a/arch/x86/kernel/head_64.S
-+++ b/arch/x86/kernel/head_64.S
-@@ -182,8 +182,9 @@ SYM_INNER_LABEL(secondary_startup_64_no_verify, SYM_L_GLOBAL)
- 	xorl	%r15d, %r15d
+diff --git a/include/asm-generic/vmlinux.lds.h b/include/asm-generic/vmlinux.lds.h
+index cc14d780c70d..2b079f73820f 100644
+--- a/include/asm-generic/vmlinux.lds.h
++++ b/include/asm-generic/vmlinux.lds.h
+@@ -456,7 +456,7 @@
+ 	. = ALIGN((align));						\
+ 	.rodata           : AT(ADDR(.rodata) - LOAD_OFFSET) {		\
+ 		__start_rodata = .;					\
+-		*(.rodata) *(.rodata.*)					\
++		*(.rodata .rodata.* .data.rel.ro*)			\
+ 		SCHED_DATA						\
+ 		RO_AFTER_INIT_DATA	/* Read only after init */	\
+ 		. = ALIGN(8);						\
+diff --git a/include/linux/compiler.h b/include/linux/compiler.h
+index ec55bcce4146..f7c48b7c0a6b 100644
+--- a/include/linux/compiler.h
++++ b/include/linux/compiler.h
+@@ -133,7 +133,7 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
+ #define annotate_unreachable() __annotate_unreachable(__COUNTER__)
  
- 	/* Derive the runtime physical address of init_top_pgt[] */
--	movq	phys_base(%rip), %rax
--	addq	$(init_top_pgt - __START_KERNEL_map), %rax
-+	leaq	init_top_pgt(%rip), %rax
-+	subq	$__START_KERNEL_map, %rax
-+	addq	phys_base(%rip), %rax
+ /* Annotate a C jump table to allow objtool to follow the code flow */
+-#define __annotate_jump_table __section(".rodata..c_jump_table")
++#define __annotate_jump_table __section(".data.rel.ro.c_jump_table")
  
- 	/*
- 	 * Retrieve the modifier (SME encryption mask if SME is active) to be
-@@ -314,7 +315,8 @@ SYM_INNER_LABEL(common_startup_64, SYM_L_LOCAL)
+ #else /* !CONFIG_OBJTOOL */
+ #define annotate_reachable()
+diff --git a/scripts/kallsyms.c b/scripts/kallsyms.c
+index 9c34b9397872..1700e97400aa 100644
+--- a/scripts/kallsyms.c
++++ b/scripts/kallsyms.c
+@@ -357,7 +357,7 @@ static void write_src(void)
+ 	printf("#define ALGN .balign 4\n");
+ 	printf("#endif\n");
  
- .Lsetup_cpu:
- 	/* Get the per cpu offset for the given CPU# which is in ECX */
--	movq	__per_cpu_offset(,%rcx,8), %rdx
-+	leaq	__per_cpu_offset(%rip), %rdx
-+	movq	(%rdx,%rcx,8), %rdx
- #else
- 	xorl	%edx, %edx /* zero-extended to clear all of RDX */
- #endif /* CONFIG_SMP */
-@@ -325,7 +327,8 @@ SYM_INNER_LABEL(common_startup_64, SYM_L_LOCAL)
+-	printf("\t.section .rodata, \"a\"\n");
++	printf("\t.section .data.rel.ro, \"a\"\n");
+ 
+ 	output_label("kallsyms_num_syms");
+ 	printf("\t.long\t%u\n", table_cnt);
+diff --git a/tools/objtool/check.c b/tools/objtool/check.c
+index 01237d167223..04725bd83232 100644
+--- a/tools/objtool/check.c
++++ b/tools/objtool/check.c
+@@ -2575,15 +2575,16 @@ static void mark_rodata(struct objtool_file *file)
+ 	 * Search for the following rodata sections, each of which can
+ 	 * potentially contain jump tables:
  	 *
- 	 * RDX contains the per-cpu offset
+-	 * - .rodata: can contain GCC switch tables
+-	 * - .rodata.<func>: same, if -fdata-sections is being used
+-	 * - .rodata..c_jump_table: contains C annotated jump tables
++	 * - .rodata .data.rel.ro		: can contain GCC switch tables
++	 * - .rodata.<func> .data.rel.ro.<func>	: same, if -fdata-sections is being used
++	 * - .data.rel.ro.c_jump_table		: contains C annotated jump tables
+ 	 *
+ 	 * .rodata.str1.* sections are ignored; they don't contain jump tables.
  	 */
--	movq	pcpu_hot + X86_current_task(%rdx), %rax
-+	leaq	pcpu_hot + X86_current_task(%rip), %rax
-+	movq	(%rax,%rdx), %rax
- 	movq	TASK_threadsp(%rax), %rsp
+ 	for_each_sec(file, sec) {
+-		if (!strncmp(sec->name, ".rodata", 7) &&
+-		    !strstr(sec->name, ".str1.")) {
++		if ((!strncmp(sec->name, ".rodata", 7) &&
++		     !strstr(sec->name, ".str1.")) ||
++		    !strncmp(sec->name, ".data.rel.ro", 12)) {
+ 			sec->rodata = true;
+ 			found = true;
+ 		}
+diff --git a/tools/objtool/include/objtool/special.h b/tools/objtool/include/objtool/special.h
+index 86d4af9c5aa9..89ee12b1a138 100644
+--- a/tools/objtool/include/objtool/special.h
++++ b/tools/objtool/include/objtool/special.h
+@@ -10,7 +10,7 @@
+ #include <objtool/check.h>
+ #include <objtool/elf.h>
  
- 	/*
-@@ -346,7 +349,8 @@ SYM_INNER_LABEL(common_startup_64, SYM_L_LOCAL)
- 	 */
- 	subq	$16, %rsp
- 	movw	$(GDT_SIZE-1), (%rsp)
--	leaq	gdt_page(%rdx), %rax
-+	leaq	gdt_page(%rip), %rax
-+	addq	%rdx, %rax
- 	movq	%rax, 2(%rsp)
- 	lgdt	(%rsp)
- 	addq	$16, %rsp
-diff --git a/arch/x86/kernel/relocate_kernel_64.S b/arch/x86/kernel/relocate_kernel_64.S
-index e9e88c342f75..cbfd0227ea3e 100644
---- a/arch/x86/kernel/relocate_kernel_64.S
-+++ b/arch/x86/kernel/relocate_kernel_64.S
-@@ -106,6 +106,9 @@ SYM_CODE_START_NOALIGN(relocate_kernel)
- 	/* setup a new stack at the end of the physical control page */
- 	lea	PAGE_SIZE(%r8), %rsp
+-#define C_JUMP_TABLE_SECTION ".rodata..c_jump_table"
++#define C_JUMP_TABLE_SECTION ".data.rel.ro.c_jump_table"
  
-+	/* take the virtual address of virtual_mapped() before jumping */
-+	leaq	virtual_mapped(%rip), %r14
-+
- 	/* jump to identity mapped page */
- 	addq	$(identity_mapped - relocate_kernel), %r8
- 	pushq	%r8
-@@ -225,8 +228,7 @@ SYM_CODE_START_LOCAL_NOALIGN(identity_mapped)
- 	movq	%rax, %cr3
- 	lea	PAGE_SIZE(%r8), %rsp
- 	call	swap_pages
--	movq	$virtual_mapped, %rax
--	pushq	%rax
-+	pushq	%r14
- 	ANNOTATE_UNRET_SAFE
- 	ret
- 	int3
+ struct special_alt {
+ 	struct list_head list;
 -- 
 2.46.0.792.g87dc391469-goog
 
