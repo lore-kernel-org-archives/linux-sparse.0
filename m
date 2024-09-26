@@ -1,57 +1,69 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pj1-f53.google.com (mail-pj1-f53.google.com [209.85.216.53])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5DC353B7A8;
-	Thu, 26 Sep 2024 13:38:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D7CC418870F;
+	Thu, 26 Sep 2024 21:35:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.53
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727357922; cv=none; b=WCQQi4vbwCkxQDml/CRvbeQDevm6pzMmgT8GZOr8FtNxmS4QoTRACLUN8ABTytP+SI/n91zc4zDvMyOCHunldtQdzoegVou12BwJv9jFH9HHg03FtbeEGrc6rMr9wO3QA3Px6cOLB0P2qSy2beFv8GAckQ/uvjjiI8sYPkzAL2A=
+	t=1727386525; cv=none; b=goQJBRrRmkqgtyjkuhqlNcfmLj145m638QfMynP66R43xq6hJqSxjzhA8mNlnbjBMWTuMILU4IVk3/QPtjSrXfnqFiq2HMebgSRVsQUs3mGhHBrNS4jgvbvo/xy4oBf2W2O2Td1+LceQFE4HnFVUeN2lwoBYmSqXToaT/Dy9xvI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727357922; c=relaxed/simple;
-	bh=OPIQS2t62p13UwMnk1FiF+unfRr5Zwe9MubLOeGiJyM=;
+	s=arc-20240116; t=1727386525; c=relaxed/simple;
+	bh=1/AF0ye1aEDqbRIMOiqu2UP5rEYyIqLBgduhnkT/Gq8=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=SWI4Ov3/hPpmp4ekefjXgITt1acMdx2JHaai2YW3K++Jlnhk++5i0P+tQeLR5cckoEm+Y8I8qPrbkPzhS/p3c9jXKyw8/v7oh6LfGDbNLRoKKEc5idpk11WTZtEEigmpwQj72fMED3moCd6l+C2DMO5b5F5TLYKA1fRV81s9rYw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=tFpkbNET; arc=none smtp.client-ip=10.30.226.201
+	 To:Cc:Content-Type; b=HBJfh/5Z7VEQxAgZ34fM/Fcum9KV9uRA4YIPjdwVhv1SKHj5FlBKtaFrY9UklpOXb6tj9a24Ppj0UNskaOvLs1phEpW4M0T3GA05X3E3GzoES+ZHys+EPON/W5TX4FRw1SnZ4EYkHV1ZwW9wX5nfulw3klh0rZgUbhtG3nAQFJ4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ntYvYQ3V; arc=none smtp.client-ip=209.85.216.53
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="tFpkbNET"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D596EC4CECE;
-	Thu, 26 Sep 2024 13:38:41 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1727357921;
-	bh=OPIQS2t62p13UwMnk1FiF+unfRr5Zwe9MubLOeGiJyM=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=tFpkbNET0czPRtMPovfI/tw3gSCaREnEFLqAxcDb3uZoTaN1MUsL6oFQbeAJWaXFI
-	 CeZWZV2EQC3jkUVUyeFkJ+3vTNfdldDlcwSemGpaMMeK9dMpCn+eo3NwP7qHalae2l
-	 VkYErS8T+eLlgBYIpVtrHU2I5PcdP6mhLc1DUl1KUsQKtRR5hqOVwbYWqQHd51bOSc
-	 0RXX9eQm9K7Euav9Ek8BEAPCErl0m7IiVuV8uXmMnTrDNFw9GHP2lFmVOsqkL2L43u
-	 cjWMgiSR1KtLVxjFC81BklSOZDD2JwvftlNBn0/eOD6Pyn0J+4KRnR0e//rfp7F508
-	 d7FbSWxfvv7MQ==
-Received: by mail-lj1-f177.google.com with SMTP id 38308e7fff4ca-2f75aaaade6so11868661fa.1;
-        Thu, 26 Sep 2024 06:38:41 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AJvYcCUXGse6vbc6FpYz4lgSlKDQJ3qHeN8YH1qg4ceNUpAOgf2a3chMjIK0ENodL3waku7Y6v9btiPZYwo=@vger.kernel.org, AJvYcCVHSf69uGrWCz6BRS1+JmcB0WwHMJusjUz5DzJz6OyyNCwKaGdkiV6aC7dllcXHLJDaeF58Iu+R6pkWfkE5@vger.kernel.org, AJvYcCVTuIuwxeKYKbgD/ed5IBfUTO7U1Ejx7RhUMhftttnafsBMVSpnvTc9K/Q5OeTJhgPJkdtAzjFih+qoU3yY@vger.kernel.org, AJvYcCVtRQGxusNOZWYtaUh1loOVtMx1E0c7HHDguIWYo9ealgtYxuWTRpJmBSWUo7f5zHlNPOM1Gw8mgXFiZ8mY@vger.kernel.org, AJvYcCWnzRX1k3MUWDUeu7WRrtNXnuRWLBPxMs1hH9mzwU5NkneQMn6dD/qskBYd2ZFzC5TMylmYyoNk3rnPXw==@vger.kernel.org, AJvYcCWwRwkLEtUjeqDHvxaVwTFatpqwvjxPRnP0dO3vppSWiwK189Ows6GwGumhRSpTmyH4CWEalcL0gdCD@vger.kernel.org, AJvYcCX2LMIhQ6EVmnkECm5H1xOqA26099cMKqZHDLb3snQOaHAII2I5pbbgC2ScvY2UAJCHWL9K3nvrFknz1qONp+CPMw==@vger.kernel.org, AJvYcCXc6rBX4B7tDEFX89zlzTTdnMaKavPMzO6FCLF0Fp51dWzHpePLktp9KpDsTPBEb2azHKHXUxYL49arAuSU2bQ=@vger.kernel.org, AJvYcCXgB42XCutcroFoVKxqmQ3xVd06k4oIAcHRUvkIUAQRtVdVKECbH9h9M9zw29dh6Av1J9g=@vger.kernel.org, AJvYcCXvi5cxeCUvrafei1UmrndmyryPFc3Yjd/XjPlDWE8wKBKBqfauz/iR5f6TXTsiAmqgA/04JIOBiM57@vger.kernel.org
-X-Gm-Message-State: AOJu0Ywss9HWQbBVgJHtvIqk1Wu4DkB/i43GOJbJ7pSBIffBAxWqmqfp
-	RPSo3fNJedto7dlLNTrd34VBZVBaW6YphvSAysX7nCs1Y6E5lZVzu/a9j9jwmABqE2Bgu0nLqyB
-	6em3OiiG3xXVqSuX9z1jAxXZ5Yl4=
-X-Google-Smtp-Source: AGHT+IGDysp0zVaI/G56jPcUmenrli6iDQ7ZCklZUQ9W3MAWEI6d8p2NALI8I7dIlWV2Pg4Oztsl5Tqp++gl5gafuuo=
-X-Received: by 2002:a2e:4a0a:0:b0:2ef:1784:a20 with SMTP id
- 38308e7fff4ca-2f91ca68786mr32564001fa.38.1727357920170; Thu, 26 Sep 2024
- 06:38:40 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ntYvYQ3V"
+Received: by mail-pj1-f53.google.com with SMTP id 98e67ed59e1d1-2e0b467da03so91493a91.2;
+        Thu, 26 Sep 2024 14:35:23 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1727386523; x=1727991323; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=YN3ZIl0AHdW2Pc3ccHhFRbQ1ihSm5IEdT9WChsNSY6k=;
+        b=ntYvYQ3VzjrPQRjO0RTjOTbXP7/4NP5rjwPgNkr9vH/XeTJuyjkJQ6j8P1Q5+uxnST
+         F3wPdxptRRuXH4IYlyP+1oLBMPEpsloYKCpFimcgj0k4lN/GD1KdZTGRrH/xAwUoC1V3
+         rJPs6Qhurc32eEX7Nw6W0yg9ypx4H8Kn2SL2FF0rDnTsbAewQk6cqpJ0OzCNZ9fG7s2K
+         jkChH3VAIV2ScpQ7p6vD/ekIMTj99jeg/1W8R/4uC1LACZ3XKgZEkEjh99yXfdBqpnAL
+         uIKAImU9QAzLmdcHL1trZc/BPKjgl7Z0W/ek20wLJnfUeFDbJ/kOre9Cpwh2jgN/OLHt
+         egVg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1727386523; x=1727991323;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=YN3ZIl0AHdW2Pc3ccHhFRbQ1ihSm5IEdT9WChsNSY6k=;
+        b=nnmJKkgcACozVDSpFBzUMkQb5Y3qgChkkOHFmpcaO+WyoEmG2yQ/DJaaT+0E6OKhbL
+         4edl7pBfS0KSuCN4J17TXsxaCijX0wFOl1McewxcYnkjHlppDaDtIlmk7BeLqo9spMzd
+         GvQfWJWmckzL3ysFqmQAywMzd6OfMCvStz6XrMLPgqsx9qF7zAWvuUCxyMl7I4LO5asF
+         tY2iqMCX1KyOtyQXSAx70zzQ3QgQ3QFPJnt3mvVfTYp7DTTgIKuR5JjAdUGM1vIhG5rn
+         wAdcVhSIglqIO2ATJ+gekoA6j5ux3+Xp6qrTXWyeWX5Hr9kk6/60rCGS1ehKqpiZANFI
+         G0JA==
+X-Forwarded-Encrypted: i=1; AJvYcCUDJ8RvVdvqtHN3lX1txbKSEmzjS+sQLqz6QZbKSBcpkEsBUAeUwf4nTqbN03vw4GXyiD9iQZArXil9IuPBiXw=@vger.kernel.org, AJvYcCUh1EnD+hD2C3vzqWv60QHnERNsPDZPvtTXZIO5sRiraXir9igXESaPEYdxkZd9i9XAYroDQMEZrC9cLvE6@vger.kernel.org, AJvYcCUidN0lHrF9iOqSPJ8IctwwAfwAs07OQfJTDdO/ZULHyFNBpvg0hyVrQCV6KMoggxOswxI=@vger.kernel.org, AJvYcCV5D5TsQSXjcHuycgk/6XXYltPQlUyoOj0RhDcW5nuV2PC/tj/Q2JUE4o2CUQJvBvD97N7k7sFVZCk9WEHGDPyghQ==@vger.kernel.org, AJvYcCVOLC6+65mOqcNjHRp1+tV/XssjpTX8h+9F4YBiY8/h9aWXzBKFdg2eK7772upIEAdFSiQJEmnzVgkk6g==@vger.kernel.org, AJvYcCVsqpEA1X34JgSSy+zWUs7+fSAIlED2wx+FoF0zXBxfBa0ReVabMdfI1p7J84be8lizTJ6y/uqbQToD@vger.kernel.org, AJvYcCVyOHlVKllui6A90Q42IfKbLrvLtdZnjC+4kVdVZSOG4aRB5tquRkPsdIouUdZ5cjLcKniIJa85fW8=@vger.kernel.org, AJvYcCWIeHXSn79E1pba2uaZgabrN6egSq3hKQJvvQyqA0ncZ3poR1endScJFmYMlQD9tOmBDQRNsnt7bGe0@vger.kernel.org, AJvYcCXTmNdlSb1QBFTlgk2/mbOW9A2NT3p8kXvs3x58YZP4/N+DnfQhUq/gJiG6xW7mj8KHqe8jHlQq55VTo3hn@vger.kernel.org
+X-Gm-Message-State: AOJu0YzCTZ3zsxEiGOsdmhyvylg0pTMM/FgSGOmCyMfxDfM9CSVwTjhW
+	AAPO1FdxgZ+AUbsMCKMSJLJBPk64IXPEa9Zxwq805/7NayLOfWOsl5gSodJeflPB/OilgtRCS/O
+	Gj38jwHBTYzU7aYb/AVVUkzDXAIw=
+X-Google-Smtp-Source: AGHT+IFP+qclc+DwNk0VcbiLZGtyseD1sfEmeyqBVla3e/ZDfuly9waYm3g7wRqfrKuy03nGqriwsOXLp8FvWSa4ibk=
+X-Received: by 2002:a17:90b:3698:b0:2db:60b:eee with SMTP id
+ 98e67ed59e1d1-2e0b8ed348emr498104a91.9.1727386523117; Thu, 26 Sep 2024
+ 14:35:23 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240925150059.3955569-30-ardb+git@google.com>
- <20240925150059.3955569-57-ardb+git@google.com> <4eca972d-a462-4cc5-9238-5d63485e1af4@oracle.com>
-In-Reply-To: <4eca972d-a462-4cc5-9238-5d63485e1af4@oracle.com>
-From: Ard Biesheuvel <ardb@kernel.org>
-Date: Thu, 26 Sep 2024 15:38:27 +0200
-X-Gmail-Original-Message-ID: <CAMj1kXEOFDwoYrLH9f-d46HRPMw7HjWRQGNdMu5_D_Ny3UtPxg@mail.gmail.com>
-Message-ID: <CAMj1kXEOFDwoYrLH9f-d46HRPMw7HjWRQGNdMu5_D_Ny3UtPxg@mail.gmail.com>
-Subject: Re: [RFC PATCH 27/28] x86/kernel: Switch to PIE linking for the core kernel
-To: Vegard Nossum <vegard.nossum@oracle.com>
-Cc: Ard Biesheuvel <ardb+git@google.com>, linux-kernel@vger.kernel.org, x86@kernel.org, 
+References: <20240925150059.3955569-30-ardb+git@google.com> <20240925150059.3955569-32-ardb+git@google.com>
+In-Reply-To: <20240925150059.3955569-32-ardb+git@google.com>
+From: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
+Date: Thu, 26 Sep 2024 23:35:10 +0200
+Message-ID: <CANiq72=z6A=50QO3V0S3Kgx6XQT93GxbB_LN6PFAQCmNgy370A@mail.gmail.com>
+Subject: Re: [RFC PATCH 02/28] Documentation: Bump minimum GCC version to 8.1
+To: Ard Biesheuvel <ardb+git@google.com>
+Cc: linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>, x86@kernel.org, 
 	"H. Peter Anvin" <hpa@zytor.com>, Andy Lutomirski <luto@kernel.org>, Peter Zijlstra <peterz@infradead.org>, 
 	Uros Bizjak <ubizjak@gmail.com>, Dennis Zhou <dennis@kernel.org>, Tejun Heo <tj@kernel.org>, 
 	Christoph Lameter <cl@linux.com>, Mathieu Desnoyers <mathieu.desnoyers@efficios.com>, 
@@ -70,84 +82,19 @@ Cc: Ard Biesheuvel <ardb+git@google.com>, linux-kernel@vger.kernel.org, x86@kern
 	linux-perf-users@vger.kernel.org, rust-for-linux@vger.kernel.org, 
 	llvm@lists.linux.dev
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Wed, 25 Sept 2024 at 22:25, Vegard Nossum <vegard.nossum@oracle.com> wrote:
+On Wed, Sep 25, 2024 at 5:10=E2=80=AFPM Ard Biesheuvel <ardb+git@google.com=
+> wrote:
 >
->
-> On 25/09/2024 17:01, Ard Biesheuvel wrote:
-> > From: Ard Biesheuvel <ardb@kernel.org>
-> >
-> > Build the kernel as a Position Independent Executable (PIE). This
-> > results in more efficient relocation processing for the virtual
-> > displacement of the kernel (for KASLR). More importantly, it instructs
-> > the linker to generate what is actually needed (a program that can be
-> > moved around in memory before execution), which is better than having to
-> > rely on the linker to create a position dependent binary that happens to
-> > tolerate being moved around after poking it in exactly the right manner.
-> >
-> > Note that this means that all codegen should be compatible with PIE,
-> > including Rust objects, so this needs to switch to the small code model
-> > with the PIE relocation model as well.
-> >
-> > Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
-> > ---
-> >   arch/x86/Kconfig                        |  2 +-
-> >   arch/x86/Makefile                       | 11 +++++++----
-> >   arch/x86/boot/compressed/misc.c         |  2 ++
-> >   arch/x86/kernel/vmlinux.lds.S           |  5 +++++
-> >   drivers/firmware/efi/libstub/x86-stub.c |  2 ++
-> >   5 files changed, 17 insertions(+), 5 deletions(-)
-> >
-...
->
-> This patch causes a build failure here (on 64-bit):
->
->    LD      .tmp_vmlinux2
->    NM      .tmp_vmlinux2.syms
->    KSYMS   .tmp_vmlinux2.kallsyms.S
->    AS      .tmp_vmlinux2.kallsyms.o
->    LD      vmlinux
->    BTFIDS  vmlinux
-> WARN: resolve_btfids: unresolved symbol bpf_lsm_key_free
-> FAILED elf_update(WRITE): invalid section entry size
-> make[5]: *** [scripts/Makefile.vmlinux:34: vmlinux] Error 255
-> make[5]: *** Deleting file 'vmlinux'
-> make[4]: *** [Makefile:1153: vmlinux] Error 2
-> make[3]: *** [debian/rules:74: build-arch] Error 2
-> dpkg-buildpackage: error: make -f debian/rules binary subprocess
-> returned exit status 2
-> make[2]: *** [scripts/Makefile.package:121: bindeb-pkg] Error 2
-> make[1]: *** [/home/opc/linux-mainline-worktree2/Makefile:1544:
-> bindeb-pkg] Error 2
-> make: *** [Makefile:224: __sub-make] Error 2
->
-> The parent commit builds fine. With V=1:
->
-> + ldflags='-m elf_x86_64 -z noexecstack --pie -z text -z
-> call-nop=suffix-nop -z max-page-size=0x200000 --build-id=sha1
-> --orphan-handling=warn --script=./arch/x86/kernel/vmlinux.lds
-> -Map=vmlinux.map'
-> + ld -m elf_x86_64 -z noexecstack --pie -z text -z call-nop=suffix-nop
-> -z max-page-size=0x200000 --build-id=sha1 --orphan-handling=warn
-> --script=./arch/x86/kernel/vmlinux.lds -Map=vmlinux.map -o vmlinux
-> --whole-archive vmlinux.a .vmlinux.export.o init/version-timestamp.o
-> --no-whole-archive --start-group --end-group .tmp_vmlinux2.kallsyms.o
-> .tmp_vmlinux1.btf.o
-> + is_enabled CONFIG_DEBUG_INFO_BTF
-> + grep -q '^CONFIG_DEBUG_INFO_BTF=y' include/config/auto.conf
-> + info BTFIDS vmlinux
-> + printf '  %-7s %s\n' BTFIDS vmlinux
->    BTFIDS  vmlinux
-> + ./tools/bpf/resolve_btfids/resolve_btfids vmlinux
-> WARN: resolve_btfids: unresolved symbol bpf_lsm_key_free
-> FAILED elf_update(WRITE): invalid section entry size
->
-> I can send the full config off-list if necessary, but looks like it
-> might be enough to set CONFIG_DEBUG_INFO_BTF=y.
->
+>  Documentation/admin-guide/README.rst | 2 +-
+>  Documentation/process/changes.rst    | 2 +-
 
-Thanks for the report. Turns out that adding the GOT to .rodata bumps
-the section's sh_entsize to 8, and libelf complains if the section
-size is not a multiple of the entry size.
+This should update scripts/min-tool-version.sh too. With that:
 
-I'll include a fix in the next revision.
+Acked-by: Miguel Ojeda <ojeda@kernel.org>
+
+As Arnd says, the cleanups can be done afterwards.
+
+Cheers,
+Miguel
