@@ -1,121 +1,123 @@
-Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id AC995142621;
-	Fri, 27 Sep 2024 16:22:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
+Received: from mail-lf1-f44.google.com (mail-lf1-f44.google.com [209.85.167.44])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A122C187FF4;
+	Sat, 28 Sep 2024 13:41:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.44
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727454144; cv=none; b=VzxlLmgElqTwORlXStcA69cPuMGtwaPmcdfCP2M0l7xWnXenFBsq5lBXZetdtGG8NdfrR3gDPWB4CsJNlekuBknKsJUcpyC2u0+Edn/TPKduJ5IqZhUk2S8sunIIVm5h5mb5mOGzhiHBBNetfzq6NZ2/p0Fveemn0szMvKeJUaA=
+	t=1727530883; cv=none; b=mGNCDUcDJQOi31t4sUEa6CCl7Zp+QYyxZ+ihqZ3jhhwBalaUrJJOJv6CYqp3yajxL81zEiba7SHZXuOFASv88ovXM3ulUQ2ph4RXqSNlpyX9m3meFocaEvwfbxR9D67XG+46zSjIdI4tiJVMxalx8Kk3+yZEgt30e+DbkFarqOk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727454144; c=relaxed/simple;
-	bh=MwxSYUQfpQZ8Dt7MR3StqGkeSe7twZkuP4tcbwLCnKs=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=QeS2eFB1r9OQ9O31gn7wzBt5Xi2JttLHUzr5ubeIDu/BPHYye3+igHHZcNvdfc9hxwbzc4gLRZL3z3PoOwjuoqlzd/qvJ65L9lJhDFtqlfoxO0kLG2797z+uFTxKOApkJE0/yEMiMgBwYPsEQDyNDaW33sjsxxOmklGKfv6PosM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; arc=none smtp.client-ip=217.140.110.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 8EDBA14BF;
-	Fri, 27 Sep 2024 09:22:44 -0700 (PDT)
-Received: from J2N7QTR9R3 (usa-sjc-imap-foss1.foss.arm.com [10.121.207.14])
-	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id B650E3F6A8;
-	Fri, 27 Sep 2024 09:22:08 -0700 (PDT)
-Date: Fri, 27 Sep 2024 17:22:03 +0100
-From: Mark Rutland <mark.rutland@arm.com>
-To: Ard Biesheuvel <ardb+git@google.com>
-Cc: linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
-	x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>,
-	Andy Lutomirski <luto@kernel.org>,
-	Peter Zijlstra <peterz@infradead.org>,
-	Uros Bizjak <ubizjak@gmail.com>, Dennis Zhou <dennis@kernel.org>,
-	Tejun Heo <tj@kernel.org>, Christoph Lameter <cl@linux.com>,
-	Mathieu Desnoyers <mathieu.desnoyers@efficios.com>,
-	Paolo Bonzini <pbonzini@redhat.com>,
-	Vitaly Kuznetsov <vkuznets@redhat.com>,
-	Juergen Gross <jgross@suse.com>,
-	Boris Ostrovsky <boris.ostrovsky@oracle.com>,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	Arnd Bergmann <arnd@arndb.de>,
-	Masahiro Yamada <masahiroy@kernel.org>, Kees Cook <kees@kernel.org>,
-	Nathan Chancellor <nathan@kernel.org>,
-	Keith Packard <keithp@keithp.com>,
-	Justin Stitt <justinstitt@google.com>,
-	Josh Poimboeuf <jpoimboe@kernel.org>,
-	Arnaldo Carvalho de Melo <acme@kernel.org>,
-	Namhyung Kim <namhyung@kernel.org>, Jiri Olsa <jolsa@kernel.org>,
-	Ian Rogers <irogers@google.com>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Kan Liang <kan.liang@linux.intel.com>, linux-doc@vger.kernel.org,
-	linux-pm@vger.kernel.org, kvm@vger.kernel.org,
-	xen-devel@lists.xenproject.org, linux-efi@vger.kernel.org,
-	linux-arch@vger.kernel.org, linux-sparse@vger.kernel.org,
-	linux-kbuild@vger.kernel.org, linux-perf-users@vger.kernel.org,
-	rust-for-linux@vger.kernel.org, llvm@lists.linux.dev
-Subject: Re: [RFC PATCH 02/28] Documentation: Bump minimum GCC version to 8.1
-Message-ID: <ZvbbqzrfkgjM1VZ3@J2N7QTR9R3>
-References: <20240925150059.3955569-30-ardb+git@google.com>
- <20240925150059.3955569-32-ardb+git@google.com>
+	s=arc-20240116; t=1727530883; c=relaxed/simple;
+	bh=orpQEHYHyBoCCUjzbaUktQopXRvr5Ek6mitfHI0agMI=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=tV750czipMfwqyxI75cqmgBddBjWfznr0tE1Bvm/1Fb1gmutKMsOLkDSKMxUj5Qs5itjros78zMXWGSpnHbPG0ZjYbeX0TSkFwUOqV0/5QIwEXKR9E/mil4mLiWWMDWPz9cOfXyBAidGZA6KqcS4z9DeFt5/oqqPCa+Ft8WJwKo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=lyaRxQfR; arc=none smtp.client-ip=209.85.167.44
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="lyaRxQfR"
+Received: by mail-lf1-f44.google.com with SMTP id 2adb3069b0e04-539885dd4bcso1707618e87.0;
+        Sat, 28 Sep 2024 06:41:21 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1727530879; x=1728135679; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=iNmBSpA2BmR/JT9QNG5130+zMmw0zS2R0933ikB5pGY=;
+        b=lyaRxQfR6pDvFtPh03QSIMr42veT9U6yGFpmRrP2MqX05526bN+lCWEpN4RksEXhL1
+         PyIKlP1CUMimgQ4B3Bu4d2uyXb2TFIEkoTrGo31BUqnTpBubkJkw85hKAGiaz7mzW/fA
+         E5cL7sHVDLP//aPpeMtUrTKdjCApIq9atVmqx413w1pu6vcVoS3BOQShVvsqiwxunwyr
+         KfZIvN+kSXjdFqwDqyMRoHxKTMPXFnVmtn+bWMKl/eyV0cYoFIYTf/gLOuDFq1s2I346
+         rK+A4iPQBSwBHtHKaLhU/hXB/y3DymiiboXLbNIFiF3m1nOYbAU1Fjyu/RDepQqdkfe1
+         f5tg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1727530879; x=1728135679;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=iNmBSpA2BmR/JT9QNG5130+zMmw0zS2R0933ikB5pGY=;
+        b=qv+bxZ61UZX5FJbxPnWH/E89lb6JClLFkHCnCybA6m4c40uk/NdEuUvfP3X6P2ZM7T
+         kQDRKBgHicqUFf1AkuU3u7Pvqvc9mPmbBf+aOV7wp1DSO3VHwWScNQEZNZN/r0yr2/U+
+         TdmuFk2yZB1Wj9rISExG9f1h4+6qC3nB8+WFmIH1xLHmjVomyUfJ1h3rK4xE4pQc1qWC
+         ixa9Z2cy1QQkALUq51KmywtK+fVTgpETWH4s3XG+OS+lNKbJ4BbU6i8+02sfG9bLdSPS
+         ZqjDbrfGQQilsK9HpcBTkJkdNAVzV2jHgMg0iPHrz3uMzM+4WQEdp+PAuNtRDA5VHnHD
+         gvVg==
+X-Forwarded-Encrypted: i=1; AJvYcCU5Qv90kM8IomWDDyyJcoh5pkluZydfD7eGC46sjT1E8ggpn2PBWnIiP8H564rs2966O5a6qwd6z9dnTO6CJNYLkw==@vger.kernel.org, AJvYcCUUvMQ7ieLv3ItQbpk029ELJzVtz1GHhFKbePsVDvZJRe40wYq9kWFsTyywoSxDeAmViTTEB7wAhhRN/Ypk@vger.kernel.org, AJvYcCV7QMX6j5hd7MCsjdDPxRzYgoV96eHt9/wcqgJfRFTdXDHOBPFQuhI7OSYEexVjmiWzJwEDWqdMSjYmdWXHIOM=@vger.kernel.org, AJvYcCVbLMpQQq0VrWrMmtY3EyavYc86XFtL+SjBOkn1h2EaBF5fmTDRETBg7PPVwx8+6DkSBngli8buW4EDeRT/@vger.kernel.org, AJvYcCVcOUk2z2+u5YMEXT28utuV4AercTvvvUoEhOFoyEux3VVPSsMeZaDUF7v+gCR+eP6VbLo=@vger.kernel.org, AJvYcCW6TONWCmlUtfcd585Zlhu7RkQMs+4g84q9Q9PNx7jnf4ytG92XBczqpY6Vu+BiGP1lrkRtDRmDmKVH@vger.kernel.org, AJvYcCXD6FE9bEQoupm0uzweMZ/FMx9Dqu3EFRbdgwMsKNUjhe2MnKbSK7fCtJCmyP61/mTatJr29EGl6Z8=@vger.kernel.org, AJvYcCXW3wJthV5+gSOj1UYTR3ZnD09rlBis3FvdpwGFNMzfrcX50vkKtc0QCkXMX9zqn61Mpq4ZUKqIjdb41A==@vger.kernel.org, AJvYcCXXt9c5hfXjZgQHacqSgG+kJrMTmKKi1p6/YViKVDImvTOJ859XS6oGvJOnTxtNSvJdaGPtZKx5GHjS@vger.kernel.org, AJvYcCXcNyM/0euV3FTAD3HeNmnvlADhPSmhNZSKMYQEkH1k02/LvGYntmcxXahuEQkssflYG29R3O6FITC9hzTV@vger.kernel.org
+X-Gm-Message-State: AOJu0YzzQEn6O5hmABLlJpJ4aLSs6mBId9uRGGXF7cHMxjt/n1WeGqtk
+	IN8sl3idKTj2+tS2AMqqWNtY3mO+VryadkAw+0FU1ptax2m1Pxhj2ofBEDUkpZDD7azBWQI9eyH
+	xRPheeLAXzrdb6hS45kj/+zOwtA==
+X-Google-Smtp-Source: AGHT+IHmvDJivNH43Y01ucMKJYFoc8AFcX6hzmgU+8XoeSSFhpvEaQoSvahoajb/ht++NQ+MH1stDT2FsmHiW/GwHn4=
+X-Received: by 2002:a05:6512:3f07:b0:536:54df:bffa with SMTP id
+ 2adb3069b0e04-5389fc7fefemr3962432e87.45.1727530879148; Sat, 28 Sep 2024
+ 06:41:19 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240925150059.3955569-32-ardb+git@google.com>
+References: <20240925150059.3955569-30-ardb+git@google.com>
+ <20240925150059.3955569-35-ardb+git@google.com> <CAFULd4ZNwfPZO-yDjrtT2ANV509HeeYgR80b9AFachaVW5zqrg@mail.gmail.com>
+In-Reply-To: <CAFULd4ZNwfPZO-yDjrtT2ANV509HeeYgR80b9AFachaVW5zqrg@mail.gmail.com>
+From: Brian Gerst <brgerst@gmail.com>
+Date: Sat, 28 Sep 2024 09:41:07 -0400
+Message-ID: <CAMzpN2j4uj=mhdi7QHaA7y_NLtaHuRpnit38quK6RjvxdUYQew@mail.gmail.com>
+Subject: Re: [RFC PATCH 05/28] x86: Define the stack protector guard symbol explicitly
+To: Uros Bizjak <ubizjak@gmail.com>
+Cc: Ard Biesheuvel <ardb+git@google.com>, linux-kernel@vger.kernel.org, 
+	Ard Biesheuvel <ardb@kernel.org>, x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>, 
+	Andy Lutomirski <luto@kernel.org>, Peter Zijlstra <peterz@infradead.org>, Dennis Zhou <dennis@kernel.org>, 
+	Tejun Heo <tj@kernel.org>, Christoph Lameter <cl@linux.com>, 
+	Mathieu Desnoyers <mathieu.desnoyers@efficios.com>, Paolo Bonzini <pbonzini@redhat.com>, 
+	Vitaly Kuznetsov <vkuznets@redhat.com>, Juergen Gross <jgross@suse.com>, 
+	Boris Ostrovsky <boris.ostrovsky@oracle.com>, 
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Arnd Bergmann <arnd@arndb.de>, 
+	Masahiro Yamada <masahiroy@kernel.org>, Kees Cook <kees@kernel.org>, 
+	Nathan Chancellor <nathan@kernel.org>, Keith Packard <keithp@keithp.com>, 
+	Justin Stitt <justinstitt@google.com>, Josh Poimboeuf <jpoimboe@kernel.org>, 
+	Arnaldo Carvalho de Melo <acme@kernel.org>, Namhyung Kim <namhyung@kernel.org>, Jiri Olsa <jolsa@kernel.org>, 
+	Ian Rogers <irogers@google.com>, Adrian Hunter <adrian.hunter@intel.com>, 
+	Kan Liang <kan.liang@linux.intel.com>, linux-doc@vger.kernel.org, 
+	linux-pm@vger.kernel.org, kvm@vger.kernel.org, xen-devel@lists.xenproject.org, 
+	linux-efi@vger.kernel.org, linux-arch@vger.kernel.org, 
+	linux-sparse@vger.kernel.org, linux-kbuild@vger.kernel.org, 
+	linux-perf-users@vger.kernel.org, rust-for-linux@vger.kernel.org, 
+	llvm@lists.linux.dev
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Wed, Sep 25, 2024 at 05:01:02PM +0200, Ard Biesheuvel wrote:
-> From: Ard Biesheuvel <ardb@kernel.org>
-> 
-> Bump the minimum GCC version to 8.1 to gain unconditional support for
-> referring to the per-task stack cookie using a symbol rather than
-> relying on the fixed offset of 40 bytes from %GS, which requires
-> elaborate hacks to support.
-> 
-> Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
-> ---
->  Documentation/admin-guide/README.rst | 2 +-
->  Documentation/process/changes.rst    | 2 +-
->  2 files changed, 2 insertions(+), 2 deletions(-)
+On Wed, Sep 25, 2024 at 2:33=E2=80=AFPM Uros Bizjak <ubizjak@gmail.com> wro=
+te:
+>
+> On Wed, Sep 25, 2024 at 5:02=E2=80=AFPM Ard Biesheuvel <ardb+git@google.c=
+om> wrote:
+> >
+> > From: Ard Biesheuvel <ardb@kernel.org>
+> >
+> > Specify the guard symbol for the stack cookie explicitly, rather than
+> > positioning it exactly 40 bytes into the per-CPU area. Doing so removes
+> > the need for the per-CPU region to be absolute rather than relative to
+> > the placement of the per-CPU template region in the kernel image, and
+> > this allows the special handling for absolute per-CPU symbols to be
+> > removed entirely.
+> >
+> > This is a worthwhile cleanup in itself, but it is also a prerequisite
+> > for PIE codegen and PIE linking, which can replace our bespoke and
+> > rather clunky runtime relocation handling.
+>
+> I would like to point out a series that converted the stack protector
+> guard symbol to a normal percpu variable [1], so there was no need to
+> assume anything about the location of the guard symbol.
+>
+> [1] "[PATCH v4 00/16] x86-64: Stack protector and percpu improvements"
+> https://lore.kernel.org/lkml/20240322165233.71698-1-brgerst@gmail.com/
+>
+> Uros.
 
-I'd like this for arm64 and others too (for unconditional support for
--fpatchable-function-entry), so FWIW:
+I plan on resubmitting that series sometime after the 6.12 merge
+window closes.  As I recall from the last version, it was decided to
+wait until after the next LTS release to raise the minimum GCC version
+to 8.1 and avoid the need to be compatible with the old stack
+protector layout.
 
-Acked-by: Mark Rutland <mark.rutland@arm.com>
-
-I think you'll want to update scripts/min-tool-version.sh too; judging
-by the diff in the cover letter that's not handled elsehere in the
-series.
-
-Mark.
-
-> 
-> diff --git a/Documentation/admin-guide/README.rst b/Documentation/admin-guide/README.rst
-> index f2bebff6a733..3dda41923ed6 100644
-> --- a/Documentation/admin-guide/README.rst
-> +++ b/Documentation/admin-guide/README.rst
-> @@ -259,7 +259,7 @@ Configuring the kernel
->  Compiling the kernel
->  --------------------
->  
-> - - Make sure you have at least gcc 5.1 available.
-> + - Make sure you have at least gcc 8.1 available.
->     For more information, refer to :ref:`Documentation/process/changes.rst <changes>`.
->  
->   - Do a ``make`` to create a compressed kernel image. It is also possible to do
-> diff --git a/Documentation/process/changes.rst b/Documentation/process/changes.rst
-> index 00f1ed7c59c3..59b7d3d8a577 100644
-> --- a/Documentation/process/changes.rst
-> +++ b/Documentation/process/changes.rst
-> @@ -29,7 +29,7 @@ you probably needn't concern yourself with pcmciautils.
->  ====================== ===============  ========================================
->          Program        Minimal version       Command to check the version
->  ====================== ===============  ========================================
-> -GNU C                  5.1              gcc --version
-> +GNU C                  8.1              gcc --version
->  Clang/LLVM (optional)  13.0.1           clang --version
->  Rust (optional)        1.78.0           rustc --version
->  bindgen (optional)     0.65.1           bindgen --version
-> -- 
-> 2.46.0.792.g87dc391469-goog
-> 
-> 
+Brian Gerst
