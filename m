@@ -1,171 +1,139 @@
-Received: from NAM10-MW2-obe.outbound.protection.outlook.com (mail-mw2nam10on2085.outbound.protection.outlook.com [40.107.94.85])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pf1-f171.google.com (mail-pf1-f171.google.com [209.85.210.171])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 942AB42AB1
-	for <linux-sparse@vger.kernel.org>; Thu, 17 Oct 2024 09:09:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.94.85
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729156149; cv=fail; b=Toynj014MdS0ij+Czxfyz43aaUu8k/nSE57JTBIKVDzYT7tzvI9RjedjwDHzINlx01TGEqmGZtym8heWzO9GUVQbpr7rCeSSE+QWF2Ah7X8hFDQGZWcH++lSW6+WnHe8dqrI6MpIqri5c9Rg6czsv/BNVhLZTDKoGkekLTwaxps=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729156149; c=relaxed/simple;
-	bh=5CB4GxGqt5MblXoIE6EJW07ApKs7reBKtxRCHBnhklo=;
-	h=From:To:Subject:Date:Message-ID:Content-Type:MIME-Version; b=V4gb7wFq9JrzwCChJ2jRCcFhYaoHyM1DgfRN/RzTh0fW1j3++8UmiyxkWYww2tWCu+R4HLwvq5G6EWqKi+Kw5WXWcKGUmTourB5IJIuhathouSnonojRg7h5cWaiiuBnD3e4VFzZF9NoyRvCqQT9Evi7Dy+if7+EXAb+hK9hA5U=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com; spf=fail smtp.mailfrom=nvidia.com; dkim=pass (2048-bit key) header.d=Nvidia.com header.i=@Nvidia.com header.b=A9Wdg2bT; arc=fail smtp.client-ip=40.107.94.85
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com
-Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=nvidia.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=Nvidia.com header.i=@Nvidia.com header.b="A9Wdg2bT"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=Z4FYfbzDkLAMp/21TM0l32sIQCi+4k5OoFQH7AgJ7/dRF5GrBOniXQAEF+a9vfKRSbPRUgNulVnf046YwLWjANQXkfkbTRMzGqBRjOzhAde4nXW7AR/V/xx/utiuO1gxapD0pzpi8d3jKgPKr0qU+MgyUrZysrclvI6+iWq3N3h8JLClOebze4OfcVinR6Bk4hz31cYxPzL9vtO+6TwdouVaF9ge9XRI2W4JW821G7LL41QOYNRHSYjaPtV4dDthSDJLkxCLMZbcph+qxdPq9czZA0BCGuQul7PcMbt7jtB1uT6/b4iMdj7m3qOhg1bwFRd8z7ys473RJPKsywPWig==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=5CB4GxGqt5MblXoIE6EJW07ApKs7reBKtxRCHBnhklo=;
- b=XUXpCbZwDG6Ew8DvmpeydM3chfpEVxZlUxTuLJKG641ApazFDQokyG6eA56gRnxZktKZyllYgh7G8df8Mmw400mtmlxDRvDxMvHBSyTSIE5AvTJvUcyCPbKG5iNuxEcsyGxdyi06ikyqkyXf6YBbHrQ/C/SHo8UYIPSnFOwxw4/t9k+glaVaipeJehHlrjKRZcTPl2f7NdPuYEZtIOZrmJMz0yu38LAtaMlDLFF3eT/zpuPxYJwVY7VU6rwTYI3hpoPX70YN9vg2+LVzkVuu57jFGTiSR95wiq2jsEtTYAtxsQdC6qxFvvoWtW0kpEuidi54c2aUYy+Kx57vdIePew==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=nvidia.com; dmarc=pass action=none header.from=nvidia.com;
- dkim=pass header.d=nvidia.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
- s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=5CB4GxGqt5MblXoIE6EJW07ApKs7reBKtxRCHBnhklo=;
- b=A9Wdg2bTr3f6iWdxay/T6sCvkGDDNU35cN4jAcWxH3RG23/h7PBGeLmTG3l+oNEwg+QsftCdg/q+JxaTgoN1wh+lZx6OXi0+vtYv2DDpDRJWiUN+SrCTmJ3d7tSmdf0WwoV86M0zgkflFxkVK02GE12wsKC8bSh/8FzazLm0t8WsOuhd2TrxqWhFd5i0d1skVbOo+zhNQCFm9hd41gd98+ZqH7Z9IOSEnE7rJ3Br4A8nx3PTLpNN8TP2+YRq5EbHaet2jWnQA9oS1GZkKqGokx0FG2BMctgtD/Dsi4HQQcmaWh//VvkgiEegadoiMcHIRqUrm0JEUV5ZZsb8zBIAKA==
-Received: from SJ2PR12MB8943.namprd12.prod.outlook.com (2603:10b6:a03:547::17)
- by SA1PR12MB8162.namprd12.prod.outlook.com (2603:10b6:806:33a::18) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8069.18; Thu, 17 Oct
- 2024 09:09:04 +0000
-Received: from SJ2PR12MB8943.namprd12.prod.outlook.com
- ([fe80::7577:f32f:798c:87cc]) by SJ2PR12MB8943.namprd12.prod.outlook.com
- ([fe80::7577:f32f:798c:87cc%5]) with mapi id 15.20.8026.019; Thu, 17 Oct 2024
- 09:09:04 +0000
-From: Aurelien Aptel <aaptel@nvidia.com>
-To: "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>
-Subject: how to figure if a struct symbol is incomplete
-Thread-Topic: how to figure if a struct symbol is incomplete
-Thread-Index: Adsgb8fdr2SGtUzFSdyBobkPl0QdSQ==
-Date: Thu, 17 Oct 2024 09:09:04 +0000
-Message-ID:
- <SJ2PR12MB8943C1A7AF702D739C892D8DA5472@SJ2PR12MB8943.namprd12.prod.outlook.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=nvidia.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: SJ2PR12MB8943:EE_|SA1PR12MB8162:EE_
-x-ms-office365-filtering-correlation-id: 61426592-f9ad-4d67-0215-08dcee8b593f
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;ARA:13230040|1800799024|366016|376014|38070700018;
-x-microsoft-antispam-message-info:
- =?utf-8?B?eGJ1TFF6bG9JdXlWWGdmU3VWcDdRVm5hUnJtYlh1dzBjUHFQeUpqMEZHcWNX?=
- =?utf-8?B?MWc3K3ErWDNKZFBaMUVyMFh2Y01ZcHNDM3RhWEF5NnNLVDZzbHNHT1k4K2ZY?=
- =?utf-8?B?c2NvSDZYODJZRGdGb0tQdlNLV2xVM2p1SmFvOUlOMWxTSUhkMFVuWjJTRkFJ?=
- =?utf-8?B?WTlYNzAraW9GbW1HSy9DZy82UlBBUU54TFNOYUpGMi9ldHJJVEpzTUlMaXEx?=
- =?utf-8?B?T3d2Qk9TZGZjaTRrRkkvdUJ6VlBBUUNGTUVacjZ6NURDYVhlY24xbFRaL3ZM?=
- =?utf-8?B?OHNYMk5aWUNEQU1LR2l6K1VDYVM5ZStsYjJWdUJwM1ZRalUrYW5nYlZLTXZp?=
- =?utf-8?B?dHRhU1pCQ01HUS9XRFcwenl2dVBlTk42MllTZXJZVEowYWRQZjFVL2xYUVhY?=
- =?utf-8?B?YVVvcENRY2EwYis2ZXY0Z2tFMUIvUE81OWt1VktoRXpxZUNVdGFRYkJXMW8v?=
- =?utf-8?B?Snk5cEZpU1JGbFJtcjlrQXdlKzhKWnl0aENWMlNHYVAyUHZCVkZ6WTdnYXNF?=
- =?utf-8?B?dEdjbXRyNzA0R1M4dzVEOUlJalJEYzJ5aE9wVDFOZlh6SEZyU0JsbDl3WnZp?=
- =?utf-8?B?WUJSVDZ2bnRIS0VoMitEUEFkc0pPazNXR09QazhDbXN0czRkZE1CZ3ZQcG14?=
- =?utf-8?B?aDZLU0x6bW9QdmdsYUJkQU9mcG52YVM5WGN4TzlxVDZjVHk5bERYNXcxNE1w?=
- =?utf-8?B?NmdtdHV6NkZIei90Z3Q3OTRoWVBlb1BtL3NYSUk2TktvdHR2YkpTVFhSL0s0?=
- =?utf-8?B?STY4VjU5N2R3Q2xqZmtLSWRxbkkxZjgyUEJOZldFNFIrQmw2dWZWMGM4WUJL?=
- =?utf-8?B?bVhtZ1VvTjFsM28rZi82d09nTGlERGxXUUxpaE9rQ3dHVUJxYzRML3hwaFA4?=
- =?utf-8?B?b2FwcEhSeGEvckpXQllJRDMrZExjeldGUHV1UHZZc1VjS0xPWUJnL1AvMysy?=
- =?utf-8?B?RmxIalR3dE1pb09nWXNzeXI5WUdtd2JHQjlhdXhIcXpvNzlRZXJBa3hXcjR4?=
- =?utf-8?B?YnQ4TVZQdTBLejNOeFIvcUZsTDlub01memNSN05Yb2tOMmsvdVZuUXBlalNi?=
- =?utf-8?B?ajVlQTd5RE1ydElGaUxqN3lQUWpRaEdRTktZbm1HTXNNcHhVK3d4bE1NSU5i?=
- =?utf-8?B?Mnl2V2V4eVVaSm1mVXJiclZJUGJOaFVrdVhwR1hZU29ZKzlEcWNkY0pHd1ZX?=
- =?utf-8?B?cG9PMTRpNG4yaXJCL0s0VE5xOWR3SytpdUxnOUM4VEpyS3N5ZUgxaFNLQzQv?=
- =?utf-8?B?K0lWS2FhcWF0RmlCSm02V3BhUDh2SHpYNzNaUVRzaTFTSHVIRE44SGlrS2Na?=
- =?utf-8?B?N2p2ZEVJTnBjMk52ZDhnZVBEZEpZa1BYeUozNCtSQmd4eStxRmpWcmIxWGJP?=
- =?utf-8?B?bTlKRTQxQjNKcWdNUGprdGdsUnJ1R0xYWDBFT0NrMFRrb0duU0hLK1BOdWg1?=
- =?utf-8?B?aUdrQWQ0ZStIOTRMTE5CVU9QZVdZbEx5dzhRbzlScGN0RkZwaEpPMHZmWllQ?=
- =?utf-8?B?Tmhxb2Y2UHhGem1xNFRHaVVIUm9sTTUrRVM5Vkp6cnR2M2w1dVZuUTR0UDQw?=
- =?utf-8?B?V2gwY3VpekRyU0cxeDR5ODBoMlFoSFN0eDB5eHhneFhHTjhSRDIwdVFmREZr?=
- =?utf-8?B?clVRdVFRK0t1ajQ5eW9YM0ZQcnRaVVdKQmRBV1BYaHVNckVSbTFMRXpIT2hr?=
- =?utf-8?B?b1V4TVhERW9DRUdpM3g1eFRmSmkzRGVFclZhanFhaUwvQWZ3UUVJaElVSzVn?=
- =?utf-8?B?L05ackZDZGdsUVdNRG81bk1mY1AvYUh4RlRaQ3BRa2gvOUZybzVxUGFqRDFH?=
- =?utf-8?Q?rcVXtrvNi7DJagYICtjGUzBks+aExJv/AJZbw=3D?=
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SJ2PR12MB8943.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(366016)(376014)(38070700018);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?utf-8?B?aEpLVXF4VGMrYXRZRDd3OGZPb1FhM2JaZmdYNGhJcjJjS041bmlHOWN0Yytj?=
- =?utf-8?B?b0tzMTVqUXNsUjF4cXJFRWJra1NYQjU4MEx6RkE3K2dMaFhvcDY5NSsvdVgz?=
- =?utf-8?B?UDR6d29mWFlNa0NURit5bU8zVm96d29ydk9Pc1ZkSFhHemY2dU9OOE9YWWt1?=
- =?utf-8?B?endFTVFhbGltQjFKSUFSdnVZWGJYQm0wQW5CZjkyb20vRzI0anYxbzg3a2tG?=
- =?utf-8?B?YWw5d2p4dU1aNVA0ZTJVRWlUY3lhbU91aUdFbTBBSXVoYWY1d285UTdEODli?=
- =?utf-8?B?ZDhab0l4UU5lcUVscUZhNFNsYTFzd3VCNHBUdE9FTUVoRTNzd05nWEZPUjZr?=
- =?utf-8?B?Y1R3dE0reXl6SzJTNThZWmZ6R1ZCNnp5T3BEbEVUc3k5K1JwQldlYlJCcVps?=
- =?utf-8?B?a2tIdXozTGhCQnczaXFFTEhobmp1M3EwczB3dUVpaFhEQ1lqVk13TzVIRllh?=
- =?utf-8?B?YmkrZ0pZVVI1L2VhS2VvM2RMSXdWK3RWby9JazVVSEJzZ2p5V25mY25PSzlK?=
- =?utf-8?B?bDQ2SnRveGlZRnNkVGFXdUliUkxGYi9ZZDhsS0lOUHB1WmZMeTczOTUvZC9N?=
- =?utf-8?B?bmY5czhnV08xTWYzMW9JNDV5M0ZVQXB2RWpXekJ3OTZEWkh6MFFuN3MrMHZ1?=
- =?utf-8?B?aWtwdGJPQ2RTQ2l6azFSUkRJN0YwZ09mdTRqU0loQWZTUERPT1hVL052L0x0?=
- =?utf-8?B?bjBaRjhBMitZS0dnaXdFeXRqRnduKzRObFI0NWg5enRGQjBNcVdrVDg4dmtq?=
- =?utf-8?B?d2I3cTRUTVFiT1FCUlpMRk9PcTM4Sk5PZmE0cXJ3QjYxY3ZTL1BndlFyTFIv?=
- =?utf-8?B?V2hXSUVEcU94RXIvNy9MVGlpNGpyVlFEc1RkcHoxc2lGZ3U5VTZpRHNNRlhP?=
- =?utf-8?B?UmpydU9WUG1DRDF1aUswS0RpOVlmS1BjYWdkakZsR1EwMmZDbWhJSVFKdmcz?=
- =?utf-8?B?N3pnc1RsaWtoRUdNZjNEZzZFRzY1WnNTSERGT0s5OVB5aW91YVRjYktEMTFN?=
- =?utf-8?B?UnNWdEJnbmorUEdxbC85ZlkxeGo4Z2swSFZvUGFNa0k2K29VbTl6VjFJWXc3?=
- =?utf-8?B?aDBacVdXNzRtL3FWVFQwK3VjeUFDNTcyZi9ldGtQbFdQVU9EQWtYQmR1dVNH?=
- =?utf-8?B?VGVDK2ZFc3ZSRXBpWjdxRkpDVGpyckt1T0N2TkorUDloLzk3OUNaL0hwKzdV?=
- =?utf-8?B?K2xQelpMcFRCN2QrbDZ4TWw5Q0E4d1BzbTRENmlmNXdnbEgrYkRLcEV1R1VH?=
- =?utf-8?B?OHhPaFk2UU9XNDcrc0E2TEtxbi96RmRXRnUzSktXUzkrK2ZOOVVwTWd0TWNj?=
- =?utf-8?B?cEJCMmxVeHJEdmhKYnVZd1JhS0NrQTRvdEoxMEhqUHZNeldiaGNOcVo5ZDAr?=
- =?utf-8?B?U3JHL1dyeGswQkNUam9PVUxOSVhFcnFBNXlhWkhjMm53SE95MzF6QmZieFZa?=
- =?utf-8?B?VFdURy9QWHNPM2FGb05GRmMwekc0RFQxWGUzZ0xLVkhSb3h5MWpieGdXa1pr?=
- =?utf-8?B?cmxBV3QxK1BwSzBRWTA4MlBTeU0vU1R6TDcyalpmS0dKdkhNcllNdVJnREZv?=
- =?utf-8?B?dTQ1V0NKQk5vN21DaHp3aXRibEx0VGZOaytXZTEzSUhMNzA1MWxNeG1RZXpK?=
- =?utf-8?B?YitFd2VneXYrUVJsOWc2WHhjVWRpaENSdmdmMTRHaGZ1bmU1N2YzVXNmdVpB?=
- =?utf-8?B?OTNYRWpEeU44OXVjbVFaeG53OTBDODVDRUd6LzdUamZLMDJrVWVFMHhqeW1h?=
- =?utf-8?B?ZTZQaWg4a1hKdis2em03cWYzc0lMLzRHY3h6bzd3OFJBZGtBMGs1amRCbUxD?=
- =?utf-8?B?cHVsbWhYdjRicFdSZElJNUFMNEYza29vdmtYZnhtbWttTlN5UDlwRzFPWEtU?=
- =?utf-8?B?T1JZM1ZUM1F4OU01OFBHY0tjWnhSWVo5dGhZOWE2cURQRlZPbDE5SnNkSTFY?=
- =?utf-8?B?aFlYMGxEeVNwYWdVc2dWcGlWVG9TL1VlbWlIdUdmL3htVDA0N0VQZHhPKzNk?=
- =?utf-8?B?bFRWaTdQSEdtKzNpQ3BwQnZLeW8zQ2FHSEpLWWRxWUt2cGRzQkllY0tKbENh?=
- =?utf-8?B?MENJcG1KQWRXTzgzay94SHJ0MS9RU1QrVk5ZY2p2ZWhrb0g0ZFdkKzYrZ1VJ?=
- =?utf-8?Q?zgZ8=3D?=
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8FD3414AD3F;
+	Mon, 11 Nov 2024 16:47:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.171
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1731343676; cv=none; b=bGMm8ge0g3W6UjCgd8ad7GprhGUGNsXhpnAMevmSlkudK2mwlFlJKlzM6oF+9TmKCXPRuEx4316olxCWOR0r8HlFEabA1uPm3VhNxdZOQhgk3t9bQmkoJpVSv9i3O2uEY/7u4OJ+iJMOUtEHUX4+lRJc6y8T/zmuwr12KcSA1a8=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1731343676; c=relaxed/simple;
+	bh=cv7HOX0Be8oHN7NlH//fc5XDhKL3U1WcsBw8HaIGpAs=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=FQm3NId4XXmxj4F4PQs2OUD3aL7drNyxPb4OczKjUUx85/NXsMnHlBYg0ajyYsbj6U00Yf3Pkp9NYA0BLuT02fCOeigJ6HtOm8wI9QtL8L8EdAQZqhiC7pdYSF37ARhkQqO6QBRFGa+0ZCZvmfXt13DNOHCPz+5bhvhmmCwT/8k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=quarantine dis=none) header.from=wanadoo.fr; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.210.171
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=quarantine dis=none) header.from=wanadoo.fr
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Received: by mail-pf1-f171.google.com with SMTP id d2e1a72fcca58-71e681bc315so3351885b3a.0;
+        Mon, 11 Nov 2024 08:47:54 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1731343674; x=1731948474;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=yVmNpVa6d/vTSwVDSMcQM5C6SueKqprysTTJDf+O7Ww=;
+        b=MG9iN78W9Gl29k/H2cWMD8jaZMANy7m0FVWb48jKZXKcxcYjHoXiWbIgkVsoVWp30r
+         Y0XEXxpUbp9Z4BFYplKXBNld4T5c9fo5J5O4ngw0jY/tbH8ZKCI+JwVmvHhVaF59nG0w
+         Anffk5hCLrFOU06BZUH1CDDahRvFonppQcA34pORj6zsXnzkUypVRYlvw1bh5YM/9y6T
+         Ar+vP3AJ6dIbYb0Q3kFySRpTJluZB16G5f8UnxQk0txn+EnmyQ3iZdq/Ryfo81mh1Kq3
+         Bs+O8WWvXBPw/9BphYhvWZ4JWNoj7tmA7KWnECFk91EqRErBpwBWctTSL4nEfS4ni0BC
+         0Z+w==
+X-Forwarded-Encrypted: i=1; AJvYcCWK/w2Ibyi9/7SwdJ4t3Rb8A9l/Vh7VrnHbWUvSw0ID4B48z7HnVxKjByy4ZMsJhX2cEWRqbyA6BBk3do4=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxdMbxS+5VPQGu2utj4IRmGNC75NX8ml/O3KlUiCjLnYMSSx7uZ
+	OQr5rZwQU2cr020IYDevijVFYM+sLG2ViCgC11WutDrVV9tXanOEo1nP2g==
+X-Google-Smtp-Source: AGHT+IGSM7pZgBQnjHeMc2NFU1cL0j9i+gxsihDAEjJ3LFHOucYoiCJyTai75Q2+UnECBNXfPwgS5A==
+X-Received: by 2002:a05:6a00:21c4:b0:71e:7f08:492c with SMTP id d2e1a72fcca58-72413f4c526mr20021547b3a.1.1731343673645;
+        Mon, 11 Nov 2024 08:47:53 -0800 (PST)
+Received: from localhost.localdomain (124x33x176x97.ap124.ftth.ucom.ne.jp. [124.33.176.97])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-72407a5ea27sm9232913b3a.177.2024.11.11.08.47.51
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 11 Nov 2024 08:47:53 -0800 (PST)
+From: Vincent Mailhol <mailhol.vincent@wanadoo.fr>
+To: Yury Norov <yury.norov@gmail.com>,
+	Rasmus Villemoes <linux@rasmusvillemoes.dk>,
+	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: linux-kernel@vger.kernel.org,
+	linux-sparse@vger.kernel.org,
+	Rikard Falkeborn <rikard.falkeborn@gmail.com>,
+	Vincent Mailhol <mailhol.vincent@wanadoo.fr>
+Subject: [PATCH v2] linux/bits: simplify GENMASK_INPUT_CHECK()
+Date: Tue, 12 Nov 2024 01:43:30 +0900
+Message-ID: <20241111164743.339117-2-mailhol.vincent@wanadoo.fr>
+X-Mailer: git-send-email 2.45.2
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-OriginatorOrg: Nvidia.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: SJ2PR12MB8943.namprd12.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 61426592-f9ad-4d67-0215-08dcee8b593f
-X-MS-Exchange-CrossTenant-originalarrivaltime: 17 Oct 2024 09:09:04.4636
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 43083d15-7273-40c1-b7db-39efd9ccc17a
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: 65W0rPsJV978Wszi5I/+ENZdMU1bYtsg9JjBBGQP/4TDdzXc5VbJYj5LEiE8scaGHiPsT6ZjgJGxKEgAcy0ySQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: SA1PR12MB8162
+X-Developer-Signature: v=1; a=openpgp-sha256; l=2564; i=mailhol.vincent@wanadoo.fr; h=from:subject; bh=cv7HOX0Be8oHN7NlH//fc5XDhKL3U1WcsBw8HaIGpAs=; b=owGbwMvMwCV2McXO4Xp97WbG02pJDOlGpvot4dKidyLWMF5kWtCXdrI8WdSAKeuFncmbk7+Pc zutZ13fUcrCIMbFICumyLKsnJNboaPQO+zQX0uYOaxMIEMYuDgFYCK7fBn+GS3w26X36fefI3Yt uZ9WqmilBX9lKr+48MTt7XIvojI/v2ZkWHf8/rmtiYLyml/9zp64m1g67SzD8RNHnzvNOp/dtkQ okh8A
+X-Developer-Key: i=mailhol.vincent@wanadoo.fr; a=openpgp; fpr=ED8F700574E67F20E574E8E2AB5FEB886DBB99C2
+Content-Transfer-Encoding: 8bit
 
-SGksDQoNCknigJltIHRveWluZyBhcm91bmQgd2l0aCBhIG5ldyBzcGFyc2UtYmFzZWQgcHJvZ3Jh
-bSwgdHJ5aW5nIHRvIGNoZWNrIGZvciBjZXJ0YWluIHRoaW5ncyBpbiBDIHN0cnVjdHMgZGVmaW5p
-dGlvbnMuDQoNCknigJl2ZSBsb29rZWQgYXJvdW5kIGF0IGV4YW1wbGVzIGFuZCBjdGFncyB3YXMg
-dGhlIG1vc3QgdXNlZnVsIGFzIGl04oCZcyB1c2luZyDigJhmaWxlX3Njb3Bl4oCZIGFzIHRoZSBz
-eW1ib2wgZW50cnkgcG9pbnQgaW5zdGVhZCBvZiB0aGUgc3BhcnNlKCkgcmV0dXJuIHZhbHVlLCB3
-aGljaCBhbGxvd2VkIG1lIHRvIHNlZSB0aGUgQVNUIG9mIHRoZSB0eXBlcy4NCkFmdGVyIHNvbWUg
-dHJpYWwgYW5kIGVycm9yLCBJJ3ZlIGZpZ3VyZWQgdGhhdCBJIGhhZCB0byBjYWxsIGV4YW1pbmVf
-c3ltYm9sX3R5cGUoKSBvbiBlYWNoIHN5bWJvbCBiZWZvcmUgSSBkaXZlIGludG8gdGhlbSB0byBm
-dWxseSBjb21wdXRlIHRoZSBiaXRfc2l6ZSAmIG9mZnNldCBvZiBhbGwgdGhlIHN0cnVjdCBtZW1i
-ZXJzLg0KDQpXaGlsZSBkb2luZyB0aGF0LCBJJ3ZlIG5vdGljZWQgdGhhdCBJIGNhbm5vdCB0ZWxs
-IGFuIGVtcHR5IHN0cnVjdHVyZSBmcm9tIGFuIGluY29tcGxldGVseSBkZWZpbmVkIG9uZS4NCkkn
-ZCBsaWtlIHRvIGVyciBvdXQgaW5zdGVhZCBvZiBzaWxlbnRseSB1c2luZyBhIHNpemU9MCBzdHJ1
-Y3Qgd2hlbiBJIHNlZSBhbiB1bmRlZmluZWQgdHlwZS4NCg0Kc3RydWN0IGVtcHR5IHt9Ow0Kc3Ry
-dWN0IGZvbyB7DQogICAgaW50IGE7DQogICAgc3RydWN0IHVua25vd24gYjsNCn07DQoNClRoZSBz
-eW1ib2wgZm9yICdzdHJ1Y3QgZW1wdHknIGFuZCB0aGUgbWVtYmVyICdiJyBib3RoIGhhdmUgYSBz
-eW0tPnNpemUgPT0gMCwgYW4gZW1wdHkgc3ltLT5zeW1ib2xfbGlzdCBhbmQgYSBzeW0tPmN0eXBl
-LmJhc2VfdHlwZSA9PSBOVUxMLg0KSG93IGNhbiB5b3UgdGVsbCB0aG9zZSAyIGNhc2VzIGFwYXJ0
-Pw0KDQpUaGFua3MNCg0K
+Because of the shortcut logic of the && operator, below expression:
+
+  __builtin_choose_expr(condition, boolean_expression, false)
+
+can be simplified as:
+
+  condition && boolean_expression
+
+Applied to GENMASK_INPUT_CHECK(),
+
+  __builtin_choose_expr(__is_constexpr((l) > (h)), (l) > (h), 0)
+
+can be replaced by:
+
+  __is_constexpr((l) > (h)) && (l) > (h)
+
+Finally, above expression is nearly the same as the expansion of
+statically_true((l) > (h)), except from the use of __is_constexpr()
+instead of __builtin_constant_p().
+
+Introduce _statically_true() which is similar to statically_true()
+but with __is_constexpr(). Apply _statically_true() to simplify
+GENMASK_INPUT_CHECK().
+
+Signed-off-by: Vincent Mailhol <mailhol.vincent@wanadoo.fr>
+---
+This change passes the unit tests from CONFIG_BITS_TEST, including the
+extra negative tests provided under #ifdef TEST_GENMASK_FAILURES [1].
+
+[1] commit 6d511020e13d ("lib/test_bits.c: add tests of GENMASK")
+Link: https://git.kernel.org/torvalds/c/6d511020e13d
+
+
+** Changelog **
+
+v1 -> v2:
+
+   - introduce _statically_true(), taking inspiration from
+     statically_true() as introduced in commit 22f546873149 ("minmax:
+     improve macro expansion and type checking")
+
+Link: https://lore.kernel.org/all/20240609073513.256179-1-mailhol.vincent@wanadoo.fr/
+---
+ include/linux/bits.h     | 5 ++---
+ include/linux/compiler.h | 1 +
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/include/linux/bits.h b/include/linux/bits.h
+index 60044b608817..01713e1eda56 100644
+--- a/include/linux/bits.h
++++ b/include/linux/bits.h
+@@ -20,9 +20,8 @@
+  */
+ #if !defined(__ASSEMBLY__)
+ #include <linux/build_bug.h>
+-#define GENMASK_INPUT_CHECK(h, l) \
+-	(BUILD_BUG_ON_ZERO(__builtin_choose_expr( \
+-		__is_constexpr((l) > (h)), (l) > (h), 0)))
++#include <linux/compiler.h>
++#define GENMASK_INPUT_CHECK(h, l) BUILD_BUG_ON_ZERO(_statically_true((l) > (h)))
+ #else
+ /*
+  * BUILD_BUG_ON_ZERO is not available in h files included from asm files,
+diff --git a/include/linux/compiler.h b/include/linux/compiler.h
+index 4d4e23b6e3e7..fee66166eca2 100644
+--- a/include/linux/compiler.h
++++ b/include/linux/compiler.h
+@@ -307,6 +307,7 @@ static inline void *offset_to_ptr(const int *off)
+  * values to determine that the condition is statically true.
+  */
+ #define statically_true(x) (__builtin_constant_p(x) && (x))
++#define _statically_true(x) (__is_constexpr(x) && (x))
+ 
+ /*
+  * This is needed in functions which generate the stack canary, see
+-- 
+2.45.2
+
