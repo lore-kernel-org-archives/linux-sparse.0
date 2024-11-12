@@ -1,119 +1,107 @@
-Received: from mail-lf1-f53.google.com (mail-lf1-f53.google.com [209.85.167.53])
+Received: from mail-pf1-f179.google.com (mail-pf1-f179.google.com [209.85.210.179])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 84EAF1BF58
-	for <linux-sparse@vger.kernel.org>; Mon, 11 Nov 2024 17:32:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8C4941885A4;
+	Tue, 12 Nov 2024 14:05:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.179
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1731346355; cv=none; b=Gv+kQ5i4lh0ReSntFEcUfZhUi97wqjMXrnuYgPcYWhGB031bNnf5xsAIWcGHhP1J3uIkfX8vlj7isFDY8Nc2N0UNEvZpYeise0Pr+7XcGp1Ce7mtX0OSppiJRxufmyXr+RTZDoJ9E3Y//Il3G9SZ7TNpj9BFBx2eNwde3Jx1V9Y=
+	t=1731420310; cv=none; b=l7eZ+r2TxhQEIC20bE2RpZ8ACu4d+ax3cuXWiVDLUf2BFhi5waWNGFVjZQKpQDyeZrupxIq0j+in3LAx0cCedInZ5eH1jQQ+yy6s5/WxO72+AVFUwdTEKWtgJbSFXr0LXV1NADXzfDTtAZ2KeE1oMyagClyAI/PL7v2uSLeGNvI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1731346355; c=relaxed/simple;
-	bh=PPNNsS1qLG2J+Yv0Mjv/CI33UdPosqw6oofwmfziC1k=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=OcuVkYc2meuZGqcZ/Dn2Zw7g+Y6z9cRcE/hvS3dQLKslNkFiPOOxChVMgld9muO1BVHcuhWFAz6YPEpYOAPqsCXznhjdvBwk5BqBusMR1oquiZ9iP8m6xO75ad+XocHxE07TBxoxyJNuy27tmABxhuyjQHIJI3Xjp4sEmDmfLUo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org; spf=pass smtp.mailfrom=linuxfoundation.org; dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b=LnZDFPyh; arc=none smtp.client-ip=209.85.167.53
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linuxfoundation.org
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="LnZDFPyh"
-Received: by mail-lf1-f53.google.com with SMTP id 2adb3069b0e04-539f76a6f0dso5347965e87.1
-        for <linux-sparse@vger.kernel.org>; Mon, 11 Nov 2024 09:32:33 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linux-foundation.org; s=google; t=1731346351; x=1731951151; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=OMII0Va/Pc2J6Ok+zfB4lxRXeg8cQiz8GFTVesocEWU=;
-        b=LnZDFPyhtV+aWaJykuKIudODpOk2BzPd5YBypID2oC217006ZjtUCxTg1lbIqEcy3w
-         qOP2AhWdPRrGr4Ph7QCP4G1MKxJtlMdbUKFzGYYofaMeTPxCiPfgTOdfVSd+9CHy5Z/s
-         c9BJLApSpaifXaHLLoe57Uf4s12sKOhpxd7L0=
+	s=arc-20240116; t=1731420310; c=relaxed/simple;
+	bh=ZpfuAYhFKoclFbDUPh8BHHiItTTKVdU+LMzqw74gvxo=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=rizmasgouZD1jLBtuLkqP0cIg9ML6W83KJhL4ImYYn8hH0GZQHz0bZHaUtYjxfvEi0EG82hwzJM94a6j0jfcDTrNrL0AgOW8duvJZqnb/BJ87lPyCpy1raLuQITBBJyFqgfJx+k6j8jhADa85lufjrHv88DOWAVMq+XngusY6qM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=quarantine dis=none) header.from=wanadoo.fr; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.210.179
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=quarantine dis=none) header.from=wanadoo.fr
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Received: by mail-pf1-f179.google.com with SMTP id d2e1a72fcca58-7242f559a9fso2856940b3a.1;
+        Tue, 12 Nov 2024 06:05:08 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1731346351; x=1731951151;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+        d=1e100.net; s=20230601; t=1731420308; x=1732025108;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=OMII0Va/Pc2J6Ok+zfB4lxRXeg8cQiz8GFTVesocEWU=;
-        b=mcg7kY3avVXoFMR17bFgQPTYWmByKSOLIR6NP6A1NWLPVn/PlRyPh3/5Wif+TgAPey
-         92IpZUiaqBtuLIOlGMtsHxxNDEMXk00ht/+liBsRm4MPyw1Jne7rGSOUikPSjRpEmrAK
-         5rkvPwo9pB8/m1Kg+6eZz28/g9DuZiHjGv264J9wy/WDtLCb7yZdxVU9qsNwNfg0MlLb
-         +v921s/QkYthhXjvkWB2YSJdkcB4UxntlRSFbkBNku3mfSJW4OBTst4DfGGskMdWaDDj
-         HzlowlvC4cu3pyDOI6VBEUnCWYCt1LVUKe+gf5O1VWg79WZU+UaXv73u0SrCKQHH8234
-         xxuA==
-X-Forwarded-Encrypted: i=1; AJvYcCVff/SMJ/8CzPBbotJoZjT1EZFvDRQQcvEA/fQIzaJIJDvNgQVduZIVf+Pu0H79R5GYa5IPnYs68mUUXdg=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yz0ZbyTLya7Ni5m26jLjRhk+fr3Ub3HdWgZP26dHcV9i0KIMWZ5
-	C89ij/QiTCMRPZLlBV7Iy2xJDABgV5q3NJKRea/V9WffupGebgWPJ4oZIk5oPkgBqvmVh74buYG
-	X6j8=
-X-Google-Smtp-Source: AGHT+IHZLxrQ8y9ONL2Cg1UAPXpAwHJoJvcMhzjlgyv7NHHmeEW+HC0/K515gO3WGXSW6nCDWyjI6A==
-X-Received: by 2002:a05:651c:1026:b0:2fb:411e:d979 with SMTP id 38308e7fff4ca-2ff202e18e6mr50909551fa.31.1731346351387;
-        Mon, 11 Nov 2024 09:32:31 -0800 (PST)
-Received: from mail-ej1-f54.google.com (mail-ej1-f54.google.com. [209.85.218.54])
-        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-5cf03bb765asm5163121a12.48.2024.11.11.09.32.29
-        for <linux-sparse@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 11 Nov 2024 09:32:30 -0800 (PST)
-Received: by mail-ej1-f54.google.com with SMTP id a640c23a62f3a-a9a6b4ca29bso697546466b.3
-        for <linux-sparse@vger.kernel.org>; Mon, 11 Nov 2024 09:32:29 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCUkqRFyHY/Rl1m/K839JEJ7SgtAvXGZqb0zeUkOT7UlgOgYVW4cGPkkGI3kvzJ28lSLc8v83/u7xixSCdo=@vger.kernel.org
-X-Received: by 2002:a17:907:9494:b0:a9a:597:8cca with SMTP id
- a640c23a62f3a-a9eefff1308mr1311580566b.45.1731346348977; Mon, 11 Nov 2024
- 09:32:28 -0800 (PST)
+        bh=Dq3XLXJU/AnKNlxTOmeTq2X0+ChFWml7RLz6HCZUdOg=;
+        b=Z2bH7wV9LXNu8fvD3GmrAGXR/tLdV7nOsTJs2bPrj+YxzLYboSFDOpxY7Zb9wzw1pb
+         WVGd+QXt1Et/JmzFBdv7th97e+o9XZMf98JDeOERWvVbQQoMzM/mrr7x71pfLVvuYewv
+         sC+IYnzLQ0E7RSuzEfqo+1SDxxwm3BJjZE7piy9eM1bzY+auULg70mMY0JWyPMONaI9F
+         VewgJFDzu3wwvk6zTDi9h57k6xPe26Zhc9WIkGu0fqHGDemsR6asDEXkhAaUI8CbMuB+
+         hKHmBpp9LOnTZLRGUtmaaB7zBDBdpnqVIJ4yBiuXF7yDv6JlA5w6i3Q+nm7XnLwojmqd
+         3lAQ==
+X-Forwarded-Encrypted: i=1; AJvYcCVGBC6emwvVGQUDOIyh/qPOw4FlzCWj23ojeDLXts2DhbOOC4aQv1K4y1kukl8Cuy0lw4SHhinPoCrZcf8=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw8vKp8JG7YSb/Og1if4hrsgMN9EH6BWbyTNGIs0A3VbOhlTJ1r
+	he4tEirvVqaY8Z6msZ2FOeQ9Q6DeKMYkFwjV/odUYqvdjQ4y3itR
+X-Google-Smtp-Source: AGHT+IGPKRetxuYOODxLpn4mRetQBnacD2UxQzqmZqYxWavHJJtlwoB/44wnXSSWGNSjKx0WDj39yQ==
+X-Received: by 2002:a05:6a20:1586:b0:1db:ef91:2e51 with SMTP id adf61e73a8af0-1dc22b579b3mr22725332637.28.1731420307713;
+        Tue, 12 Nov 2024 06:05:07 -0800 (PST)
+Received: from localhost.localdomain (124x33x176x97.ap124.ftth.ucom.ne.jp. [124.33.176.97])
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-7f41f644a23sm10480007a12.53.2024.11.12.06.05.05
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 12 Nov 2024 06:05:07 -0800 (PST)
+From: Vincent Mailhol <mailhol.vincent@wanadoo.fr>
+To: Linus Torvalds <torvalds@linux-foundation.org>,
+	Yury Norov <yury.norov@gmail.com>,
+	Rasmus Villemoes <linux@rasmusvillemoes.dk>,
+	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: linux-kernel@vger.kernel.org,
+	linux-sparse@vger.kernel.org,
+	Rikard Falkeborn <rikard.falkeborn@gmail.com>,
+	Vincent Mailhol <mailhol.vincent@wanadoo.fr>
+Subject: [PATCH v3 0/2] add _statically_true() to simplify GENMASK_INPUT_CHECK()
+Date: Tue, 12 Nov 2024 22:59:22 +0900
+Message-ID: <20241112140454.518823-4-mailhol.vincent@wanadoo.fr>
+X-Mailer: git-send-email 2.45.2
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241111164743.339117-2-mailhol.vincent@wanadoo.fr>
-In-Reply-To: <20241111164743.339117-2-mailhol.vincent@wanadoo.fr>
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Date: Mon, 11 Nov 2024 09:32:12 -0800
-X-Gmail-Original-Message-ID: <CAHk-=wh5SNYdgx8-X+ggHP+ojbG2F7oyt3TLmMgqejYd5zn0Aw@mail.gmail.com>
-Message-ID: <CAHk-=wh5SNYdgx8-X+ggHP+ojbG2F7oyt3TLmMgqejYd5zn0Aw@mail.gmail.com>
-Subject: Re: [PATCH v2] linux/bits: simplify GENMASK_INPUT_CHECK()
-To: Vincent Mailhol <mailhol.vincent@wanadoo.fr>
-Cc: Yury Norov <yury.norov@gmail.com>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, 
-	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, linux-kernel@vger.kernel.org, 
-	linux-sparse@vger.kernel.org, Rikard Falkeborn <rikard.falkeborn@gmail.com>
-Content-Type: text/plain; charset="UTF-8"
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1490; i=mailhol.vincent@wanadoo.fr; h=from:subject; bh=ZpfuAYhFKoclFbDUPh8BHHiItTTKVdU+LMzqw74gvxo=; b=owGbwMvMwCV2McXO4Xp97WbG02pJDOnGCW0TLWftqFjmwRa8VE/UjNu9LFd8smmT6w6NZQa3T k5O4GXoKGVhEONikBVTZFlWzsmt0FHoHXboryXMHFYmkCEMXJwCMBHX9Qz/697sXS34pDw0LC1V ye4cX6/264IdPz9ZhdzSrljxtnT+e0aG+WITZK99TboYVOh++03ZjT2VPxgsOU0vfBPd2nvBMia fGQA=
+X-Developer-Key: i=mailhol.vincent@wanadoo.fr; a=openpgp; fpr=ED8F700574E67F20E574E8E2AB5FEB886DBB99C2
+Content-Transfer-Encoding: 8bit
 
-On Mon, 11 Nov 2024 at 08:48, Vincent Mailhol
-<mailhol.vincent@wanadoo.fr> wrote:
->
->    - introduce _statically_true(), taking inspiration from
->      statically_true() as introduced in commit 22f546873149 ("minmax:
->      improve macro expansion and type checking")
+The first patch introduces a new variant of statically_true() named
+_statically_true() which rely on __is_constexpr() to produce a
+constant expression result which can be used in BUILD_BUG_ON_ZERO()
+and other macros which expect a constant expression as input.
 
-So I really think this needs an explanation of what the difference is
-when using __builtin_constant_p() vs using __is_constexpr(), and why
-the existing statically_true() didn't work for you.
+The second patch applies this newly created _statically_true() to
+GENMASK_INPUT_CHECK().
 
-In my experience, __is_constexpr() is too limited, because it
-literally requires a syntactically constant expression.
 
-In contrast, __builtin_constant_p() often works for things that aren't
-constant expressions, but that evaluate to constants at build time.
+** Changelog **
 
-For example, I had a test patch that used statically_true() to do
-things like "if the size of a user copy is a multiple of the size of
-'long', call a simplified version without the byte copy part".
+v2 -> v3:
 
-And sure, __is_constexpr() gets it right for completely constant
-arguments. But __builtin_constant_p() will actually trigger not only
-those, but also when the argument is something like
+   - split the single patch into a series of two patches.
 
-        if (copy_to_user(buf, values, n * sizeof(u64)))
+   - add explanation of why _statically_true() is needed in addition
+     to the existing statically_true(). Explain the pros and cons of
+     each.
 
-because it sees that even if "n * sizeof(u64)" is not a constant, the
-"is this a multiple of 'long' size" _is_ constant.
+   - use __builtin_choose_expr() in _statically_true(). The
+     _statically_true() of the v2 works perfectly fine when used in
+     conjunction with BUILD_BUG_ON_ZERO() but fails if used, for
+     example, in arrays or in static_assert().
 
-IOW, I think __builtin_constant_p() is preferable, because it not only
-doesn't expand to the horror that is __is_constexpr(), it also
-generally does better when you have the flexibility to use it.
+Link: https://lore.kernel.org/all/20241111164743.339117-2-mailhol.vincent@wanadoo.fr/
 
-Of course, I do think that the use in BUILD_BUG_ON_ZERO() requires
-something that is more statically reliable, and so __is_constexpr()
-that is purely syntactic is probably the right thing to have. So I'm
-not objecting to your _statically_true() per se. I just think this
-needs a big comment about why we have both versions, and when to use
-one over the other.
+v1 -> v2:
 
-                     Linus
+   - introduce _statically_true(), taking inspiration from
+     statically_true() as introduced in commit 22f546873149 ("minmax:
+     improve macro expansion and type checking").
+
+Link: https://lore.kernel.org/all/20240609073513.256179-1-mailhol.vincent@wanadoo.fr/
+
+Vincent Mailhol (2):
+  compiler.h: add _static_assert()
+  linux/bits.h: simplify GENMASK_INPUT_CHECK()
+
+ include/linux/bits.h     |  5 ++---
+ include/linux/compiler.h | 14 ++++++++++++++
+ 2 files changed, 16 insertions(+), 3 deletions(-)
+
+-- 
+2.45.2
+
