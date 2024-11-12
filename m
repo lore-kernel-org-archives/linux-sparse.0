@@ -1,107 +1,170 @@
-Received: from mail-yw1-f182.google.com (mail-yw1-f182.google.com [209.85.128.182])
+Received: from smtp.smtpout.orange.fr (smtp-14.smtpout.orange.fr [80.12.242.14])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9D088212F05
-	for <linux-sparse@vger.kernel.org>; Tue, 12 Nov 2024 17:52:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.182
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0C271218316
+	for <linux-sparse@vger.kernel.org>; Tue, 12 Nov 2024 19:09:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=80.12.242.14
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1731433942; cv=none; b=ChCOUR/bA03+m/3yZyb7sgykx8tk5IR8fozYr4/l+9a8Sl3ftNh0aVuhVbZDS5LLQFxlgf/ap4VkJrEZNdsYDXlwYuw7iLcD7e7ba+jRUx94LqzBWB12iU8W6h30zchfoVy4KBEUS7DZPEHv+5m9QTg9poxPB52wsq9kuuxInlk=
+	t=1731438549; cv=none; b=avqE6ItG8a7so+WCRPg1sz/CZGGw3TlRxHynaTiJin5C33RhEQ/XZM/Z/fAZPmUa9db8ou4zmEibPxcZ9ZGfeMdGIrxyCZz3h33rw43ted/ivRHWDvX9ljTkaxGL7a+pE53mnh6B1va2sBJ7JH/OdintVVYSPT0CycW/bo8xZ98=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1731433942; c=relaxed/simple;
-	bh=rF0m3RHCDCu5flwjKgaX68jhNqdc11TxTrvhrmCBPPg=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=etuocQzxojhn8fZKvQK3jWNJIKpPrEuur32lepbSXhSdPBql/oag6u/uVywXCfZx/Y3+LVL5VdBZZQaEkIRl2aMwj5ySX+7zezvMXVrLbAmtsK8S9djGqPJmnGsJP6s0ShbTXMYmLxV9ZAAnAb5itzYEWv/zxUXOBREzMbYDn5w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org; spf=pass smtp.mailfrom=linuxfoundation.org; dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b=HOwxMVfS; arc=none smtp.client-ip=209.85.128.182
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linuxfoundation.org
+	s=arc-20240116; t=1731438549; c=relaxed/simple;
+	bh=17mtmBY8ZwUCeRi/t4IdmbeGrefNGpC3DWHRJW4wuu4=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=EYNN+qi4ko4anSFvGt21+vsBS4pQDjzPHA5X0XtmejF9oUdNOD0yBAilkYbMvWupPzLkjrdbhZxREdFlk6AxMXA5OWVWQxhmw99OVViEJr/9JA6ZnGofEcBuVes2UIsrOwz7iJPpwEp2jZUMFbYnJvFlZ6FwOTB4nFp6cz9tKKs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wanadoo.fr; spf=pass smtp.mailfrom=wanadoo.fr; dkim=pass (2048-bit key) header.d=wanadoo.fr header.i=@wanadoo.fr header.b=Ghl1rS2I; arc=none smtp.client-ip=80.12.242.14
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wanadoo.fr
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wanadoo.fr
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="HOwxMVfS"
-Received: by mail-yw1-f182.google.com with SMTP id 00721157ae682-6e5b7cd1ef5so51382487b3.1
-        for <linux-sparse@vger.kernel.org>; Tue, 12 Nov 2024 09:52:20 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linux-foundation.org; s=google; t=1731433939; x=1732038739; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=s4eyKsihgIZD98hfy0JGAdD/M8t7V0X38hx8vGXpfi0=;
-        b=HOwxMVfSDYQ+RxVYbxIKybq63fDnnIv3ifxeI3YXFf7c7AGzMw5A621vYXjS+UFgyI
-         Qp/I3I/uhNH+XQTOdmdzgHc+lCIeWwzVz0Y4VOutOEJ4vNk3L/nzxVOyjg2v7bRGV4lz
-         D2HDdEGPwaAevGXkFysfNgBG2ELGQXVK2qpTU=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1731433939; x=1732038739;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=s4eyKsihgIZD98hfy0JGAdD/M8t7V0X38hx8vGXpfi0=;
-        b=WkcLSHWrWXTMMotiRL2f7Q1W8ddso6yDTWTQip/RNbgphymxHBWdePyCY1IvT1+I2k
-         gUKWvbLkATs5KgsZNyRcKsvMCPHZh1+zeKkbtbPkRSqm3pCsezVCuCUC3ijUJXtMRQgF
-         I/rUHziJO222LUtpPGZ8OYSkq7QSZqfmeeKX0dS6pgIwFegahzfctkg7p1z02yocXwLK
-         JOrJj+SEHd5B9hb3QKMBoyh5ZYp/iZG6dgI9E4rLnbIbdaH+6WN257AXurn5hd4tbEar
-         AavCRJGCmvaSeXpTNyGh2JRqX8OfF4okFWb7JgCM59w+A2IlMVREg7D8uARii4JiyxMr
-         8afg==
-X-Forwarded-Encrypted: i=1; AJvYcCVKSQ4uOxxXPznQh9Of8NHE3lEQfVp2jnBNs5YFg6imwTiojPp7qk/GIK3+AHRvQob8tvmAzZjNhiWSGdw=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yww2mDi56k2VKeoavjfdPKOwP0Idb48I1AIsVXtsbFt6BkXz/O3
-	IjBfIdCbipYRUNEnoZ1qA8AQ58drTWNGIM90rb9mAiew9iE6QFrcVIoXCjANYVR94xMCKkCKUUy
-	/XKRwJ46FpSSeUwNAdkpt0f0mvxpyNtWGuUkm/Q==
-X-Google-Smtp-Source: AGHT+IGvEcIbEvzGr1VmCsZ0mQRwAsSPld9R2C5JTh0+fNcSwWaec7ZBqYSyzKL8e3qzWUzVn7JzLdpmgnyRZvU5CZE=
-X-Received: by 2002:a05:690c:6211:b0:6ea:3313:f98c with SMTP id
- 00721157ae682-6eaddf8430emr155761917b3.32.1731433939616; Tue, 12 Nov 2024
- 09:52:19 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=wanadoo.fr header.i=@wanadoo.fr header.b="Ghl1rS2I"
+Received: from localhost.localdomain ([106.146.16.70])
+	by smtp.orange.fr with ESMTPA
+	id AwFntjwiq18HRAwG3t29pO; Tue, 12 Nov 2024 20:09:05 +0100
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=wanadoo.fr;
+	s=t20230301; t=1731438545;
+	bh=P1AYhd2AajanOBGPm1PpNJJsdw+dSp6kxGNZyhNotu4=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version;
+	b=Ghl1rS2I4TfK8LdPDV4uADyga+Sw7s6CC8y7qXWUBuXCAjCX5eIMQAn1pWT66DxSe
+	 QN3bidA+V8ryVF6RtnDm+kLl5Z3o6DOeZSk7QQaopKYtbaa+ssl2y2SwIANK8RaePC
+	 VsKSZcJMMvt+b+GCvYibwlHxNSmXK9co6K37Ob9plKaoLWALQcNL1//MbK6mxxbzpS
+	 NAc8U8vCjNZYDspouWdz1rfFGPV+mUz0CTr6407O+D7IOVRXEdg+d0Am0dqiuZCyBi
+	 ZxFltZWm9mY+XalXCX56dBraFBxDoeewSMQ0r4kmg2igSb+QZRvARBZ+C+ple8+UWF
+	 CMQQwKC3UMNeg==
+X-ME-Helo: localhost.localdomain
+X-ME-Auth: bWFpbGhvbC52aW5jZW50QHdhbmFkb28uZnI=
+X-ME-Date: Tue, 12 Nov 2024 20:09:05 +0100
+X-ME-IP: 106.146.16.70
+From: Vincent Mailhol <mailhol.vincent@wanadoo.fr>
+To: Linus Torvalds <torvalds@linux-foundation.org>,
+	Yury Norov <yury.norov@gmail.com>,
+	Rasmus Villemoes <linux@rasmusvillemoes.dk>,
+	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: linux-kernel@vger.kernel.org,
+	linux-sparse@vger.kernel.org,
+	Rikard Falkeborn <rikard.falkeborn@gmail.com>,
+	Vincent Mailhol <mailhol.vincent@wanadoo.fr>
+Subject: [RESEND PATCH v3 1/2] compiler.h: add _static_assert()
+Date: Wed, 13 Nov 2024 04:08:39 +0900
+Message-ID: <20241112190840.601378-5-mailhol.vincent@wanadoo.fr>
+X-Mailer: git-send-email 2.45.2
+In-Reply-To: <20241112190840.601378-4-mailhol.vincent@wanadoo.fr>
+References: <20241112190840.601378-4-mailhol.vincent@wanadoo.fr>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241112140454.518823-4-mailhol.vincent@wanadoo.fr>
-In-Reply-To: <20241112140454.518823-4-mailhol.vincent@wanadoo.fr>
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Date: Tue, 12 Nov 2024 09:52:09 -0800
-Message-ID: <CAADWXX88Uv+r1JtpnN2gDv6S2wDTqxsn5x8+-U_xWfeNxmT9NA@mail.gmail.com>
-Subject: Re: [PATCH v3 0/2] add _statically_true() to simplify GENMASK_INPUT_CHECK()
-To: Vincent Mailhol <mailhol.vincent@wanadoo.fr>
-Cc: Yury Norov <yury.norov@gmail.com>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, 
-	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, linux-kernel@vger.kernel.org, 
-	linux-sparse@vger.kernel.org, Rikard Falkeborn <rikard.falkeborn@gmail.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+X-Developer-Signature: v=1; a=openpgp-sha256; l=3465; i=mailhol.vincent@wanadoo.fr; h=from:subject; bh=17mtmBY8ZwUCeRi/t4IdmbeGrefNGpC3DWHRJW4wuu4=; b=owGbwMvMwCV2McXO4Xp97WbG02pJDOnGy3dEtyo9z0/7PSPAKvVr8gfLeYlBmb531jw89kJG8 nyQLP/PjlIWBjEuBlkxRZZl5ZzcCh2F3mGH/lrCzGFlAhnCwMUpABM5uJyRYb7S5Jc/ao1lpAyd jt0Tz220dn0kv6Lb5ZQA5x7PU5HNFgz/q5RVHf5LlD1bZSb9ZHPzs03ss8zbPp09mfReoiHK/LY UNwA=
+X-Developer-Key: i=mailhol.vincent@wanadoo.fr; a=openpgp; fpr=ED8F700574E67F20E574E8E2AB5FEB886DBB99C2
+Content-Transfer-Encoding: 8bit
 
-On Tue, Nov 12, 2024 at 6:05=E2=80=AFAM Vincent Mailhol
-<mailhol.vincent@wanadoo.fr> wrote:
->
-> v2 -> v3:
->
->    - split the single patch into a series of two patches.
+__builtin_constant_p() is known for not always being able to produce
+constant expression [1] which lead to the introduction of
+__is_constexpr() [2]. Because of its dependency on
+__builtin_constant_p(), statically_true() suffers from the same
+issues.
 
-I haven't actually gotten to the patches yet, because all your emails
-end up in my spam box.
+For example:
 
-The reason is because your git-send-email setup is broken, resulting in:
+  void foo(int a)
+  {
+  	 /* fail on GCC */
+  	BUILD_BUG_ON_ZERO(statically_true(a));
 
-  dmarc=3Dfail (p=3DQUARANTINE sp=3DNONE dis=3DQUARANTINE) header.from=3Dwa=
-nadoo.fr
+  	 /* fail both clang and GCC */
+  	static char arr[statically_true(a) ? 1 : 2];
+  }
 
-because you claim to use a wanadoo.fr address in your "From:" line:
+For the same reasons why __is_constexpr() was created to cover
+__builtin_constant_p() edge cases, __is_constexpr() can be used to
+resolve statically_true() limitations.
 
-    From: Vincent Mailhol <mailhol.vincent@wanadoo.fr>
+Note that, somehow, GCC is not always able to fold this:
 
-but you actually used gmail to send it, and the DKIM hash was
-generated by gmail:
+  __is_constexpr(x) && (x)
 
-    DKIM-Signature: v=3D1; a=3Drsa-sha256; c=3Drelaxed/relaxed;
-        d=3D1e100.net;
+It is OK in BUILD_BUG_ON_ZERO() but not in array declarations or in
+static_assert():
 
-And then DMARC complains because the From: and the DKIM doesn't match.
+  void bar(int a)
+  {
+  	/* success */
+  	BUILD_BUG_ON_ZERO(__is_constexpr(a) && (a));
 
-So to actually get the right DKIM hashes, you need to either
+  	/* fail on GCC */
+  	static char arr[__is_constexpr(a) && (a) ? 1 : 2];
 
- (a) send email using the wanadoo.fr smtp gateway
+  	/* fail on GCC */
+  	static_assert(__is_constexpr(a) && (a));
+  }
 
-or
+Encapsulating the expression in a __builtin_choose_expr() switch
+resolves all these failed test.
 
- (b) make the sender be that gmail address that you actually use for sendin=
-g.
+Declare a new _statically_true() macro which, by making use of the
+__builtin_choose_expr() and __is_constexpr(x) combo, always produces a
+constant expression.
 
-Pls fix.
+It should be noted that statically_true() still produces better
+folding:
 
-                  Linus
+  statically_true(!(var * 8 % 8))
+
+always evaluates to true even if var is unknown, whereas
+
+  _statically_true(!(var * 8 % 8))
+
+fails to fold the expression and return false.
+
+For this reason, usage of _statically_true() be should the exception.
+Reflect in the documentation that _statically_true() is less powerful
+and that statically_true() is the overall preferred solution.
+
+[1] __builtin_constant_p cannot resolve to const when optimizing
+Link: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=19449
+
+[2] commit 3c8ba0d61d04 ("kernel.h: Retain constant expression output for max()/min()")
+
+Signed-off-by: Vincent Mailhol <mailhol.vincent@wanadoo.fr>
+---
+Bonuses:
+
+  - above examples, and a bit more:
+
+      https://godbolt.org/z/zzqM1ajPj
+
+  - a proof that statically_true() does better constant folding than _statically_true()
+
+      https://godbolt.org/z/vK6KK4hMG
+---
+ include/linux/compiler.h | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/include/linux/compiler.h b/include/linux/compiler.h
+index 4d4e23b6e3e7..c76db8b50202 100644
+--- a/include/linux/compiler.h
++++ b/include/linux/compiler.h
+@@ -308,6 +308,20 @@ static inline void *offset_to_ptr(const int *off)
+  */
+ #define statically_true(x) (__builtin_constant_p(x) && (x))
+ 
++/*
++ * Similar to statically_true() but produces a constant expression
++ *
++ * To be used in conjunction with macros, such as BUILD_BUG_ON_ZERO(),
++ * which require their input to be a constant expression and for which
++ * statically_true() would otherwise fail.
++ *
++ * This is a tradeoff: _statically_true() is less efficient at
++ * constant folding and will fail to optimize any expressions in which
++ * at least one of the subcomponent is not constant. For the general
++ * case, statically_true() is better.
++ */
++#define _statically_true(x) __builtin_choose_expr(__is_constexpr(x), x, false)
++
+ /*
+  * This is needed in functions which generate the stack canary, see
+  * arch/x86/kernel/smpboot.c::start_secondary() for an example.
+-- 
+2.45.2
+
