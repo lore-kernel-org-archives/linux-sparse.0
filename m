@@ -1,105 +1,107 @@
-Received: from mail-pl1-f176.google.com (mail-pl1-f176.google.com [209.85.214.176])
+Received: from mail-yw1-f182.google.com (mail-yw1-f182.google.com [209.85.128.182])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8FDB91FCC55;
-	Tue, 12 Nov 2024 14:05:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.176
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9D088212F05
+	for <linux-sparse@vger.kernel.org>; Tue, 12 Nov 2024 17:52:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1731420315; cv=none; b=EiVisdFXJPwYjEZJOZVjdt4OHb8xifGz3rA4qUvr9sDUrIULu9suIu+CbGGMke7fLnlyJx0yL/TDoYnhyhWrSCgNvC3A/JSGHP7b70mLJNJfWzahKi5wy4cC5yEg9V6or2E4iCRxK52fUrTFUIJUEZvvXkMboU94uL6Y+v+3lLo=
+	t=1731433942; cv=none; b=ChCOUR/bA03+m/3yZyb7sgykx8tk5IR8fozYr4/l+9a8Sl3ftNh0aVuhVbZDS5LLQFxlgf/ap4VkJrEZNdsYDXlwYuw7iLcD7e7ba+jRUx94LqzBWB12iU8W6h30zchfoVy4KBEUS7DZPEHv+5m9QTg9poxPB52wsq9kuuxInlk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1731420315; c=relaxed/simple;
-	bh=SrJFRuhlzoZ8GAgh2rIJFuamp5YX3FbowBkwkQ/Ewdc=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=N/bigGDoVNVNrUXeGjS/3XW9KIpGSmET3fagzyzyVMbUaYzKyKhp6wYvT+/uKogsJgTvXhfHYshDBjwMbYROElizApnbvKGyxkMgY7Sq0xFZEWZOM5e6071TQvRm2xBZMaddIQeIXQJetk4Xaqcf2lVLeRBAQhaZVyXpMipgAIw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=quarantine dis=none) header.from=wanadoo.fr; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.214.176
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=quarantine dis=none) header.from=wanadoo.fr
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Received: by mail-pl1-f176.google.com with SMTP id d9443c01a7336-20cb47387ceso58682055ad.1;
-        Tue, 12 Nov 2024 06:05:13 -0800 (PST)
+	s=arc-20240116; t=1731433942; c=relaxed/simple;
+	bh=rF0m3RHCDCu5flwjKgaX68jhNqdc11TxTrvhrmCBPPg=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=etuocQzxojhn8fZKvQK3jWNJIKpPrEuur32lepbSXhSdPBql/oag6u/uVywXCfZx/Y3+LVL5VdBZZQaEkIRl2aMwj5ySX+7zezvMXVrLbAmtsK8S9djGqPJmnGsJP6s0ShbTXMYmLxV9ZAAnAb5itzYEWv/zxUXOBREzMbYDn5w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org; spf=pass smtp.mailfrom=linuxfoundation.org; dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b=HOwxMVfS; arc=none smtp.client-ip=209.85.128.182
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linuxfoundation.org
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="HOwxMVfS"
+Received: by mail-yw1-f182.google.com with SMTP id 00721157ae682-6e5b7cd1ef5so51382487b3.1
+        for <linux-sparse@vger.kernel.org>; Tue, 12 Nov 2024 09:52:20 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linux-foundation.org; s=google; t=1731433939; x=1732038739; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=s4eyKsihgIZD98hfy0JGAdD/M8t7V0X38hx8vGXpfi0=;
+        b=HOwxMVfSDYQ+RxVYbxIKybq63fDnnIv3ifxeI3YXFf7c7AGzMw5A621vYXjS+UFgyI
+         Qp/I3I/uhNH+XQTOdmdzgHc+lCIeWwzVz0Y4VOutOEJ4vNk3L/nzxVOyjg2v7bRGV4lz
+         D2HDdEGPwaAevGXkFysfNgBG2ELGQXVK2qpTU=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1731420313; x=1732025113;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+        d=1e100.net; s=20230601; t=1731433939; x=1732038739;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=iLgkTjb8Qax6qcLVJZ4OagY9T3nwD0WZDNygw1a2Krs=;
-        b=XuxqLi8zSVn2mvN9ETYpig1fxvxYu/xa50WQaiZgMk4KpYW+Z/OXYpHYuyvIFP2WKH
-         uvd+MSamKr9JaMAXzNWrlctOxDpXO5/CkrGKrf8kzIYik371oY1U1xCqpONOUZFUdtox
-         uAC6YzhGRkXYosKFL6fd8xG+Y3JoTVUGWpwVeIaxXo/4aIcEUz091b8+VjvZFmazpoj9
-         Ov8HRg6Zeb3hvezSuup9kpUD3UhjrN7Ih8q7omyXIJx2pjATmP7Wj96hZFOJ68QJyr8N
-         oZZQsim9u4TpxUbFKOvDrDfsAmAm6f3f5NTz3ZFkTzeaDbNfGpiQVQmZAZJvsMqFxpJm
-         3SfQ==
-X-Forwarded-Encrypted: i=1; AJvYcCX9DzG18godwmIU3LxXEpUFChcn+CBoNB8dV9UL9vUIiy3j9ewpBnrHciVCUtPM8sFoczHFIX5iThEYhKs=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yw5izl7vEJ/yki71Bwy1ZwDEqyPUlwhfbSs71sgjlhtHHousI5c
-	6LSlFPj4cbd/uHqnp9pWXWu2/LDExPB65o4OejIwqD8xrkLxR4PA
-X-Google-Smtp-Source: AGHT+IHAyO2QTUUO0HaKBXoybzM/XHVUDbmdQqcbH3AkbpQT70i1dhQgvuaRFWMkaVeJcpDf3iHTeQ==
-X-Received: by 2002:a17:902:e752:b0:20c:8907:908 with SMTP id d9443c01a7336-2118359c216mr209080545ad.44.1731420312602;
-        Tue, 12 Nov 2024 06:05:12 -0800 (PST)
-Received: from localhost.localdomain (124x33x176x97.ap124.ftth.ucom.ne.jp. [124.33.176.97])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-7f41f644a23sm10480007a12.53.2024.11.12.06.05.10
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 12 Nov 2024 06:05:12 -0800 (PST)
-From: Vincent Mailhol <mailhol.vincent@wanadoo.fr>
-To: Linus Torvalds <torvalds@linux-foundation.org>,
-	Yury Norov <yury.norov@gmail.com>,
-	Rasmus Villemoes <linux@rasmusvillemoes.dk>,
-	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: linux-kernel@vger.kernel.org,
-	linux-sparse@vger.kernel.org,
-	Rikard Falkeborn <rikard.falkeborn@gmail.com>,
-	Vincent Mailhol <mailhol.vincent@wanadoo.fr>
-Subject: [PATCH v3 2/2] linux/bits.h: simplify GENMASK_INPUT_CHECK()
-Date: Tue, 12 Nov 2024 22:59:24 +0900
-Message-ID: <20241112140454.518823-6-mailhol.vincent@wanadoo.fr>
-X-Mailer: git-send-email 2.45.2
-In-Reply-To: <20241112140454.518823-4-mailhol.vincent@wanadoo.fr>
-References: <20241112140454.518823-4-mailhol.vincent@wanadoo.fr>
+        bh=s4eyKsihgIZD98hfy0JGAdD/M8t7V0X38hx8vGXpfi0=;
+        b=WkcLSHWrWXTMMotiRL2f7Q1W8ddso6yDTWTQip/RNbgphymxHBWdePyCY1IvT1+I2k
+         gUKWvbLkATs5KgsZNyRcKsvMCPHZh1+zeKkbtbPkRSqm3pCsezVCuCUC3ijUJXtMRQgF
+         I/rUHziJO222LUtpPGZ8OYSkq7QSZqfmeeKX0dS6pgIwFegahzfctkg7p1z02yocXwLK
+         JOrJj+SEHd5B9hb3QKMBoyh5ZYp/iZG6dgI9E4rLnbIbdaH+6WN257AXurn5hd4tbEar
+         AavCRJGCmvaSeXpTNyGh2JRqX8OfF4okFWb7JgCM59w+A2IlMVREg7D8uARii4JiyxMr
+         8afg==
+X-Forwarded-Encrypted: i=1; AJvYcCVKSQ4uOxxXPznQh9Of8NHE3lEQfVp2jnBNs5YFg6imwTiojPp7qk/GIK3+AHRvQob8tvmAzZjNhiWSGdw=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yww2mDi56k2VKeoavjfdPKOwP0Idb48I1AIsVXtsbFt6BkXz/O3
+	IjBfIdCbipYRUNEnoZ1qA8AQ58drTWNGIM90rb9mAiew9iE6QFrcVIoXCjANYVR94xMCKkCKUUy
+	/XKRwJ46FpSSeUwNAdkpt0f0mvxpyNtWGuUkm/Q==
+X-Google-Smtp-Source: AGHT+IGvEcIbEvzGr1VmCsZ0mQRwAsSPld9R2C5JTh0+fNcSwWaec7ZBqYSyzKL8e3qzWUzVn7JzLdpmgnyRZvU5CZE=
+X-Received: by 2002:a05:690c:6211:b0:6ea:3313:f98c with SMTP id
+ 00721157ae682-6eaddf8430emr155761917b3.32.1731433939616; Tue, 12 Nov 2024
+ 09:52:19 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1232; i=mailhol.vincent@wanadoo.fr; h=from:subject; bh=SrJFRuhlzoZ8GAgh2rIJFuamp5YX3FbowBkwkQ/Ewdc=; b=owGbwMvMwCV2McXO4Xp97WbG02pJDOnGCd13Oq9q39+g/TFD9ZLI4uA77k9nnX63eeHV91fvm Z35tfiKXUcpC4MYF4OsmCLLsnJOboWOQu+wQ38tYeawMoEMYeDiFICJGFky/DNYN931SmLzZYO8 7ftfyi801y0NXpJU/euYTJgLV/yki9MZ/vDO3ztR2/dlyOeiZYcbd3+Oq/p06Gn11mPKR7WmLmT ZKcMAAA==
-X-Developer-Key: i=mailhol.vincent@wanadoo.fr; a=openpgp; fpr=ED8F700574E67F20E574E8E2AB5FEB886DBB99C2
-Content-Transfer-Encoding: 8bit
+References: <20241112140454.518823-4-mailhol.vincent@wanadoo.fr>
+In-Reply-To: <20241112140454.518823-4-mailhol.vincent@wanadoo.fr>
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Date: Tue, 12 Nov 2024 09:52:09 -0800
+Message-ID: <CAADWXX88Uv+r1JtpnN2gDv6S2wDTqxsn5x8+-U_xWfeNxmT9NA@mail.gmail.com>
+Subject: Re: [PATCH v3 0/2] add _statically_true() to simplify GENMASK_INPUT_CHECK()
+To: Vincent Mailhol <mailhol.vincent@wanadoo.fr>
+Cc: Yury Norov <yury.norov@gmail.com>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, 
+	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, linux-kernel@vger.kernel.org, 
+	linux-sparse@vger.kernel.org, Rikard Falkeborn <rikard.falkeborn@gmail.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-In GENMASK_INPUT_CHECK(),
+On Tue, Nov 12, 2024 at 6:05=E2=80=AFAM Vincent Mailhol
+<mailhol.vincent@wanadoo.fr> wrote:
+>
+> v2 -> v3:
+>
+>    - split the single patch into a series of two patches.
 
-  __builtin_choose_expr(__is_constexpr((l) > (h)), (l) > (h), 0)
+I haven't actually gotten to the patches yet, because all your emails
+end up in my spam box.
 
-is the exact expansion of:
+The reason is because your git-send-email setup is broken, resulting in:
 
-  _statically_true((l) > (h))
+  dmarc=3Dfail (p=3DQUARANTINE sp=3DNONE dis=3DQUARANTINE) header.from=3Dwa=
+nadoo.fr
 
-Apply _statically_true() to simplify GENMASK_INPUT_CHECK().
+because you claim to use a wanadoo.fr address in your "From:" line:
 
-Signed-off-by: Vincent Mailhol <mailhol.vincent@wanadoo.fr>
----
-This change passes the unit tests from CONFIG_BITS_TEST, including the
-extra negative tests provided under #ifdef TEST_GENMASK_FAILURES [1].
+    From: Vincent Mailhol <mailhol.vincent@wanadoo.fr>
 
-[1] commit 6d511020e13d ("lib/test_bits.c: add tests of GENMASK")
-Link: https://git.kernel.org/torvalds/c/6d511020e13d
----
- include/linux/bits.h | 5 ++---
- 1 file changed, 2 insertions(+), 3 deletions(-)
+but you actually used gmail to send it, and the DKIM hash was
+generated by gmail:
 
-diff --git a/include/linux/bits.h b/include/linux/bits.h
-index 60044b608817..01713e1eda56 100644
---- a/include/linux/bits.h
-+++ b/include/linux/bits.h
-@@ -20,9 +20,8 @@
-  */
- #if !defined(__ASSEMBLY__)
- #include <linux/build_bug.h>
--#define GENMASK_INPUT_CHECK(h, l) \
--	(BUILD_BUG_ON_ZERO(__builtin_choose_expr( \
--		__is_constexpr((l) > (h)), (l) > (h), 0)))
-+#include <linux/compiler.h>
-+#define GENMASK_INPUT_CHECK(h, l) BUILD_BUG_ON_ZERO(_statically_true((l) > (h)))
- #else
- /*
-  * BUILD_BUG_ON_ZERO is not available in h files included from asm files,
--- 
-2.45.2
+    DKIM-Signature: v=3D1; a=3Drsa-sha256; c=3Drelaxed/relaxed;
+        d=3D1e100.net;
 
+And then DMARC complains because the From: and the DKIM doesn't match.
+
+So to actually get the right DKIM hashes, you need to either
+
+ (a) send email using the wanadoo.fr smtp gateway
+
+or
+
+ (b) make the sender be that gmail address that you actually use for sendin=
+g.
+
+Pls fix.
+
+                  Linus
