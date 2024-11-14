@@ -1,112 +1,105 @@
-Received: from mail-wm1-f53.google.com (mail-wm1-f53.google.com [209.85.128.53])
+Received: from mail-lj1-f180.google.com (mail-lj1-f180.google.com [209.85.208.180])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A8EFA1F76A8
-	for <linux-sparse@vger.kernel.org>; Thu, 14 Nov 2024 10:40:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 186361F9431
+	for <linux-sparse@vger.kernel.org>; Thu, 14 Nov 2024 11:01:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.180
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1731580830; cv=none; b=BiYzHSqbPkd5pNEaHCpkKy2tkm/D4xTIRgKGfa685Ynvcwg2UWLAr/x7Qo2Cvlv0A7tfXKLMhzsYx1iVFatG4zkNov0xyGTs/a7JmeQYNVQgnG7FkduiIMsSapmyQf/fdsGKQo50k5oUGHu5Wxa1Mtm2e8nsRh99f9doozHyD28=
+	t=1731582118; cv=none; b=h1bzMK+YLKjlVeIj6MnHyqtM5XNhhAu+1YRhXxo6n7Fy5yszwZnEJdHfaq1QYP47G5jLsgmhurwAE/7ySSwYloLI+0YYyyNrgfkEo0DbV+rYpKzrDK4N/78cH9Dh5gqJ1YQ2j+6IEM7DzE6s6YGKdeyMZ40vtQWquEOtAL/+bTE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1731580830; c=relaxed/simple;
-	bh=9AkKxEVBb49xweTPBUktV/8NfSLDBUfWsHDMby19RI4=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=SQnxfYbU0Z0e3h+XMY39vkgBtDNlBeJZ1MCW1MI7LjtrPzRLSEmGMsn0n9OB1rEUkggIksJ03J2Lt5SyMvz8SXfB6UYJ1Oj7aOUBLw1QAS6o/rtOm0MvNLvW+R5bYWtkT1hbsgLfmBwdL3jdPEeL2fgWqbSxOq20qvPcbTIJezk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=nhSTtYbf; arc=none smtp.client-ip=209.85.128.53
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1731582118; c=relaxed/simple;
+	bh=qPAWrOr3vWkhHjcu1uXtnkQY76pnDl93bawx4pmiu0w=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=pS28aIn1TD/7nYprdewEXPkmEPcRWbLcZ5WaPEQBygXlC0qStwnV/vBGXmqLdIkWjMF1YU1cOtSnnjk1ZWjfZSqwuKTp9+TB3EcwoSJRiy0s7t+lCtr+JOS6x/tO4XYRpEMpm4W6HiImsVA6HT4NBOmckfeOnqik/4v549qafQU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linbit.com; spf=pass smtp.mailfrom=linbit.com; dkim=pass (2048-bit key) header.d=linbit-com.20230601.gappssmtp.com header.i=@linbit-com.20230601.gappssmtp.com header.b=sGu/artx; arc=none smtp.client-ip=209.85.208.180
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linbit.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="nhSTtYbf"
-Received: by mail-wm1-f53.google.com with SMTP id 5b1f17b1804b1-43159c9f617so4093815e9.2
-        for <linux-sparse@vger.kernel.org>; Thu, 14 Nov 2024 02:40:28 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linbit-com.20230601.gappssmtp.com header.i=@linbit-com.20230601.gappssmtp.com header.b="sGu/artx"
+Received: by mail-lj1-f180.google.com with SMTP id 38308e7fff4ca-2fb50e84ec7so3644041fa.1
+        for <linux-sparse@vger.kernel.org>; Thu, 14 Nov 2024 03:01:55 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1731580827; x=1732185627; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=V+KWyQHeoGoqflE1crVxP4Tsix1+zwZTB2zJKsiob7s=;
-        b=nhSTtYbfCPId7ocJhieFoJDInmPxbpJ2uUhzld1Oe3NSUyWXPwV3l+adf5ShpXd6hh
-         LaS3kzksBimJLXqK7MZHQeo4/z3HbE8/eLQU6WXj44QSU9WWDrfcjJ/EXJotACfT2VXs
-         A1xe4h4IZBLzl8cl6qt7orOhD6XSR+/kg4CFx8wzXvQk5SLhNJoKARP3SGQujSF2Xn6V
-         /XKegelz/x43vL+Z5ZXEU6e2hSBmO2H+9p5x8kCSBj/edLoyrSPmCAcJZIkAxTjLsrKL
-         NNUmRma6UVJmMuLCKpFmA1tGrOU1JkzSK2DFJ/W7SGSd7rebacWSRp8JG3LJrOrC61z0
-         qs8Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1731580827; x=1732185627;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+        d=linbit-com.20230601.gappssmtp.com; s=20230601; t=1731582114; x=1732186914; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=V+KWyQHeoGoqflE1crVxP4Tsix1+zwZTB2zJKsiob7s=;
-        b=sJYerzzdwC6zqPot/JIAqco6E+MLhcOvXB1slltWSqFkocPg74+v/odicwpfYgk1xq
-         xoWPUkENw+l8VuXu/1OaOsX2CNfPohZXNC5wWoczlYlBojQcJLDaV6WRfG2K5MZnsnfj
-         Zqcc53qnKme6av2ItB9Dt8LpYWrPo3rVNVDvpNSQXNp1+AZWlA83Wn+RIj9Ve//yBUJv
-         49tGgeITOQykFxTHEzz9WE4GqYd1bRmNRNv+6ngs29V41jr91dVZNg9a6U6pP6nZaxwZ
-         L5KxBlk98Ps/KqObLcK+hHsLv1J7hdhP+NqpCFjK0dfonKHOulpaud2bUi3kcm/eXi2S
-         zmWA==
-X-Forwarded-Encrypted: i=1; AJvYcCVlWspT7VyyZK4/Yc3FMEnkGYPkPA9WMBJUDbgtoA4wDr3lwM7NWPkoCU7lfmI9ZNOk08Xu/J8GBoXIUGg=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxheaHeMp1W2XVExfmq+rb04uftaU+PW/htWhYS/eCu1U/sNdMk
-	4pkDtKoijIgeQ8hpZ+W3eAy+Rp2t5EcmCCfLjSUe1ilvF7OBeXKX99rL8cIUWHo=
-X-Google-Smtp-Source: AGHT+IHL0UzLkSLa2ICsA94lpf23MBJB+9BtCC/UgPCLuU8rRMTvtwPv3tETm2V18Af40d9WXc+dMA==
-X-Received: by 2002:a05:600c:a40a:b0:432:d866:f45e with SMTP id 5b1f17b1804b1-432d866f646mr34209595e9.33.1731580826996;
-        Thu, 14 Nov 2024 02:40:26 -0800 (PST)
-Received: from localhost ([196.207.164.177])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-432da298760sm19010355e9.37.2024.11.14.02.40.26
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 14 Nov 2024 02:40:26 -0800 (PST)
-Date: Thu, 14 Nov 2024 13:40:23 +0300
-From: Dan Carpenter <dan.carpenter@linaro.org>
-To: Philipp Reisner <philipp.reisner@linbit.com>,
-	Miguel Ojeda <ojeda@kernel.org>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
-	linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 1/1] compiler.h: Add missing include statement for
- build_bug.h
-Message-ID: <a2ed9ec0-4909-44bf-be11-21a22789e1d1@stanley.mountain>
-References: <20241114101402.156397-1-philipp.reisner@linbit.com>
- <20241114101402.156397-2-philipp.reisner@linbit.com>
+        bh=/CdykCz3hdWH3Ou+T064c0ieZUNSSG/qvO70CTuEaX8=;
+        b=sGu/artx82Uc4HbQrRIWH41EGrewjPjLkRtfjFY8/Zs/Ii5pVNIVxivucgWD0vWzgW
+         TW0FKzOBM/LtUZeezlLYCkcqUrMTxfhna7ufN3QvRNp4Ur/oVzFpSig3jU838t1A8Lso
+         KIitRq5q89QkARZdNjohM8XKXA3bbeUx5Bf9fA+xuZw4+NNYL1HfZp234iI0VFDhXdc9
+         UVyyumMdSPQdTVpWdtKw5AM9IS8F5BiUz3PCebFVu4ITvyMmxRJpzD6Ubhm/xXPKseZF
+         zJzf66Ord6J/1gX+7HLDsgEsAKbHCOEEF4C7D3yhtczJF5Wli1GjrQ66Yo1eZN6WMzq/
+         OXtA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1731582114; x=1732186914;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=/CdykCz3hdWH3Ou+T064c0ieZUNSSG/qvO70CTuEaX8=;
+        b=unkEUSomJwo9yRoPJb2WRFzOgdYLODbgoF8SS50/tylJ67P/2ggpEKibhQhPh6OXW9
+         +1MEDj+RVrshnJVxmGkE7LA1UvI2c8sTT5CK9jDJd8i0XTOWuo2SrPrkaXueufm2caff
+         38BNWJtBkAHOOm9iiMKfG0Z4fpJejJoBVzHysP+EDBahkydyXWK5HuAc4pt5im/ZVXQ8
+         lWXMskORGs3KZZCTHk8xrukZv3RgnAK8UyifBRuHlVFb6PHJNWar9hUgHl1PvMilOPwl
+         B480gIF6rFVOjSljFtZeqZcp1q/kLMrIaWL1Nn8jGi4WlrP59OrU711yKCcqerIlYJr+
+         EqyQ==
+X-Forwarded-Encrypted: i=1; AJvYcCXvIG3pRNrwnbYlebLa2sVWRg14OtFGATo42GCt39Jz1cEgf0fAwyqHU9rB4eHmxPiOElpqY7/DzI7jOLs=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yz8MdEkU51bAbGeG1Bn/gS4rC1p19c3JgUfP9BFOLFrhDxxhete
+	f5sVr8n7/Zvs9gnJKVdT6WtA0NPLpAmqRJ/r2jZi1BLuApBgT8Ys607OtyhpTiL8GVpn6NMrLH/
+	3c72mKgN+NVCUcpTJpZAis4rcFurEmgtCH2I9cp9IXwym7WUrA28=
+X-Google-Smtp-Source: AGHT+IGbi3VDPOzkHrrfqdZNWFsbgtu7/DdTzRf299ddEfxUAeB7GKsHAUYjFDrm8Gxf3Em1QMcHxhiQGuJ9zjk/uJo=
+X-Received: by 2002:a05:651c:1589:b0:2fc:a347:6d87 with SMTP id
+ 38308e7fff4ca-2ff20162111mr119380801fa.13.1731582114230; Thu, 14 Nov 2024
+ 03:01:54 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20241114101402.156397-2-philipp.reisner@linbit.com>
+References: <20241114101402.156397-1-philipp.reisner@linbit.com>
+ <20241114101402.156397-2-philipp.reisner@linbit.com> <a2ed9ec0-4909-44bf-be11-21a22789e1d1@stanley.mountain>
+In-Reply-To: <a2ed9ec0-4909-44bf-be11-21a22789e1d1@stanley.mountain>
+From: Philipp Reisner <philipp.reisner@linbit.com>
+Date: Thu, 14 Nov 2024 12:01:42 +0100
+Message-ID: <CADGDV=XZnkOUrc=AC=D5CeOHagiTbSGd2KGK0rN1MWoSXjidCw@mail.gmail.com>
+Subject: Re: [PATCH 1/1] compiler.h: Add missing include statement for build_bug.h
+To: Dan Carpenter <dan.carpenter@linaro.org>
+Cc: Miguel Ojeda <ojeda@kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, 
+	linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Thu, Nov 14, 2024 at 11:14:02AM +0100, Philipp Reisner wrote:
-> compiler.h defines __must_be_array() and __must_be_cstr() and both
-> expand to BUILD_BUG_ON_ZERO(). build_bug.h defines BUILD_BUG_ON_ZERO().
-> So far compiler.h lacks to include build_bug.h.
-> 
-> Fix compiler.h by including build_bug.h. With that compiler.h and
-> build_bug.h depend on each other.
-> 
-> Signed-off-by: Philipp Reisner <philipp.reisner@linbit.com>
-> ---
+On Thu, Nov 14, 2024 at 11:40=E2=80=AFAM Dan Carpenter <dan.carpenter@linar=
+o.org> wrote:
+>
+> On Thu, Nov 14, 2024 at 11:14:02AM +0100, Philipp Reisner wrote:
+> > compiler.h defines __must_be_array() and __must_be_cstr() and both
+> > expand to BUILD_BUG_ON_ZERO(). build_bug.h defines BUILD_BUG_ON_ZERO().
+> > So far compiler.h lacks to include build_bug.h.
+> >
+> > Fix compiler.h by including build_bug.h. With that compiler.h and
+> > build_bug.h depend on each other.
+> >
+> > Signed-off-by: Philipp Reisner <philipp.reisner@linbit.com>
+> > ---
+>
+> Fixes: ec0bbef66f86 ("Compiler Attributes: homogenize __must_be_array")
+>
+> What actually breaks?  This commit is six years old.  It's weird that we'=
+re only
+> seeing build breakage now.  Or did you just notice this while reviewing t=
+he
+> code?
+>
 
-Fixes: ec0bbef66f86 ("Compiler Attributes: homogenize __must_be_array")
+I am working on a compilation unit that includes linux/string.h.
+Compiling it breaks when using strscp(). That is since commit
+commit 559048d156ff3391c4b793779a824c9193e20442
+Author: Kees Cook <kees@kernel.org>
+Date:   Mon Aug 5 14:43:44 2024 -0700
 
-What actually breaks?  This commit is six years old.  It's weird that we're only
-seeing build breakage now.  Or did you just notice this while reviewing the
-code?
+Of course, my trivial workaround is including build_bug.h in my
+source; it is just not the proper way to fix this.
 
-regards,
-dan carpenter
-
->  include/linux/compiler.h | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/include/linux/compiler.h b/include/linux/compiler.h
-> index 4d4e23b6e3e7..2d75e4892316 100644
-> --- a/include/linux/compiler.h
-> +++ b/include/linux/compiler.h
-> @@ -3,6 +3,7 @@
->  #define __LINUX_COMPILER_H
->  
->  #include <linux/compiler_types.h>
-> +#include <linux/build_bug.h>    /* for BUILD_BUG_ON_ZERO() */
->  
->  #ifndef __ASSEMBLY__
->  
-> -- 
-> 2.47.0
-> 
+best regards,
+ Phil
