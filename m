@@ -1,113 +1,101 @@
-Received: from mail-ed1-f44.google.com (mail-ed1-f44.google.com [209.85.208.44])
+Received: from mail-ed1-f46.google.com (mail-ed1-f46.google.com [209.85.208.46])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0D13518BC21
-	for <linux-sparse@vger.kernel.org>; Thu, 14 Nov 2024 17:42:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.44
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BFE5418C907
+	for <linux-sparse@vger.kernel.org>; Thu, 14 Nov 2024 18:28:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.46
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1731606158; cv=none; b=UWHDyTtLrn73QujRRx3ucJUM/l8awN3l3/ibZFWyqcQ94YNIWtkaSP/OZmFBVI94I1WG2lpzWJjEbZ6s49eZKMpIfUhjUFw7aaTsn+2+tDIRrOuGqnv224zUWn5Iqm6xIvwrNPZEXpXtcZHQranRBUeElFhtjUld9NJx8aExBQY=
+	t=1731608903; cv=none; b=fN6/qZ98VZGXWIQqj7u2QQeOAA3fWrwEZUZD1yf/iOE2QviNW8XJgwsMQIlnARyi2jIPH0oDZw5gR4wDoI/EMA7pniWBF7sirHVte4XdYGPbhU13saHxmhJUw45j3l6aWFkuR2QqpwCDZ5pObzL9J06ArvsDJqULNiDBdl2uqYQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1731606158; c=relaxed/simple;
-	bh=mSaU8+k6H5UsTO/zFUXIvfBdXgPPqBH46d5GSShwijo=;
+	s=arc-20240116; t=1731608903; c=relaxed/simple;
+	bh=KCc0gSJuw6M6GZeBy+cbkCwwo7HpbQ8dLEdU98bWO6A=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=BdzRVOo+Ls3APx7stwztwftEDveV0ST1hNIcsHMxg6wEhBXYeDdlUGquq2Bmw5zqYLbc4G/mkHBY3wZgYkkfP1VQWoHav2gtLm1Nt+Uq+aYv1gyZY6+lMZziyZ2jJXOBBloZaXQVyfmDxwKfRpLi3Tq8C1NXQMU4mKPnUR8eEDk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org; spf=pass smtp.mailfrom=linuxfoundation.org; dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b=bTXmb0hg; arc=none smtp.client-ip=209.85.208.44
+	 To:Cc:Content-Type; b=PbNSWf+8r33j81RZ9i3GbUUXpiF08wms9FlC5F6SDsXN2PusGxl4/5BhM7y4urLIAjwsuN66Ae+v5sjDl9BP5gE8nPwARlPJlx1AexmPus3+/sH/esmsM9koCGI3RXnxPYkYIO4VigZihP8/03J2+6tUAzFEpqCkedrkk6/tvTM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org; spf=pass smtp.mailfrom=linuxfoundation.org; dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b=DvHfA7Dq; arc=none smtp.client-ip=209.85.208.46
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linuxfoundation.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="bTXmb0hg"
-Received: by mail-ed1-f44.google.com with SMTP id 4fb4d7f45d1cf-5cacb76e924so1428661a12.0
-        for <linux-sparse@vger.kernel.org>; Thu, 14 Nov 2024 09:42:35 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="DvHfA7Dq"
+Received: by mail-ed1-f46.google.com with SMTP id 4fb4d7f45d1cf-5cedea84d77so1332382a12.1
+        for <linux-sparse@vger.kernel.org>; Thu, 14 Nov 2024 10:28:21 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linux-foundation.org; s=google; t=1731606154; x=1732210954; darn=vger.kernel.org;
+        d=linux-foundation.org; s=google; t=1731608900; x=1732213700; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=Qnfu4AuFc7Ir4mUZPIm/dFK37daLn9XyJCKqN5KNnKU=;
-        b=bTXmb0hg/PSAmC5JWBtjYpMMEaOV4IgsFuz8JZLqQgGdds1y3Q2lPLMYcxed6kv82V
-         moDTN9KnR3e3JENCgZHn97adJcvZHBk5jUjJ0TY6xCebEX3N2Uyz8RrJRHivfa98cFf8
-         BLKmOthuarB6CBBRLQ2nQdNDEf4l5mBTfwW9E=
+        bh=DaqaoJAF7E7zv6sqRicq9V7Po6v7/UVcqTEzLTnHU3M=;
+        b=DvHfA7DqYC2scy1u+OFbr0McJwUi7JJcahySZIHRd/Rs3biVZWbOle5Movg7TAUoVM
+         NQwyhqVIaEjpimJ5GVth0xakvuslR9qH8kzFjMX5hcqD83ESQuR9b8EMPWS8NsdMRjTU
+         hYsnS6WzblI5GWWLsnoICxPGr8QaLXUyc6Sks=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1731606154; x=1732210954;
+        d=1e100.net; s=20230601; t=1731608900; x=1732213700;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=Qnfu4AuFc7Ir4mUZPIm/dFK37daLn9XyJCKqN5KNnKU=;
-        b=roWGTMv1hsqooiJHtiu6EkWQUP2D3o4dsxaVwv2X7qfh1nBHm7rUPOIYN+tA5cf1VB
-         59+cQeup186zMtJAcwg5RsVA7TeKPUDPf2OJi5+cXvnTrscMUYX7gZeCs9YibcOWcOaI
-         rvI56Hb6IbqCvgpMPk3NG0FZSQvCV1wVeNIqynb7W4PzWr7WhZsdw8riSb32y0VLSFWV
-         5s8EFXIQ6bzuOa5ALCE9AXctf+VheXkhSCHI0B98ld6vBZoUnnogbdoK0Xx92YmzHhVZ
-         FlON0CMGhNZLdTkX2FTQleX9c9TiBxzKBdJutwfZJOV4awu3YMnvSRcYuDfI3M03fwaH
-         /gXg==
-X-Forwarded-Encrypted: i=1; AJvYcCXM2cbji0nBhoxDB9P/5Za/eQP1y+kre89RJs3KwwmY5etyTH4prbfAlMF0fUzOwQPjnEoh5DPQ3w/aTGc=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yys6BgNHitmL/R6ZpBdO//8jHSt78OL0JYm7Mg4NpmLsHSFLCNf
-	iiYExtxYF635Ta/rGnsUTcV+jZz0tJCUJ4igRuDdZHFuW3wjSCrY4WRE8QGyQuBlCUvY+anjlW9
-	kFiXQgA==
-X-Google-Smtp-Source: AGHT+IFSwdnxkCpl/jgYOCqPE0RKoD8YLYsEODCgiOukTZQtjCcPNEJE8gFanBZr6Z6IT+4/H+Azbg==
-X-Received: by 2002:a05:6402:2786:b0:5cb:7877:a633 with SMTP id 4fb4d7f45d1cf-5cf77eeb975mr2465873a12.33.1731606154089;
-        Thu, 14 Nov 2024 09:42:34 -0800 (PST)
-Received: from mail-ed1-f47.google.com (mail-ed1-f47.google.com. [209.85.208.47])
-        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-5cf79b9faf4sm761747a12.33.2024.11.14.09.42.32
+        bh=DaqaoJAF7E7zv6sqRicq9V7Po6v7/UVcqTEzLTnHU3M=;
+        b=ZFCl1I/Sh8EjNtLQq18hIo0b5VEaAF5dQZj08SsAGBSnZu3EMeb6GkcCdTBR5jEp+y
+         NMtvJD+jI8cKLeM8VdBHyF9Q7lulAORxuYG+MjKx0tC67ZQMPqNDiif7DsgTHtJ35eEC
+         fxztHx3dADZzmvkYcLnBHuaWV/E4TWeYtO/amiSQltO0LGMAKTInDM3ZIS9/8uEQi2rr
+         RYWBrjZE9W1cyflkAbi0u87hG56ARbDyaxZNWoQRY4e2vhTWvy1TBzcp+qbPzwlZ3i38
+         S8jXCRP3H1XLoA4Vw7MPByVdqlDqCpW7cYA344FyMGsNwQ3DDeGrFgulpkMor+WYcpLi
+         9Rhg==
+X-Forwarded-Encrypted: i=1; AJvYcCWUfzlL5hwfq6IisKud9BpzDaOLtc0J8tYOn9qMwqmCFVtfrs8CLFuS659R56OidOfcKwZMAFu6RyT/xVo=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyOFy5HKqP5sgWadWiKc2D3uTDGJ8BTkeGZD1SBtbBZXNjK//C1
+	8ihBW7S/luEoz4PD4OFaV1mRP7IDqNEXNf7301SZCdH1f0lG4g8vSaznIXvmHYhv6d7PxnEGjTp
+	e/JnWiA==
+X-Google-Smtp-Source: AGHT+IE2Xh+zVCE2iHQxFMzjV1P90LzEJrrP/XygPWb6+5zsWkZRKIhQSf0KnnirBGXp1Dsjteclcw==
+X-Received: by 2002:a05:6402:13c7:b0:5ce:dde6:dd6f with SMTP id 4fb4d7f45d1cf-5cf63103700mr6803719a12.24.1731608899908;
+        Thu, 14 Nov 2024 10:28:19 -0800 (PST)
+Received: from mail-ed1-f54.google.com (mail-ed1-f54.google.com. [209.85.208.54])
+        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-5cf87e031a1sm287454a12.17.2024.11.14.10.28.18
         for <linux-sparse@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 14 Nov 2024 09:42:33 -0800 (PST)
-Received: by mail-ed1-f47.google.com with SMTP id 4fb4d7f45d1cf-5cf8593ca4bso646762a12.1
-        for <linux-sparse@vger.kernel.org>; Thu, 14 Nov 2024 09:42:32 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCX7UX8bb6+3JjmscH23CtUpTESiIQAvwWcTMnrzzwED6BDKqYFao06JyO5lQ75pfij/KuETQvgDOlm5hPk=@vger.kernel.org
-X-Received: by 2002:a17:907:9307:b0:a9e:b5d0:de6 with SMTP id
- a640c23a62f3a-aa20cded0b0mr291909366b.50.1731606152058; Thu, 14 Nov 2024
- 09:42:32 -0800 (PST)
+        Thu, 14 Nov 2024 10:28:19 -0800 (PST)
+Received: by mail-ed1-f54.google.com with SMTP id 4fb4d7f45d1cf-5cedea84d77so1332342a12.1
+        for <linux-sparse@vger.kernel.org>; Thu, 14 Nov 2024 10:28:18 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCX00xqvSGitR/BvQfAHXBjGK74/V1L1Nhpebx14nDGejve7psTfGrHGr46veg2P+sWmkrP1nu0JEXYKcC4=@vger.kernel.org
+X-Received: by 2002:a17:906:6a29:b0:a9a:1437:3175 with SMTP id
+ a640c23a62f3a-aa1f813b795mr748535666b.51.1731608898491; Thu, 14 Nov 2024
+ 10:28:18 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241114101402.156397-1-philipp.reisner@linbit.com> <20241114101402.156397-2-philipp.reisner@linbit.com>
-In-Reply-To: <20241114101402.156397-2-philipp.reisner@linbit.com>
+References: <20241114101402.156397-1-philipp.reisner@linbit.com>
+ <20241114101402.156397-2-philipp.reisner@linbit.com> <CAHk-=wgn=e3gD=tty+p1o8HBy7qxBCgCHiDEd5+FMtn9jdwd2g@mail.gmail.com>
+In-Reply-To: <CAHk-=wgn=e3gD=tty+p1o8HBy7qxBCgCHiDEd5+FMtn9jdwd2g@mail.gmail.com>
 From: Linus Torvalds <torvalds@linux-foundation.org>
-Date: Thu, 14 Nov 2024 09:42:15 -0800
-X-Gmail-Original-Message-ID: <CAHk-=wgn=e3gD=tty+p1o8HBy7qxBCgCHiDEd5+FMtn9jdwd2g@mail.gmail.com>
-Message-ID: <CAHk-=wgn=e3gD=tty+p1o8HBy7qxBCgCHiDEd5+FMtn9jdwd2g@mail.gmail.com>
+Date: Thu, 14 Nov 2024 10:28:02 -0800
+X-Gmail-Original-Message-ID: <CAHk-=wjLSEcZ5LdW+3C+9rtjvNPHZT6zdk0POj67T5k2ZpDbgA@mail.gmail.com>
+Message-ID: <CAHk-=wjLSEcZ5LdW+3C+9rtjvNPHZT6zdk0POj67T5k2ZpDbgA@mail.gmail.com>
 Subject: Re: [PATCH 1/1] compiler.h: Add missing include statement for build_bug.h
 To: Philipp Reisner <philipp.reisner@linbit.com>, Kees Cook <keescook@chromium.org>
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, linux-sparse@vger.kernel.org, 
 	linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Thu, 14 Nov 2024 at 02:23, Philipp Reisner
-<philipp.reisner@linbit.com> wrote:
+On Thu, 14 Nov 2024 at 09:42, Linus Torvalds
+<torvalds@linux-foundation.org> wrote:
 >
-> compiler.h defines __must_be_array() and __must_be_cstr() and both
-> expand to BUILD_BUG_ON_ZERO(). build_bug.h defines BUILD_BUG_ON_ZERO().
-> So far compiler.h lacks to include build_bug.h.
+> I think a better fix would be to not use BUILD_BUG_ON_ZERO() at all,
+> but just use _Static_assert() directly here, to make
+> <linux/compiler.h> be more self-sufficient.
 
-The bug is real, but..
+Damn. We can't do that, because we typically use this in contexts that
+require us to return zero (because the assertion part of an
+expression), and then that whole expression needs to be a constant
+integer expression.
 
-> Fix compiler.h by including build_bug.h. With that compiler.h and
-> build_bug.h depend on each other.
+And because _Static_assert() isn't an expression, we'd need to wrap it
+with a statement expression or something.
 
-I hate how compiler.h would include build_bug.h, which - on the very
-first line - then in turn includes compiler.h.
+And *hat* we can't do in arbitrary contexts.
 
-Does it *work*? Yes. The standard include guards stop the thing from
-recursing, and both headers only do create pre-processor defines, so
-the dependencies aren't ordered, but it's really really ugly to have
-these kinds of circular includes.
+Grr. I absolutely detest how bad the standard tools are. It's kind of
+sad how we need to build our own hacky BUILD_BUG_ON() to do this.
 
-I think a better fix would be to not use BUILD_BUG_ON_ZERO() at all,
-but just use _Static_assert() directly here, to make
-<linux/compiler.h> be more self-sufficient.
+There's probably some trick I'm missing, but yeah, it looks like we
+need our BUILD_BUG_ON_ZERO() thing with that crazy bitfield hack.
 
-The gcc docs say that __builtin_types_compatible_p() and
-__builtin_has_attribute() both return an integer constant expression,
-so that should be fine (the advantage of BUILD_BUG_ON_ZERO() is that
-it works in some contexts that aren't necessarily technically integer
-constant expressions - as long as they just evaluate to a constant).
-
-We historically used to avoid _Static_assert(), but that was for
-historical reasons (ie it's one of those things that didn't exist back
-in the day..)
-
-Hmm?
-
-              Linus
+                           Linus
