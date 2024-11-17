@@ -1,95 +1,83 @@
-Received: from mail-ed1-f42.google.com (mail-ed1-f42.google.com [209.85.208.42])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from eu-smtp-delivery-151.mimecast.com (eu-smtp-delivery-151.mimecast.com [185.58.86.151])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D4D421D0E36
-	for <linux-sparse@vger.kernel.org>; Sun, 17 Nov 2024 19:10:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.42
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1B0E81DA61B
+	for <linux-sparse@vger.kernel.org>; Sun, 17 Nov 2024 19:23:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.58.86.151
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1731870613; cv=none; b=GBHcXvRz/G/UgN+yVU/Z5alc503jwqrjzFvPKT8ixg/ZYqKvVRqTUT74dDWes8ZYL5sIH4vczWXotuuWwnXf01Ybcy26YWNSJ+PlTxvsCsg2n8ZkgM8nYcDDoWmeNUlNI0p778DnVE0vkwwk4LiGZt4UYEvE4pF1TXSK00GqgNA=
+	t=1731871406; cv=none; b=XVnzrz328toh0Y7nVT/bo7a5OFenjBgFu78Z5T/FeCGCkRGx/txPiCScx9piWucxmVhPkxbCeMM7/qZNanjngG4trLbBRBCFl5ej+InAu40vPVoPJOAjpfpSvMB7QdB+bbOe3C/yrm768g2AT6PI3loMEuwRNuEFzzzxt68qJkY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1731870613; c=relaxed/simple;
-	bh=rKZSQWVvGhg4raZdqqnEYVcbbk/2GmORPysBvFpPh/E=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=W9uiKzIVii0feR1UFM1BkrjergEDNyVZTnVz+BtFuZBvpCT/eFFwLHpPj5qab3CLUONEHcrv95/YfNa9AwRX4JdnBgCcyVZBbo4yEjpoYYyEeEGIvskZLf6h8nKbEQBk97xl0I15mQjcP653UX13apsMLFj1OJaU8laRa+vkSwA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org; spf=pass smtp.mailfrom=linuxfoundation.org; dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b=baIgCviD; arc=none smtp.client-ip=209.85.208.42
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linuxfoundation.org
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="baIgCviD"
-Received: by mail-ed1-f42.google.com with SMTP id 4fb4d7f45d1cf-5c9c28c1ecbso4921662a12.0
-        for <linux-sparse@vger.kernel.org>; Sun, 17 Nov 2024 11:10:10 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linux-foundation.org; s=google; t=1731870609; x=1732475409; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=yTq39KpSi/XOcjYMPkfmcPZj5cLER0PBeGZUoAkDQbU=;
-        b=baIgCviDGngvEErUPTSeLANqyNK3/+Bva3KBDnml6h6QcRAvGCkBvXWwMS4ShnSEL2
-         TtPI23q9h0D/eHreOpMRDM6rJ97JX8hRU0JliFBmJZccO1Qh+AL71lfQqLb769ktdii2
-         3/9AUQlkXqXuOAvodoHdXKEpmkF5zsg8zrYFs=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1731870609; x=1732475409;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=yTq39KpSi/XOcjYMPkfmcPZj5cLER0PBeGZUoAkDQbU=;
-        b=wcmLMp+xSOSZm0xF0ZFx8PD1wUnQJX3Vp7Wf4uJhQZCOmhcNzcP4izBq756t2uRJ0+
-         624XZ/ypn786U5dSNxvpKlVkvlMZ8rBtbMEbQZnjrZN3QktTNY/iwN5U19k3y8hyQyNu
-         7nXU+cj5cTU1Jd+m1TDuPxuKwpRsWk9I0fgkCK2wU4cfDENRn42aKecfaPv3uOTbp+7T
-         BZAXtuDb60RXXQmzEhkHQGxLknFisPBcH+Odh+OUHkylwK+hOdkrsktOtV/TpuEqLGmq
-         BDNz+uGSneqMOTl871D5uvrUrO9j6MHndevhki2wU3n9/3XYjPqB+kW+kRKkcv60uJvT
-         maAQ==
-X-Forwarded-Encrypted: i=1; AJvYcCX6drHLKjxUyORTa7voAZdvGqMxoHQ1t3HKUYD9GwxvAbWdLagts82moU4lGAU9EhCxydezlSDFYDP6miw=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yxw8tvDxsaajJKhqMVmbUBwtSyLX6W//Yzt2W6cvd36Wms7WjRF
-	qvPeygQs8UwMMGPdUmSIcGRNcsfC2z458lX3Z41PtNhQwQtL1irhG8HwnZ6AANawHiP3DKjQF/U
-	vyd6trA==
-X-Google-Smtp-Source: AGHT+IESjMfB0nRqpuEfkIxWjIt4KpYgQM+vnioPBdBqdCBkmm4PPx7/Vm2uG5wk5z+AHy2eZuDDFA==
-X-Received: by 2002:a05:6402:348d:b0:5cf:a759:b27b with SMTP id 4fb4d7f45d1cf-5cfa759c16bmr4203543a12.33.1731870609039;
-        Sun, 17 Nov 2024 11:10:09 -0800 (PST)
-Received: from mail-ej1-f51.google.com (mail-ej1-f51.google.com. [209.85.218.51])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-aa20df26b8fsm452158766b.25.2024.11.17.11.10.07
-        for <linux-sparse@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 17 Nov 2024 11:10:08 -0800 (PST)
-Received: by mail-ej1-f51.google.com with SMTP id a640c23a62f3a-a9a6acac4c3so595967866b.0
-        for <linux-sparse@vger.kernel.org>; Sun, 17 Nov 2024 11:10:07 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCVgH70kyC2BIzxK6Kxs41iFqMuTwy5eXUYNXArmLw3laDQT80ZEcsicBQz6ILYYZwQZoY+w14kiBlPG+3I=@vger.kernel.org
-X-Received: by 2002:a17:907:a4e:b0:a99:c9a4:a4d5 with SMTP id
- a640c23a62f3a-aa483482762mr901553266b.29.1731870607652; Sun, 17 Nov 2024
- 11:10:07 -0800 (PST)
+	s=arc-20240116; t=1731871406; c=relaxed/simple;
+	bh=0kDBzHy4Z3zCX3m3Wqf3QqCh8+QMdVY5KxEOrrON/1A=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 MIME-Version:Content-Type; b=SepFLKJ+wOGZtnyo5DVQ10VqgJqZ/P5Tg/+CcgxR7Gyb6Te64NwPFX7liosDAtSoj2bjMmAkWWyf+k/ukaN1T3bQAivQlLBisvofd4uyLo9NmzBNE/nf32QTg+GttJ5M8htaAujewujRdrxCJA1jQrhEvk2oWQFznxcEcrUKBtU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ACULAB.COM; spf=pass smtp.mailfrom=aculab.com; arc=none smtp.client-ip=185.58.86.151
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ACULAB.COM
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=aculab.com
+Received: from AcuMS.aculab.com (156.67.243.121 [156.67.243.121]) by
+ relay.mimecast.com with ESMTP with both STARTTLS and AUTH (version=TLSv1.2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id
+ uk-mta-33-DPMEbQEGOSq-2p63680f8w-1; Sun, 17 Nov 2024 19:23:21 +0000
+X-MC-Unique: DPMEbQEGOSq-2p63680f8w-1
+X-Mimecast-MFC-AGG-ID: DPMEbQEGOSq-2p63680f8w
+Received: from AcuMS.Aculab.com (10.202.163.6) by AcuMS.aculab.com
+ (10.202.163.6) with Microsoft SMTP Server (TLS) id 15.0.1497.48; Sun, 17 Nov
+ 2024 19:23:20 +0000
+Received: from AcuMS.Aculab.com ([::1]) by AcuMS.aculab.com ([::1]) with mapi
+ id 15.00.1497.048; Sun, 17 Nov 2024 19:23:20 +0000
+From: David Laight <David.Laight@ACULAB.COM>
+To: 'Linus Torvalds' <torvalds@linux-foundation.org>
+CC: Vincent Mailhol <mailhol.vincent@wanadoo.fr>, Yury Norov
+	<yury.norov@gmail.com>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, "Luc Van
+ Oostenryck" <luc.vanoostenryck@gmail.com>, "linux-kernel@vger.kernel.org"
+	<linux-kernel@vger.kernel.org>, "linux-sparse@vger.kernel.org"
+	<linux-sparse@vger.kernel.org>, Rikard Falkeborn <rikard.falkeborn@gmail.com>
+Subject: RE: [PATCH v4 1/2] compiler.h: add const_true()
+Thread-Topic: [PATCH v4 1/2] compiler.h: add const_true()
+Thread-Index: AQHbNfHJErTnWAqww06zGCD7FdQ1jLK7v5ZAgAAJngCAAAybIIAABtuAgAABLjA=
+Date: Sun, 17 Nov 2024 19:23:20 +0000
+Message-ID: <fab10eb9e70041c0a034f4945a978e00@AcuMS.aculab.com>
+References: <20241113172939.747686-4-mailhol.vincent@wanadoo.fr>
+ <20241113172939.747686-5-mailhol.vincent@wanadoo.fr>
+ <8bf6922f4bb143d1bc699aadd1c84607@AcuMS.aculab.com>
+ <CAHk-=wiq=GUNWJwWh1CRAYchW73UmOaSkaCovLatfDKeveZctA@mail.gmail.com>
+ <c2eabf2786c2498eae5772e5af3c456f@AcuMS.aculab.com>
+ <CAHk-=whaUtqsgLGk3a+1+SJ2+KGK+GK-WbSK0dX2JpVN3bs0hQ@mail.gmail.com>
+In-Reply-To: <CAHk-=whaUtqsgLGk3a+1+SJ2+KGK+GK-WbSK0dX2JpVN3bs0hQ@mail.gmail.com>
+Accept-Language: en-GB, en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-ms-exchange-transport-fromentityheader: Hosted
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241113172939.747686-4-mailhol.vincent@wanadoo.fr>
- <20241113172939.747686-5-mailhol.vincent@wanadoo.fr> <8bf6922f4bb143d1bc699aadd1c84607@AcuMS.aculab.com>
- <CAHk-=wiq=GUNWJwWh1CRAYchW73UmOaSkaCovLatfDKeveZctA@mail.gmail.com> <c2eabf2786c2498eae5772e5af3c456f@AcuMS.aculab.com>
-In-Reply-To: <c2eabf2786c2498eae5772e5af3c456f@AcuMS.aculab.com>
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Date: Sun, 17 Nov 2024 11:09:51 -0800
-X-Gmail-Original-Message-ID: <CAHk-=whaUtqsgLGk3a+1+SJ2+KGK+GK-WbSK0dX2JpVN3bs0hQ@mail.gmail.com>
-Message-ID: <CAHk-=whaUtqsgLGk3a+1+SJ2+KGK+GK-WbSK0dX2JpVN3bs0hQ@mail.gmail.com>
-Subject: Re: [PATCH v4 1/2] compiler.h: add const_true()
-To: David Laight <David.Laight@aculab.com>
-Cc: Vincent Mailhol <mailhol.vincent@wanadoo.fr>, Yury Norov <yury.norov@gmail.com>, 
-	Rasmus Villemoes <linux@rasmusvillemoes.dk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, 
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, 
-	"linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, 
-	Rikard Falkeborn <rikard.falkeborn@gmail.com>
-Content-Type: text/plain; charset="UTF-8"
+X-Mimecast-Spam-Score: 0
+X-Mimecast-MFC-PROC-ID: TMT5mZChX7bAs6r66yO3wz-nH03phbIa2YuwTAEUb_4_1731871401
+X-Mimecast-Originator: aculab.com
+Content-Language: en-US
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: base64
 
-On Sun, 17 Nov 2024 at 11:05, David Laight <David.Laight@aculab.com> wrote:
->
-> I think everything can be built on a base if_const_zero(x, if_z, if_nz)
-> #define const_true(x) if_const_zero(!(x), 1, 0)
-> #define is_constexpr(x) if_const_zero((x) * 0), 1, 0)
-> which gives a bit more flexibility.
+RnJvbTogTGludXMgVG9ydmFsZHMNCj4gU2VudDogMTcgTm92ZW1iZXIgMjAyNCAxOToxMA0KPiAN
+Cj4gT24gU3VuLCAxNyBOb3YgMjAyNCBhdCAxMTowNSwgRGF2aWQgTGFpZ2h0IDxEYXZpZC5MYWln
+aHRAYWN1bGFiLmNvbT4gd3JvdGU6DQo+ID4NCj4gPiBJIHRoaW5rIGV2ZXJ5dGhpbmcgY2FuIGJl
+IGJ1aWx0IG9uIGEgYmFzZSBpZl9jb25zdF96ZXJvKHgsIGlmX3osIGlmX256KQ0KPiA+ICNkZWZp
+bmUgY29uc3RfdHJ1ZSh4KSBpZl9jb25zdF96ZXJvKCEoeCksIDEsIDApDQo+ID4gI2RlZmluZSBp
+c19jb25zdGV4cHIoeCkgaWZfY29uc3RfemVybygoeCkgKiAwLCAxLCAwKQ0KPiA+IHdoaWNoIGdp
+dmVzIGEgYml0IG1vcmUgZmxleGliaWxpdHkuDQo+IA0KPiBUaGUgaXNfY29uc3RleHByKCkgc2hv
+dWxkIHByb2JhYmx5IGJlIGlmX2NvbnN0X3plcm8oMCohKHgpLDEsMCkgdG8gYmUNCj4gb2sgd2l0
+aCBwb2ludGVycyBhbmQgd2l0aCAibG9uZyBsb25nIiBjb25zdGFudHMuDQo+IA0KPiBBbmQgdGhl
+ICIxLDAiIGFyZ3VtZW50cyBzaG91bGQgaGF2ZSBhIHJlYWwgcmVhc29uIGZvciBleGlzdGluZy4g
+SSdtDQo+IG5vdCBlbnRpcmVseSBjb252aW5jZWQgYW55IG90aGVyIGNhc2VzIG1ha2UgbXVjaCBz
+ZW5zZS4NCg0KSSBtaWdodCBoYXZlIHVzZWQgdGhlbSB3aGVuIHRyeWluZyB0byBnZXQgKGhpZ2gg
+Pj0gMHUpIHRocm91Z2ggYSAtVzEgYnVpbGQuDQooZm9yIGV4YW1wbGUgaW4gR0VOTUFTSygpKS4N
+CkNhbid0IHF1aXRlIHJlbWVtYmVyIHRoZSBob3JyaWQgc29sdXRpb24gdGhvdWdoLg0KDQpTaW5j
+ZSA5OSUgd2lsbCBiZSAxLDAgbWF5YmUgc2F2aW5nIHRoZSBleHRyYSBleHBhbnNpb24gaXMgYmVz
+dCBhbnl3YXkuDQpTbyBoYXZlIGlzX2NvbnN0X3plcm8oeCkgYW5kIGFkZCBpZl9jb25zdF96ZXJv
+KHgsIGlmX3osIGlmX256KSBsYXRlci4NCg0KCURhdmlkDQoNCi0NClJlZ2lzdGVyZWQgQWRkcmVz
+cyBMYWtlc2lkZSwgQnJhbWxleSBSb2FkLCBNb3VudCBGYXJtLCBNaWx0b24gS2V5bmVzLCBNSzEg
+MVBULCBVSw0KUmVnaXN0cmF0aW9uIE5vOiAxMzk3Mzg2IChXYWxlcykNCg==
 
-The is_constexpr() should probably be if_const_zero(0*!(x)),1,0) to be
-ok with pointers and with "long long" constants.
-
-And the "1,0" arguments should have a real reason for existing. I'm
-not entirely convinced any other cases make much sense.
-
-           Linus
