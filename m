@@ -1,106 +1,109 @@
-Received: from eu-smtp-delivery-151.mimecast.com (eu-smtp-delivery-151.mimecast.com [185.58.86.151])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ej1-f41.google.com (mail-ej1-f41.google.com [209.85.218.41])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 907EB144D1A
-	for <linux-sparse@vger.kernel.org>; Sun, 17 Nov 2024 22:38:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.58.86.151
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2FFDD1DB36B
+	for <linux-sparse@vger.kernel.org>; Sun, 17 Nov 2024 22:58:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1731883111; cv=none; b=C/8znUBH+DAfLr+AYkfhCQedlY0fk2+R0zne24vPo5KkrV5s4aLXOjP6dl7+5aHPuDxM41NfOPx+3C37ZjNZFyLutPwRSQdImJPFrmYk3eIgoWY2Br4Zb3Qh+33b/zlOYdLCtPzP/5Bws4lht0IcJUskMBHi+X2wdCasGwn2aEc=
+	t=1731884307; cv=none; b=B6HlWR7Qn1kRAP0lqH3ye42QCPvbYqzJiJUlAllHA7ydCqh74ahRv3ntK+X2L/VlX3iMRdSjk8mL4ZjIAjTitmEZcPLQQVBjYKpsblCRq2Dp3NKzy06+GurB7dY0CiIuc/yy56276LJUu40roCA3LNpZ6RlWyWvTSrZ+YJiiq2M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1731883111; c=relaxed/simple;
-	bh=2l9mQSwUstwUuLUzwIPuOARQ5ev1wuJCPXnNgx4NN7w=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 MIME-Version:Content-Type; b=G+dc0W3K66fgxYSdrBcj9qKytrBM2wDmjcj/T1dqyoSu7W0J7ruOhUWtXRd+81DvgMnEGHtcydO5U+5cP6ZLECPLkKXGHIP/40ZcBMGvvD3ZmS667Q/HS0JpfF4c6hd/8nEWD1hkR0DkSqGZnPy3qFJYNG90jkWw8kFgRAPp2eQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ACULAB.COM; spf=pass smtp.mailfrom=aculab.com; arc=none smtp.client-ip=185.58.86.151
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ACULAB.COM
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=aculab.com
-Received: from AcuMS.aculab.com (156.67.243.121 [156.67.243.121]) by
- relay.mimecast.com with ESMTP with both STARTTLS and AUTH (version=TLSv1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id
- uk-mta-29-2rHpzjVKOP-ixmiiFv3v0A-1; Sun, 17 Nov 2024 22:38:20 +0000
-X-MC-Unique: 2rHpzjVKOP-ixmiiFv3v0A-1
-X-Mimecast-MFC-AGG-ID: 2rHpzjVKOP-ixmiiFv3v0A
-Received: from AcuMS.Aculab.com (10.202.163.4) by AcuMS.aculab.com
- (10.202.163.4) with Microsoft SMTP Server (TLS) id 15.0.1497.48; Sun, 17 Nov
- 2024 22:38:19 +0000
-Received: from AcuMS.Aculab.com ([::1]) by AcuMS.aculab.com ([::1]) with mapi
- id 15.00.1497.048; Sun, 17 Nov 2024 22:38:19 +0000
-From: David Laight <David.Laight@ACULAB.COM>
-To: 'Linus Torvalds' <torvalds@linux-foundation.org>
-CC: Vincent Mailhol <mailhol.vincent@wanadoo.fr>, Yury Norov
-	<yury.norov@gmail.com>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, "Luc Van
- Oostenryck" <luc.vanoostenryck@gmail.com>, "linux-kernel@vger.kernel.org"
-	<linux-kernel@vger.kernel.org>, "linux-sparse@vger.kernel.org"
-	<linux-sparse@vger.kernel.org>, Rikard Falkeborn <rikard.falkeborn@gmail.com>
-Subject: RE: [PATCH v4 1/2] compiler.h: add const_true()
-Thread-Topic: [PATCH v4 1/2] compiler.h: add const_true()
-Thread-Index: AQHbNfHJErTnWAqww06zGCD7FdQ1jLK7v5ZAgAAJngCAAAybIIAABtuAgAABLjCAABBOAIAAHt5Q
-Date: Sun, 17 Nov 2024 22:38:19 +0000
-Message-ID: <2b5282038b1f46bc9a658fb2b6d78350@AcuMS.aculab.com>
-References: <20241113172939.747686-4-mailhol.vincent@wanadoo.fr>
- <20241113172939.747686-5-mailhol.vincent@wanadoo.fr>
- <8bf6922f4bb143d1bc699aadd1c84607@AcuMS.aculab.com>
- <CAHk-=wiq=GUNWJwWh1CRAYchW73UmOaSkaCovLatfDKeveZctA@mail.gmail.com>
- <c2eabf2786c2498eae5772e5af3c456f@AcuMS.aculab.com>
- <CAHk-=whaUtqsgLGk3a+1+SJ2+KGK+GK-WbSK0dX2JpVN3bs0hQ@mail.gmail.com>
- <fab10eb9e70041c0a034f4945a978e00@AcuMS.aculab.com>
- <CAHk-=wgfpLdt7SFFGcByTfHdkvv7AEa3MDu_s_W1kfOxQs49pw@mail.gmail.com>
-In-Reply-To: <CAHk-=wgfpLdt7SFFGcByTfHdkvv7AEa3MDu_s_W1kfOxQs49pw@mail.gmail.com>
-Accept-Language: en-GB, en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-ms-exchange-transport-fromentityheader: Hosted
+	s=arc-20240116; t=1731884307; c=relaxed/simple;
+	bh=EiVbVsi+3KRPH1RlO/UqhhebmUP6+aP3L6Bqgv1bwW4=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=Ktmm4p9FAHCi3R9d+RNHVRIsIAR1ralC1fvuQCH+CJvtUNHpY2M53iW+Q9R9YDBiprNrKcqsr6bNPG1NagNChM2wX7DgxOYl/Y93r6WTljDI7AlHd3alvzQMslLvqukhR4AUnc8vS2G/Ckm1ouuBFCyonWeG/LTPDbG4x4U3ZV8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org; spf=pass smtp.mailfrom=linuxfoundation.org; dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b=G6wg8/Vh; arc=none smtp.client-ip=209.85.218.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linuxfoundation.org
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="G6wg8/Vh"
+Received: by mail-ej1-f41.google.com with SMTP id a640c23a62f3a-a9a977d6cc7so135850666b.3
+        for <linux-sparse@vger.kernel.org>; Sun, 17 Nov 2024 14:58:24 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linux-foundation.org; s=google; t=1731884303; x=1732489103; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=jzkeKdhEDg8y8yiwaJERZ7qd5zIqnzWCTyWLEoroQ78=;
+        b=G6wg8/Vhe0PNb3WyAqiFA8U4tA5/ZKgcaXWtTyB/Ef2j1FJPGMX294xh84HhEbk5SA
+         B9Rfe6ddQqAXh+i/nYej7Fj2yfd05XERx3CbApUxlyT1F3tRwlcyyvXYMQ46DfZ/d4tI
+         yrtldBTzzxdFC0cAJ72SVfB2Fklo6Py2Jks7A=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1731884303; x=1732489103;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=jzkeKdhEDg8y8yiwaJERZ7qd5zIqnzWCTyWLEoroQ78=;
+        b=lPLE8a320+taXziTrg2Qw8BvQSW8WYBHEaabVO4O5tXj2XTqJ+MYlGCQXasB6gbT1h
+         mlm2UYc/yYkrX2J0yyIGB9Bft7xAKTYFbFwcowzL1RgbfLjNCLy1m0Rm8UYyGcrGQv4C
+         dWyg79+7f2T+SsVA8oWNSQ0rLTLvDGOZSwLqRyzh3LjBSj8JFRba2f9LumZVm+cuZ7uu
+         S/voi7fudwX55SeShkZqxhIe7IuwpmlhoZe5wUZj7p0grIghMjjM6KZK5Zy9UsfQVfjQ
+         mTMT0Hbu+mOwKnNXa4tyg6Kl8sojqAFbKSp1GnvbBJIJ55lSY/FxjwZBlM8Lmr6Oc2gU
+         iMAg==
+X-Forwarded-Encrypted: i=1; AJvYcCWTPEuiEQlSXkOOFsi1i+FTfpgROVxFzifIudNtQk5oHKBZwBUNwtBIenhh7/fC4AwPY0Hxw3fWRBfwEtA=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzaewCFVVa7iCCQ3Nh2AVTdAHF74Fnv/kuuZXCAjpV5wFCQovZe
+	f6KRVXr9nTR3nTUFijSgBsMZcBUYlFhCNBDiW3bUaD4gJZwgNASDVcYNrBAZHOuzdhOTZ9IuY8C
+	Os+F2Hg==
+X-Google-Smtp-Source: AGHT+IEG7l/XnKSA3jEUbkn1YPVORWYNi78L03gx23iCCTucReE7CPEr04GUhgcJcpPQ/+W3AFm6hw==
+X-Received: by 2002:a05:6402:34cd:b0:5cf:c0ba:ecc5 with SMTP id 4fb4d7f45d1cf-5cfc0bb26c1mr4467386a12.4.1731884303420;
+        Sun, 17 Nov 2024 14:58:23 -0800 (PST)
+Received: from mail-wm1-f48.google.com (mail-wm1-f48.google.com. [209.85.128.48])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-aa20e043e75sm462845466b.153.2024.11.17.14.58.21
+        for <linux-sparse@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sun, 17 Nov 2024 14:58:21 -0800 (PST)
+Received: by mail-wm1-f48.google.com with SMTP id 5b1f17b1804b1-4316cce103dso22115645e9.3
+        for <linux-sparse@vger.kernel.org>; Sun, 17 Nov 2024 14:58:21 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCXsMSrQeAKM/3HfIjuT7RjvIxwx0sRJjea6hBCwPZhg8ug6JXHXcg0efyJPHJARZTOYHfMuUJVdm1vopuQ=@vger.kernel.org
+X-Received: by 2002:a05:6000:1849:b0:382:440e:4e86 with SMTP id
+ ffacd0b85a97d-382440e513bmr2379360f8f.33.1731884301218; Sun, 17 Nov 2024
+ 14:58:21 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Mimecast-Spam-Score: 0
-X-Mimecast-MFC-PROC-ID: oM2cnRPf-ZOH1OJs8SQ6r2GW8QGGG95jP63pAo9Rw_M_1731883100
-X-Mimecast-Originator: aculab.com
-Content-Language: en-US
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: base64
+References: <20241113172939.747686-4-mailhol.vincent@wanadoo.fr>
+ <20241113172939.747686-5-mailhol.vincent@wanadoo.fr> <8bf6922f4bb143d1bc699aadd1c84607@AcuMS.aculab.com>
+ <CAHk-=wiq=GUNWJwWh1CRAYchW73UmOaSkaCovLatfDKeveZctA@mail.gmail.com>
+ <c2eabf2786c2498eae5772e5af3c456f@AcuMS.aculab.com> <CAHk-=whaUtqsgLGk3a+1+SJ2+KGK+GK-WbSK0dX2JpVN3bs0hQ@mail.gmail.com>
+ <fab10eb9e70041c0a034f4945a978e00@AcuMS.aculab.com> <CAHk-=wgfpLdt7SFFGcByTfHdkvv7AEa3MDu_s_W1kfOxQs49pw@mail.gmail.com>
+ <2b5282038b1f46bc9a658fb2b6d78350@AcuMS.aculab.com>
+In-Reply-To: <2b5282038b1f46bc9a658fb2b6d78350@AcuMS.aculab.com>
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Date: Sun, 17 Nov 2024 14:58:05 -0800
+X-Gmail-Original-Message-ID: <CAHk-=wiV+yL5qhm5FbeKz3FV6Zdi4oRv7rr3b_=16tfmwUMWFA@mail.gmail.com>
+Message-ID: <CAHk-=wiV+yL5qhm5FbeKz3FV6Zdi4oRv7rr3b_=16tfmwUMWFA@mail.gmail.com>
+Subject: Re: [PATCH v4 1/2] compiler.h: add const_true()
+To: David Laight <David.Laight@aculab.com>
+Cc: Vincent Mailhol <mailhol.vincent@wanadoo.fr>, Yury Norov <yury.norov@gmail.com>, 
+	Rasmus Villemoes <linux@rasmusvillemoes.dk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, 
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, 
+	"linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, 
+	Rikard Falkeborn <rikard.falkeborn@gmail.com>
+Content-Type: text/plain; charset="UTF-8"
 
-RnJvbTogTGludXMgVG9ydmFsZHMNCj4gU2VudDogMTcgTm92ZW1iZXIgMjAyNCAyMDoxMg0KPiAN
-Cj4gT24gU3VuLCAxNyBOb3YgMjAyNCBhdCAxMToyMywgRGF2aWQgTGFpZ2h0IDxEYXZpZC5MYWln
-aHRAYWN1bGFiLmNvbT4gd3JvdGU6DQo+ID4NCj4gPiBTaW5jZSA5OSUgd2lsbCBiZSAxLDAgbWF5
-YmUgc2F2aW5nIHRoZSBleHRyYSBleHBhbnNpb24gaXMgYmVzdCBhbnl3YXkuDQo+ID4gU28gaGF2
-ZSBpc19jb25zdF96ZXJvKHgpIGFuZCBhZGQgaWZfY29uc3RfemVybyh4LCBpZl96LCBpZl9ueikg
-bGF0ZXIuDQo+IA0KPiBPay4gU28gc29tZXRoaW5nIGxpa2UgdGhpcyBzZWVtcyB0byBnaXZlIHVz
-IHRoZSByZWxldmFudCBjYXNlczoNCj4gDQo+ICAgI2RlZmluZSBfX2lzX2NvbnN0X3plcm8oeCkg
-XA0KPiAgICAgICAgIF9HZW5lcmljKDA/KHZvaWQgKikobG9uZykoeCk6KGNoYXIgKikwLCBjaGFy
-ICo6MSwgdm9pZCAqOjApDQo+IA0KPiAgICNkZWZpbmUgaXNfY29uc3RfemVybyh4KSBfX2lzX2Nv
-bnN0X3plcm8oISEoeCkpDQo+ICAgI2RlZmluZSBpc19jb25zdF90cnVlKHgpIF9faXNfY29uc3Rf
-emVybyghKHgpKQ0KPiAgICNkZWZpbmUgaXNfY29uc3QoeCkgX19pc19jb25zdF96ZXJvKDAqISh4
-KSkNCj4gDQo+IGFuZCBzaG91bGQgd29yayB3aXRoIGFsbCBzY2FsYXIgZXhwcmVzc2lvbnMgdGhh
-dCBJIGNhbiB0aGluayBvZiAob2ssDQo+IHRlY2huaWNhbGx5ICd2b2lkJyBpcyBhIHNjYWxhciB0
-eXBlIGFuZCBpdCBvYnZpb3VzbHkgd29uJ3Qgd29yayB3aXRoDQo+IHRoYXQpLiBBbmQgc2hvdWxk
-IHdvcmsgaW4gYWxsIGNvbnRleHRzLg0KDQpTZWVtcyBhIHJlYXNvbmFibGUgc2V0Lg0KDQpNYXli
-ZSB0aGV5IG5lZWQgYSBzZXQgdGhhdCBhcmUgcGFpcmVkIHdpdGggX19CVUlMRF9CVUdfT05fWkVS
-T19NU0coKQ0KdG8gZ2VuZXJhdGUgYW4gZXJyb3IgbWVzc2FnZSBvbiBmYWlsdXJlLg0KDQpBbHRo
-b3VnaCBJIHdvdWxkIGFkZCBhIGZldyBtb3JlICcgJyBjaGFyYWN0ZXJzIGZvciByZWFkYWJpbGl0
-eS4NCg0KPiBJdCBkb2VzIHdhbnQgYSBjb21tZW50IChpbiBhZGRpdGlvbiB0byB0aGUgY29tbWVu
-dCBhYm91dCBob3cgTlVMTCBpcw0KPiBzcGVjaWFsIGZvciB0aGUgdGVybmFyeSBvcCB0aGF0IG1h
-a2VzIGl0IHdvcmspOiB0aGUgJyhsb25nKScgY2FzdCBpcw0KPiBzbyB0aGF0IHRoZXJlIGFyZSBu
-byB3YXJuaW5ncyBmb3IgY2FzdGluZyB0byAndm9pZCAqJyB3aGVuIGl0J3MgKm5vdCoNCj4gYSBj
-b25zdGFudCB6ZXJvIGV4cHJlc3Npb24sIGFuZCB0aGUgJyEnIHBhdHRlcm4gaXMgdG8gdHVybiBw
-b2ludGVycw0KPiBhbmQgaHVnZSBjb25zdGFudHMgaW50byAnaW50JyB3aXRob3V0IGxvc3Mgb2Yg
-aW5mb3JtYXRpb24gYW5kIHdpdGhvdXQNCj4gd2FybmluZ3MuDQoNClRoZSBjb21tZW50cyB3b3Vs
-ZCBuZWVkIHRvIGJlIHRlcnNlIG9uZS1saW5lcnMuDQoNCkkgd29uZGVyIGlmIGl0IHJlYWRzIGJl
-dHRlciAoYW5kIHdpdGhvdXQgZXh0cmEgY29tbWVudHMpIGlmIHRoZSAobG9uZykNCmNhc3QgaXMg
-cmVtb3ZlZCBhbmQgdGhlICdjYWxsZXJzJyBhcmUgcmVxdWlyZWQgdG8gZ2VuZXJhdGUgJ2xvbmcn
-IGFyZ3MuDQpTbyB5b3UgaGF2ZToNCg0KI2RlZmluZSBfX2lzX2NvbnN0X3plcm8oeCkgXA0KCV9H
-ZW5lcmljKDAgPyAodm9pZCAqKSh4KSA6IChjaGFyICopMCwgY2hhciAqOiAxLCB2b2lkICo6IDAp
-DQogDQojZGVmaW5lIGlzX2NvbnN0X3plcm8oeCkgX19pc19jb25zdF96ZXJvKCh4KSA/IDFMIDog
-MEwpDQojZGVmaW5lIGlzX2NvbnN0X3RydWUoeCkgX19pc19jb25zdF96ZXJvKCh4KSA/IDBMIDog
-MUwpDQojZGVmaW5lIGlzX2NvbnN0KHgpIF9faXNfY29uc3RfemVybygoeCkgPyAwTCA6IDBMKQ0K
-DQpJJ3ZlIGRvbmUgYSBxdWljayB0ZXN0IG9mIHRoZSBsYXN0IG9uZSBpbiBnb2Rib2x0Lg0KDQoJ
-RGF2aWQNCg0KPiANCj4gQ29tcG91bmQgdHlwZXMgb2J2aW91c2x5IHdpbGwgZ2VuZXJhdGUgYSB3
-YXJuaW5nLiBBcyB0aGV5IHNob3VsZC4NCj4gDQo+IFRoZSBhYm92ZSBsb29rcyByZWFzb25hYmxl
-IHRvIG1lLCBidXQgSSBkaWRuJ3QgYWN0dWFsbHkgdGVzdCBhbnkgb2YgaXQNCj4gaW4gdGhlIGFj
-dHVhbCBrZXJuZWwgYnVpbGQuDQo+IA0KPiAgICAgICAgICAgICAgTGludXMNCg0KLQ0KUmVnaXN0
-ZXJlZCBBZGRyZXNzIExha2VzaWRlLCBCcmFtbGV5IFJvYWQsIE1vdW50IEZhcm0sIE1pbHRvbiBL
-ZXluZXMsIE1LMSAxUFQsIFVLDQpSZWdpc3RyYXRpb24gTm86IDEzOTczODYgKFdhbGVzKQ0K
+On Sun, 17 Nov 2024 at 14:38, David Laight <David.Laight@aculab.com> wrote:
+>
+> I wonder if it reads better (and without extra comments) if the (long)
+> cast is removed and the 'callers' are required to generate 'long' args.
 
+I think that's much less obvious, actually. You'd have to explain why
+it has those odd long constants now.
+
+Also, technically it's not even really about "long", but "intptr_t",
+which doesn't have a simple constant representation.
+
+We're using "long" in this context because we don't want to have even
+more dependencies in compiler.h - but I do think that means that the
+cast is at least conceptually the proper way to do things: it's how
+you'd do it in some user-mode header if you do this (as opposed to our
+kernel model where we generate all these things from scratch anyway).
+
+The "0*!(x)" is admittedly kind of ugly, and might be prettier as
+"0&&(x)". Same number of characters, but technically one op less and
+not mixing booleans and integer ops.
+
+But honestly, nobody is ever going to look at the internals anyway
+once it's all in there and works.
+
+              Linus
