@@ -1,114 +1,106 @@
-Received: from mail-ed1-f41.google.com (mail-ed1-f41.google.com [209.85.208.41])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from eu-smtp-delivery-151.mimecast.com (eu-smtp-delivery-151.mimecast.com [185.58.86.151])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E9F451DB94F
-	for <linux-sparse@vger.kernel.org>; Sun, 17 Nov 2024 20:12:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.41
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 907EB144D1A
+	for <linux-sparse@vger.kernel.org>; Sun, 17 Nov 2024 22:38:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.58.86.151
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1731874369; cv=none; b=l1QA+4iTbqUFmdiBF7ygHmvevvbnZAtMqDKpwslKSvF8OBUU1n0D5LD/qpfZeg6efyP4p+/BD1HMUIgBYb3LjIRkrsm1jX/V4i315jjJojfoPr5/Gw8jWeYOmqE6sQon/Ub/aBw9RjNBj4z8T8VZ7fEhz9uhUeWkeXyQVVJ4ezg=
+	t=1731883111; cv=none; b=C/8znUBH+DAfLr+AYkfhCQedlY0fk2+R0zne24vPo5KkrV5s4aLXOjP6dl7+5aHPuDxM41NfOPx+3C37ZjNZFyLutPwRSQdImJPFrmYk3eIgoWY2Br4Zb3Qh+33b/zlOYdLCtPzP/5Bws4lht0IcJUskMBHi+X2wdCasGwn2aEc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1731874369; c=relaxed/simple;
-	bh=lM4U6ZLxdN3VnshIyoKyM2sOLvlQlZEzMP31+1XpynE=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Si+MGzQW2ysb+P8QJTUX/NAJWmFRHLCznMv1VWodofRF6+UTAgqaOcqgghMg/Ze53HqFAOCpkBmrSq8LO8mtnIxMjtPuMvew1spIYltqXUOTyd1XiBMkwb2LH6L8PQag0AuGyeQSNyJCPYhtMR1a21i/wq+HDeBTtWq1U01GeSo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org; spf=pass smtp.mailfrom=linuxfoundation.org; dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b=WdhrHc53; arc=none smtp.client-ip=209.85.208.41
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linuxfoundation.org
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="WdhrHc53"
-Received: by mail-ed1-f41.google.com with SMTP id 4fb4d7f45d1cf-5cfcb7183deso193780a12.0
-        for <linux-sparse@vger.kernel.org>; Sun, 17 Nov 2024 12:12:46 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linux-foundation.org; s=google; t=1731874365; x=1732479165; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=iVwnG+ZIZFKobx5Kvb+VdCEhnAlm8t8yGOsPLjE743Q=;
-        b=WdhrHc53OoniXL+Sn3j/jVxIgtuickWhgePamdeKKQsBZMDBU1fpm2Rz6+JCwnByUy
-         xt4/uMeHHrCRrcOXtuPsCPjnEdTXoHpiDTnm5PkfwPElQuzy4NtCuJhCYIxUhelUrr+y
-         ZIKjYLET5Jeno6ISDt8P0q+iou2+oFFyUauTM=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1731874365; x=1732479165;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=iVwnG+ZIZFKobx5Kvb+VdCEhnAlm8t8yGOsPLjE743Q=;
-        b=XKQUfrBm+huehWFMrGFlM6xbM9kkMGCP3WIyMiXE5tzUhnI+KWp4y9/eKswq6uAnLK
-         d7Zg6b2yFTSgcxFB1vXKvwPeKKMVXXuRuCT4x4PchVSEkSLCQ4vQ3ZLlOgDubpN1bFy5
-         XcJLmCjjZsLlXLVkselvGmo3yNsIfhHHhSEXpvqWF6U5XEXezzNuA1WeGYg0/MA0H7bv
-         FNmtP++6FWxHnGioQshfBKfzgyN0AIjQcasJ0KnbEY4iAe0hZAo+7FtwAXPWP/8HYhwB
-         8F9kvTiNjO1x1QwDRDRQxv6oNk3wS7/z6hM9eezb70aI7KSSzujqoteqaaFZboNGAk33
-         HtFg==
-X-Forwarded-Encrypted: i=1; AJvYcCWxFVSnwjtyxpD3ZHoQMYe6nDodxzB92ljWNRtTzyRW1yQdPZUORnoLbi7+Y0ugyrF/7R8ZWzq0jC002e8=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxieL3sfv6XqTB4rrKqrnNJ7f8ASRpQqEcXustnM9AHKbFE8hsn
-	1TtjGuCLsNqeHBaueQOvDE7ONRwKJfiCykyM9mhYQmRIMYi9SGpsQY170MvC8Wjumkz6QyxOnjh
-	5Uu4vGw==
-X-Google-Smtp-Source: AGHT+IEEJSQkcgpr3t5kaNQW0oQGOzcBMtvCY08LbcXbC4ojVYgc/7Dnsbz0tP4cF7DvSO4hwWF0ig==
-X-Received: by 2002:a05:6402:26c3:b0:5cf:b860:34be with SMTP id 4fb4d7f45d1cf-5cfb860371dmr3699672a12.11.1731874365025;
-        Sun, 17 Nov 2024 12:12:45 -0800 (PST)
-Received: from mail-ed1-f54.google.com (mail-ed1-f54.google.com. [209.85.208.54])
-        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-5cfbe0d23e1sm791880a12.12.2024.11.17.12.12.42
-        for <linux-sparse@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 17 Nov 2024 12:12:43 -0800 (PST)
-Received: by mail-ed1-f54.google.com with SMTP id 4fb4d7f45d1cf-5cfcb7183deso193736a12.0
-        for <linux-sparse@vger.kernel.org>; Sun, 17 Nov 2024 12:12:42 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCWkg1mzCtpHK02Fqmlecr2OKAP+eTD74eZA59mcXuhQHpcgi6PZO+pWD3QVOVSSawgG4Zw/Cotr0vvPwp0=@vger.kernel.org
-X-Received: by 2002:a17:906:9c84:b0:a9a:eeb:b26a with SMTP id
- a640c23a62f3a-aa48185c8afmr827341266b.1.1731874362328; Sun, 17 Nov 2024
- 12:12:42 -0800 (PST)
+	s=arc-20240116; t=1731883111; c=relaxed/simple;
+	bh=2l9mQSwUstwUuLUzwIPuOARQ5ev1wuJCPXnNgx4NN7w=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 MIME-Version:Content-Type; b=G+dc0W3K66fgxYSdrBcj9qKytrBM2wDmjcj/T1dqyoSu7W0J7ruOhUWtXRd+81DvgMnEGHtcydO5U+5cP6ZLECPLkKXGHIP/40ZcBMGvvD3ZmS667Q/HS0JpfF4c6hd/8nEWD1hkR0DkSqGZnPy3qFJYNG90jkWw8kFgRAPp2eQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ACULAB.COM; spf=pass smtp.mailfrom=aculab.com; arc=none smtp.client-ip=185.58.86.151
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ACULAB.COM
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=aculab.com
+Received: from AcuMS.aculab.com (156.67.243.121 [156.67.243.121]) by
+ relay.mimecast.com with ESMTP with both STARTTLS and AUTH (version=TLSv1.2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id
+ uk-mta-29-2rHpzjVKOP-ixmiiFv3v0A-1; Sun, 17 Nov 2024 22:38:20 +0000
+X-MC-Unique: 2rHpzjVKOP-ixmiiFv3v0A-1
+X-Mimecast-MFC-AGG-ID: 2rHpzjVKOP-ixmiiFv3v0A
+Received: from AcuMS.Aculab.com (10.202.163.4) by AcuMS.aculab.com
+ (10.202.163.4) with Microsoft SMTP Server (TLS) id 15.0.1497.48; Sun, 17 Nov
+ 2024 22:38:19 +0000
+Received: from AcuMS.Aculab.com ([::1]) by AcuMS.aculab.com ([::1]) with mapi
+ id 15.00.1497.048; Sun, 17 Nov 2024 22:38:19 +0000
+From: David Laight <David.Laight@ACULAB.COM>
+To: 'Linus Torvalds' <torvalds@linux-foundation.org>
+CC: Vincent Mailhol <mailhol.vincent@wanadoo.fr>, Yury Norov
+	<yury.norov@gmail.com>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, "Luc Van
+ Oostenryck" <luc.vanoostenryck@gmail.com>, "linux-kernel@vger.kernel.org"
+	<linux-kernel@vger.kernel.org>, "linux-sparse@vger.kernel.org"
+	<linux-sparse@vger.kernel.org>, Rikard Falkeborn <rikard.falkeborn@gmail.com>
+Subject: RE: [PATCH v4 1/2] compiler.h: add const_true()
+Thread-Topic: [PATCH v4 1/2] compiler.h: add const_true()
+Thread-Index: AQHbNfHJErTnWAqww06zGCD7FdQ1jLK7v5ZAgAAJngCAAAybIIAABtuAgAABLjCAABBOAIAAHt5Q
+Date: Sun, 17 Nov 2024 22:38:19 +0000
+Message-ID: <2b5282038b1f46bc9a658fb2b6d78350@AcuMS.aculab.com>
+References: <20241113172939.747686-4-mailhol.vincent@wanadoo.fr>
+ <20241113172939.747686-5-mailhol.vincent@wanadoo.fr>
+ <8bf6922f4bb143d1bc699aadd1c84607@AcuMS.aculab.com>
+ <CAHk-=wiq=GUNWJwWh1CRAYchW73UmOaSkaCovLatfDKeveZctA@mail.gmail.com>
+ <c2eabf2786c2498eae5772e5af3c456f@AcuMS.aculab.com>
+ <CAHk-=whaUtqsgLGk3a+1+SJ2+KGK+GK-WbSK0dX2JpVN3bs0hQ@mail.gmail.com>
+ <fab10eb9e70041c0a034f4945a978e00@AcuMS.aculab.com>
+ <CAHk-=wgfpLdt7SFFGcByTfHdkvv7AEa3MDu_s_W1kfOxQs49pw@mail.gmail.com>
+In-Reply-To: <CAHk-=wgfpLdt7SFFGcByTfHdkvv7AEa3MDu_s_W1kfOxQs49pw@mail.gmail.com>
+Accept-Language: en-GB, en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-ms-exchange-transport-fromentityheader: Hosted
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241113172939.747686-4-mailhol.vincent@wanadoo.fr>
- <20241113172939.747686-5-mailhol.vincent@wanadoo.fr> <8bf6922f4bb143d1bc699aadd1c84607@AcuMS.aculab.com>
- <CAHk-=wiq=GUNWJwWh1CRAYchW73UmOaSkaCovLatfDKeveZctA@mail.gmail.com>
- <c2eabf2786c2498eae5772e5af3c456f@AcuMS.aculab.com> <CAHk-=whaUtqsgLGk3a+1+SJ2+KGK+GK-WbSK0dX2JpVN3bs0hQ@mail.gmail.com>
- <fab10eb9e70041c0a034f4945a978e00@AcuMS.aculab.com>
-In-Reply-To: <fab10eb9e70041c0a034f4945a978e00@AcuMS.aculab.com>
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Date: Sun, 17 Nov 2024 12:12:26 -0800
-X-Gmail-Original-Message-ID: <CAHk-=wgfpLdt7SFFGcByTfHdkvv7AEa3MDu_s_W1kfOxQs49pw@mail.gmail.com>
-Message-ID: <CAHk-=wgfpLdt7SFFGcByTfHdkvv7AEa3MDu_s_W1kfOxQs49pw@mail.gmail.com>
-Subject: Re: [PATCH v4 1/2] compiler.h: add const_true()
-To: David Laight <David.Laight@aculab.com>
-Cc: Vincent Mailhol <mailhol.vincent@wanadoo.fr>, Yury Norov <yury.norov@gmail.com>, 
-	Rasmus Villemoes <linux@rasmusvillemoes.dk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, 
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, 
-	"linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, 
-	Rikard Falkeborn <rikard.falkeborn@gmail.com>
-Content-Type: text/plain; charset="UTF-8"
+X-Mimecast-Spam-Score: 0
+X-Mimecast-MFC-PROC-ID: oM2cnRPf-ZOH1OJs8SQ6r2GW8QGGG95jP63pAo9Rw_M_1731883100
+X-Mimecast-Originator: aculab.com
+Content-Language: en-US
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: base64
 
-On Sun, 17 Nov 2024 at 11:23, David Laight <David.Laight@aculab.com> wrote:
->
-> Since 99% will be 1,0 maybe saving the extra expansion is best anyway.
-> So have is_const_zero(x) and add if_const_zero(x, if_z, if_nz) later.
+RnJvbTogTGludXMgVG9ydmFsZHMNCj4gU2VudDogMTcgTm92ZW1iZXIgMjAyNCAyMDoxMg0KPiAN
+Cj4gT24gU3VuLCAxNyBOb3YgMjAyNCBhdCAxMToyMywgRGF2aWQgTGFpZ2h0IDxEYXZpZC5MYWln
+aHRAYWN1bGFiLmNvbT4gd3JvdGU6DQo+ID4NCj4gPiBTaW5jZSA5OSUgd2lsbCBiZSAxLDAgbWF5
+YmUgc2F2aW5nIHRoZSBleHRyYSBleHBhbnNpb24gaXMgYmVzdCBhbnl3YXkuDQo+ID4gU28gaGF2
+ZSBpc19jb25zdF96ZXJvKHgpIGFuZCBhZGQgaWZfY29uc3RfemVybyh4LCBpZl96LCBpZl9ueikg
+bGF0ZXIuDQo+IA0KPiBPay4gU28gc29tZXRoaW5nIGxpa2UgdGhpcyBzZWVtcyB0byBnaXZlIHVz
+IHRoZSByZWxldmFudCBjYXNlczoNCj4gDQo+ICAgI2RlZmluZSBfX2lzX2NvbnN0X3plcm8oeCkg
+XA0KPiAgICAgICAgIF9HZW5lcmljKDA/KHZvaWQgKikobG9uZykoeCk6KGNoYXIgKikwLCBjaGFy
+ICo6MSwgdm9pZCAqOjApDQo+IA0KPiAgICNkZWZpbmUgaXNfY29uc3RfemVybyh4KSBfX2lzX2Nv
+bnN0X3plcm8oISEoeCkpDQo+ICAgI2RlZmluZSBpc19jb25zdF90cnVlKHgpIF9faXNfY29uc3Rf
+emVybyghKHgpKQ0KPiAgICNkZWZpbmUgaXNfY29uc3QoeCkgX19pc19jb25zdF96ZXJvKDAqISh4
+KSkNCj4gDQo+IGFuZCBzaG91bGQgd29yayB3aXRoIGFsbCBzY2FsYXIgZXhwcmVzc2lvbnMgdGhh
+dCBJIGNhbiB0aGluayBvZiAob2ssDQo+IHRlY2huaWNhbGx5ICd2b2lkJyBpcyBhIHNjYWxhciB0
+eXBlIGFuZCBpdCBvYnZpb3VzbHkgd29uJ3Qgd29yayB3aXRoDQo+IHRoYXQpLiBBbmQgc2hvdWxk
+IHdvcmsgaW4gYWxsIGNvbnRleHRzLg0KDQpTZWVtcyBhIHJlYXNvbmFibGUgc2V0Lg0KDQpNYXli
+ZSB0aGV5IG5lZWQgYSBzZXQgdGhhdCBhcmUgcGFpcmVkIHdpdGggX19CVUlMRF9CVUdfT05fWkVS
+T19NU0coKQ0KdG8gZ2VuZXJhdGUgYW4gZXJyb3IgbWVzc2FnZSBvbiBmYWlsdXJlLg0KDQpBbHRo
+b3VnaCBJIHdvdWxkIGFkZCBhIGZldyBtb3JlICcgJyBjaGFyYWN0ZXJzIGZvciByZWFkYWJpbGl0
+eS4NCg0KPiBJdCBkb2VzIHdhbnQgYSBjb21tZW50IChpbiBhZGRpdGlvbiB0byB0aGUgY29tbWVu
+dCBhYm91dCBob3cgTlVMTCBpcw0KPiBzcGVjaWFsIGZvciB0aGUgdGVybmFyeSBvcCB0aGF0IG1h
+a2VzIGl0IHdvcmspOiB0aGUgJyhsb25nKScgY2FzdCBpcw0KPiBzbyB0aGF0IHRoZXJlIGFyZSBu
+byB3YXJuaW5ncyBmb3IgY2FzdGluZyB0byAndm9pZCAqJyB3aGVuIGl0J3MgKm5vdCoNCj4gYSBj
+b25zdGFudCB6ZXJvIGV4cHJlc3Npb24sIGFuZCB0aGUgJyEnIHBhdHRlcm4gaXMgdG8gdHVybiBw
+b2ludGVycw0KPiBhbmQgaHVnZSBjb25zdGFudHMgaW50byAnaW50JyB3aXRob3V0IGxvc3Mgb2Yg
+aW5mb3JtYXRpb24gYW5kIHdpdGhvdXQNCj4gd2FybmluZ3MuDQoNClRoZSBjb21tZW50cyB3b3Vs
+ZCBuZWVkIHRvIGJlIHRlcnNlIG9uZS1saW5lcnMuDQoNCkkgd29uZGVyIGlmIGl0IHJlYWRzIGJl
+dHRlciAoYW5kIHdpdGhvdXQgZXh0cmEgY29tbWVudHMpIGlmIHRoZSAobG9uZykNCmNhc3QgaXMg
+cmVtb3ZlZCBhbmQgdGhlICdjYWxsZXJzJyBhcmUgcmVxdWlyZWQgdG8gZ2VuZXJhdGUgJ2xvbmcn
+IGFyZ3MuDQpTbyB5b3UgaGF2ZToNCg0KI2RlZmluZSBfX2lzX2NvbnN0X3plcm8oeCkgXA0KCV9H
+ZW5lcmljKDAgPyAodm9pZCAqKSh4KSA6IChjaGFyICopMCwgY2hhciAqOiAxLCB2b2lkICo6IDAp
+DQogDQojZGVmaW5lIGlzX2NvbnN0X3plcm8oeCkgX19pc19jb25zdF96ZXJvKCh4KSA/IDFMIDog
+MEwpDQojZGVmaW5lIGlzX2NvbnN0X3RydWUoeCkgX19pc19jb25zdF96ZXJvKCh4KSA/IDBMIDog
+MUwpDQojZGVmaW5lIGlzX2NvbnN0KHgpIF9faXNfY29uc3RfemVybygoeCkgPyAwTCA6IDBMKQ0K
+DQpJJ3ZlIGRvbmUgYSBxdWljayB0ZXN0IG9mIHRoZSBsYXN0IG9uZSBpbiBnb2Rib2x0Lg0KDQoJ
+RGF2aWQNCg0KPiANCj4gQ29tcG91bmQgdHlwZXMgb2J2aW91c2x5IHdpbGwgZ2VuZXJhdGUgYSB3
+YXJuaW5nLiBBcyB0aGV5IHNob3VsZC4NCj4gDQo+IFRoZSBhYm92ZSBsb29rcyByZWFzb25hYmxl
+IHRvIG1lLCBidXQgSSBkaWRuJ3QgYWN0dWFsbHkgdGVzdCBhbnkgb2YgaXQNCj4gaW4gdGhlIGFj
+dHVhbCBrZXJuZWwgYnVpbGQuDQo+IA0KPiAgICAgICAgICAgICAgTGludXMNCg0KLQ0KUmVnaXN0
+ZXJlZCBBZGRyZXNzIExha2VzaWRlLCBCcmFtbGV5IFJvYWQsIE1vdW50IEZhcm0sIE1pbHRvbiBL
+ZXluZXMsIE1LMSAxUFQsIFVLDQpSZWdpc3RyYXRpb24gTm86IDEzOTczODYgKFdhbGVzKQ0K
 
-Ok. So something like this seems to give us the relevant cases:
-
-  #define __is_const_zero(x) \
-        _Generic(0?(void *)(long)(x):(char *)0, char *:1, void *:0)
-
-  #define is_const_zero(x) __is_const_zero(!!(x))
-  #define is_const_true(x) __is_const_zero(!(x))
-  #define is_const(x) __is_const_zero(0*!(x))
-
-and should work with all scalar expressions that I can think of (ok,
-technically 'void' is a scalar type and it obviously won't work with
-that). And should work in all contexts.
-
-It does want a comment (in addition to the comment about how NULL is
-special for the ternary op that makes it work): the '(long)' cast is
-so that there are no warnings for casting to 'void *' when it's *not*
-a constant zero expression, and the '!' pattern is to turn pointers
-and huge constants into 'int' without loss of information and without
-warnings.
-
-Compound types obviously will generate a warning. As they should.
-
-The above looks reasonable to me, but I didn't actually test any of it
-in the actual kernel build.
-
-             Linus
