@@ -1,72 +1,121 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from eu-smtp-delivery-151.mimecast.com (eu-smtp-delivery-151.mimecast.com [185.58.86.151])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 572346AA7;
-	Sun, 17 Nov 2024 05:26:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 01ABA3A1CD
+	for <linux-sparse@vger.kernel.org>; Sun, 17 Nov 2024 17:24:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.58.86.151
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1731821202; cv=none; b=kMuUopXjG5jRix7gDwyuiZZhIbnK0QNYgIEgtEmj7j8l/w2hhE1mMbFqb9xZSP64nfQxtB2I/8gblBYqjn3oSfm3Jc06iUAYiCMBNuE3p8K43bXUcz7u0979jjlyBTgXsTp1ZbtEF85SqQhSgLHJ5bxgBMw9YYZzgFxr3EdQZkk=
+	t=1731864301; cv=none; b=GtOuoJHWCHTiAlCjMvJPzUPH6Xnto+DMihTqEgGCvqmh83FJI7RERZR0p5kHzs+OWgbvzsWNxvuXJp7b4/wQ/sOG7gylsebsQsEbMmM/FoZW+FlFycxEBpEdLrf4GXVBzr1pIfJzkXAKvoNKLek0VFEsM/3h6/cPqutjkYral/E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1731821202; c=relaxed/simple;
-	bh=RJxiXFXQu4UdQqTOlJG7VZ5TbO+8ahl6FEJzpLSDedQ=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=MSNE3dlx4VFtLEFFpn4E2FGWb89rAECuPpxuSvH1MBVhVvZMUIjWNg8ByMNFcOVVl0YGqO9HKsECnz9RggkiP1PiClZsf2xOzGtooB/t6ZGd6uFK0z+Vvs188UxfPA+rgSNIgvSg0K7s30rtZFFfuzS28sP8FvI3mUf4V3XrHeg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=cHocZkkc; arc=none smtp.client-ip=10.30.226.201
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="cHocZkkc"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CAF46C4CECD;
-	Sun, 17 Nov 2024 05:26:41 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1731821201;
-	bh=RJxiXFXQu4UdQqTOlJG7VZ5TbO+8ahl6FEJzpLSDedQ=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=cHocZkkcroXT7Go/mutUNrj0dsotAznMn9t27WQ8ILEIfqqND2on2FpDbXsBiGM5M
-	 9Jt9pYhtaF5EvN59lKSJYBwk3/CiStgMlqmreS3Fb9vQEVEg7qC2Ym0ZKNoxahHidn
-	 pLlp4XVxLdkda+V2xGnQ+pfP1GOtgqqpaJeyHNVWBo1dpadAJ4lD/3aiYYNYjwXWi+
-	 FMWOfDWaMbVmlb/HRxFp3zfSYwaE6hpnjNgCoosYmhWzZG+N6Qkm25YxtPHGRslCdW
-	 GMrRTCZAgiDxFeLUw1o6TKsqTy0Pj+COf7JpFp+eA+rzmA1IN/aSFUXtCFy8hrg4P/
-	 gJrHgOF4vN3fA==
-From: Kees Cook <kees@kernel.org>
-To: Linus Torvalds <torvalds@linux-foundation.org>,
-	Philipp Reisner <philipp.reisner@linbit.com>
-Cc: Kees Cook <kees@kernel.org>,
-	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
-	linux-sparse@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: Re: [PATCH] compiler.h: Fix undefined BUILD_BUG_ON_ZERO()
-Date: Sat, 16 Nov 2024 21:26:33 -0800
-Message-Id: <173182119158.650820.5112435274770871325.b4-ty@kernel.org>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20241115204602.249590-1-philipp.reisner@linbit.com>
-References: <CAHk-=wiPZmd1hrsUoP+9vPg2=E0Jj6Li77_BZcV9GocbJg8fag@mail.gmail.com> <20241115204602.249590-1-philipp.reisner@linbit.com>
+	s=arc-20240116; t=1731864301; c=relaxed/simple;
+	bh=WXgXmjEkeVkaqXh0v1ISBXOrG2oE+R4HdXb950Jipxk=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 MIME-Version:Content-Type; b=iczjK2oWyueDrhp5dNHkr4bLMT/SyVxbhMQxf33Y65IF4Qmm2N+TW2o4YGt+gNe2WNQw44AWtWlHlVbGuX17a6aHCQe5QI1FvBuOOY8ai5sr498phMvz6ssPbmUAgN03wFZtr2yNUQCAjrtVjMPhTGwl8cA52PMl/QJH31+6Jds=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ACULAB.COM; spf=pass smtp.mailfrom=aculab.com; arc=none smtp.client-ip=185.58.86.151
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ACULAB.COM
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=aculab.com
+Received: from AcuMS.aculab.com (156.67.243.121 [156.67.243.121]) by
+ relay.mimecast.com with ESMTP with both STARTTLS and AUTH (version=TLSv1.2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id
+ uk-mta-65-aYQSyGLCMVmxdIscXjtVLw-1; Sun, 17 Nov 2024 17:24:55 +0000
+X-MC-Unique: aYQSyGLCMVmxdIscXjtVLw-1
+X-Mimecast-MFC-AGG-ID: aYQSyGLCMVmxdIscXjtVLw
+Received: from AcuMS.Aculab.com (10.202.163.6) by AcuMS.aculab.com
+ (10.202.163.6) with Microsoft SMTP Server (TLS) id 15.0.1497.48; Sun, 17 Nov
+ 2024 17:24:54 +0000
+Received: from AcuMS.Aculab.com ([::1]) by AcuMS.aculab.com ([::1]) with mapi
+ id 15.00.1497.048; Sun, 17 Nov 2024 17:24:54 +0000
+From: David Laight <David.Laight@ACULAB.COM>
+To: 'Vincent Mailhol' <mailhol.vincent@wanadoo.fr>, Linus Torvalds
+	<torvalds@linux-foundation.org>, Yury Norov <yury.norov@gmail.com>, "Rasmus
+ Villemoes" <linux@rasmusvillemoes.dk>, Luc Van Oostenryck
+	<luc.vanoostenryck@gmail.com>
+CC: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+	"linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, "Rikard
+ Falkeborn" <rikard.falkeborn@gmail.com>
+Subject: RE: [PATCH v4 2/2] linux/bits.h: simplify GENMASK_INPUT_CHECK()
+Thread-Topic: [PATCH v4 2/2] linux/bits.h: simplify GENMASK_INPUT_CHECK()
+Thread-Index: AQHbNfVbqmtUi60kGE6/zbkAvTDGArK7vYpQ
+Date: Sun, 17 Nov 2024 17:24:54 +0000
+Message-ID: <8bf9eb4434104a3b960d52bd1d38caea@AcuMS.aculab.com>
+References: <20241113172939.747686-4-mailhol.vincent@wanadoo.fr>
+ <20241113172939.747686-6-mailhol.vincent@wanadoo.fr>
+In-Reply-To: <20241113172939.747686-6-mailhol.vincent@wanadoo.fr>
+Accept-Language: en-GB, en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-ms-exchange-transport-fromentityheader: Hosted
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+X-Mimecast-Spam-Score: 0
+X-Mimecast-MFC-PROC-ID: jXRB0NTiDWmNnuhH7L30gLk9NUo2Bjxv1uSDD4aCXM8_1731864295
+X-Mimecast-Originator: aculab.com
+Content-Language: en-US
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
-On Fri, 15 Nov 2024 21:46:02 +0100, Philipp Reisner wrote:
-> <linux/compiler.h> defines __must_be_array() and __must_be_cstr() and
-> both expand to BUILD_BUG_ON_ZERO(), but <linux/build_bug.h> defines
-> BUILD_BUG_ON_ZERO(). Including <linux/build_bug.h> in
-> <linux/compiler.h> would create a cyclic dependency as
-> <linux/build_bug.h> already includes <linux/compiler.h>.
-> 
-> Fix that by defining __BUILD_BUG_ON_ZERO_MSG() in <linux/compiler.h>
-> and using that for __must_be_array() and __must_be_cstr().
-> 
-> [...]
+From: Vincent Mailhol
+> Sent: 13 November 2024 17:19
+>=20
+> In GENMASK_INPUT_CHECK(),
+>=20
+>   __builtin_choose_expr(__is_constexpr((l) > (h)), (l) > (h), 0)
+>=20
+> is the exact expansion of:
+>=20
+>   const_true((l) > (h))
+>=20
+> Apply const_true() to simplify GENMASK_INPUT_CHECK().
 
-Applied to for-next/hardening, thanks!
+Wouldn't statically_true() give better coverage ?
+I wouldn't have though that GENMASK() got used anywhere where a constant
+integer expression was needed.
 
-[1/1] compiler.h: Fix undefined BUILD_BUG_ON_ZERO()
-      https://git.kernel.org/kees/c/d7a516c6eeae
+More interesting would be to get it to pass a W=3D1 build for
+any place where 'l' is 0u.
 
-Take care,
+=09David
 
--- 
-Kees Cook
+>=20
+> Signed-off-by: Vincent Mailhol <mailhol.vincent@wanadoo.fr>
+> ---
+> This change passes the unit tests from CONFIG_BITS_TEST, including the
+> extra negative tests provided under #ifdef TEST_GENMASK_FAILURES [1].
+>=20
+> [1] commit 6d511020e13d ("lib/test_bits.c: add tests of GENMASK")
+> Link: https://git.kernel.org/torvalds/c/6d511020e13d
+> ---
+>  include/linux/bits.h | 5 ++---
+>  1 file changed, 2 insertions(+), 3 deletions(-)
+>=20
+> diff --git a/include/linux/bits.h b/include/linux/bits.h
+> index 60044b608817..61a75d3f294b 100644
+> --- a/include/linux/bits.h
+> +++ b/include/linux/bits.h
+> @@ -20,9 +20,8 @@
+>   */
+>  #if !defined(__ASSEMBLY__)
+>  #include <linux/build_bug.h>
+> -#define GENMASK_INPUT_CHECK(h, l) \
+> -=09(BUILD_BUG_ON_ZERO(__builtin_choose_expr( \
+> -=09=09__is_constexpr((l) > (h)), (l) > (h), 0)))
+> +#include <linux/compiler.h>
+> +#define GENMASK_INPUT_CHECK(h, l) BUILD_BUG_ON_ZERO(const_true((l) > (h)=
+))
+>  #else
+>  /*
+>   * BUILD_BUG_ON_ZERO is not available in h files included from asm files=
+,
+> --
+> 2.45.2
+>=20
+
+-
+Registered Address Lakeside, Bramley Road, Mount Farm, Milton Keynes, MK1 1=
+PT, UK
+Registration No: 1397386 (Wales)
 
