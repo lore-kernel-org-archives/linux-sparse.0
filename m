@@ -1,94 +1,97 @@
-Received: from eu-smtp-delivery-151.mimecast.com (eu-smtp-delivery-151.mimecast.com [185.58.85.151])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ed1-f41.google.com (mail-ed1-f41.google.com [209.85.208.41])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E7BE318B47E
-	for <linux-sparse@vger.kernel.org>; Mon, 18 Nov 2024 09:27:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.58.85.151
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5C8461BD9D2
+	for <linux-sparse@vger.kernel.org>; Mon, 18 Nov 2024 17:10:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1731922042; cv=none; b=sXFDPxQMWcivDVNDr8ApN6rz6raFaoKvggcaD1dNuwDnxH+1AeHpwYfdd6vPRPho1KaLrsIT6IuMOyxwFFNUgsGAyS2tunoPlRpn57qg0QkzDrR40pXo2aZdcPvKMk6ZwEVK84myVbHLLWuaUvJQOCKZWdWIFe2Kggt5CWXvqkA=
+	t=1731949817; cv=none; b=h4W/3Vx49S7BOaa3meHCvgI8UlQloFP+tkGnumbdBgzLfNtKfwyvS3IX3c4k9sJqNSYE9jhcQJ/YoA8yN+CFWhc3NZbYcsSFTpoQwUf2rEJ3SMFya+lCzFVzQAHQxmwlpLYwIQHo/IubHMrMYpXSHxSTq2M50Mhy8ojuXdpU8To=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1731922042; c=relaxed/simple;
-	bh=dCCdQD6c9JHMs8dqZRqRQboZUW3fsM/GJ2kNZhzY8sA=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 MIME-Version:Content-Type; b=hWxLYgMVZBspbXDce3tHEQdvSBITq/E1tkKAAxb5EFL/pXYsP/7ycpmAmT9+G5CK13rrboRcLDXIl8Re9PNvW4gN3a+QrzaEZlewsyoS+osyVoGOl9qiE7do03omjoqxZZTiC3ImzpxtMbLWVwrY2CoExT+j4kzn6JrBITQKQjc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ACULAB.COM; spf=pass smtp.mailfrom=aculab.com; arc=none smtp.client-ip=185.58.85.151
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ACULAB.COM
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=aculab.com
-Received: from AcuMS.aculab.com (156.67.243.121 [156.67.243.121]) by
- relay.mimecast.com with ESMTP with both STARTTLS and AUTH (version=TLSv1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id
- uk-mta-286-JJNqEPiRP5mr16F-M4gs8w-1; Mon, 18 Nov 2024 09:27:18 +0000
-X-MC-Unique: JJNqEPiRP5mr16F-M4gs8w-1
-X-Mimecast-MFC-AGG-ID: JJNqEPiRP5mr16F-M4gs8w
-Received: from AcuMS.Aculab.com (10.202.163.4) by AcuMS.aculab.com
- (10.202.163.4) with Microsoft SMTP Server (TLS) id 15.0.1497.48; Mon, 18 Nov
- 2024 09:27:17 +0000
-Received: from AcuMS.Aculab.com ([::1]) by AcuMS.aculab.com ([::1]) with mapi
- id 15.00.1497.048; Mon, 18 Nov 2024 09:27:17 +0000
-From: David Laight <David.Laight@ACULAB.COM>
-To: 'Vincent Mailhol' <mailhol.vincent@wanadoo.fr>, Linus Torvalds
-	<torvalds@linux-foundation.org>
-CC: Yury Norov <yury.norov@gmail.com>, Rasmus Villemoes
-	<linux@rasmusvillemoes.dk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-	"linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, "Rikard
- Falkeborn" <rikard.falkeborn@gmail.com>
-Subject: RE: [PATCH v4 1/2] compiler.h: add const_true()
-Thread-Topic: [PATCH v4 1/2] compiler.h: add const_true()
-Thread-Index: AQHbNfHJErTnWAqww06zGCD7FdQ1jLK7v5ZAgAAJngCAAAybIIAABtuAgAABLjCAABBOAIAAHt5QgABZWomAAGEx4A==
-Date: Mon, 18 Nov 2024 09:27:17 +0000
-Message-ID: <fea4cc244f2f4f1a8cde7c49548e74eb@AcuMS.aculab.com>
-References: <20241113172939.747686-4-mailhol.vincent@wanadoo.fr>
- <20241113172939.747686-5-mailhol.vincent@wanadoo.fr>
- <8bf6922f4bb143d1bc699aadd1c84607@AcuMS.aculab.com>
- <CAHk-=wiq=GUNWJwWh1CRAYchW73UmOaSkaCovLatfDKeveZctA@mail.gmail.com>
- <c2eabf2786c2498eae5772e5af3c456f@AcuMS.aculab.com>
- <CAHk-=whaUtqsgLGk3a+1+SJ2+KGK+GK-WbSK0dX2JpVN3bs0hQ@mail.gmail.com>
- <fab10eb9e70041c0a034f4945a978e00@AcuMS.aculab.com>
- <CAHk-=wgfpLdt7SFFGcByTfHdkvv7AEa3MDu_s_W1kfOxQs49pw@mail.gmail.com>
- <2b5282038b1f46bc9a658fb2b6d78350@AcuMS.aculab.com>
- <CAHk-=wiV+yL5qhm5FbeKz3FV6Zdi4oRv7rr3b_=16tfmwUMWFA@mail.gmail.com>
- <CAMZ6RqJ=ze66FuOrWvuY26T6p+9GftrAeVApbTLnT_HgRWJL_Q@mail.gmail.com>
-In-Reply-To: <CAMZ6RqJ=ze66FuOrWvuY26T6p+9GftrAeVApbTLnT_HgRWJL_Q@mail.gmail.com>
-Accept-Language: en-GB, en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-ms-exchange-transport-fromentityheader: Hosted
+	s=arc-20240116; t=1731949817; c=relaxed/simple;
+	bh=W0Jl5ocHSP4PGYw8LxtnuPw3akkRY4E9C/tdE6Gbf2Y=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=HtFxlg27vVbFfegT2GWt7hUhK+HXj8TzXU8i/Ahv64Bkt8QC1tUFfgn4EorRfyosouJ8QH013p6gKrdWVOwlfjBq0AMjFKcs+0XgF017QntLiF2ziWexYwjKJ1EAb0+u623kY95bjPGt/5YcqgQuTwiER1DqYDgi06cwgoZzgU0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org; spf=pass smtp.mailfrom=linuxfoundation.org; dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b=iNG5vNci; arc=none smtp.client-ip=209.85.208.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linuxfoundation.org
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="iNG5vNci"
+Received: by mail-ed1-f41.google.com with SMTP id 4fb4d7f45d1cf-5cfc19065ffso1865786a12.3
+        for <linux-sparse@vger.kernel.org>; Mon, 18 Nov 2024 09:10:15 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linux-foundation.org; s=google; t=1731949813; x=1732554613; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=cHhSpMFQSzvTkKEefPe2mtAUvRV1u6SYwiNS6wbH29c=;
+        b=iNG5vNciWnZuo40+8zsdGU6zhGHAZGz3dyl7X482LRMdFv2GmvVQLi9JPlutL/z++D
+         jWA3lOfSc4I/aGYuH/QbuuFaojUazbRlRe7MB52kfB7/cBFObRjLR22W9c+lF+c1CfPj
+         gjmPIer5IL6a+axphpoA2g9xb8PMjQ9nsAfF4=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1731949813; x=1732554613;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=cHhSpMFQSzvTkKEefPe2mtAUvRV1u6SYwiNS6wbH29c=;
+        b=IQYfCnZbMz+vYGN6onPboTTK1cbKtznoofKstoDekJxdhmO8UomhmC4eyNvthmloKe
+         D6z2NMMd/nEfIFST4eOGVSFW3FAfbbdcC0bw3ey3ojZReTdKxcwcIpodGcT4S8Ol7iyz
+         W/VaBQGx6iYrjxNgVv+8Bq9d/PJCgchYg3OiYgeFSlX2iPRj4dZZrNruXbAkFNTa7qQo
+         yACBO13Qp7RBSnGLOdOECwuRvYWN7kZG+O+47hvl81WBTLCzb5wdRWPahA+nIp+4UHZE
+         gT/A4dfJCHCRGRt6LqHTaUkdnWA/jh6QM9XOX4Htk+BxeP+bFxe9CDesy02OueTECvSU
+         EIPQ==
+X-Forwarded-Encrypted: i=1; AJvYcCXpTtDFwXb08czWBJKW27MnIJGJTh0mtUyCTg558MY4RalayMNzMP2KmwjZFwNg6lXQvX86BCXcmmmOSok=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwDXDPbpDfwCfHWRl7WvVux70Lp3LnxrhJl0/T2MzaIDszS3k8j
+	QlDRGj2p8zdgEV1QSCZaS8GJyvKTAHTfLmHvWLoHVWCUTBUpAk8f9R8LOggIr044QVZ9RKPE6Yp
+	nEKit9w==
+X-Google-Smtp-Source: AGHT+IGaYZSG4zZd4mTS/wJo3Y4pZr/oYDooCNdd4ohRhHZIRP5RKHzPzzPmsvOpJI0qF4JF2s5+7A==
+X-Received: by 2002:a17:907:2d91:b0:a99:f8db:68b2 with SMTP id a640c23a62f3a-aa483421ca0mr1154354766b.18.1731949812889;
+        Mon, 18 Nov 2024 09:10:12 -0800 (PST)
+Received: from mail-ej1-f44.google.com (mail-ej1-f44.google.com. [209.85.218.44])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-aa20e0016b3sm566804266b.103.2024.11.18.09.10.12
+        for <linux-sparse@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 18 Nov 2024 09:10:12 -0800 (PST)
+Received: by mail-ej1-f44.google.com with SMTP id a640c23a62f3a-aa3a79d4d59so6966b.3
+        for <linux-sparse@vger.kernel.org>; Mon, 18 Nov 2024 09:10:12 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCXkbCQ330ej8VYCxJ51CAy5KF8Rwxwv7+Cb+aGZPRg685+zFNumFZj7dPCLLeJ/kUGfgqGCKqz+R+oTbYw=@vger.kernel.org
+X-Received: by 2002:a17:907:2d91:b0:a99:f8db:68b2 with SMTP id
+ a640c23a62f3a-aa483421ca0mr1154348466b.18.1731949811840; Mon, 18 Nov 2024
+ 09:10:11 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Mimecast-Spam-Score: 0
-X-Mimecast-MFC-PROC-ID: AAzFNcx7hAT2yYYhANhE_5RIqFGiv-t2kRqR_WbNfrM_1731922037
-X-Mimecast-Originator: aculab.com
-Content-Language: en-US
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: base64
+References: <20241113172939.747686-4-mailhol.vincent@wanadoo.fr>
+ <20241113172939.747686-5-mailhol.vincent@wanadoo.fr> <8bf6922f4bb143d1bc699aadd1c84607@AcuMS.aculab.com>
+ <CAHk-=wiq=GUNWJwWh1CRAYchW73UmOaSkaCovLatfDKeveZctA@mail.gmail.com>
+ <c2eabf2786c2498eae5772e5af3c456f@AcuMS.aculab.com> <CAHk-=whaUtqsgLGk3a+1+SJ2+KGK+GK-WbSK0dX2JpVN3bs0hQ@mail.gmail.com>
+ <fab10eb9e70041c0a034f4945a978e00@AcuMS.aculab.com> <CAHk-=wgfpLdt7SFFGcByTfHdkvv7AEa3MDu_s_W1kfOxQs49pw@mail.gmail.com>
+ <2b5282038b1f46bc9a658fb2b6d78350@AcuMS.aculab.com> <CAHk-=wiV+yL5qhm5FbeKz3FV6Zdi4oRv7rr3b_=16tfmwUMWFA@mail.gmail.com>
+ <CAMZ6RqJ=ze66FuOrWvuY26T6p+9GftrAeVApbTLnT_HgRWJL_Q@mail.gmail.com>
+In-Reply-To: <CAMZ6RqJ=ze66FuOrWvuY26T6p+9GftrAeVApbTLnT_HgRWJL_Q@mail.gmail.com>
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Date: Mon, 18 Nov 2024 09:09:55 -0800
+X-Gmail-Original-Message-ID: <CAHk-=wg0r4XutgSRxzeEi6QQUJ4oej5o-kdS8j02KrLEXT4WnA@mail.gmail.com>
+Message-ID: <CAHk-=wg0r4XutgSRxzeEi6QQUJ4oej5o-kdS8j02KrLEXT4WnA@mail.gmail.com>
+Subject: Re: [PATCH v4 1/2] compiler.h: add const_true()
+To: Vincent Mailhol <mailhol.vincent@wanadoo.fr>
+Cc: David Laight <David.Laight@aculab.com>, Yury Norov <yury.norov@gmail.com>, 
+	Rasmus Villemoes <linux@rasmusvillemoes.dk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, 
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, 
+	"linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, 
+	Rikard Falkeborn <rikard.falkeborn@gmail.com>
+Content-Type: text/plain; charset="UTF-8"
 
-RnJvbTogVmluY2VudCBNYWlsaG9sDQo+IFNlbnQ6IDE4IE5vdmVtYmVyIDIwMjQgMDM6MjINCj4g
-DQo+IE9uIE1vbi4gMTggbm92LiAyMDI0IMOgIDA3OjU4LCBMaW51cyBUb3J2YWxkcw0KPiA8dG9y
-dmFsZHNAbGludXgtZm91bmRhdGlvbi5vcmc+IHdyb3RlOg0KPiA+IFRoZSAiMCohKHgpIiBpcyBh
-ZG1pdHRlZGx5IGtpbmQgb2YgdWdseSwgYW5kIG1pZ2h0IGJlIHByZXR0aWVyIGFzDQo+ID4gIjAm
-Jih4KSIuIFNhbWUgbnVtYmVyIG9mIGNoYXJhY3RlcnMsIGJ1dCB0ZWNobmljYWxseSBvbmUgb3Ag
-bGVzcyBhbmQNCj4gPiBub3QgbWl4aW5nIGJvb2xlYW5zIGFuZCBpbnRlZ2VyIG9wcy4NCj4gDQo+
-IEkgZGlkIGEgdHJlZSB3aWRlIHJlcGxhY2VtZW50IG9mIF9faXNfY29uc3RleHByKCkgd2l0aCBp
-c19jb25zdCgpIGFuZA0KPiBkaWQgYW4gYWxseWVzY29uZmlnIGJ1aWxkIHRlc3QuIEl0IHlpZWxk
-cyBhIC1XaW50LWluLWJvb2wtY29udGV4dA0KPiB3YXJuaW5nIGluIEdDQyBmb3IgYm90aCB0aGUg
-IjAqISh4KSIgYW5kIHRoZSAiMCYmKHgpIiBlYWNoIHRpbWUgdGhlDQo+IGV4cHJlc3Npb24gY29u
-dGFpbnMgbm9uLWJvb2xlYW4gb3BlcmF0b3JzLCBmb3IgZXhhbXBsZTogKiBvciA8PC4NCj4gDQo+
-IEkgcmVwcm9kdWNlZCBpdCBpbiBnb2Rib2x0IGhlcmU6DQo+IA0KPiAgIGh0dHBzOi8vZ29kYm9s
-dC5vcmcvei81V2NidmFucTMNCg0KQXBwbGllcyB0byBwcmV0dHkgbXVjaCBhbGwgdGhlIHZhcmlh
-bnRzLg0KTmVlZHMgdG8gYmUgKHgpID09IDAgKG9yICh4KSAhPSAwKSByYXRoZXIgdGhhbiAhKHgp
-DQoNCkZvcnR1bmF0ZWx5IGNvbXBhcmlzb24gb3BlcmF0b3JzIChhbmQgPzopIGFyZSBhbGwgdmFs
-aWQgaW4NCmNvbnN0YW50IGludGVnZXIgZXhwcmVzc2lvbnMuDQoNCk9oLCBvbmUgYWR2YW50YWdl
-IG9mIHN0YXRpY2FsbHlfY29uc3QoKSBpcyB0aGF0IHlvdSBjYW4gZ2l2ZQ0KaXQgYSAnbG9jYWwn
-IHZhcmlhYmxlIHRoYXQgY29udGFpbnMgdGhlIHZhbHVlLg0KU28gdGhpcyB3b3JrczoNCiNkZWZp
-bmUgY2hlY2tfbG9faG8obG8sIGhpKSBkbyB7IFwNCglfX2F1dG9fdHlwZSBfbG8gPSBsbzsgXA0K
-CV9fYXV0b190eXBlIF9oaSA9IGhpOyBcDQoJQlVJTERfQlVHX09OX01TRyhfbG8gPiBfaGksICJp
-bnZlcnRlZCBib3VuZHMiKTsgXA0KfSB3aGlsZSAoMCkNCg0KSSdtIHRyeWluZyB0byBmaW5hbGlz
-ZSBhIHBhdGNoIGZvciBtaW4oKSBhbmQgbWF4KCkuDQoNCglEYXZpZA0KDQoJDQoNCi0NClJlZ2lz
-dGVyZWQgQWRkcmVzcyBMYWtlc2lkZSwgQnJhbWxleSBSb2FkLCBNb3VudCBGYXJtLCBNaWx0b24g
-S2V5bmVzLCBNSzEgMVBULCBVSw0KUmVnaXN0cmF0aW9uIE5vOiAxMzk3Mzg2IChXYWxlcykNCg==
+On Sun, 17 Nov 2024 at 19:22, Vincent Mailhol
+<mailhol.vincent@wanadoo.fr> wrote:
+>
+> I did a tree wide replacement of __is_constexpr() with is_const() and
+> did an allyesconfig build test. It yields a -Wint-in-bool-context
+> warning in GCC for both the "0*!(x)" and the "0&&(x)" each time the
+> expression contains non-boolean operators, for example: * or <<.
 
+Grr. Annoying. But yeah, replace the "!" with "!= 0" and I guess it
+should be ok.
+
+             Linus
