@@ -1,97 +1,139 @@
-Received: from mail-ed1-f41.google.com (mail-ed1-f41.google.com [209.85.208.41])
+Received: from mail-ej1-f41.google.com (mail-ej1-f41.google.com [209.85.218.41])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5C8461BD9D2
-	for <linux-sparse@vger.kernel.org>; Mon, 18 Nov 2024 17:10:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.41
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 96B5E1AC8A6;
+	Tue, 26 Nov 2024 17:23:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1731949817; cv=none; b=h4W/3Vx49S7BOaa3meHCvgI8UlQloFP+tkGnumbdBgzLfNtKfwyvS3IX3c4k9sJqNSYE9jhcQJ/YoA8yN+CFWhc3NZbYcsSFTpoQwUf2rEJ3SMFya+lCzFVzQAHQxmwlpLYwIQHo/IubHMrMYpXSHxSTq2M50Mhy8ojuXdpU8To=
+	t=1732641836; cv=none; b=Zgs+mlhPWLKwm/9j0EyebIk7XYMkgKYxmUUVUc1e8G6/1FKII6BiNGQSkikf7RiKB83xrBzuapBuB26lsCO+EcZ31wwyJmv6xnv8A5lqkMMVc58ugOcuVyPR3PfA/ukiUkT1NZ6PyN1lAxkKrODtu9L+Ol/PCv+pDAHJCDfjndw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1731949817; c=relaxed/simple;
-	bh=W0Jl5ocHSP4PGYw8LxtnuPw3akkRY4E9C/tdE6Gbf2Y=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=HtFxlg27vVbFfegT2GWt7hUhK+HXj8TzXU8i/Ahv64Bkt8QC1tUFfgn4EorRfyosouJ8QH013p6gKrdWVOwlfjBq0AMjFKcs+0XgF017QntLiF2ziWexYwjKJ1EAb0+u623kY95bjPGt/5YcqgQuTwiER1DqYDgi06cwgoZzgU0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org; spf=pass smtp.mailfrom=linuxfoundation.org; dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b=iNG5vNci; arc=none smtp.client-ip=209.85.208.41
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linuxfoundation.org
+	s=arc-20240116; t=1732641836; c=relaxed/simple;
+	bh=U2qWLpvmvrNRc7fBpmJACAoXp45wDX7aSHeyAukM69w=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=RWS09tV1RY0cYsN24yqE3DeVT4hHUAX0kkM14KudCPSODWitV7HmSCAOWnMjlvrZ5f0drP5PdD85V/B2L+nzITHWcULDvIKlin+PkEBHJ+1H8EAVn+Xa6TkGt16fsfgEEFGW+u5AA7LqijaXPc3NXaGIKGRKKmN8XXajC0f2qx0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=blsAnjk7; arc=none smtp.client-ip=209.85.218.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="iNG5vNci"
-Received: by mail-ed1-f41.google.com with SMTP id 4fb4d7f45d1cf-5cfc19065ffso1865786a12.3
-        for <linux-sparse@vger.kernel.org>; Mon, 18 Nov 2024 09:10:15 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="blsAnjk7"
+Received: by mail-ej1-f41.google.com with SMTP id a640c23a62f3a-a9e44654ae3so792399866b.1;
+        Tue, 26 Nov 2024 09:23:54 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linux-foundation.org; s=google; t=1731949813; x=1732554613; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=cHhSpMFQSzvTkKEefPe2mtAUvRV1u6SYwiNS6wbH29c=;
-        b=iNG5vNciWnZuo40+8zsdGU6zhGHAZGz3dyl7X482LRMdFv2GmvVQLi9JPlutL/z++D
-         jWA3lOfSc4I/aGYuH/QbuuFaojUazbRlRe7MB52kfB7/cBFObRjLR22W9c+lF+c1CfPj
-         gjmPIer5IL6a+axphpoA2g9xb8PMjQ9nsAfF4=
+        d=gmail.com; s=20230601; t=1732641833; x=1733246633; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=2Erh3kDkyyLqMgBRTpctsP9hRptfdoHadkYL68Kj+DE=;
+        b=blsAnjk70GyW/Q4EyY5ilD/7rNsNXCfdWulDT/Da0yKClNXSO/0Xr5KwbqdbGMuvpJ
+         begI2oRdbw0VBXHRDJ7XKA1A+1Y9WNUUjnTrdQ8sv0HA/TcYErgJJvgcKjKPl4YpiUje
+         Vvk7ql+ZyWPk46Egq+fTOnyQzC6J0kC8RWvdKIzDS0vGK9c0QCXH44RVQ1XLyUFb08MI
+         Ui7gAbI1++7yoYe60CAG4lC0hT7fBpeA0JT184EIJU4Bf5l72kLTfO7S3TmID9DYFLT/
+         8qslenLo2lBEZzULqILX4DILIXxAMiTbQl9mOzCoCHSqWDH5MOkJaWbABzsb7gUzbCQO
+         64Tg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1731949813; x=1732554613;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+        d=1e100.net; s=20230601; t=1732641833; x=1733246633;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=cHhSpMFQSzvTkKEefPe2mtAUvRV1u6SYwiNS6wbH29c=;
-        b=IQYfCnZbMz+vYGN6onPboTTK1cbKtznoofKstoDekJxdhmO8UomhmC4eyNvthmloKe
-         D6z2NMMd/nEfIFST4eOGVSFW3FAfbbdcC0bw3ey3ojZReTdKxcwcIpodGcT4S8Ol7iyz
-         W/VaBQGx6iYrjxNgVv+8Bq9d/PJCgchYg3OiYgeFSlX2iPRj4dZZrNruXbAkFNTa7qQo
-         yACBO13Qp7RBSnGLOdOECwuRvYWN7kZG+O+47hvl81WBTLCzb5wdRWPahA+nIp+4UHZE
-         gT/A4dfJCHCRGRt6LqHTaUkdnWA/jh6QM9XOX4Htk+BxeP+bFxe9CDesy02OueTECvSU
-         EIPQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXpTtDFwXb08czWBJKW27MnIJGJTh0mtUyCTg558MY4RalayMNzMP2KmwjZFwNg6lXQvX86BCXcmmmOSok=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwDXDPbpDfwCfHWRl7WvVux70Lp3LnxrhJl0/T2MzaIDszS3k8j
-	QlDRGj2p8zdgEV1QSCZaS8GJyvKTAHTfLmHvWLoHVWCUTBUpAk8f9R8LOggIr044QVZ9RKPE6Yp
-	nEKit9w==
-X-Google-Smtp-Source: AGHT+IGaYZSG4zZd4mTS/wJo3Y4pZr/oYDooCNdd4ohRhHZIRP5RKHzPzzPmsvOpJI0qF4JF2s5+7A==
-X-Received: by 2002:a17:907:2d91:b0:a99:f8db:68b2 with SMTP id a640c23a62f3a-aa483421ca0mr1154354766b.18.1731949812889;
-        Mon, 18 Nov 2024 09:10:12 -0800 (PST)
-Received: from mail-ej1-f44.google.com (mail-ej1-f44.google.com. [209.85.218.44])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-aa20e0016b3sm566804266b.103.2024.11.18.09.10.12
-        for <linux-sparse@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 18 Nov 2024 09:10:12 -0800 (PST)
-Received: by mail-ej1-f44.google.com with SMTP id a640c23a62f3a-aa3a79d4d59so6966b.3
-        for <linux-sparse@vger.kernel.org>; Mon, 18 Nov 2024 09:10:12 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCXkbCQ330ej8VYCxJ51CAy5KF8Rwxwv7+Cb+aGZPRg685+zFNumFZj7dPCLLeJ/kUGfgqGCKqz+R+oTbYw=@vger.kernel.org
-X-Received: by 2002:a17:907:2d91:b0:a99:f8db:68b2 with SMTP id
- a640c23a62f3a-aa483421ca0mr1154348466b.18.1731949811840; Mon, 18 Nov 2024
- 09:10:11 -0800 (PST)
+        bh=2Erh3kDkyyLqMgBRTpctsP9hRptfdoHadkYL68Kj+DE=;
+        b=wFm9T/F2+Mxn/xao/iO6xJ6VkgqrncgbiBvimaVZ8yEWpO9FrsLB/cCsFps4L3jYLy
+         cYBGrkP0TR6p2yHBElfbk1Hpe3HMgDyNydg4PgcjUcc2yNgOwZioTMmhqhXK7+yi36jW
+         WZH2IYW5/l7yDVsCt8QwpWDxCOI8y4dCboL6uEi6c3z0s2El3a8uURXslksCLKlxL+Tr
+         6TuTPSuRb5pXDrBwfS1JxGBb9LbrwtILQQokgkeS/uZUcFXom6M1zyrHMOaMpE4sLuUq
+         v9R4YSf3uqRVwn79hkZaQl+6HSxqpCjxbWWeWcXqzAe0vGAJ4JGa0nS4OWSLx2vukzjN
+         l0wQ==
+X-Forwarded-Encrypted: i=1; AJvYcCUtxn/JWZrteI4HT/fVuR/yeyrazO88SqmUQcaIAgpAvNf+k1kQwltwMFnQpyFCI8wQ5rU+OwefaBdu@vger.kernel.org, AJvYcCV0Vp9JTjZLO+Q2MJMt9s7DTKQOioA66k2lYpidZF9kOf/p+CkpKg06jJ56AJ5qZYExHt2aQ2uM@vger.kernel.org, AJvYcCVIXEALO9+yybyfWaAuiDcPx9BkjCQqgvHpQoUhZ5dQ8uQNRwAjZB5fapjATkr5UDHJMmk97PEl7VpIaOBx@vger.kernel.org, AJvYcCWmkxgaGV3O54K7zxZb5LEWDz/NSsprs1YgXKMb7UV3HO/+9zNrXAFloQoXpDi/prUauOcFhMObjV/XfU0Yi7Q=@vger.kernel.org, AJvYcCWq0J1UwnSYWGCjkjxIZwE4un5GIVFeLbVTVDV2iblAtdtD+oK3HQkwVGeJRCNYdXwGkvkGSTUvz+C+dtrE@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw6kqSFeySwb2H2DX3O7DVfYS3azVF97fOWAfoI07BSXnbfZJCO
+	XwwcTM36N+JPjzMcqeytyOr0yp31V4kyA2NHOhszaWPx1Ty7xkjE
+X-Gm-Gg: ASbGncueS+j/UWtaDH+dETCBGfjWKgtkcpwozuBNKSV5NptpWmlFvxQHMGnzligK202
+	W1lNE55IS8RUPhAbQIq90aGAlHyximpsGjBoUBcFx6mHqNsu3nKl4MOnk7cd6zxsli2dmqkKVj0
+	IXi+dLFFu380ffZKjtguSVB/1m1qh15IHL0NZkWrtEvp5mC3UQXmJMPtfiylPK+HYlT+7YwAErw
+	ZxOW/l+bCldx9RCkK8cZqm+Hej5SHtcH3D/YwJvkh2NUvsbUDsXEoKqUk4=
+X-Google-Smtp-Source: AGHT+IECV1SfPk75kkOO3nyGfh6AJfPnfs9z/0KCVg6p2LbUtu1npUxOUG5Li3TZL6yCbXfXk+iKng==
+X-Received: by 2002:a17:906:314f:b0:aa4:9ab1:196c with SMTP id a640c23a62f3a-aa50990b24emr1417865366b.9.1732641832663;
+        Tue, 26 Nov 2024 09:23:52 -0800 (PST)
+Received: from localhost.localdomain ([46.248.82.114])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-aa534232086sm473832866b.42.2024.11.26.09.23.51
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 26 Nov 2024 09:23:52 -0800 (PST)
+From: Uros Bizjak <ubizjak@gmail.com>
+To: x86@kernel.org,
+	linux-sparse@vger.kernel.org,
+	linux-mm@kvack.org,
+	linux-kernel@vger.kernel.org,
+	linux-bcachefs@vger.kernel.org,
+	linux-arch@vger.kernel.org,
+	netdev@vger.kernel.org
+Cc: Uros Bizjak <ubizjak@gmail.com>,
+	Thomas Gleixner <tglx@linutronix.de>,
+	Dennis Zhou <dennis@kernel.org>,
+	Tejun Heo <tj@kernel.org>,
+	Christoph Lameter <cl@linux.com>,
+	Linus Torvalds <torvalds@linux-foundation.org>,
+	Andy Lutomirski <luto@kernel.org>,
+	Ingo Molnar <mingo@kernel.org>,
+	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
+	Nadav Amit <nadav.amit@gmail.com>,
+	Brian Gerst <brgerst@gmail.com>,
+	"H . Peter Anvin" <hpa@zytor.com>,
+	Peter Zijlstra <peterz@infradead.org>
+Subject: [PATCH 0/6] Enable strict percpu address space checks
+Date: Tue, 26 Nov 2024 18:21:17 +0100
+Message-ID: <20241126172332.112212-1-ubizjak@gmail.com>
+X-Mailer: git-send-email 2.42.0
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241113172939.747686-4-mailhol.vincent@wanadoo.fr>
- <20241113172939.747686-5-mailhol.vincent@wanadoo.fr> <8bf6922f4bb143d1bc699aadd1c84607@AcuMS.aculab.com>
- <CAHk-=wiq=GUNWJwWh1CRAYchW73UmOaSkaCovLatfDKeveZctA@mail.gmail.com>
- <c2eabf2786c2498eae5772e5af3c456f@AcuMS.aculab.com> <CAHk-=whaUtqsgLGk3a+1+SJ2+KGK+GK-WbSK0dX2JpVN3bs0hQ@mail.gmail.com>
- <fab10eb9e70041c0a034f4945a978e00@AcuMS.aculab.com> <CAHk-=wgfpLdt7SFFGcByTfHdkvv7AEa3MDu_s_W1kfOxQs49pw@mail.gmail.com>
- <2b5282038b1f46bc9a658fb2b6d78350@AcuMS.aculab.com> <CAHk-=wiV+yL5qhm5FbeKz3FV6Zdi4oRv7rr3b_=16tfmwUMWFA@mail.gmail.com>
- <CAMZ6RqJ=ze66FuOrWvuY26T6p+9GftrAeVApbTLnT_HgRWJL_Q@mail.gmail.com>
-In-Reply-To: <CAMZ6RqJ=ze66FuOrWvuY26T6p+9GftrAeVApbTLnT_HgRWJL_Q@mail.gmail.com>
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Date: Mon, 18 Nov 2024 09:09:55 -0800
-X-Gmail-Original-Message-ID: <CAHk-=wg0r4XutgSRxzeEi6QQUJ4oej5o-kdS8j02KrLEXT4WnA@mail.gmail.com>
-Message-ID: <CAHk-=wg0r4XutgSRxzeEi6QQUJ4oej5o-kdS8j02KrLEXT4WnA@mail.gmail.com>
-Subject: Re: [PATCH v4 1/2] compiler.h: add const_true()
-To: Vincent Mailhol <mailhol.vincent@wanadoo.fr>
-Cc: David Laight <David.Laight@aculab.com>, Yury Norov <yury.norov@gmail.com>, 
-	Rasmus Villemoes <linux@rasmusvillemoes.dk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, 
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, 
-	"linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, 
-	Rikard Falkeborn <rikard.falkeborn@gmail.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-On Sun, 17 Nov 2024 at 19:22, Vincent Mailhol
-<mailhol.vincent@wanadoo.fr> wrote:
->
-> I did a tree wide replacement of __is_constexpr() with is_const() and
-> did an allyesconfig build test. It yields a -Wint-in-bool-context
-> warning in GCC for both the "0*!(x)" and the "0&&(x)" each time the
-> expression contains non-boolean operators, for example: * or <<.
+This patchset enables strict percpu address space checks via x86 named 
+address space qualifiers. Percpu variables are declared in
+__seg_gs/__seg_fs named AS and kept named AS qualified until they
+are dereferenced via percpu accessor. This approach enables various
+compiler checks for cross-namespace variable assignments.
 
-Grr. Annoying. But yeah, replace the "!" with "!= 0" and I guess it
-should be ok.
+Please note that current version of sparse doesn't know anything about
+__typeof_unqual__() operator. Avoid the usage of __typeof_unqual__()
+when sparse checking is active to prevent sparse errors with unknowing
+keyword.
 
-             Linus
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Dennis Zhou <dennis@kernel.org>
+Cc: Tejun Heo <tj@kernel.org>
+Cc: Christoph Lameter <cl@linux.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Andy Lutomirski <luto@kernel.org>
+Cc: Ingo Molnar <mingo@kernel.org>
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Nadav Amit <nadav.amit@gmail.com>
+Cc: Brian Gerst <brgerst@gmail.com>
+Cc: H. Peter Anvin <hpa@zytor.com>
+Cc: Peter Zijlstra <peterz@infradead.org>
+
+Uros Bizjak (6):
+  x86/kgdb: Use IS_ERR_PCPU() macro
+  compiler.h: Introduce TYPEOF_UNQUAL() macro
+  percpu: Use TYPEOF_UNQUAL() in variable declarations
+  percpu: Use TYPEOF_UNQUAL() in *_cpu_ptr() accessors
+  percpu: Repurpose __percpu tag as a named address space qualifier
+  percpu/x86: Enable strict percpu checks via named AS qualifiers
+
+ arch/x86/include/asm/percpu.h  | 34 +++++++++++++++++++---------
+ arch/x86/kernel/kgdb.c         |  2 +-
+ fs/bcachefs/util.h             |  2 +-
+ include/asm-generic/percpu.h   | 41 +++++++++++++++++++++++-----------
+ include/linux/compiler.h       | 13 +++++++++++
+ include/linux/compiler_types.h |  2 +-
+ include/linux/part_stat.h      |  2 +-
+ include/linux/percpu-defs.h    |  6 ++---
+ include/net/snmp.h             |  5 ++---
+ init/Kconfig                   |  3 +++
+ kernel/locking/percpu-rwsem.c  |  2 +-
+ net/mpls/internal.h            |  4 ++--
+ 12 files changed, 80 insertions(+), 36 deletions(-)
+
+-- 
+2.42.0
+
