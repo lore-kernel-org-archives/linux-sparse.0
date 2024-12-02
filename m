@@ -1,122 +1,165 @@
-Received: from mail-lj1-f175.google.com (mail-lj1-f175.google.com [209.85.208.175])
+Received: from mail-wm1-f54.google.com (mail-wm1-f54.google.com [209.85.128.54])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 62BC414831E;
-	Fri, 29 Nov 2024 16:33:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D272A1F9F63
+	for <linux-sparse@vger.kernel.org>; Mon,  2 Dec 2024 09:25:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.54
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1732898029; cv=none; b=nE5rTlC2wM3N9Kf9gzy++8DvGAzB349XpN1yzdfQZbM6/kAa7A7sMZn+roVzmpOzpjKW21eNsS3ikmTWOMdoeS8upC4QZMXAtzQlcSp0V6mxrVRuC4oqJgX5wusyp/ouSLTMwiX8RcNfRdADutOiFVVgklRCIXcKUkIGmOvOJG0=
+	t=1733131560; cv=none; b=mrfwA4/v5y92pnjby7olvOs18BjqCqfkytitkfKAgI2R1cAJ0lyKkIJFzPFdpTrBZsmpZVkhR7DTQ6qWCv1dM3CmvLmvSp38Xhlke4PIdBHnkNvtORZFTYQQW5tCEaJJ7xB84Hr5OTQiWkTfeCQrfoJz6EeamK/Ci3CLLU2THsA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1732898029; c=relaxed/simple;
-	bh=jV/HJJoyFisUlmpbEwO+vSgy0MZZ5vDW7dpKoJjtGRI=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=jU7+VqxfS7Ax1s4t69fO0KAjya6EXRTepHJsVlLiSK7gO+241ANDhJD8JfnIBdpeTxagHbdOcXM8DBrzy1/yUzFmeKUJyI9SJMV/XtBgDC+QNe/VxvhaDH6vl3tJvF8UON5Wh65xZzJqP8rFXYwbXhKXOyTlf1PmhIkS5HdA2iM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=HxDOwPls; arc=none smtp.client-ip=209.85.208.175
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1733131560; c=relaxed/simple;
+	bh=6mxr67GXj5kOILSJ1Q4R3qqL56+A0QkCVd0OEZ4aJ0c=;
+	h=Date:From:To:Subject:Message-ID:MIME-Version:Content-Type:
+	 Content-Disposition; b=O9rRh/mmr/2Lv//xnsn982E1JT5eLC1ES+mxxnSz0v2xlfD6dpaiYWGYJKOLNC2D8/AdZPYw1oAtE5Ln2Vc0P6K5p/EbUYWZjYZU7pWXhUZvvicv9b8WCl/YbQ6gS5pD+m4P5ae6bRNBVybbTJcRHzEvPh+bQAriwrEDIwjSzKs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b=gHoG7xpY; arc=none smtp.client-ip=209.85.128.54
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=baylibre.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="HxDOwPls"
-Received: by mail-lj1-f175.google.com with SMTP id 38308e7fff4ca-2ffe2700e91so17496231fa.2;
-        Fri, 29 Nov 2024 08:33:47 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="gHoG7xpY"
+Received: by mail-wm1-f54.google.com with SMTP id 5b1f17b1804b1-432d86a3085so32855195e9.2
+        for <linux-sparse@vger.kernel.org>; Mon, 02 Dec 2024 01:25:56 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1732898025; x=1733502825; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=3o5c5OkJBnxuHx2X8U5fNa7RxI4N2MNNsd2C+SVC6H4=;
-        b=HxDOwPlsOuNayfgqQF/4HcFAN22Bb4SyTY+kvR1RfeDjOizxefu7IPvSnAt9vIfoLp
-         5LKADzcTCqv5llUj7u/0On9zPocv2BXGnsJyge2OYlxy3+y+2gzAKRekavk+AqXCCUjz
-         nteQzH2SBeqXii8rtsFggHya4pAyWAb4kJsXlmNmMAPVwfBMQUpUE0l5JfPmeruo5isR
-         U8KCcOGqCzPfLt478jEy7bSlU0aPQY+Y6GSm4UHKC8jPF9oNSOYyRuDPkTcNAiOXC4oM
-         1Ej4HYjq5NcAjDO/Fq5VnAwl71deLoDI0k/Sn1FMBINezkQXdD6ThhCT7cKKb7/TIrV4
-         xivw==
+        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1733131555; x=1733736355; darn=vger.kernel.org;
+        h=content-disposition:mime-version:message-id:subject:to:from:date
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=Z9xEJ/kUhPCLV4a4NQE3Bv/XOpAmETNr1Q9eiG6xcMA=;
+        b=gHoG7xpYwrMCKkZpBMN4lIoBpxUYHMT2owuaTaA2KpcLLXx5pTmC5zhdvzB+BVWPg2
+         IiEN19SPGFVa0BpdQfz3ew+213vIWbmkl5cbJADU4QyhIlUuE2CjeM3YmyqbICq/sX3Z
+         DMPlFnidMFM2rEaD/CwVrKep7eu8IreWVxn3qQTjK+MnRqi7lBCGZEQzmsh9F1wlsXh5
+         XlLK/UJaJ3pHjf7uKqigIUtQot6PRvYL1tPUMj69zlpxcb2o9T9l4hrBH1Mqbb2HDeiL
+         XsN2mEqmN+IouSSGXEsDzGGBOdIj5Roe+L7wac9PyaIpoBlXzm2ezAB2u0wuBmYNizVw
+         HWxg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1732898025; x=1733502825;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=3o5c5OkJBnxuHx2X8U5fNa7RxI4N2MNNsd2C+SVC6H4=;
-        b=fqigoB+nc+VuB9GdJrQJyYgw4tlt/z0SkE/IAmGmtQqOHTqoegh/NJJW6QC6tckm2w
-         SmjNoI6Q1KJnCblJU1iKEaj82jq2Yo+mNre9YN8EAFXgbJlt0uTWCDIQNx9EhxQeSPrW
-         ct05cKckv/2TYJYWfB6RLEbUZKL/Qq6FRIPEO29zHG2GzS5AwmP7HbylUPcs/I76ZHt+
-         Nc9RmRHic5N20NjxctYL/mH7La8Bagnqn43wa4lxLPwe+XTD50xg0sVxd5/5tfAHGbpG
-         mi6H/f0BqmlMHEvNdJD6v/qQ1Ome5qQbKTkJH8ZJwuRamkgBzXT7ozu1WxWW2Cly5x2U
-         q6Rw==
-X-Forwarded-Encrypted: i=1; AJvYcCUMDexXD9KRhQGuBqTw7W4HSR548SuYu2EtQSLgvTADKBXN1ofYBNRa5xTP7IW7wafOYU+A331t11oHkq7z@vger.kernel.org, AJvYcCUcVnSePwPCoHb4rqjbPNKOdCYl1t30nYf/NJFvcwOkE5DgcEpVa5o04ykVacZC6kWXxYxspga2o41Wx4Jg@vger.kernel.org, AJvYcCWvKXNAHV1zlmJUGYVlwA4uqDwZuC2/6QsGaeMB9rVWu5ukAWOvwDb8yWpVok9KHI5ahj7fSIVRd6RuuNnL+6E=@vger.kernel.org, AJvYcCXMwRRabvNq4mGVoR7JybdFEfrPe0BRFq15/2OGVPxwt7Vmf7CfeIlQif1p79sr14fyvS6LeG4XTRDV@vger.kernel.org, AJvYcCXrNR2O809X59JevlCfAaLXWQDZN4cSOMUtbyLVVhehJ49YrNUFwFVtJM5mrg6kZiOJelMPZCcA@vger.kernel.org
-X-Gm-Message-State: AOJu0Yxw/qVdAjVlng84exwc0fxG80dyLhw5hvhQFuNJjx3aZTJ+KgzA
-	DkVGJlnIsHRbR1Q4msYRxl0vQ7DipmAolPWQrwx+HF2X7qiyTnonlAOfg7Mz/ve2GHStjKCJUro
-	vKElRcWcFtNV9cl7l1ZjG6wtY0bs=
-X-Gm-Gg: ASbGncsZhFeP1wnlVX03FwEuxAqG/QDd+Igz0CW+x5uY/T9vTgCoB+1yr6xH1wejpaH
-	xDmp6vpMkkZGHv7pSJvT1qwBMdnecYtQ=
-X-Google-Smtp-Source: AGHT+IFlFVlEhUxi6HFl3pGJQ6QkeeDU+I701r/q00tFH5KVLO7PE8iiSpjGYGZRstbj+0OGHuFgSmi6H+4E2uBgCeM=
-X-Received: by 2002:a2e:a916:0:b0:2fb:4982:daea with SMTP id
- 38308e7fff4ca-2ffd60dbdb9mr82866831fa.32.1732898025269; Fri, 29 Nov 2024
- 08:33:45 -0800 (PST)
+        d=1e100.net; s=20230601; t=1733131555; x=1733736355;
+        h=content-disposition:mime-version:message-id:subject:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=Z9xEJ/kUhPCLV4a4NQE3Bv/XOpAmETNr1Q9eiG6xcMA=;
+        b=MvMJefEFgEDYNQofBiRzSv6acEecOMT84ggWh/0+JOC61Uz7chjFHbCTbv2nkhkSvp
+         g9lOh3PSy7iH+kKcYKDPXUXUAxs3IgqhXuyBh0UW4Szc261F45KAPky6guyUGXY5H8yc
+         jOCUFQd+9MgCV7FnIAOMg813K9M4cwOPlF2JrTfAtfxYIh8vrruIaE/Uk+IMSn1xUJ+f
+         g3EOYTtiUvVtwpfUHssbphPQ+m8x0+mt8pPlRAxqHuUVia4gR66xw+rku1Nuledvjjc9
+         BNr61P3qBn0r8c1F2b28kFX9qJE2ctpaf5ZaZxjtiEnEsiaLCdVZ2NM6KDXGJKoml/iK
+         384w==
+X-Gm-Message-State: AOJu0Ywi0jw3AxsehXYMW3cWJ0Ho8FToIWEgSCy717Dws2+GXiIzXVQc
+	LfNlMC7x428PaE27kMED3QVQzse3o43L4iJ4H0UjP9zjuGOkGob6jo11MSDN+0O81gzu2523+JC
+	5hbE=
+X-Gm-Gg: ASbGncucHpr8DCKYkWeUVQ/EahwibfNqdRNt6aveTwN/BWe5nrynm5xvE86p6Eylhno
+	1r21Tg9YF66TK1ONpMAqCrq7BEA3T52OCYGi4ox741KqYJxnm2Y5P3fSehPRGGiQxasaq6FKh+0
+	k4BrMQhRUWK2G9VNDBgJ+jqOhhY8xjpJ8n1efvCIzh+0eFbSoIoD34c+0WxOkyZOlkEK5Kc+tX6
+	A0Z8r6oPhPanTuIXJrKciTgNzeZ4JNs1uqO//PJFoAuwbNiejy5CZs44PKROPkJsePN2R3boZpQ
+	9/+j
+X-Google-Smtp-Source: AGHT+IFp5ayivS0s1d11wGzmQxjcS/jMbWZxPbJSWUm9EDAw+LCn4IL/WiVUIk4+tA9ZBuqesArWXg==
+X-Received: by 2002:a05:6000:1887:b0:385:ee40:2d88 with SMTP id ffacd0b85a97d-385ee403053mr3480386f8f.3.1733131555077;
+        Mon, 02 Dec 2024 01:25:55 -0800 (PST)
+Received: from localhost (p5dc6838f.dip0.t-ipconnect.de. [93.198.131.143])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-385e940fef3sm5603774f8f.42.2024.12.02.01.25.54
+        for <linux-sparse@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 02 Dec 2024 01:25:54 -0800 (PST)
+Date: Mon, 2 Dec 2024 10:25:53 +0100
+From: Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@baylibre.com>
+To: linux-sparse@vger.kernel.org
+Subject: sparse reports "different lock contexts for basic block" when using
+ guard syntax
+Message-ID: <xc3xx56vvesaen7r2c3q5thmrjva7zcfq5habasejlyn7vnpbj@jxsfprt5gfa4>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241126172332.112212-1-ubizjak@gmail.com> <20241126172332.112212-7-ubizjak@gmail.com>
- <9CECB9F7-E700-4A92-98B9-6FD027F9CE65@gmail.com>
-In-Reply-To: <9CECB9F7-E700-4A92-98B9-6FD027F9CE65@gmail.com>
-From: Uros Bizjak <ubizjak@gmail.com>
-Date: Fri, 29 Nov 2024 17:33:33 +0100
-Message-ID: <CAFULd4Zs32G+NToyGSHv8quQbSOfaEC2UjtQ3vwnn9jufK47rA@mail.gmail.com>
-Subject: Re: [PATCH 6/6] percpu/x86: Enable strict percpu checks via named AS qualifiers
-To: Nadav Amit <nadav.amit@gmail.com>
-Cc: "the arch/x86 maintainers" <x86@kernel.org>, linux-sparse@vger.kernel.org, 
-	"open list:MEMORY MANAGEMENT" <linux-mm@kvack.org>, 
-	Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-bcachefs@vger.kernel.org, 
-	linux-arch@vger.kernel.org, netdev@vger.kernel.org, 
-	Dennis Zhou <dennis@kernel.org>, Tejun Heo <tj@kernel.org>, Christoph Lameter <cl@linux.com>, 
-	Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@kernel.org>, Borislav Petkov <bp@alien8.de>, 
-	Dave Hansen <dave.hansen@linux.intel.com>, "H. Peter Anvin" <hpa@zytor.com>, 
-	Linus Torvalds <torvalds@linux-foundation.org>, Andy Lutomirski <luto@kernel.org>, 
-	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Brian Gerst <brgerst@gmail.com>, 
-	Peter Zijlstra <peterz@infradead.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="3lsfgxv2aanl5a7r"
+Content-Disposition: inline
+
+
+--3lsfgxv2aanl5a7r
+Content-Type: text/plain; protected-headers=v1; charset=us-ascii
+Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
+Subject: sparse reports "different lock contexts for basic block" when using
+ guard syntax
+MIME-Version: 1.0
 
-On Fri, Nov 29, 2024 at 4:45=E2=80=AFPM Nadav Amit <nadav.amit@gmail.com> w=
-rote:
->
->
-> > On 26 Nov 2024, at 19:21, Uros Bizjak <ubizjak@gmail.com> wrote:
-> >
-> > This patch declares percpu variables in __seg_gs/__seg_fs named AS
-> > and keeps them named AS qualified until they are dereferenced with
-> > percpu accessor. This approach enables various compiler check
-> > for cross-namespace variable assignments.
->
-> [snip]
->
-> > @@ -95,9 +95,19 @@
-> >
-> > #endif /* CONFIG_SMP */
-> >
-> > -#define __my_cpu_type(var) typeof(var) __percpu_seg_override
-> > -#define __my_cpu_ptr(ptr) (__my_cpu_type(*(ptr))*)(__force uintptr_t)(=
-ptr)
-> > -#define __my_cpu_var(var) (*__my_cpu_ptr(&(var)))
-> > +#if defined(CONFIG_USE_X86_SEG_SUPPORT) && \
-> > +    defined(CONFIG_CC_HAS_TYPEOF_UNQUAL) && !defined(__CHECKER__)
->
-> Is the __CHECKER__ check because of sparse, as in patch 2/6 ?
-> If so, do you want to add a similar comment here?
+Hello,
 
-Yes, this is the same check. We can declare _percpu variables in
-__seg_gs named address space only when __typeof_unqual__ is used. I
-will add a comment in the next revision of the patchset.
+on Linux v6.13-rc1 I get:
 
-> Other than that, I went over the different patches and it looks good as
-> much as I can tell.
->
-> If it means anything, you have for the series
->
-> Acked-by: Nadav Amit <nadav.amit@gmail.com <mailto:nadav.amit@gmail.com>>
+	$ armmake C=3D1 drivers/pwm/pwm-gpio.o
+	...
+	  CC [M]  drivers/pwm/pwm-gpio.o
+	  CHECK   /home/uwe/gsrc/linux/drivers/pwm/pwm-gpio.c
+	drivers/pwm/pwm-gpio.c:98:9: warning: context imbalance in 'pwm_gpio_timer=
+' - wrong count at exit
+	drivers/pwm/pwm-gpio.c:101:12: warning: context imbalance in 'pwm_gpio_app=
+ly' - different lock contexts for basic block
+	drivers/pwm/pwm-gpio.c:166:9: warning: context imbalance in 'pwm_gpio_get_=
+state' - wrong count at exit
 
-Thanks!
+with
 
-Uros.
+	$ sparse --version
+	0.6.4 (Debian: 0.6.4-4+b1)
+
+but also on sparse/main.
+
+Trying to understand what sparse wants to tell me, I tried the following
+change and the 2nd warning goes away:
+
+diff --git a/drivers/pwm/pwm-gpio.c b/drivers/pwm/pwm-gpio.c
+index 9f8884ac7504..d811b1f71c92 100644
+--- a/drivers/pwm/pwm-gpio.c
++++ b/drivers/pwm/pwm-gpio.c
+@@ -103,6 +103,7 @@ static int pwm_gpio_apply(struct pwm_chip *chip, struct=
+ pwm_device *pwm,
+ {
+ 	struct pwm_gpio *gpwm =3D pwmchip_get_drvdata(chip);
+ 	bool invert =3D state->polarity =3D=3D PWM_POLARITY_INVERSED;
++	unsigned long flags;
+=20
+ 	if (state->duty_cycle && state->duty_cycle < hrtimer_resolution)
+ 		return -EINVAL;
+@@ -125,7 +126,7 @@ static int pwm_gpio_apply(struct pwm_chip *chip, struct=
+ pwm_device *pwm,
+ 			return ret;
+ 	}
+=20
+-	guard(spinlock_irqsave)(&gpwm->lock);
++	spin_lock_irqsave(&gpwm->lock, flags);
+=20
+ 	if (!state->enabled) {
+ 		pwm_gpio_round(&gpwm->state, state);
+@@ -148,6 +149,7 @@ static int pwm_gpio_apply(struct pwm_chip *chip, struct=
+ pwm_device *pwm,
+ 				      HRTIMER_MODE_REL);
+ 	}
+=20
++	spin_unlock_irqrestore(&gpwm->lock, flags);
+ 	return 0;
+ }
+=20
+
+But unless I'm mistaken the new code in pwm-gpio.c is equivalent, so
+maybe sparse doesn't understand the guard syntax?
+
+Any hints?
+
+Best regards
+Uwe
+
+--3lsfgxv2aanl5a7r
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCgAdFiEEP4GsaTp6HlmJrf7Tj4D7WH0S/k4FAmdNfR0ACgkQj4D7WH0S
+/k5pjggAoqM7d071x2sac1CeS9ES/8Jk/ZRpHidiEdLuftrmDccOFfLfmki5X9Za
+o+yaB6yAvuGKhcNpYX56NCdFl8lzS6wSS80l1BzqcuqBSD8f9fmrKR6SlPeoUO/W
+wCCd9eLnEGPjNPC24juV1IE4JaD/LwW5nc0hd/4kshLFNXS8HE2F04mGCQBmWfEV
+kxgoKT80Rma83xtRh/B4pcd9ZFcduBZfFLjJSRccp/KMsz/yFVmRdvRolh1jseLZ
+HtkZtLM8uhs4ZAGNEFH0pq1FRkCpXxoudnEKxo4txjxZ1cQQCJbZnT/5Ue8+Swyg
+WH/B1cS1ATtgh5Y3jz76lxVEG7juCA==
+=i54m
+-----END PGP SIGNATURE-----
+
+--3lsfgxv2aanl5a7r--
