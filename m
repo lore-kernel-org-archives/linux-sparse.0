@@ -1,165 +1,117 @@
-Received: from mail-wm1-f54.google.com (mail-wm1-f54.google.com [209.85.128.54])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D272A1F9F63
-	for <linux-sparse@vger.kernel.org>; Mon,  2 Dec 2024 09:25:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.54
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4C6FE1D90B3;
+	Mon,  2 Dec 2024 17:35:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733131560; cv=none; b=mrfwA4/v5y92pnjby7olvOs18BjqCqfkytitkfKAgI2R1cAJ0lyKkIJFzPFdpTrBZsmpZVkhR7DTQ6qWCv1dM3CmvLmvSp38Xhlke4PIdBHnkNvtORZFTYQQW5tCEaJJ7xB84Hr5OTQiWkTfeCQrfoJz6EeamK/Ci3CLLU2THsA=
+	t=1733160904; cv=none; b=hnyINPmjWfycBzQGJe8VPx1ae7P7YpRPojJr3ELsEa2fiGHrrXCcL5yJJdMb9gyvcEVHz13embUNO3QW5YMd/5jBQtNYPHV+C1bvVe9of/Np1JAAp8Qp8oI5UBgjAKc2lPvVNxD5RFFyjmJJIhvt4cbTe+5zOyS8JjZByVNDt/g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733131560; c=relaxed/simple;
-	bh=6mxr67GXj5kOILSJ1Q4R3qqL56+A0QkCVd0OEZ4aJ0c=;
-	h=Date:From:To:Subject:Message-ID:MIME-Version:Content-Type:
-	 Content-Disposition; b=O9rRh/mmr/2Lv//xnsn982E1JT5eLC1ES+mxxnSz0v2xlfD6dpaiYWGYJKOLNC2D8/AdZPYw1oAtE5Ln2Vc0P6K5p/EbUYWZjYZU7pWXhUZvvicv9b8WCl/YbQ6gS5pD+m4P5ae6bRNBVybbTJcRHzEvPh+bQAriwrEDIwjSzKs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b=gHoG7xpY; arc=none smtp.client-ip=209.85.128.54
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=baylibre.com
+	s=arc-20240116; t=1733160904; c=relaxed/simple;
+	bh=5SkdVpyxMkwcefHUvrmeRmooVspzWLLjyCNkLAyYF/4=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
+	 In-Reply-To:To:Cc; b=JlYSDkUvLpeILBF+771Th+HASIVKqkavtmXhk0lskC5/c7TAzlz1H41IWjBOoiuTIqP8hkcC8tXAcm961M0aC8P7aCxR0wCvXmOO0hj5i0hEDparm7DRjnEpdRKEj6paLzyIlSMzIlNxFBrIqut93Hk+fP8gLvgrTwdOFd+sNzE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=krYcOchp; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="gHoG7xpY"
-Received: by mail-wm1-f54.google.com with SMTP id 5b1f17b1804b1-432d86a3085so32855195e9.2
-        for <linux-sparse@vger.kernel.org>; Mon, 02 Dec 2024 01:25:56 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1733131555; x=1733736355; darn=vger.kernel.org;
-        h=content-disposition:mime-version:message-id:subject:to:from:date
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=Z9xEJ/kUhPCLV4a4NQE3Bv/XOpAmETNr1Q9eiG6xcMA=;
-        b=gHoG7xpYwrMCKkZpBMN4lIoBpxUYHMT2owuaTaA2KpcLLXx5pTmC5zhdvzB+BVWPg2
-         IiEN19SPGFVa0BpdQfz3ew+213vIWbmkl5cbJADU4QyhIlUuE2CjeM3YmyqbICq/sX3Z
-         DMPlFnidMFM2rEaD/CwVrKep7eu8IreWVxn3qQTjK+MnRqi7lBCGZEQzmsh9F1wlsXh5
-         XlLK/UJaJ3pHjf7uKqigIUtQot6PRvYL1tPUMj69zlpxcb2o9T9l4hrBH1Mqbb2HDeiL
-         XsN2mEqmN+IouSSGXEsDzGGBOdIj5Roe+L7wac9PyaIpoBlXzm2ezAB2u0wuBmYNizVw
-         HWxg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1733131555; x=1733736355;
-        h=content-disposition:mime-version:message-id:subject:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=Z9xEJ/kUhPCLV4a4NQE3Bv/XOpAmETNr1Q9eiG6xcMA=;
-        b=MvMJefEFgEDYNQofBiRzSv6acEecOMT84ggWh/0+JOC61Uz7chjFHbCTbv2nkhkSvp
-         g9lOh3PSy7iH+kKcYKDPXUXUAxs3IgqhXuyBh0UW4Szc261F45KAPky6guyUGXY5H8yc
-         jOCUFQd+9MgCV7FnIAOMg813K9M4cwOPlF2JrTfAtfxYIh8vrruIaE/Uk+IMSn1xUJ+f
-         g3EOYTtiUvVtwpfUHssbphPQ+m8x0+mt8pPlRAxqHuUVia4gR66xw+rku1Nuledvjjc9
-         BNr61P3qBn0r8c1F2b28kFX9qJE2ctpaf5ZaZxjtiEnEsiaLCdVZ2NM6KDXGJKoml/iK
-         384w==
-X-Gm-Message-State: AOJu0Ywi0jw3AxsehXYMW3cWJ0Ho8FToIWEgSCy717Dws2+GXiIzXVQc
-	LfNlMC7x428PaE27kMED3QVQzse3o43L4iJ4H0UjP9zjuGOkGob6jo11MSDN+0O81gzu2523+JC
-	5hbE=
-X-Gm-Gg: ASbGncucHpr8DCKYkWeUVQ/EahwibfNqdRNt6aveTwN/BWe5nrynm5xvE86p6Eylhno
-	1r21Tg9YF66TK1ONpMAqCrq7BEA3T52OCYGi4ox741KqYJxnm2Y5P3fSehPRGGiQxasaq6FKh+0
-	k4BrMQhRUWK2G9VNDBgJ+jqOhhY8xjpJ8n1efvCIzh+0eFbSoIoD34c+0WxOkyZOlkEK5Kc+tX6
-	A0Z8r6oPhPanTuIXJrKciTgNzeZ4JNs1uqO//PJFoAuwbNiejy5CZs44PKROPkJsePN2R3boZpQ
-	9/+j
-X-Google-Smtp-Source: AGHT+IFp5ayivS0s1d11wGzmQxjcS/jMbWZxPbJSWUm9EDAw+LCn4IL/WiVUIk4+tA9ZBuqesArWXg==
-X-Received: by 2002:a05:6000:1887:b0:385:ee40:2d88 with SMTP id ffacd0b85a97d-385ee403053mr3480386f8f.3.1733131555077;
-        Mon, 02 Dec 2024 01:25:55 -0800 (PST)
-Received: from localhost (p5dc6838f.dip0.t-ipconnect.de. [93.198.131.143])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-385e940fef3sm5603774f8f.42.2024.12.02.01.25.54
-        for <linux-sparse@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 02 Dec 2024 01:25:54 -0800 (PST)
-Date: Mon, 2 Dec 2024 10:25:53 +0100
-From: Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@baylibre.com>
-To: linux-sparse@vger.kernel.org
-Subject: sparse reports "different lock contexts for basic block" when using
- guard syntax
-Message-ID: <xc3xx56vvesaen7r2c3q5thmrjva7zcfq5habasejlyn7vnpbj@jxsfprt5gfa4>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="krYcOchp"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id EB054C4CED6;
+	Mon,  2 Dec 2024 17:35:03 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1733160904;
+	bh=5SkdVpyxMkwcefHUvrmeRmooVspzWLLjyCNkLAyYF/4=;
+	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To:From;
+	b=krYcOchpdZfTOGmmZmYXGkkzng0VBYzBaTIPS/JdWNiJdmt/4S7+V2deZeuJtDiHJ
+	 5bOfjWx9PMCJkw4vWMJA+j7RGJgyQT3MCvZz+ywWGgXkUPQ1I8zhp2RRNDd7wmPgUC
+	 KVr3TdRx7r3vS7sNZQQ4VuZSeMJ1Co4MyFc7SbZRWDfa4cIk4lQ19T0FRsrpwOa17T
+	 JopKvCO/OnNKT3V7n07PfE9Ll3My7kWEoWbthp4JMgarfO7M35ovTZ+SUQIDeAkdh8
+	 VxQs0KDQFLoqYMNE9XZ9vIlYg+Eia5POewyoXqK+ltXanlAIbCfNk8+zvx51tcJKic
+	 OeLS9BafEnm7Q==
+Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D2CC9D7833C;
+	Mon,  2 Dec 2024 17:35:03 +0000 (UTC)
+From: Vincent Mailhol via B4 Relay <devnull+mailhol.vincent.wanadoo.fr@kernel.org>
+Date: Tue, 03 Dec 2024 02:33:23 +0900
+Subject: [PATCH 01/10] compiler.h: add statically_false()
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="3lsfgxv2aanl5a7r"
-Content-Disposition: inline
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-Id: <20241203-is_constexpr-refactor-v1-1-4e4cbaecc216@wanadoo.fr>
+References: <20241203-is_constexpr-refactor-v1-0-4e4cbaecc216@wanadoo.fr>
+In-Reply-To: <20241203-is_constexpr-refactor-v1-0-4e4cbaecc216@wanadoo.fr>
+To: Linus Torvalds <torvalds@linux-foundation.org>, 
+ David Laight <David.Laight@aculab.com>, 
+ Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, 
+ Nathan Chancellor <nathan@kernel.org>, 
+ Nick Desaulniers <ndesaulniers@google.com>, 
+ Bill Wendling <morbo@google.com>, Justin Stitt <justinstitt@google.com>, 
+ Yury Norov <yury.norov@gmail.com>, 
+ Rasmus Villemoes <linux@rasmusvillemoes.dk>, Kees Cook <kees@kernel.org>, 
+ "Gustavo A. R. Silva" <gustavoars@kernel.org>, 
+ Jani Nikula <jani.nikula@linux.intel.com>, 
+ Joonas Lahtinen <joonas.lahtinen@linux.intel.com>, 
+ Rodrigo Vivi <rodrigo.vivi@intel.com>, 
+ Tvrtko Ursulin <tursulin@ursulin.net>, David Airlie <airlied@gmail.com>, 
+ Simona Vetter <simona@ffwll.ch>, Suzuki K Poulose <suzuki.poulose@arm.com>, 
+ Mike Leach <mike.leach@linaro.org>, James Clark <james.clark@linaro.org>, 
+ Alexander Shishkin <alexander.shishkin@linux.intel.com>, 
+ Rikard Falkeborn <rikard.falkeborn@gmail.com>, 
+ Martin Uecker <Martin.Uecker@med.uni-goettingen.de>
+Cc: linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org, 
+ llvm@lists.linux.dev, linux-hardening@vger.kernel.org, 
+ intel-gfx@lists.freedesktop.org, dri-devel@lists.freedesktop.org, 
+ coresight@lists.linaro.org, linux-arm-kernel@lists.infradead.org, 
+ Vincent Mailhol <mailhol.vincent@wanadoo.fr>
+X-Mailer: b4 0.14.2
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1089;
+ i=mailhol.vincent@wanadoo.fr; h=from:subject:message-id;
+ bh=MUJOQQOOJL9dYDVaPT65KhZRSmD+ZVJ1pjvxSAixArY=;
+ b=owGbwMvMwCV2McXO4Xp97WbG02pJDOm+74/KH7/U7qegXjXTofXb3TYljXrmuVYbMjW/tLXe4
+ w0P49vQUcrCIMbFICumyLKsnJNboaPQO+zQX0uYOaxMIEMYuDgFYCKiExj+h59n32w4XUS9Q6Hd
+ rUTL9LrKv/cufhltT6M9vi38WfriOSPDth1s9Y4XTgudV69oFplrmhzR2RRm0jljjlHtl08TxWX
+ ZAQ==
+X-Developer-Key: i=mailhol.vincent@wanadoo.fr; a=openpgp;
+ fpr=ED8F700574E67F20E574E8E2AB5FEB886DBB99C2
+X-Endpoint-Received: by B4 Relay for mailhol.vincent@wanadoo.fr/default
+ with auth_id=291
+X-Original-From: Vincent Mailhol <mailhol.vincent@wanadoo.fr>
+Reply-To: mailhol.vincent@wanadoo.fr
+
+From: Vincent Mailhol <mailhol.vincent@wanadoo.fr>
+
+For completion, add statically_false() which is the equivalent of
+statically_true() except that it will return true only if the input is
+known to be false at compile time.
+
+The == operator is used instead of the ! negation to prevent a
+-Wint-in-bool-context compiler warning when the argument is not a
+boolean. For example:
+
+  statically_false(var * 0)
+
+Signed-off-by: Vincent Mailhol <mailhol.vincent@wanadoo.fr>
+---
+ include/linux/compiler.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/include/linux/compiler.h b/include/linux/compiler.h
+index 469a64dd6495fefab2c85ffc279568a657b72660..a2a56a50dd85227a4fdc62236a2710ca37c5ba52 100644
+--- a/include/linux/compiler.h
++++ b/include/linux/compiler.h
+@@ -314,6 +314,7 @@ static inline void *offset_to_ptr(const int *off)
+  * values to determine that the condition is statically true.
+  */
+ #define statically_true(x) (__builtin_constant_p(x) && (x))
++#define statically_false(x) (__builtin_constant_p(x) && (x) == 0)
+ 
+ /*
+  * This is needed in functions which generate the stack canary, see
+
+-- 
+2.45.2
 
 
---3lsfgxv2aanl5a7r
-Content-Type: text/plain; protected-headers=v1; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-Subject: sparse reports "different lock contexts for basic block" when using
- guard syntax
-MIME-Version: 1.0
-
-Hello,
-
-on Linux v6.13-rc1 I get:
-
-	$ armmake C=3D1 drivers/pwm/pwm-gpio.o
-	...
-	  CC [M]  drivers/pwm/pwm-gpio.o
-	  CHECK   /home/uwe/gsrc/linux/drivers/pwm/pwm-gpio.c
-	drivers/pwm/pwm-gpio.c:98:9: warning: context imbalance in 'pwm_gpio_timer=
-' - wrong count at exit
-	drivers/pwm/pwm-gpio.c:101:12: warning: context imbalance in 'pwm_gpio_app=
-ly' - different lock contexts for basic block
-	drivers/pwm/pwm-gpio.c:166:9: warning: context imbalance in 'pwm_gpio_get_=
-state' - wrong count at exit
-
-with
-
-	$ sparse --version
-	0.6.4 (Debian: 0.6.4-4+b1)
-
-but also on sparse/main.
-
-Trying to understand what sparse wants to tell me, I tried the following
-change and the 2nd warning goes away:
-
-diff --git a/drivers/pwm/pwm-gpio.c b/drivers/pwm/pwm-gpio.c
-index 9f8884ac7504..d811b1f71c92 100644
---- a/drivers/pwm/pwm-gpio.c
-+++ b/drivers/pwm/pwm-gpio.c
-@@ -103,6 +103,7 @@ static int pwm_gpio_apply(struct pwm_chip *chip, struct=
- pwm_device *pwm,
- {
- 	struct pwm_gpio *gpwm =3D pwmchip_get_drvdata(chip);
- 	bool invert =3D state->polarity =3D=3D PWM_POLARITY_INVERSED;
-+	unsigned long flags;
-=20
- 	if (state->duty_cycle && state->duty_cycle < hrtimer_resolution)
- 		return -EINVAL;
-@@ -125,7 +126,7 @@ static int pwm_gpio_apply(struct pwm_chip *chip, struct=
- pwm_device *pwm,
- 			return ret;
- 	}
-=20
--	guard(spinlock_irqsave)(&gpwm->lock);
-+	spin_lock_irqsave(&gpwm->lock, flags);
-=20
- 	if (!state->enabled) {
- 		pwm_gpio_round(&gpwm->state, state);
-@@ -148,6 +149,7 @@ static int pwm_gpio_apply(struct pwm_chip *chip, struct=
- pwm_device *pwm,
- 				      HRTIMER_MODE_REL);
- 	}
-=20
-+	spin_unlock_irqrestore(&gpwm->lock, flags);
- 	return 0;
- }
-=20
-
-But unless I'm mistaken the new code in pwm-gpio.c is equivalent, so
-maybe sparse doesn't understand the guard syntax?
-
-Any hints?
-
-Best regards
-Uwe
-
---3lsfgxv2aanl5a7r
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEP4GsaTp6HlmJrf7Tj4D7WH0S/k4FAmdNfR0ACgkQj4D7WH0S
-/k5pjggAoqM7d071x2sac1CeS9ES/8Jk/ZRpHidiEdLuftrmDccOFfLfmki5X9Za
-o+yaB6yAvuGKhcNpYX56NCdFl8lzS6wSS80l1BzqcuqBSD8f9fmrKR6SlPeoUO/W
-wCCd9eLnEGPjNPC24juV1IE4JaD/LwW5nc0hd/4kshLFNXS8HE2F04mGCQBmWfEV
-kxgoKT80Rma83xtRh/B4pcd9ZFcduBZfFLjJSRccp/KMsz/yFVmRdvRolh1jseLZ
-HtkZtLM8uhs4ZAGNEFH0pq1FRkCpXxoudnEKxo4txjxZ1cQQCJbZnT/5Ue8+Swyg
-WH/B1cS1ATtgh5Y3jz76lxVEG7juCA==
-=i54m
------END PGP SIGNATURE-----
-
---3lsfgxv2aanl5a7r--
