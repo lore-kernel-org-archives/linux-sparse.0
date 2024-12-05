@@ -1,48 +1,48 @@
-Received: from out.smtpout.orange.fr (out-18.smtpout.orange.fr [193.252.22.18])
+Received: from out.smtpout.orange.fr (out-16.smtpout.orange.fr [193.252.22.16])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 81055226EEF;
-	Thu,  5 Dec 2024 17:26:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=193.252.22.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 07E2D1E492;
+	Thu,  5 Dec 2024 19:35:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=193.252.22.16
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733419576; cv=none; b=AxTar06LdbiWOgvLpXkpS11fdZslE9oTDEWnPSbZYqILTc6BUz/tgJQNgio9Jl06YCU69KUzsUOgVQKiONb40qKy4MuWJKO8yw10AKAwfqhXQRKSETNOeN1IXxynuOyN33jcfQhY6VhVRay3UXegFClg/0qqKYt5DDzdD+zvMeM=
+	t=1733427304; cv=none; b=dKZGGFGxYL96d16TIwhNlSYa8gXRZnrJjCQPNcLZ9HJ3rJgNtwPSVQLVm3EnUGTslmE9pr08EX6TvI4ArfGBUNguTguKgWM1ggCrfIkbYV2WBU/Mz0E0dm14XZg1Mj+rwPl0z4wqRquC+0if6po6oOzScaGWQ2uzRXPRtokAfPA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733419576; c=relaxed/simple;
-	bh=jlq0yEcIkfhAw4RY3cySThksRiqdiH9uWNpu/3Vz1CA=;
+	s=arc-20240116; t=1733427304; c=relaxed/simple;
+	bh=l03ckjiHPorjA8gus97LZ3ryPn3/bYJ9+uD0vBgzyho=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=k/QQVbA4LVTz826UMidEq6awI3Y1CzuLPmWcoTteEEnM8PX7eeEiZkzAhsUl0+VNkwRXl1N/93fwdDWbnvj2ts4h2pfwku16qJe02etgDhsFCvVQdIzTXOUpBKxEORngw/QeIpRD3rQtTju2meDQegNBzNoPHW+ryDBcHrXiEnA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wanadoo.fr; spf=pass smtp.mailfrom=wanadoo.fr; dkim=pass (2048-bit key) header.d=wanadoo.fr header.i=@wanadoo.fr header.b=rs+oC1Tr; arc=none smtp.client-ip=193.252.22.18
+	 To:Cc:Content-Type; b=DYN1UWXrfdxGhxVUPfcRr6k9e6eEIBn+hDzwOW7NlsVeeAXKLattkfiiYpblUzLHApLt+tnggPRqWUyrKBIfdeQ4iiKJSVeLgPZ9m5TNqPWCEyrbFxWErKFvalh//JZlXa1te4lq8IUXxzYKlw+Exth1lG3zE+VU125ntW5t0pA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wanadoo.fr; spf=pass smtp.mailfrom=wanadoo.fr; dkim=pass (2048-bit key) header.d=wanadoo.fr header.i=@wanadoo.fr header.b=a8Z+qwPi; arc=none smtp.client-ip=193.252.22.16
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wanadoo.fr
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wanadoo.fr
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=wanadoo.fr header.i=@wanadoo.fr header.b="rs+oC1Tr"
-Received: from mail-ed1-f45.google.com ([209.85.208.45])
+	dkim=pass (2048-bit key) header.d=wanadoo.fr header.i=@wanadoo.fr header.b="a8Z+qwPi"
+Received: from mail-lj1-f181.google.com ([209.85.208.181])
 	by smtp.orange.fr with ESMTPSA
-	id JFcBtxPvW5DmFJFcBtb1Ic; Thu, 05 Dec 2024 18:26:11 +0100
+	id JHbktUI5D60jWJHbkt0ASm; Thu, 05 Dec 2024 20:33:53 +0100
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=wanadoo.fr;
-	s=t20230301; t=1733419571;
-	bh=y8D8qHkNTgsq/hueRr7hAF5ECQldq13KAVXg/Zr3BLA=;
+	s=t20230301; t=1733427233;
+	bh=L5clrau1lRtsXlazqJvRaiJm9ebUB3H7RT0weXhH8So=;
 	h=MIME-Version:From:Date:Message-ID:Subject:To;
-	b=rs+oC1TrEE1v/UZFNCIY5AjtHxQj56UdZP4oNawSj2QAaLpf/Ly47/hWHZOuMQlXH
-	 nQXdmjeBnBum795IjKCj3pTbQypO0+ZoGcV0+9PAB9wPBUFZtv0wBY5Vh8p9M9RafR
-	 fIDII6JyeIjLdnF9qxiGv2BnN5l0yX+wpd+W3uq+6CTt4gt1uUZwN5kVI1HV57kwBm
-	 CDxlyBIGVh6kSxA7JT0bFBExW7DUk86B4n114BWNbAjNbvnDXR6giT1+uZvRflQDwm
-	 GD+Fs8/muxIQNX3+OF6DLtun+Dtcf9UzfZeU+bRCR5KpftzoQs7J5WePMz7kMqkPvH
-	 SBu1XVtltfHOg==
-X-ME-Helo: mail-ed1-f45.google.com
+	b=a8Z+qwPiCiUyFdFAjZ1p/4rRaY16/Mhttd3Jwv3NDVPTMVQiQ8vw/PR6bJg9dMGts
+	 XyKQLyjKXy4tB1A/sIQ34zX50ia+zK4DTKTZG4oCRWdgxDm6ib41J3iyoJwaQRgSNT
+	 V/Etv+Zx3xOFpMK58TR3IUJLtC8HPwa3kMSNgYbUO7lGQ2Z07V+aDRn5FgdIjMsncQ
+	 Xwua+rxuPaRoeoqH2uVYOmHP2sDb9MRMDUD3NXnj0FqbTy6+UIGELMB8KsIqBjy0zK
+	 +q6vIISskryaz2OVnhHBnYJD9/OaeEReN5bGS6YjrwPheuRl92596NmII9BFKNTzCR
+	 Z/4L19/bzYfUw==
+X-ME-Helo: mail-lj1-f181.google.com
 X-ME-Auth: bWFpbGhvbC52aW5jZW50QHdhbmFkb28uZnI=
-X-ME-Date: Thu, 05 Dec 2024 18:26:11 +0100
-X-ME-IP: 209.85.208.45
-Received: by mail-ed1-f45.google.com with SMTP id 4fb4d7f45d1cf-5cf6f367f97so1632035a12.0;
-        Thu, 05 Dec 2024 09:26:11 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCUTTG4Io+Ofnv/lAS1YAZEAhy6yZ9THnnrxqjHUlMp2rru+CV/FEX0+I4Ye1fGrlGoA0bCfqkJGRxUEfvh4@vger.kernel.org, AJvYcCUa3nUu/H0UoF+1eo9DytksgIrHYdnYp+P5RF/B8oDUwDQgLFvuO0pI2mlSGqyizEKaah5laFZHFx4AQiAzirE=@vger.kernel.org, AJvYcCXxcmHkH1OJZkomNmtbUBcI6+oqS6v/rsLCdjm8Hto5JlxzZP/TZcHhxwwsimcr8BdqCiAeJN3GuxA0pIsX@vger.kernel.org
-X-Gm-Message-State: AOJu0Yykc3BDt/cliWXqpg0kiTsrKUhJvSwYyGfI+hVNubzMfSzigbGy
-	W48rC8Vo/tH58cY51rfS/7RwUjthawbrXKj+QwsAiYY3FlDSxNb9FHXBnBgQK98xbbOgVAavEW3
-	THZTM38D1KCsbYsAYjOmdiBSYNAg=
-X-Google-Smtp-Source: AGHT+IFZAC0AEpJ1/mPjmzfGhg/DetDbHXis2ssNehZ0yWdtCmcXanGc2R7Dja3wTy2rdkW6SAY6SvJBqtErDk3coGc=
-X-Received: by 2002:a17:906:3295:b0:aa5:28af:f0e with SMTP id
- a640c23a62f3a-aa5f7d4edd1mr1018856966b.15.1733413793948; Thu, 05 Dec 2024
- 07:49:53 -0800 (PST)
+X-ME-Date: Thu, 05 Dec 2024 20:33:53 +0100
+X-ME-IP: 209.85.208.181
+Received: by mail-lj1-f181.google.com with SMTP id 38308e7fff4ca-30020d33d05so10578061fa.0;
+        Thu, 05 Dec 2024 11:33:52 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCUOpZUTVCDcEmm86kZK1AJDk+hw2e0wEDJ2hhGu2qGXIcQJZ73LSNj5b4GUHtcm3eJsOm3GttmtcRLkbFi94Qc=@vger.kernel.org, AJvYcCWaKB8h9Ed0X82GP3Hp2pdwbWQ/RuQOrfy2jp1yCFCfgAOgnGoDs8TLVe56DsohktJaYqnY5R4iIjo2J16i@vger.kernel.org, AJvYcCXLOqVRTPtWeUIR0iBR7Vfeg2EHyGdy3VkvBbBq4x0oyORfGS+YawlxedqbjJkXL54gESW6RJflVWe4ez/w@vger.kernel.org
+X-Gm-Message-State: AOJu0YwiqmIpceFFgzMYxQ70DXNVhxaurS22eqRaujhLxqE6Wygv2wph
+	qm6FynMw2YoA61j5m0SF8u+/8k+NB4KIouqjEPkiS9KXSQiSbEAbObf6vnTGiy7bN/wYbTS/CKE
+	vkh2QNp9Po/ujhLcYGcmj8LH7wng=
+X-Google-Smtp-Source: AGHT+IH7WYy/8Hc8H+vVCwhqalxjzlWUoqcEyoqkjWQBBxloHACrRQF+5k7EKnQaTMOmRJCyI12iNEP09nDvxOtT4aY=
+X-Received: by 2002:a05:6402:358f:b0:5d0:fc12:79e3 with SMTP id
+ 4fb4d7f45d1cf-5d125063c34mr3565576a12.15.1733414047033; Thu, 05 Dec 2024
+ 07:54:07 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
@@ -50,14 +50,13 @@ List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 References: <20241203-is_constexpr-refactor-v1-0-4e4cbaecc216@wanadoo.fr>
- <20241203-is_constexpr-refactor-v1-4-4e4cbaecc216@wanadoo.fr> <dff4cdd543104e3792e4856375f310c1@AcuMS.aculab.com>
-In-Reply-To: <dff4cdd543104e3792e4856375f310c1@AcuMS.aculab.com>
+ <20241203-is_constexpr-refactor-v1-6-4e4cbaecc216@wanadoo.fr> <ad4482cc835543578862051431f5174f@AcuMS.aculab.com>
+In-Reply-To: <ad4482cc835543578862051431f5174f@AcuMS.aculab.com>
 From: Vincent Mailhol <mailhol.vincent@wanadoo.fr>
-Date: Fri, 6 Dec 2024 00:49:43 +0900
-X-Gmail-Original-Message-ID: <CAMZ6RqLsiOF=5FZ=U2MtZ01iBYKZHtfZ5Zi4t3m=L5Oc4EPHGg@mail.gmail.com>
-Message-ID: <CAMZ6RqLsiOF=5FZ=U2MtZ01iBYKZHtfZ5Zi4t3m=L5Oc4EPHGg@mail.gmail.com>
-Subject: Re: [PATCH 04/10] linux/bits.h: simplify GENMASK_INPUT_CHECK() by
- using is_const_true()
+Date: Fri, 6 Dec 2024 00:53:56 +0900
+X-Gmail-Original-Message-ID: <CAMZ6RqJMXKaa_xDcyweGwb+FqvANrpvrkRvnjh6_s-J1ApVmaA@mail.gmail.com>
+Message-ID: <CAMZ6RqJMXKaa_xDcyweGwb+FqvANrpvrkRvnjh6_s-J1ApVmaA@mail.gmail.com>
+Subject: Re: [PATCH 06/10] fortify: replace __is_constexpr() by is_const() in strlen()
 To: David Laight <David.Laight@aculab.com>
 Cc: Linus Torvalds <torvalds@linux-foundation.org>, 
 	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Nathan Chancellor <nathan@kernel.org>, 
@@ -82,25 +81,55 @@ Cc: Linus Torvalds <torvalds@linux-foundation.org>,
 	"linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 Content-Type: text/plain; charset="UTF-8"
 
-On Thu. 5 Dec 2024 at 03:52, David Laight <David.Laight@aculab.com> wrote:
+On Thu. 5 Dec. 2024 at 03:58, David Laight <David.Laight@aculab.com> wrote:
 > From: Vincent Mailhol
 > > Sent: 02 December 2024 17:33
 > >
-> >   __builtin_choose_expr(__is_constexpr((l) > (h)), (l) > (h), 0)
+> > From: Vincent Mailhol <mailhol.vincent@wanadoo.fr>
 > >
-> > is equivalent to:
+> > is_const() is a one to one replacement of __is_constexpr(). Do the
+> > replacement so that __is_constexpr() can be removed.
 > >
-> >   is_const_true((l) > (h))
+> > Signed-off-by: Vincent Mailhol <mailhol.vincent@wanadoo.fr>
+> > ---
+> >  include/linux/fortify-string.h | 4 ++--
+> >  1 file changed, 2 insertions(+), 2 deletions(-)
+> >
+> > diff --git a/include/linux/fortify-string.h b/include/linux/fortify-string.h
+> > index 0d99bf11d260a3482bbe46e35c7553c0ccfb8b94..e3f2f772c5439ef71eb4a904b4ce27956bc69743 100644
+> > --- a/include/linux/fortify-string.h
+> > +++ b/include/linux/fortify-string.h
+> > @@ -254,8 +254,8 @@ __FORTIFY_INLINE __kernel_size_t strnlen(const char * const POS p, __kernel_size
+> >   * Returns number of characters in @p (NOT including the final NUL).
+> >   *
+> >   */
+> > -#define strlen(p)                                                    \
+> > -     __builtin_choose_expr(__is_constexpr(__builtin_strlen(p)),      \
+> > +#define strlen(p)                                            \
+> > +     __builtin_choose_expr(is_const(__builtin_strlen(p)),    \
+> >               __builtin_strlen(p), __fortify_strlen(p))
 >
-> Change it to BUILD_BUG_ON_MSG(statically_true((l) < (h)), "error message")
+> I'm sure Linus suggested a way of doing that without replicating
+> the __builtin_strlen().
 >
-> and then fix all the fallout :-)
+> Indeed it may be valid to do:
+>         len = __builtin_strlen(p);
+>         __builtin_constant_p(len) ? len : __fortify_strlen(p);
 
-BUILD_BUG_ON_MSG() is not suitable for GENMASK_INPUT_CHECK. We need
-one of the variants that returns zero here.
+Then, wouldn't it be better for strlen() to be an inline function
+instead of a macro?
 
-But I agree that it is good to have a more meaningful error message
-here. I will use __BUILD_BUG_ON_ZERO_MSG() in v2.
+  __FORTIFY_INLINE __kernel_size_t strlen(const char *p)
+  {
+          __kernel_size_t ret = __builtin_strlen(p);
+
+          if (__builtin_constant_p(ret))
+                  return ret;
+          return __fortify_strlen(p);
+  }
+
+I tested it and it worked on an allyesconfig. So if I receive no
+objections, strlen() will become an inline function in v2.
 
 
 Yours sincerely,
