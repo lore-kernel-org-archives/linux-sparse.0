@@ -1,102 +1,145 @@
-Received: from eu-smtp-delivery-151.mimecast.com (eu-smtp-delivery-151.mimecast.com [185.58.85.151])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ej1-f48.google.com (mail-ej1-f48.google.com [209.85.218.48])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BE98618DF86
-	for <linux-sparse@vger.kernel.org>; Fri,  6 Dec 2024 03:40:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.58.85.151
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2055522315
+	for <linux-sparse@vger.kernel.org>; Fri,  6 Dec 2024 06:14:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733456448; cv=none; b=bprvDEG01s5pM+/FASJVBo43rGRjQ7+4QrHYQnWK2LREyZan90jBF3TKjkG48Tdw91Xq/ZGFic7kE9ieY2L4BJUxMHa6iK5h0cLSgZbfsHDm/czIrKHkbkiqDrA6ynyzxloxgvTnSxV5QnQH3jpm8O3sxLiUrBLhFDDP8ABEip8=
+	t=1733465698; cv=none; b=VLlrkBWyYb5CMtdGGWdS8YD7jZ9/K/ZOrXQ4RHwopNqXKpuD16//S/G73B4+XMJ7Oje8JRTAk6DjUgK+jH7z3fvJeZji2pyh1M25A716qFYO1YnO2ffvczsXlTRr/euScnx0F/ZlVjd3am7NPn023JoDnhlNYJa84vpa0pqdTho=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733456448; c=relaxed/simple;
-	bh=EDdmm0DHzlfUIVjgSjHafTsxqy+4Kuy7LBa8PuA68Ug=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 MIME-Version:Content-Type; b=dZAN4MhFmN8G4uHhAuuBbnvDDApVriVobvbNfh3O+/1d0Z7CqRgBqBrsJJAftaMQqZvfVtXTba3E/F02xV9rqrDrWl9IdzaEeFOabOIa9Z198cdqndlcdaoSeV3XEatit/4qZQxro3G6P57xYlGuE69lbYM7FfMGqjfx5D8H+kM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ACULAB.COM; spf=pass smtp.mailfrom=aculab.com; arc=none smtp.client-ip=185.58.85.151
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ACULAB.COM
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=aculab.com
-Received: from AcuMS.aculab.com (156.67.243.121 [156.67.243.121]) by
- relay.mimecast.com with ESMTP with both STARTTLS and AUTH (version=TLSv1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id
- uk-mta-280-C8E4fnSMOAGX_JjFtXp91A-1; Fri, 06 Dec 2024 03:40:43 +0000
-X-MC-Unique: C8E4fnSMOAGX_JjFtXp91A-1
-X-Mimecast-MFC-AGG-ID: C8E4fnSMOAGX_JjFtXp91A
-Received: from AcuMS.Aculab.com (10.202.163.6) by AcuMS.aculab.com
- (10.202.163.6) with Microsoft SMTP Server (TLS) id 15.0.1497.48; Fri, 6 Dec
- 2024 03:39:59 +0000
-Received: from AcuMS.Aculab.com ([::1]) by AcuMS.aculab.com ([::1]) with mapi
- id 15.00.1497.048; Fri, 6 Dec 2024 03:39:59 +0000
-From: David Laight <David.Laight@ACULAB.COM>
-To: 'Vincent Mailhol' <mailhol.vincent@wanadoo.fr>
-CC: Linus Torvalds <torvalds@linux-foundation.org>, Luc Van Oostenryck
-	<luc.vanoostenryck@gmail.com>, Nathan Chancellor <nathan@kernel.org>, "Nick
- Desaulniers" <ndesaulniers@google.com>, Bill Wendling <morbo@google.com>,
-	Justin Stitt <justinstitt@google.com>, Yury Norov <yury.norov@gmail.com>,
-	Rasmus Villemoes <linux@rasmusvillemoes.dk>, Kees Cook <kees@kernel.org>,
-	"Gustavo A. R. Silva" <gustavoars@kernel.org>, Jani Nikula
-	<jani.nikula@linux.intel.com>, Joonas Lahtinen
-	<joonas.lahtinen@linux.intel.com>, Rodrigo Vivi <rodrigo.vivi@intel.com>,
-	Tvrtko Ursulin <tursulin@ursulin.net>, David Airlie <airlied@gmail.com>,
-	Simona Vetter <simona@ffwll.ch>, Suzuki K Poulose <suzuki.poulose@arm.com>,
-	Mike Leach <mike.leach@linaro.org>, James Clark <james.clark@linaro.org>,
-	Alexander Shishkin <alexander.shishkin@linux.intel.com>, Rikard Falkeborn
-	<rikard.falkeborn@gmail.com>, Martin Uecker
-	<Martin.Uecker@med.uni-goettingen.de>, "linux-sparse@vger.kernel.org"
-	<linux-sparse@vger.kernel.org>, "linux-kernel@vger.kernel.org"
-	<linux-kernel@vger.kernel.org>, "llvm@lists.linux.dev"
-	<llvm@lists.linux.dev>, "linux-hardening@vger.kernel.org"
-	<linux-hardening@vger.kernel.org>, "intel-gfx@lists.freedesktop.org"
-	<intel-gfx@lists.freedesktop.org>, "dri-devel@lists.freedesktop.org"
-	<dri-devel@lists.freedesktop.org>, "coresight@lists.linaro.org"
-	<coresight@lists.linaro.org>, "linux-arm-kernel@lists.infradead.org"
-	<linux-arm-kernel@lists.infradead.org>
-Subject: RE: [PATCH 01/10] compiler.h: add statically_false()
-Thread-Topic: [PATCH 01/10] compiler.h: add statically_false()
-Thread-Index: AQHbROCIk5mOE+KmUE+HEr8z57N8IbLWaz+wgAFe2gCAALnCYA==
-Date: Fri, 6 Dec 2024 03:39:59 +0000
-Message-ID: <b48e2f5dd8d64cbab471629ae03c7511@AcuMS.aculab.com>
-References: <20241203-is_constexpr-refactor-v1-0-4e4cbaecc216@wanadoo.fr>
- <20241203-is_constexpr-refactor-v1-1-4e4cbaecc216@wanadoo.fr>
- <e115a4245e5342a994a7e596cc6357fa@AcuMS.aculab.com>
- <CAMZ6Rq+n0vG9zObF-kY-Xo+iP_Y3P8A6_nEfB8F=UhqeQBepRw@mail.gmail.com>
-In-Reply-To: <CAMZ6Rq+n0vG9zObF-kY-Xo+iP_Y3P8A6_nEfB8F=UhqeQBepRw@mail.gmail.com>
-Accept-Language: en-GB, en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-ms-exchange-transport-fromentityheader: Hosted
+	s=arc-20240116; t=1733465698; c=relaxed/simple;
+	bh=z6hEp8csz74EZNAx+MsdQ8oAglzBDLPIjblM5QboFag=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=G7Xs4stZSyEwi3XwGMY6YoZskRvMR/GNAYfjrDYxz35IVc14krHGv1chzCyAP/Ce5XjECMVP0M3gBPT417YqVu7JRrQhj3RSfNch687dcf38xsNFDJ058L0F4Aivu/dhax+QRinP88FrfZ5R1tqhWYuNODVXxeC3F5098cRpMos=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org; spf=pass smtp.mailfrom=linuxfoundation.org; dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b=iBe6nH2w; arc=none smtp.client-ip=209.85.218.48
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linuxfoundation.org
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="iBe6nH2w"
+Received: by mail-ej1-f48.google.com with SMTP id a640c23a62f3a-a9e44654ae3so267588066b.1
+        for <linux-sparse@vger.kernel.org>; Thu, 05 Dec 2024 22:14:56 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linux-foundation.org; s=google; t=1733465695; x=1734070495; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=lkINBrTDhyE0tcSEzrQhWY00f3rEWU+OMRPtBhc6Jxo=;
+        b=iBe6nH2w89cSp3aP2k3OYrT6xXL5JPt1el06Xg/9HqC+GTF9IqJdo5G/D9u99Qx5Jz
+         0mdnk3MoLYl3wrM8xWsRx0FICd80XvU1okN+cYgRVY8Ef7ISWofNRSahiLM8gUkLODH2
+         lwlseVwRPnD6l5sIXHhjyZFoB4/0BRNfIG7d0=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1733465695; x=1734070495;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=lkINBrTDhyE0tcSEzrQhWY00f3rEWU+OMRPtBhc6Jxo=;
+        b=LHUtC/b4HsDI11Bk6NkTIX7Vd19R3/0hISul3lm1EpB14cvF1iaTJlfFJkCC2RqfEP
+         z9Dqk0VTHiVZ9TB+3T5XM+eawGn9q28MtatwTKaYU/171yw/rnBYkkmK8f2xcKr1GXIq
+         rIyUWCeIakRdSDCXSOqqWsRaHiKH8gTcaN8uCombFEz4iPrs1lL81dFUfyjENP0D/omE
+         a00BwBuVIBnVkQjbCamQ43f8cq8/LkoZ82/3V3MxUXFNcPYBSSUqrIpPFi7ZWK46UY7k
+         d+im0tNU+CF8X4dEVejt/bWHEKsQYmsGDV5+kzlfRH1fpv9wIVvGYAPaD88WcSsndIKi
+         sv8A==
+X-Forwarded-Encrypted: i=1; AJvYcCUfaQgaKxr8iSgHFHRorDLhkkSOJnPvd/metD4/cKAZuV1yrMRx2YOwhjo4gWVnzQB+Ksq0TilKYdCuyc8=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzZ/2hLRh9ccM+7uQ2cboyXnOpdeJm3eQx1wzStbtBVBa+kE8rX
+	sgs7uN4/GSMZKW4WcnMgwwvY0y4/B93YZIhXSVl3Kwqu+soD2e1iKnvO4Mw0apfSr/WvMZKHOn0
+	nIaMzYA==
+X-Gm-Gg: ASbGncsYjeohqgOvWUvntnRxPpCsRmicgelZXe3LtYm+pbiAzwbFqwi+LcM9iu44rxK
+	vQV9jL65jxuXXbAS8potF2eFjyygz2WE/xl+EhpOcyU/G1P5HfwbB9zftUgxUteeqnpGt69W1wl
+	/xMJW5R29YET/YWxbVDf4KaKya5HjnKkjmgkkDbNcS9W+Af1KnToSGuDWAxZmvaE3zFLydGw7sb
+	M+gMKkjCNQoY5PPa3Rnj5xzdQFw5H/fdDGddxKGEF7t/ohaCIxGYDxlEZHcxFEr2IcmKdptyIq5
+	Z3AcSY8AmBu6s1b26nVGuFsf
+X-Google-Smtp-Source: AGHT+IEXWJH2ixJkuEniyKYymK9KoMwSBbJnRPTk/tRFsmn6Fyd5UjUOgYPac87Y5ne0QxZobvmVPA==
+X-Received: by 2002:a17:906:9d1:b0:aa6:25d2:c99e with SMTP id a640c23a62f3a-aa639fb34d4mr131137666b.5.1733465695264;
+        Thu, 05 Dec 2024 22:14:55 -0800 (PST)
+Received: from mail-ej1-f46.google.com (mail-ej1-f46.google.com. [209.85.218.46])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-aa625e58dffsm186413266b.13.2024.12.05.22.14.52
+        for <linux-sparse@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 05 Dec 2024 22:14:52 -0800 (PST)
+Received: by mail-ej1-f46.google.com with SMTP id a640c23a62f3a-a9e44654ae3so267582366b.1
+        for <linux-sparse@vger.kernel.org>; Thu, 05 Dec 2024 22:14:52 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCXfkm1Tc/W7rTruR2eC71GSjwhO3V1lty2ECoutgxnsbjcxWL5jSJnXuOoe4RYaymlkJYTtLe9tbL36JtM=@vger.kernel.org
+X-Received: by 2002:a17:906:1db1:b0:aa6:3de7:f258 with SMTP id
+ a640c23a62f3a-aa63de7f394mr66959966b.37.1733465692215; Thu, 05 Dec 2024
+ 22:14:52 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Mimecast-Spam-Score: 0
-X-Mimecast-MFC-PROC-ID: Rf6Y7P9F0YZgZwMhIiHgpg2n9tHcMgToeSBehNjkXrI_1733456442
-X-Mimecast-Originator: aculab.com
-Content-Language: en-US
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: base64
+References: <20241203-is_constexpr-refactor-v1-0-4e4cbaecc216@wanadoo.fr>
+ <20241203-is_constexpr-refactor-v1-2-4e4cbaecc216@wanadoo.fr>
+ <1d807c7471b9434aa8807e6e86c964ec@AcuMS.aculab.com> <CAMZ6RqLJLP+4d8f5gLfBdFeDVgqy23O+Eo8HRgKCthqBjSHaaw@mail.gmail.com>
+ <9ef03cebb4dd406885d8fdf79aaef043@AcuMS.aculab.com>
+In-Reply-To: <9ef03cebb4dd406885d8fdf79aaef043@AcuMS.aculab.com>
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Date: Thu, 5 Dec 2024 22:14:36 -0800
+X-Gmail-Original-Message-ID: <CAHk-=wjmeU6ahyuwAymqkSpxX-gCNa3Qc70UXjgnxNiC8eiyOw@mail.gmail.com>
+Message-ID: <CAHk-=wjmeU6ahyuwAymqkSpxX-gCNa3Qc70UXjgnxNiC8eiyOw@mail.gmail.com>
+Subject: Re: [PATCH 02/10] compiler.h: add is_const() as a replacement of __is_constexpr()
+To: David Laight <David.Laight@aculab.com>
+Cc: Vincent Mailhol <mailhol.vincent@wanadoo.fr>, Martin Uecker <muecker@gwdg.de>, 
+	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Nathan Chancellor <nathan@kernel.org>, 
+	Nick Desaulniers <ndesaulniers@google.com>, Bill Wendling <morbo@google.com>, 
+	Justin Stitt <justinstitt@google.com>, Yury Norov <yury.norov@gmail.com>, 
+	Rasmus Villemoes <linux@rasmusvillemoes.dk>, Kees Cook <kees@kernel.org>, 
+	"Gustavo A. R. Silva" <gustavoars@kernel.org>, Jani Nikula <jani.nikula@linux.intel.com>, 
+	Joonas Lahtinen <joonas.lahtinen@linux.intel.com>, Rodrigo Vivi <rodrigo.vivi@intel.com>, 
+	Tvrtko Ursulin <tursulin@ursulin.net>, David Airlie <airlied@gmail.com>, 
+	Simona Vetter <simona@ffwll.ch>, Suzuki K Poulose <suzuki.poulose@arm.com>, 
+	Mike Leach <mike.leach@linaro.org>, James Clark <james.clark@linaro.org>, 
+	Alexander Shishkin <alexander.shishkin@linux.intel.com>, 
+	Rikard Falkeborn <rikard.falkeborn@gmail.com>, 
+	"linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, 
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, 
+	"llvm@lists.linux.dev" <llvm@lists.linux.dev>, 
+	"linux-hardening@vger.kernel.org" <linux-hardening@vger.kernel.org>, 
+	"intel-gfx@lists.freedesktop.org" <intel-gfx@lists.freedesktop.org>, 
+	"dri-devel@lists.freedesktop.org" <dri-devel@lists.freedesktop.org>, 
+	"coresight@lists.linaro.org" <coresight@lists.linaro.org>, 
+	"linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="UTF-8"
 
-RnJvbTogVmluY2VudCBNYWlsaG9sDQo+IFNlbnQ6IDA1IERlY2VtYmVyIDIwMjQgMTU6MjYNCj4g
-DQo+IE9uIFRodS4gNSBEZWMgMjAyNCBhdCAwMzozMCwgRGF2aWQgTGFpZ2h0IDxEYXZpZC5MYWln
-aHRAYWN1bGFiLmNvbT4gd3JvdGU6DQo+ID4gRnJvbTogVmluY2VudCBNYWlsaG9sDQo+ID4gPiBT
-ZW50OiAwMiBEZWNlbWJlciAyMDI0IDE3OjMzDQo+ID4gPg0KPiA+ID4gRnJvbTogVmluY2VudCBN
-YWlsaG9sIDxtYWlsaG9sLnZpbmNlbnRAd2FuYWRvby5mcj4NCj4gPiA+DQo+ID4gPiBGb3IgY29t
-cGxldGlvbiwgYWRkIHN0YXRpY2FsbHlfZmFsc2UoKSB3aGljaCBpcyB0aGUgZXF1aXZhbGVudCBv
-Zg0KPiA+ID4gc3RhdGljYWxseV90cnVlKCkgZXhjZXB0IHRoYXQgaXQgd2lsbCByZXR1cm4gdHJ1
-ZSBvbmx5IGlmIHRoZSBpbnB1dCBpcw0KPiA+ID4ga25vd24gdG8gYmUgZmFsc2UgYXQgY29tcGls
-ZSB0aW1lLg0KPiA+DQo+ID4gVGhpcyBpcyBwcmV0dHkgbXVjaCBwb2ludGxlc3MuDQo+ID4gSXQg
-aXMganVzdCBhcyBlYXN5IHRvIGludmVydCB0aGUgY29uZGl0aW9uIGF0IHRoZSBjYWxsIHNpdGUu
-DQo+IA0KPiBUbyBzdGFydCB3aXRoLCBJIHdpbGwgYXJndWUgdGhhdDoNCj4gDQo+ICAgc3RhdGlj
-YWxseV9mYWxzZShmb28pDQo+IA0KPiBpcyBtb3JlIHByZXR0eSB0aGFuDQo+IA0KPiAgIHN0YXRp
-Y2FsbHlfdHJ1ZSghKGZvbykpDQoNCkV4Y2VwdCB0aGF0IHRoZSB0ZXN0IGlzIG1vcmUgbGlrZWx5
-IHRvIGJlOg0KCXN0YXRpY2FsbHlfZmFsc2UoeCA+IHkpDQphbmQgdGhlIGludmVydCBpcyB0aGVu
-DQoJc3RhdGljYWxseV90cnVlKHggPD0geSkNCg0KTm8gZGlmZmVyZW50IGZyb20gQyBpdHNlbGYs
-IHRoZXJlIGlzIG5vICdpZm5vdCAoY29uZGl0aW9uKSB7Li4ufScNCihkb24ndCB0YWxrIHRvIG1l
-IGFib3V0IHBlcmwuLi4pDQoNCkkgc3VzcGVjdCB5b3UgbmVlZCB0byBwcmV0dHkgbXVjaCByZW1v
-dmUgYWxsIHRoZSBjb21tZW50cyB0aGF0DQpjcm9zcy1yZWZlciB0byBzdGF0aWNhbGx5X3RydWUo
-KSBmcm9tIHRoZSBvdGhlciBwYXRjaGVzLg0KDQpTbyBpc19jb25zdF90cnVlKCkgaXMganVzdCAn
-cmV0dXJuIHRydWUgaWYgdGhlIGV4cHJlc3Npb24NCmlzIGEgJ25vbi16ZXJvIGNvbnN0YW50IGlu
-dGVnZXIgZXhwcmVzc2lvbicuDQoNCglEYXZpZA0KDQotDQpSZWdpc3RlcmVkIEFkZHJlc3MgTGFr
-ZXNpZGUsIEJyYW1sZXkgUm9hZCwgTW91bnQgRmFybSwgTWlsdG9uIEtleW5lcywgTUsxIDFQVCwg
-VUsNClJlZ2lzdHJhdGlvbiBObzogMTM5NzM4NiAoV2FsZXMpDQo=
+On Thu, 5 Dec 2024 at 18:26, David Laight <David.Laight@aculab.com> wrote:
+>
+> From: Vincent Mailhol
+> > ACK. Would adding a suggested--by Linus tag solve your concern?
 
+I'm genberally the one person who doesn't need any more credit ;)
+
+> I actually suspect the first patches to change __is_constexpr() to
+> use _Generic were from myself.
+
+Yes. And David was also I think the one who suggested something else
+than "!!" originally too.
+
+I may have liked "!!" for being very idiomatic and traditional C, but
+there were those pesky compilers that warn about "integer in bool
+context" or whatever the annoying warning was when then doing the
+"multiply by zero" to turn a constant expression into a constant zero
+expression.
+
+So that
+
+  #define is_const(x) __is_const_zero(0 * (x))
+
+causes issues when 'x' is not an integer expression (think
+"is_const(NULL)" or "is_const(1 == 2)".
+
+Side note: I think "(x) == 0" will make sparse unhappy when 'x' is a
+pointer, because it results that horrid "use integer zero as NULL
+without a cast" thing when the plain zero gets implicitly cast to a
+pointer. Which is a really nasty and broken C pattern and should never
+have been silent.
+
+I think David suggested using ((x)?0:0) at some point. Silly
+nonsensical and complex expression, but maybe that finally gets rid of
+all the warnings:
+
+     #define is_const(x) __is_const_zero((x)?0:0)
+
+might work regardless of the type of 'x'.
+
+Or does that trigger some odd case too?
+
+            Linus
