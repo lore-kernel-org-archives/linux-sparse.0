@@ -1,165 +1,174 @@
-Received: from mx-2023-1.gwdg.de (mx-2023-1.gwdg.de [134.76.10.21])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from out.smtpout.orange.fr (out-18.smtpout.orange.fr [193.252.22.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3342E13D882;
-	Sat,  7 Dec 2024 08:40:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=134.76.10.21
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7A0D613D8AC;
+	Sat,  7 Dec 2024 09:15:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=193.252.22.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733560815; cv=none; b=VdSQexViZivseLfyzItgR1mEnqpmoWvWBPyrnDdK5EgQWDbxwqLVHuZDVthtDUrEOOhVeRkbjNp6aQ/zZWtd1bpjvtJcBXzsRn/tk+wsvruGI1JtrRxKAmZVwt5aTrdzE9zCc8zjc4UjP+G+e2DnD/TMDog5mtbXU3bDI8nbO6w=
+	t=1733562913; cv=none; b=mh5CMy/ZL2ekT1IZ5nuc8CgpFYKc4OK85kY1yfNPnpZKsBrsdSr9RR1jGkR/ZZnCaobGNFLSqh3M6AejWTv23ygeEAEG7xT3hignLf1ngTJCtNZSLu9CBRoI8EX49Pkgi8obLkGNJcJOkO6UYXosf2vXzAijL50hbnB9QfU121w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733560815; c=relaxed/simple;
-	bh=PdxvATUKG43ydKCs9xklflch8LG5kpMBPRXQw/UGABA=;
-	h=Message-ID:Subject:From:To:CC:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=Jt007+yG7jH/WaquQC/VAXHC17S8uR9tkXZ9bNIbmzSFKgwIQOpPvYjhc1qoDgNuc9spN5tycp0mvVKhm8hp/2fJ5wCe5wSsLT9rVZxzaaTLJ4+TAXyecCh6l6rFu0sO+XFAFrrctWa0jfm6vu0DDl9YnkLqW1R0AWW6LTsUIhg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gwdg.de; spf=pass smtp.mailfrom=gwdg.de; dkim=pass (2048-bit key) header.d=gwdg.de header.i=@gwdg.de header.b=CiksJ+6m; arc=none smtp.client-ip=134.76.10.21
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gwdg.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gwdg.de
+	s=arc-20240116; t=1733562913; c=relaxed/simple;
+	bh=huRGOuA6sHnabOZJpFhgi5lSLIFcZ3aSkaFlHFukdTA=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=iAGCN/00/MWQenyqJcxTQiTv66ZA3pbtVgIDaHGNAyHjreGg9X2DlwaUJ+3wVeq8gYZmyQM0b32tvQ4m2l2gP5SHckR2ZxsQYyLgjAbD4/caNNJZ15QrxPNV+l9ReXWTrYK6T0E0NWCOMyaBxGJRxOtvrug0EFh1K0YLz0RBVrM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wanadoo.fr; spf=pass smtp.mailfrom=wanadoo.fr; dkim=pass (2048-bit key) header.d=wanadoo.fr header.i=@wanadoo.fr header.b=dhWDFwds; arc=none smtp.client-ip=193.252.22.18
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wanadoo.fr
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wanadoo.fr
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gwdg.de header.i=@gwdg.de header.b="CiksJ+6m"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=gwdg.de;
-	s=2023-rsa; h=MIME-Version:Content-Transfer-Encoding:Content-Type:References:
-	In-Reply-To:Date:CC:To:From:Subject:Message-ID:Sender:Reply-To:Content-ID:
-	Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc
-	:Resent-Message-ID:List-Id:List-Help:List-Unsubscribe:List-Subscribe:
-	List-Post:List-Owner:List-Archive;
-	bh=eDkgUwCcQtOfovebMtMEsFmujecvWxrMcPeoL9u2wnU=; b=CiksJ+6m8UmWKFBUT4L/0cUbuN
-	C2UvpC0fRZA2CSeNutopy7iKy2C12ANDY6G6H0B/uxReaJNEIPaeY3ebCrxfeOzGx5pwqNVSmRPlU
-	o6FQjobun/MRucwBD2aNzNxLXFPoypwhurD6uMWTFg2q95Im/tq1I1E9+YMsU1PU04htPNWMRo4PV
-	ZBb0Av9a09UnWZyPJLeLOngtbpcJShTr8KzGy5biE/3Biekx7a6xEUh+7NgtwsXeC9dA9SeYs+RAi
-	Egh4AChbnI2w/jqtX55O0t+utYob6SjBTpHqckqcPhu1gzM9qe/ZUSHTtvwyZ7RgGwHWyswSJGdWZ
-	4yJRz9CQ==;
-Received: from xmailer.gwdg.de ([134.76.10.29]:40719)
-	by mailer.gwdg.de with esmtp (GWDG Mailer)
-	(envelope-from <muecker@gwdg.de>)
-	id 1tJqM3-004Jfy-1D;
-	Sat, 07 Dec 2024 09:39:59 +0100
-Received: from mbx19-fmz-06.um.gwdg.de ([10.108.142.65] helo=email.gwdg.de)
-	by mailer.gwdg.de with esmtps (TLS1.2:ECDHE-RSA-AES128-GCM-SHA256:128)
-	(GWDG Mailer)
-	(envelope-from <muecker@gwdg.de>)
-	id 1tJqM3-000Qkk-0p;
-	Sat, 07 Dec 2024 09:39:59 +0100
-Received: from [192.168.0.221] (10.250.9.200) by MBX19-FMZ-06.um.gwdg.de
- (10.108.142.65) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.2.1544.14; Sat, 7 Dec
- 2024 09:39:51 +0100
-Message-ID: <9607300dfca5d71ca9570b1e1de0864e524f356b.camel@gwdg.de>
-Subject: Re: [PATCH 02/10] compiler.h: add is_const() as a replacement of
- __is_constexpr()
-From: Martin Uecker <muecker@gwdg.de>
-To: Vincent Mailhol <mailhol.vincent@wanadoo.fr>
-CC: David Laight <David.Laight@aculab.com>, Linus Torvalds
-	<torvalds@linux-foundation.org>, Luc Van Oostenryck
-	<luc.vanoostenryck@gmail.com>, Nathan Chancellor <nathan@kernel.org>, "Nick
- Desaulniers" <ndesaulniers@google.com>, Bill Wendling <morbo@google.com>,
-	Justin Stitt <justinstitt@google.com>, Yury Norov <yury.norov@gmail.com>,
-	Rasmus Villemoes <linux@rasmusvillemoes.dk>, Kees Cook <kees@kernel.org>,
-	"Gustavo A. R. Silva" <gustavoars@kernel.org>, Jani Nikula
-	<jani.nikula@linux.intel.com>, Joonas Lahtinen
-	<joonas.lahtinen@linux.intel.com>, Rodrigo Vivi <rodrigo.vivi@intel.com>,
-	Tvrtko Ursulin <tursulin@ursulin.net>, David Airlie <airlied@gmail.com>,
-	Simona Vetter <simona@ffwll.ch>, Suzuki K Poulose <suzuki.poulose@arm.com>,
-	Mike Leach <mike.leach@linaro.org>, James Clark <james.clark@linaro.org>,
-	Alexander Shishkin <alexander.shishkin@linux.intel.com>, Rikard Falkeborn
-	<rikard.falkeborn@gmail.com>, "linux-sparse@vger.kernel.org"
-	<linux-sparse@vger.kernel.org>, "linux-kernel@vger.kernel.org"
-	<linux-kernel@vger.kernel.org>, "llvm@lists.linux.dev"
-	<llvm@lists.linux.dev>, "linux-hardening@vger.kernel.org"
-	<linux-hardening@vger.kernel.org>, "intel-gfx@lists.freedesktop.org"
-	<intel-gfx@lists.freedesktop.org>, "dri-devel@lists.freedesktop.org"
-	<dri-devel@lists.freedesktop.org>, "coresight@lists.linaro.org"
-	<coresight@lists.linaro.org>, "linux-arm-kernel@lists.infradead.org"
-	<linux-arm-kernel@lists.infradead.org>
-Date: Sat, 7 Dec 2024 09:39:50 +0100
-In-Reply-To: <CAMZ6RqKzGiRNMeLsQKRNrxvW_bXB-kEi11udQ82kKX6tGCrqcg@mail.gmail.com>
-References: <20241203-is_constexpr-refactor-v1-0-4e4cbaecc216@wanadoo.fr>
-	 <20241203-is_constexpr-refactor-v1-2-4e4cbaecc216@wanadoo.fr>
-	 <1d807c7471b9434aa8807e6e86c964ec@AcuMS.aculab.com>
-	 <CAMZ6RqLJLP+4d8f5gLfBdFeDVgqy23O+Eo8HRgKCthqBjSHaaw@mail.gmail.com>
-	 <9ef03cebb4dd406885d8fdf79aaef043@AcuMS.aculab.com>
-	 <abdd7862f136aa676b2d2c324369f4a43ff9909c.camel@gwdg.de>
-	 <CAMZ6RqKzGiRNMeLsQKRNrxvW_bXB-kEi11udQ82kKX6tGCrqcg@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-User-Agent: Evolution 3.46.4-2 
+	dkim=pass (2048-bit key) header.d=wanadoo.fr header.i=@wanadoo.fr header.b="dhWDFwds"
+Received: from mail-lf1-f49.google.com ([209.85.167.49])
+	by smtp.orange.fr with ESMTPSA
+	id Jqu2txNv8hfQMJqu3t1LwF; Sat, 07 Dec 2024 10:15:07 +0100
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=wanadoo.fr;
+	s=t20230301; t=1733562907;
+	bh=WL9xGcicUYweWPrIZdM4obw40wyP2AJI744Zi36nKfc=;
+	h=MIME-Version:From:Date:Message-ID:Subject:To;
+	b=dhWDFwds7RWH0fN/bRBBIvm8+Zp98bDNugCssGvA1RVZ83ilvP+Ez7EMvYmB9AOxC
+	 LgjmGO3LcyX7TWdQ6JPJeyDeG9qlaYlM//SSNtJUC/DOxOehzf2KRYnr52D9Br/WX1
+	 VxgPBHzokRIoex28Ow8lArMZHT5BlqbeKnc/juow3vz5JeWr0GkfdPCVqczJyMZM31
+	 nYG2dQbn0fIwsS4WaCczxB8IFJvNUMIF0oRvZBlhYKiTdj54OZFYD1gUOsTe6jv40d
+	 16BL8FnKEcgUdle067x4HC39C/hzLd+QwKQs6kKmfS5K01FytuRTmZMkyRRrhqA3fH
+	 n7K2NPhphgGnQ==
+X-ME-Helo: mail-lf1-f49.google.com
+X-ME-Auth: bWFpbGhvbC52aW5jZW50QHdhbmFkb28uZnI=
+X-ME-Date: Sat, 07 Dec 2024 10:15:07 +0100
+X-ME-IP: 209.85.167.49
+Received: by mail-lf1-f49.google.com with SMTP id 2adb3069b0e04-53dde4f0f23so2583648e87.3;
+        Sat, 07 Dec 2024 01:15:07 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCUwUjpZftLT6U0QTUxMDif2CJcfY6PgVRC3wX2aZCwKYmDJYUKBfY/xJ2KE4mWKL2MHfhToS13asZama0f+J/o=@vger.kernel.org, AJvYcCVi+r6vULMHAOFjsYslAGlDkDJMBpB6IbqxSptocYtgt2riO9fC89lGLlUMNErru/fD/K5b4lNqISA+xU2a@vger.kernel.org, AJvYcCXO2MITLQCtg1yksIM3c0nHoDGEH9q9tYV0B8o0n03XnrczhGoF7IUYzIQdFSsaO4xqzKvZUhDbu8gXnhmv@vger.kernel.org
+X-Gm-Message-State: AOJu0YzrlkYBFCpPyM6VRXBQS8g9rWkce4lZ9L7mXqnNmYEf8r47/ZDE
+	8Zc/MokQ+NjywBk24w8+MQ7hpT1kAPRHLy0Q1LCZGDNKE1WQYSLiBKNoSK84n9HiIHaQ0KZ/iq1
+	RxZckxOf9nNrb1zTB/g6mDQnllFk=
+X-Google-Smtp-Source: AGHT+IF0UkbZeO6DhnG4OpInkasGFbpfvjfWezi2XR8vGYhVDKgOfxRspF7qPi3YhfQ2NuvOk/LKXDlfFe/grz4kS7w=
+X-Received: by 2002:a17:906:b399:b0:aa5:33f0:c50e with SMTP id
+ a640c23a62f3a-aa63a287c66mr153642666b.57.1733474989334; Fri, 06 Dec 2024
+ 00:49:49 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-ClientProxiedBy: mbx19-fmz-02.um.gwdg.de (10.108.142.53) To
- MBX19-FMZ-06.um.gwdg.de (10.108.142.65)
-X-EndpointSecurity-0xde81-EV: v:7.9.17.458, d:out, a:y, w:t, t:5, sv:1733541190, ts:1733560793
-X-Virus-Scanned: (clean) by clamav
-X-Spam-Level: -
+References: <20241203-is_constexpr-refactor-v1-0-4e4cbaecc216@wanadoo.fr>
+ <20241203-is_constexpr-refactor-v1-2-4e4cbaecc216@wanadoo.fr>
+ <1d807c7471b9434aa8807e6e86c964ec@AcuMS.aculab.com> <CAMZ6RqLJLP+4d8f5gLfBdFeDVgqy23O+Eo8HRgKCthqBjSHaaw@mail.gmail.com>
+ <9ef03cebb4dd406885d8fdf79aaef043@AcuMS.aculab.com> <CAHk-=wjmeU6ahyuwAymqkSpxX-gCNa3Qc70UXjgnxNiC8eiyOw@mail.gmail.com>
+ <CAMZ6RqKLrDB-xkm2G242yU7L=tzxCR9NTwca-1yuWSSEHAOrxQ@mail.gmail.com>
+In-Reply-To: <CAMZ6RqKLrDB-xkm2G242yU7L=tzxCR9NTwca-1yuWSSEHAOrxQ@mail.gmail.com>
+From: Vincent Mailhol <mailhol.vincent@wanadoo.fr>
+Date: Fri, 6 Dec 2024 17:49:37 +0900
+X-Gmail-Original-Message-ID: <CAMZ6RqJzPqfY4Uy3EWTTqRgN2Gq0hDr2R4zSDMEaMT_CS=05tw@mail.gmail.com>
+Message-ID: <CAMZ6RqJzPqfY4Uy3EWTTqRgN2Gq0hDr2R4zSDMEaMT_CS=05tw@mail.gmail.com>
+Subject: Re: [PATCH 02/10] compiler.h: add is_const() as a replacement of __is_constexpr()
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: David Laight <David.Laight@aculab.com>, 
+	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Nathan Chancellor <nathan@kernel.org>, 
+	Nick Desaulniers <ndesaulniers@google.com>, Bill Wendling <morbo@google.com>, 
+	Justin Stitt <justinstitt@google.com>, Yury Norov <yury.norov@gmail.com>, 
+	Rasmus Villemoes <linux@rasmusvillemoes.dk>, Kees Cook <kees@kernel.org>, 
+	"Gustavo A. R. Silva" <gustavoars@kernel.org>, Jani Nikula <jani.nikula@linux.intel.com>, 
+	Joonas Lahtinen <joonas.lahtinen@linux.intel.com>, Rodrigo Vivi <rodrigo.vivi@intel.com>, 
+	Tvrtko Ursulin <tursulin@ursulin.net>, David Airlie <airlied@gmail.com>, 
+	Simona Vetter <simona@ffwll.ch>, Suzuki K Poulose <suzuki.poulose@arm.com>, 
+	Mike Leach <mike.leach@linaro.org>, James Clark <james.clark@linaro.org>, 
+	Alexander Shishkin <alexander.shishkin@linux.intel.com>, 
+	Rikard Falkeborn <rikard.falkeborn@gmail.com>, 
+	"linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, 
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, 
+	"llvm@lists.linux.dev" <llvm@lists.linux.dev>, 
+	"linux-hardening@vger.kernel.org" <linux-hardening@vger.kernel.org>, 
+	"intel-gfx@lists.freedesktop.org" <intel-gfx@lists.freedesktop.org>, 
+	"dri-devel@lists.freedesktop.org" <dri-devel@lists.freedesktop.org>, 
+	"coresight@lists.linaro.org" <coresight@lists.linaro.org>, 
+	"linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, uecker@tugraz.at
+Content-Type: text/plain; charset="UTF-8"
 
-Am Freitag, dem 06.12.2024 um 16:26 +0900 schrieb Vincent Mailhol:
-> > On Fri. 6 Dec. 2024 at 15:40, Martin Uecker <muecker@gwdg.de> wrote:
-> > > > Am Freitag, dem 06.12.2024 um 02:25 +0000 schrieb David Laight:
-> > > > > > From: Vincent Mailhol
-> > > > > > > > Sent: 05 December 2024 15:31
-> > > > > > > >=20
-> > > > > > > > -CC: Martin Uecker <Martin.Uecker@med.uni-goettingen.de>
-> > > > > > > > +CC: Martin Uecker <muecker@gwdg.de>
-> > > > > > > > (seems that Martin changed his address)
-> > > >=20
-> > > > My current one is this: uecker@tugraz.at
-> >=20
-> > Ack
-> >=20
-> > (...)
-> >=20
-> > > > > > > > > > > > + *
-> > > > > > > > > > > > + * Glory to Martin Uecker <Martin.Uecker@med.uni-g=
-oettingen.de>
-> > > > > > > > > >=20
-> > > > > > > > > > IIRC Martin has agreed in the past that the accreditati=
-on can
-> > > > > > > > > > be removed - especially since it refers to the 'sizeof =
-(void)' trick.
-> > > > > > > >=20
-> > > > > > > > I tried to look for such message:
-> > > > > > > >=20
-> > > > > > > >   https://lore.kernel.org/all/?q=3Df%3A%22martin+uecker%22+=
-__is_constexpr
-> > > > > > > >=20
-> > > > > > > > but couldn't find it. Do you have the link?
-> > > > > > > >=20
-> > > > > > > > @Martin, do you agree that I remove the accreditation?
-> >=20
-> > So, do you agree to have the accreditation removed in compiler.h?
-> > Personally, I do not mind. I am also OK to remove you from the
-> > documentation and add you to the CREDITS file if you'd like to.
+On Fri. 6 Dec. 2024 at 16:19, Vincent Mailhol
+<mailhol.vincent@wanadoo.fr> wrote:
+> On Fri. 6 Dec. 2024 at 15:14, Linus Torvalds
+> <torvalds@linux-foundation.org> wrote:
+> > On Thu, 5 Dec 2024 at 18:26, David Laight <David.Laight@aculab.com> wrote:
 
-Sorry, I somehow didn't read this part. Please do whatever you think is
-most appropriate (but please update my email to the new above if it
-still appears anywhere).
+(...)
 
+> > I may have liked "!!" for being very idiomatic and traditional C, but
+> > there were those pesky compilers that warn about "integer in bool
+> > context" or whatever the annoying warning was when then doing the
+> > "multiply by zero" to turn a constant expression into a constant zero
+> > expression.
+> >
+> > So that
+> >
+> >   #define is_const(x) __is_const_zero(0 * (x))
+> >
+> > causes issues when 'x' is not an integer expression (think
+> > "is_const(NULL)" or "is_const(1 == 2)".
+>
+> But 1 == 2 has already an integer type as proven by:
+>
+>   #define is_int(x) _Generic(x, int: 1, default: 0)
+>   static_assert(is_int(1 == 2));
+>
+> So, it leaves us with the case is_const(pointer). To which I would
+> question if we really want to support this. By definition, an
+> expression with a pointer type can not be an *integer* constant
+> expression. So one part of me tells me that it is a sane thing to
+> *not* support this case and throw a warning if the user feeds
+> is_cont() with a pointer.
+>
+> If we just what to accept pointer arguments but still return false
+> (because those are not integers), one solution is:
+>
+>   #define is_const(x) __is_const_zero((long)(x) * 0l)
+>
+> This would be consistent with __is_constexpr(): it does accept NULL
+> (i.e. no warnings), but does not recognize it as an integer constant
+> expression, e.g.:
+>
+>   is_const(NULL);
+>
+> returns false with no warnings.
+>
+> > Side note: I think "(x) == 0" will make sparse unhappy when 'x' is a
+> > pointer, because it results that horrid "use integer zero as NULL
+> > without a cast" thing when the plain zero gets implicitly cast to a
+> > pointer. Which is a really nasty and broken C pattern and should never
+> > have been silent.
+> >
+> > I think David suggested using ((x)?0:0) at some point. Silly
+> > nonsensical and complex expression, but maybe that finally gets rid of
+> > all the warnings:
+> >
+> >      #define is_const(x) __is_const_zero((x)?0:0)
+> >
+> > might work regardless of the type of 'x'.
+> >
+> > Or does that trigger some odd case too?
+>
+> Following a quick test, this seems to work and to return true if given
+> NULL as an argument (contrary to the current __is_const_expr()). So if
+> we want to go beyond the C standard and extend the meaning of integer
+> constant expression in the kernel to also include constant pointers, I
+> agree that this is the way to go!
 
-I find it amazing how much time the Linux kernel community spends
-revising code to make it work perfectly.
+I just came up with a new idea:
 
-Still, I am wondering whether some of this time and effort should not
-be targeted at C compilers and language work to make these macro
-hacks unnecessary?
+  #define is_const(x) __is_const_zero((x) != (x))
 
-I already found the original motivation for these macros very questionable.
-Removing VLAs at the cost having imprecise worst-case bounds strikes
-me as fundamentally misguided - at least if security is the motivation.
+Similarly to ((x)?0:0), this seems to work with everything (including
+with NULL), but arguably a bit less ugly.
 
-So maybe there are other good reasons for this, e.g. bad code
-for VLAs or risk of jumping the guard page if the attacker can somehow
-influence its size (but for this there is -Wvla-larger-than). But even then=
-,
-wouldn't it be a more worthwhile and interesting investment of engineering
-resources to improving code generation / warnings at the compiler level?
-
-Also the fortification of strlen and co seems something which could be
-much better solved with annotations and proper compiler support.=20
-
-Martin
-
-
-
-
+> Side question, Linus, what do you think about the __is_const_zero()
+> documentation in
+>
+>   https://lore.kernel.org/all/20241203-is_constexpr-refactor-v1-2-4e4cbaecc216@wanadoo.fr/
+>
+> Do you think I am too verbose as pointed out by David? Some people
+> (including me and Yuri) like it that way, but if you also think this
+> is too much, I will make it shorter.
+>
+> Thanks,
+>
+>
+> Yours sincerely,
+> Vincent Mailhol
