@@ -1,57 +1,48 @@
-Received: from mail-ej1-f49.google.com (mail-ej1-f49.google.com [209.85.218.49])
+Received: from out.smtpout.orange.fr (out-14.smtpout.orange.fr [193.252.22.14])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1E08F1E529;
-	Sat,  7 Dec 2024 13:50:54 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.49
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5A5641DFE1;
+	Sat,  7 Dec 2024 14:21:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=193.252.22.14
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733579456; cv=none; b=HroVBm4Feoec/NyAwldlOJOKOgbIbhuTVqvzco2CYCxGqHuJwHI2ZdfQ482/pIG0bUAETAyuCHMnPTnCc9oNAaOcJoBB2MuoJut8mS3cDH663+xYJXgZEPSe3KkQpUbYtZQUIvGYPjqwARLQbaXGJ+POajIL8FdMsY+lqrK60aM=
+	t=1733581315; cv=none; b=fcnAqFlZaFmLbkGSs0Lm8vaIorbSjYZ4wH9RrnHHueWP05Ppqb2P1WV47mJgPcTpXKnyv1Z2U6FfolTHuDFBsT+LKK7WtjeXBSxP0AEH6eDLnJqmuuvta95SgZxqO4wrNGp/BnOgUU/0GeTXUbxBWlit97jmUUSr0vR/sd52bPs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733579456; c=relaxed/simple;
-	bh=tqpi9D9V12ZhYD/Eo2oo1VJUJRZoXZAOBye2Q9k0rME=;
+	s=arc-20240116; t=1733581315; c=relaxed/simple;
+	bh=r7zPRKW+PjxixSGhr3dPnkSnW+fktu4xG/vmEVmcVkA=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=aHWmRs/bjGRop7D/YZNoQ27TOFAf6/O/5W28DDeL5VPG1vQ/KjVbiUE3OKuNHOKag35NgTRB3KNf2ndifuScQrNN5+x+m0IFtEJ8XqWs7F5Q0gNOxw6i28lXSm1WZM2XHpYkFYTeM9PiVJ7OeYMaAa/Ax9QpylsO7uyKjp34DJU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=RZXJ8bn4; arc=none smtp.client-ip=209.85.218.49
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	 To:Cc:Content-Type; b=ZoEZA7/RsOKFJq9laWdQ7NLmwLkdB3YZHDJ4+joDOXcdxJiHnqFNbsH8wriKF0yl69N9WPpxYM3c2kQwcFteUTmqNAjFUGhawx2ah393mTafUTNq3hYzjYBq+pI7x4owcTg0EXmZnhRhxo6ieh2EoBD7P/hpEXaamYXxT9Xhslg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wanadoo.fr; spf=pass smtp.mailfrom=wanadoo.fr; dkim=pass (2048-bit key) header.d=wanadoo.fr header.i=@wanadoo.fr header.b=gwiP4BfJ; arc=none smtp.client-ip=193.252.22.14
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wanadoo.fr
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wanadoo.fr
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="RZXJ8bn4"
-Received: by mail-ej1-f49.google.com with SMTP id a640c23a62f3a-aa1e6ecd353so470249566b.1;
-        Sat, 07 Dec 2024 05:50:54 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1733579453; x=1734184253; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=xHFw9+ZFS/5kCWej9Q2r4cNs9qWMsdVVVFbrLzYifFk=;
-        b=RZXJ8bn4UfsSbL81PCYYSYu2+C6r9uIsZnYejqWiTa6mbpTrv5IPS0mtV4DJAW1Lqa
-         nSmgsbnjfVNbTb67ybCeD4ShwUXnhcKXXcKbo2Pzlx7sKt6TGKHmdOLXdr5XHcVwpp5C
-         SGi+uiXozLRlkNLzX6Ajeihnrw0CvxLFWErUT7q/L6VL8KT3WOm7tdez4ofpdNPG+1O3
-         3MvPrXgmFvxtWWKOdfiKJySORn6HZ5TeGpDOz1FXNoBt/II1u9Cr3Y1kwvb+YgN1av2P
-         khuCv+3nZvgIMIxuVk6W3KDZZ8jAphEctGAgKq0H6plUNT9I16qSrRN9LEE1lsthSq5U
-         ZtrQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1733579453; x=1734184253;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=xHFw9+ZFS/5kCWej9Q2r4cNs9qWMsdVVVFbrLzYifFk=;
-        b=G5lsEG3M+OccCu5VQBnX1CH/OtcNdfnvQ6IXDOLIa/71CjHdPC9EdUUopEHXBL45QZ
-         rJbG0d4f7zuStv6DNx4RR5tgRfnudAE+x4To5b4Y95vdQ0EaERWBHmISslkGz9PAR3Wl
-         uZ/Iu6cCZdnuN7aQtaYZghXSuOoiJXSsFn51Hvs74QL12YsWAQxRIQXgBS0vmO+jDJNV
-         yqFnoYBExUmI+QGbYeA8FWiAkb2q8k368FhV/hQo2us5QHEE9kHLIkphVUiU5dZqX+pC
-         d8UZbsZvmSMWLDyW6KjDRalk7gIUaiwu+V+H6SBp0QqnYAJd3QzdrwHVltHc8JRr/9cf
-         ma6A==
-X-Forwarded-Encrypted: i=1; AJvYcCVs0cKj2PJMlk2F3F8sJkW2QBCDhoTupqOX4Dqsj6I0WW0Mjwjrc+8P8cPrsB1Ybq/D8IjcTOB+m4c0gTX/@vger.kernel.org, AJvYcCW05vw9hvNI91UcmBLkA2k5uQ4C8vK7sjN6yreqBjpdvQHNjQQPS5H6xHGauCyndvLDCGOlaUxhTU54SFWoT80=@vger.kernel.org, AJvYcCXQR+Guu9SvOWUlzXJ6kkCfTDBOYDXJ/NUBabTVFW79+Nf7ooXui8Ni5Dqcs6eifm3DYcJyzpIAkgkS5CDI@vger.kernel.org
-X-Gm-Message-State: AOJu0Yz55p9tYMgSlwKUi474MmCrlB+MkKVb0AUA+EKYPerZoQjHxH87
-	qsoAyup0B2Uh6VYp7GhpyrL127j/tFQ5OnUiw1Cn6oUarATba373uZ9/rPJNJgDHDMXxkb2INId
-	lEuAO3ubGw2+ye1rGZzmaL9hJt2g=
-X-Gm-Gg: ASbGncvFS0pbPOYSZSGI1LhqoPuxgDqW+PnTLD5iDupclcqcvvnLIMUCHFGem4D/lQd
-	Jd3uyyQw8mIlyYApO7MqOgE+Bv9dZXDo=
-X-Google-Smtp-Source: AGHT+IH6k2GyIlgxnGFl/g0StSGsvarnhcm9pbDRqjwA6P99KliYB7aZHWQfO50sclN4sezlsrdFqfGV/df1a3TMj88=
-X-Received: by 2002:aa7:cf83:0:b0:5d3:d7c2:ca58 with SMTP id
- 4fb4d7f45d1cf-5d3d7c2cad3mr7104642a12.24.1733579453216; Sat, 07 Dec 2024
- 05:50:53 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=wanadoo.fr header.i=@wanadoo.fr header.b="gwiP4BfJ"
+Received: from mail-lj1-f179.google.com ([209.85.208.179])
+	by smtp.orange.fr with ESMTPSA
+	id JvgrtuN8m3iIjJvgstKW2Z; Sat, 07 Dec 2024 15:21:50 +0100
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=wanadoo.fr;
+	s=t20230301; t=1733581310;
+	bh=Q1k59tg7g6ZR0AiJKHkbtvAsnBjYlK49uTsKYbfsQyM=;
+	h=MIME-Version:From:Date:Message-ID:Subject:To;
+	b=gwiP4BfJB71AFH3NlbdaJwDel7cPzPPXg0vuSj7JZByhSqT+cBvwkzuAYyIk7h4N4
+	 05AbkCLcsrKVksURZx4/E3wM4BbsSlLMl+22w5XuTUWdAXi3Sl2XUO0zUVbC7xZ+5M
+	 S6Vwtd6VkjvK4aw46/gH66/e/MjTbXNwqHK7/tKWCXt2GEE5AjtYKMela907v/cZP5
+	 XXbQed7fwJKaaejBXlI93a44UAazx7dGWUwT49ZI2QiDPsN8SzNXz+sSXi2yB8zlQ0
+	 25mh4SD0cvH1SRzKW7k0m9bx3rhJkfXKYeE9BrusuEI5JoSTZOLEKToTMscJepCpPi
+	 aXRugyRs8HwLQ==
+X-ME-Helo: mail-lj1-f179.google.com
+X-ME-Auth: bWFpbGhvbC52aW5jZW50QHdhbmFkb28uZnI=
+X-ME-Date: Sat, 07 Dec 2024 15:21:50 +0100
+X-ME-IP: 209.85.208.179
+Received: by mail-lj1-f179.google.com with SMTP id 38308e7fff4ca-3004028c714so6068451fa.2;
+        Sat, 07 Dec 2024 06:21:50 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCV87MpYCQwszEpVkgVkcQvfgZzoawDRf0xod9PClB5RnxaSX5vIP86K91CoAdTT/pUDWG2bkvJjhXaliS/3dwk=@vger.kernel.org, AJvYcCW4Z1azu+t6dpwSASzF381kdKgNUMyzF1XJ/5OOaFA7otEetdhFISYTEOlXnyzSx/VbdUuohvjkOl6NxNxA@vger.kernel.org, AJvYcCWOuaxsg9nGrvzsk9Vbg4y7y9qYWFjP5bGA2zOyfZhZ+9giO2Lom6a4e9yO0izlwBVVrCIqCeGA5pAurmXy@vger.kernel.org
+X-Gm-Message-State: AOJu0Yyx6CKhoYOl8dvLiDezDdYSIlhF67n3QdgIu93xWHBzKBEZmX9S
+	vcncWUU/JkS1rc3i+tWdTAy8LPkg4kRdGG999btXHvvNPE2VIU5rAYaJa0m4EPWdta/yvVnFAVg
+	F28HVftbQK7fDIrNXfQnS952nAjQ=
+X-Google-Smtp-Source: AGHT+IHLXgFQhA/c3KQxjVrMyKCAmSqwk42Fqpsfdz6EK+jIFFcEtdXEZClHZQiPmD1jBbv/RGy99L+br5F0PLvN22o=
+X-Received: by 2002:a17:907:7392:b0:aa5:427d:b101 with SMTP id
+ a640c23a62f3a-aa63a1109camr127306566b.36.1733460187056; Thu, 05 Dec 2024
+ 20:43:07 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
@@ -59,19 +50,17 @@ List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 References: <20241203-is_constexpr-refactor-v1-0-4e4cbaecc216@wanadoo.fr>
- <20241203-is_constexpr-refactor-v1-2-4e4cbaecc216@wanadoo.fr>
- <1d807c7471b9434aa8807e6e86c964ec@AcuMS.aculab.com> <CAMZ6RqLJLP+4d8f5gLfBdFeDVgqy23O+Eo8HRgKCthqBjSHaaw@mail.gmail.com>
- <9ef03cebb4dd406885d8fdf79aaef043@AcuMS.aculab.com> <abdd7862f136aa676b2d2c324369f4a43ff9909c.camel@gwdg.de>
- <CAMZ6RqKzGiRNMeLsQKRNrxvW_bXB-kEi11udQ82kKX6tGCrqcg@mail.gmail.com>
- <9607300dfca5d71ca9570b1e1de0864e524f356b.camel@gwdg.de> <CAMZ6RqJGqBqvgxzp5yPFY1pk0WkkwEMM34qU-dZ3kXfsnKaqEg@mail.gmail.com>
- <429e7c6713ecc94494d9107e5f5a1f0c8e854f23.camel@gwdg.de>
-In-Reply-To: <429e7c6713ecc94494d9107e5f5a1f0c8e854f23.camel@gwdg.de>
-From: Vincent Mailhol <vincent.mailhol@gmail.com>
-Date: Sat, 7 Dec 2024 22:50:41 +0900
-Message-ID: <CAMZ6RqL+iS6GVsY20=O6GdQakRpp7XdewZJsUbmE5OCsKaHR6Q@mail.gmail.com>
-Subject: Re: [PATCH 02/10] compiler.h: add is_const() as a replacement of __is_constexpr()
-To: Martin Uecker <muecker@gwdg.de>
-Cc: David Laight <David.Laight@aculab.com>, Linus Torvalds <torvalds@linux-foundation.org>, 
+ <20241203-is_constexpr-refactor-v1-1-4e4cbaecc216@wanadoo.fr>
+ <e115a4245e5342a994a7e596cc6357fa@AcuMS.aculab.com> <CAMZ6Rq+n0vG9zObF-kY-Xo+iP_Y3P8A6_nEfB8F=UhqeQBepRw@mail.gmail.com>
+ <b48e2f5dd8d64cbab471629ae03c7511@AcuMS.aculab.com>
+In-Reply-To: <b48e2f5dd8d64cbab471629ae03c7511@AcuMS.aculab.com>
+From: Vincent Mailhol <mailhol.vincent@wanadoo.fr>
+Date: Fri, 6 Dec 2024 13:42:56 +0900
+X-Gmail-Original-Message-ID: <CAMZ6RqKUH5VGHAuqv+dR_0o1JFTvV_gNV2qUwoMfcWCQUSX2Lg@mail.gmail.com>
+Message-ID: <CAMZ6RqKUH5VGHAuqv+dR_0o1JFTvV_gNV2qUwoMfcWCQUSX2Lg@mail.gmail.com>
+Subject: Re: [PATCH 01/10] compiler.h: add statically_false()
+To: David Laight <David.Laight@aculab.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, 
 	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Nathan Chancellor <nathan@kernel.org>, 
 	Nick Desaulniers <ndesaulniers@google.com>, Bill Wendling <morbo@google.com>, 
 	Justin Stitt <justinstitt@google.com>, Yury Norov <yury.norov@gmail.com>, 
@@ -83,6 +72,7 @@ Cc: David Laight <David.Laight@aculab.com>, Linus Torvalds <torvalds@linux-found
 	Mike Leach <mike.leach@linaro.org>, James Clark <james.clark@linaro.org>, 
 	Alexander Shishkin <alexander.shishkin@linux.intel.com>, 
 	Rikard Falkeborn <rikard.falkeborn@gmail.com>, 
+	Martin Uecker <Martin.Uecker@med.uni-goettingen.de>, 
 	"linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, 
 	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, 
 	"llvm@lists.linux.dev" <llvm@lists.linux.dev>, 
@@ -92,64 +82,69 @@ Cc: David Laight <David.Laight@aculab.com>, Linus Torvalds <torvalds@linux-found
 	"coresight@lists.linaro.org" <coresight@lists.linaro.org>, 
 	"linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Sat. 7 Dec. 2024 =C3=A0 22:19, Martin Uecker <muecker@gwdg.de> wrote:
-> Am Samstag, dem 07.12.2024 um 21:45 +0900 schrieb Vincent Mailhol:
-> > On Sat. 7 Dec. 2024 at 17:39, Martin Uecker <muecker@gwdg.de> wrote:
-> > > Am Freitag, dem 06.12.2024 um 16:26 +0900 schrieb Vincent Mailhol:
->
-> ...
->
-> > > I find it amazing how much time the Linux kernel community spends
-> > > revising code to make it work perfectly.
-> > >
-> > > Still, I am wondering whether some of this time and effort should not
-> > > be targeted at C compilers and language work to make these macro
-> > > hacks unnecessary?
+On Fri. 6 Dec. 2024 at 12:39, David Laight <David.Laight@aculab.com> wrote:
+> From: Vincent Mailhol
+> > Sent: 05 December 2024 15:26
 > >
-> > It seems to me that the long term solution to this problem are the
-> > constexpr functions.
+> > On Thu. 5 Dec 2024 at 03:30, David Laight <David.Laight@aculab.com> wrote:
+> > > From: Vincent Mailhol
+> > > > Sent: 02 December 2024 17:33
+> > > >
+> > > > From: Vincent Mailhol <mailhol.vincent@wanadoo.fr>
+> > > >
+> > > > For completion, add statically_false() which is the equivalent of
+> > > > statically_true() except that it will return true only if the input is
+> > > > known to be false at compile time.
+> > >
+> > > This is pretty much pointless.
+> > > It is just as easy to invert the condition at the call site.
+> >
+> > To start with, I will argue that:
+> >
+> >   statically_false(foo)
+> >
+> > is more pretty than
+> >
+> >   statically_true(!(foo))
 >
-> How would constexpr functions help here?  (I am a bit sceptical about
-> constexpr functions.)
-
-I was thinking of some of the "side features" of constexpr functions. Namel=
-y:
-
-  - std::is_constant_evaluated
-  Link: https://en.cppreference.com/w/cpp/types/is_constant_evaluated
-
-  - if consteval
-  Link: https://en.cppreference.com/w/cpp/language/if#Consteval_if
-
-I did not try it, but looking at these, I believe that this would
-allow us to rewrite most of our macros into some constexpr functions.
-
-> > But the core issue is that before getting this support in Linux, we
-> > have to wait for this to be added to the C2Y draft, then implemented
-> > in the compilers (probably just reusing the C++ constexpr functions)
-> > and finally wait maybe one more decade for the C2Y support to reach
-> > the kernel. For reference the kernel supports C11 only from 2022=E2=80=
-=A6 So
-> > maybe we will see those in the kernel around 2037? Meanwhile, we have
-> > to deal with those hacks.
+> Except that the test is more likely to be:
+>         statically_false(x > y)
+> and the invert is then
+>         statically_true(x <= y)
 >
-> If we do not collaborate on proper solutions, then you might have
-> to wait much longer.
+> No different from C itself, there is no 'ifnot (condition) {...}'
+> (don't talk to me about perl...)
 
-I was invited to WG14 this September. For now, I am only lurking. The
-thing I have in mind right now is to write a paper to allow the use of
-static_assert() in expressions (i.e. make it return 0 on success).
-That should be a relatively small change, but would bring a nice
-quality of life improvement.
+No need to talk about perl, just staying in C, it has both the #ifdef
+and the #ifndef directives (and since C23, it even has the #elifndef).
 
-For context, look at this:
+Regardless, this was just a nitpick. You convinced me, I will remove
+both statically_false() and is_const_false() in v2.
 
-  https://lore.kernel.org/all/CAHk-=3DwjLSEcZ5LdW+3C+9rtjvNPHZT6zdk0POj67T5=
-k2ZpDbgA@mail.gmail.com/T/#m1ba33a804b4041154b72a1d0333f90ec7204c461
+> I suspect you need to pretty much remove all the comments that
+> cross-refer to statically_true() from the other patches.
+>
+> So is_const_true() is just 'return true if the expression
+> is a 'non-zero constant integer expression'.
 
-And I will definitely follow the progress of constexpr functions in C2Y.
+No. Linus made it clear in
+
+  https://lore.kernel.org/all/CAHk-=wh5SNYdgx8-X+ggHP+ojbG2F7oyt3TLmMgqejYd5zn0Aw@mail.gmail.com/
+
+that we need an explanation of why statically_true() may not work in
+some contexts and I agree with this.
+
+As far as I like using proper nuances between the terms 'integer
+constant expression' and 'compile time constant', treating
+statically_true() and is_const_true() as completely different things
+as you are suggesting is not constructive. At the end, what matters
+the most in a comment, is that the final user properly understands how
+to use the thing correctly.
+
+Removing the cross reference would increase the risk of people using
+is_const_true() in places where it is not needed. I will keep the
+cross reference to statically_true().
 
 
 Yours sincerely,
