@@ -1,137 +1,116 @@
-Received: from mail-ed1-f54.google.com (mail-ed1-f54.google.com [209.85.208.54])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from eu-smtp-delivery-151.mimecast.com (eu-smtp-delivery-151.mimecast.com [185.58.85.151])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EE6D2192B76
-	for <linux-sparse@vger.kernel.org>; Fri,  6 Dec 2024 19:15:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.54
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9278F1C5480
+	for <linux-sparse@vger.kernel.org>; Fri,  6 Dec 2024 19:39:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.58.85.151
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733512542; cv=none; b=H9Up++Bwf3u0+3C9E3SMD1tievNl88nipsX5txdRCS24WJG18MFim1kiGz3OFQTx6dt0GnfZ74fnwEqtDdLiDmNHlobkEL0Hfvv2zCM9ywkw03BJqWVO95JAGxWtuWCeh9sarTrFJBUOcVp6Fz9kY0RCj5wsBD3NhPy61adpI40=
+	t=1733513971; cv=none; b=KRaE7LnIowklQgB1W52V3jZpFN4kCPoSFahb5ipLisTPXvLSQIF0gTycMn10S9j65tgrwJj0RBaG7pNe6l6orNlR38DaHkvXySIHx/j4c12/edLo7hxa0nyx6owYs3qdmy9uvW1UtiPETLaMqFVkcvDM3+BifpaNk7e8Lg/cE/8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733512542; c=relaxed/simple;
-	bh=i8VSKf3d9h7aPyCMroFIPs2BgVVC/quFiHlWg+y9lfA=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=UiJERHKNBhh5Op+Um+odP2KR6p1rzRhciDVjU/vO6BxRdm3jkBqA+YOvQPlJEu3ow56ZIc4Q7J4DPd+nfii7TB8gBRhDGvmpo6toLRIREeGBz5t9w1DyeEPx0/ui5FQ6Y6trMin021jO1RVACugd643AtLc9TVh4QsDvWwlFRrc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org; spf=pass smtp.mailfrom=linuxfoundation.org; dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b=UxCybm7w; arc=none smtp.client-ip=209.85.208.54
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linuxfoundation.org
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="UxCybm7w"
-Received: by mail-ed1-f54.google.com with SMTP id 4fb4d7f45d1cf-5ceca0ec4e7so2714381a12.0
-        for <linux-sparse@vger.kernel.org>; Fri, 06 Dec 2024 11:15:40 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linux-foundation.org; s=google; t=1733512539; x=1734117339; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=HB1D/kV+LS+wbR3JFN0rKIWFlL1hHHNzi40qmGJ0Urw=;
-        b=UxCybm7w93T+ZWPiQAgME7Rn2EA9H6rDgxmx/nvYagMAxgcG9/8abf6z/lw61dtm36
-         D1wFwMTnbs36AHyMTh1fWJoPbCedp79YW0GF4ClvMbfoUUmXhsyVbp16OPMLEkOWxian
-         6Dk4KduLTZ9GPm3qR0C8g8k3o3xVXnWBBftlM=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1733512539; x=1734117339;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=HB1D/kV+LS+wbR3JFN0rKIWFlL1hHHNzi40qmGJ0Urw=;
-        b=avdmR9+fXSvbr4bL9Sno0Mm+FaRjhSbS3aBOv4FSNkbsqMZ4edJFTmx1Xl5Ffjbl3V
-         ZzNafgbPV1aY/xMyoEO1oxjJSpCob6a3N/fiV1zlRQJpJ1czwsVlSlqHwddswN3iZNVt
-         f4D12MVteLlIgiMKxvQMDUuZO+MdTNhsr423AoGlSUxogwfVd6kjAj27qpUDaJ2B6mvY
-         faKYfOfZYcR3nJwPTgJzxup2LZWRo7Essa67GP70ZXucK5wISjc4J49nc1ixq7sJkKJ7
-         o/frVGT+mY5ilvK0wYsV773zH58oeGvDuMTlBL2PDsOgFNIluvf4U6et5K45pITplSFm
-         P10A==
-X-Forwarded-Encrypted: i=1; AJvYcCXu2XtSpwaGSRjF5v3Somd9hu31Fl2wme7D4MWxyuZMJr6FK/TZrUHW0OSxD+uM8KoEFsmFUdCDfkaYXAQ=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyC5l1GX/N+0bftqTeSp3GjybyjfpF+NPfzP//Wtiu1emMGeEAu
-	WB7KDh+QVOcZ57sdDBFpmPFyY8SQahYbGSJyJh+/F99krV/NJxbkrG02RSzadxN310fP20obXhQ
-	DAP34TQ==
-X-Gm-Gg: ASbGncs7cf/Sibj76u4kMbM7tvHssmMxl83ZuuZu+Opl8Fh3wr9iPI3uwOFyN6wKcAE
-	zBHUKi1cFr21hhvy+jrLmuvSmaij2wc7+tf6zpk6TDv9+8GKCCsMCqc+pIaaYIyRs4eWMMEYaxl
-	VmvJg5OWTfgUk/CVFYQo9dlIYkjbPQcU/E8fK30ZAaybCblTHsXciAtIV/Xg0kSgtsdD0y6RCbY
-	MicX1gUyif9KeIz17KBHgUjVbqTPipuI5CxBPoOvlq73ytMgl4WlTJvSqnNl5soKoUOrnLVRwam
-	94DpKBj2eOk5fe+Dht3EPlao
-X-Google-Smtp-Source: AGHT+IEo5yItwIjkdrGDUs5Z4mLzAYk3vc36wUKCTHgNt6yT8X/AEdYOhflxro/BBhQjkfePTzWBFg==
-X-Received: by 2002:a17:906:cc2:b0:aa5:27d4:980a with SMTP id a640c23a62f3a-aa63a242b13mr287440966b.49.1733512539108;
-        Fri, 06 Dec 2024 11:15:39 -0800 (PST)
-Received: from mail-ej1-f44.google.com (mail-ej1-f44.google.com. [209.85.218.44])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-aa62608f57fsm280883166b.146.2024.12.06.11.15.37
-        for <linux-sparse@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 06 Dec 2024 11:15:37 -0800 (PST)
-Received: by mail-ej1-f44.google.com with SMTP id a640c23a62f3a-a9a68480164so298793666b.3
-        for <linux-sparse@vger.kernel.org>; Fri, 06 Dec 2024 11:15:37 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCUwZVgPdqkk9ACizc2PJfkxFazO1AkNqobokyLpO7kbmJXgIeFdcBgniGp/VSFFeTlJ8Eijyu6eAwtPN1s=@vger.kernel.org
-X-Received: by 2002:a17:906:4c2:b0:aa5:308c:3489 with SMTP id
- a640c23a62f3a-aa63a2519b0mr271057466b.58.1733512537212; Fri, 06 Dec 2024
- 11:15:37 -0800 (PST)
+	s=arc-20240116; t=1733513971; c=relaxed/simple;
+	bh=WYU3BtfPgc8JALRFkC2f8cKo9E+ajIbNWzGzFbmxxNQ=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 MIME-Version:Content-Type; b=jNq6P1AtUIbBVwC/SWHWl3Tv8bVB4LM9EDFG7vPZr+bvDm9YHocuSCwFZjVyrYkPW0V385lKFqgWMsw27Pz5anYa3LD24jKrTNlFLfV2yxwG3NkNcy07YiAy+pDJAoMgWZK1OoeLpKJzWKeYYTNdU2inIyRCeWXu9P5sCV7aB2Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ACULAB.COM; spf=pass smtp.mailfrom=aculab.com; arc=none smtp.client-ip=185.58.85.151
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ACULAB.COM
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=aculab.com
+Received: from AcuMS.aculab.com (156.67.243.121 [156.67.243.121]) by
+ relay.mimecast.com with ESMTP with both STARTTLS and AUTH (version=TLSv1.2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id
+ uk-mta-184-wSN4kbhlPXCqAnAYZUig_Q-1; Fri, 06 Dec 2024 19:39:27 +0000
+X-MC-Unique: wSN4kbhlPXCqAnAYZUig_Q-1
+X-Mimecast-MFC-AGG-ID: wSN4kbhlPXCqAnAYZUig_Q
+Received: from AcuMS.Aculab.com (10.202.163.6) by AcuMS.aculab.com
+ (10.202.163.6) with Microsoft SMTP Server (TLS) id 15.0.1497.48; Fri, 6 Dec
+ 2024 19:38:40 +0000
+Received: from AcuMS.Aculab.com ([::1]) by AcuMS.aculab.com ([::1]) with mapi
+ id 15.00.1497.048; Fri, 6 Dec 2024 19:38:40 +0000
+From: David Laight <David.Laight@ACULAB.COM>
+To: 'Linus Torvalds' <torvalds@linux-foundation.org>
+CC: Vincent Mailhol <vincent.mailhol@gmail.com>, Luc Van Oostenryck
+	<luc.vanoostenryck@gmail.com>, Nathan Chancellor <nathan@kernel.org>, "Nick
+ Desaulniers" <ndesaulniers@google.com>, Bill Wendling <morbo@google.com>,
+	Justin Stitt <justinstitt@google.com>, Yury Norov <yury.norov@gmail.com>,
+	Rasmus Villemoes <linux@rasmusvillemoes.dk>, Kees Cook <kees@kernel.org>,
+	"Gustavo A. R. Silva" <gustavoars@kernel.org>, Jani Nikula
+	<jani.nikula@linux.intel.com>, Joonas Lahtinen
+	<joonas.lahtinen@linux.intel.com>, Rodrigo Vivi <rodrigo.vivi@intel.com>,
+	Tvrtko Ursulin <tursulin@ursulin.net>, David Airlie <airlied@gmail.com>,
+	Simona Vetter <simona@ffwll.ch>, Suzuki K Poulose <suzuki.poulose@arm.com>,
+	Mike Leach <mike.leach@linaro.org>, James Clark <james.clark@linaro.org>,
+	Alexander Shishkin <alexander.shishkin@linux.intel.com>, Rikard Falkeborn
+	<rikard.falkeborn@gmail.com>, "linux-sparse@vger.kernel.org"
+	<linux-sparse@vger.kernel.org>, "linux-kernel@vger.kernel.org"
+	<linux-kernel@vger.kernel.org>, "llvm@lists.linux.dev"
+	<llvm@lists.linux.dev>, "linux-hardening@vger.kernel.org"
+	<linux-hardening@vger.kernel.org>, "intel-gfx@lists.freedesktop.org"
+	<intel-gfx@lists.freedesktop.org>, "dri-devel@lists.freedesktop.org"
+	<dri-devel@lists.freedesktop.org>, "coresight@lists.linaro.org"
+	<coresight@lists.linaro.org>, "linux-arm-kernel@lists.infradead.org"
+	<linux-arm-kernel@lists.infradead.org>, "uecker@tugraz.at" <uecker@tugraz.at>
+Subject: RE: [PATCH 02/10] compiler.h: add is_const() as a replacement of
+ __is_constexpr()
+Thread-Topic: [PATCH 02/10] compiler.h: add is_const() as a replacement of
+ __is_constexpr()
+Thread-Index: AQHbROFPJXcuwP9wN0+yRzIQ2cx/pbLWa+gggAFf14CAACMqUIABpzoGgAAClHCAAAPoAIAAAwjg
+Date: Fri, 6 Dec 2024 19:38:40 +0000
+Message-ID: <0f5c07b827c3468c8fa3928a93a98bfa@AcuMS.aculab.com>
+References: <20241203-is_constexpr-refactor-v1-0-4e4cbaecc216@wanadoo.fr>
+ <20241203-is_constexpr-refactor-v1-2-4e4cbaecc216@wanadoo.fr>
+ <1d807c7471b9434aa8807e6e86c964ec@AcuMS.aculab.com>
+ <CAMZ6RqLJLP+4d8f5gLfBdFeDVgqy23O+Eo8HRgKCthqBjSHaaw@mail.gmail.com>
+ <9ef03cebb4dd406885d8fdf79aaef043@AcuMS.aculab.com>
+ <CAHk-=wjmeU6ahyuwAymqkSpxX-gCNa3Qc70UXjgnxNiC8eiyOw@mail.gmail.com>
+ <CAMZ6Rq+SzTA25XcMZnMnOJcrrq1VZpeT1xceinarqbXgDDo8VA@mail.gmail.com>
+ <CAHk-=wiP8111QZZJNbcDNsYQ_JC-xvwRKr0qV9UdKn3HKK+-4Q@mail.gmail.com>
+ <d23fe8a5dbe84bfeb18097fdef7aa4c4@AcuMS.aculab.com>
+ <CAHk-=win8afdcergvJ6f2=rRrff8giGUW62qmYs9Ae6aw=wcnA@mail.gmail.com>
+In-Reply-To: <CAHk-=win8afdcergvJ6f2=rRrff8giGUW62qmYs9Ae6aw=wcnA@mail.gmail.com>
+Accept-Language: en-GB, en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-ms-exchange-transport-fromentityheader: Hosted
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241203-is_constexpr-refactor-v1-0-4e4cbaecc216@wanadoo.fr>
- <20241203-is_constexpr-refactor-v1-2-4e4cbaecc216@wanadoo.fr>
- <1d807c7471b9434aa8807e6e86c964ec@AcuMS.aculab.com> <CAMZ6RqLJLP+4d8f5gLfBdFeDVgqy23O+Eo8HRgKCthqBjSHaaw@mail.gmail.com>
- <9ef03cebb4dd406885d8fdf79aaef043@AcuMS.aculab.com> <CAHk-=wjmeU6ahyuwAymqkSpxX-gCNa3Qc70UXjgnxNiC8eiyOw@mail.gmail.com>
- <CAMZ6Rq+SzTA25XcMZnMnOJcrrq1VZpeT1xceinarqbXgDDo8VA@mail.gmail.com>
- <CAHk-=wiP8111QZZJNbcDNsYQ_JC-xvwRKr0qV9UdKn3HKK+-4Q@mail.gmail.com> <d23fe8a5dbe84bfeb18097fdef7aa4c4@AcuMS.aculab.com>
-In-Reply-To: <d23fe8a5dbe84bfeb18097fdef7aa4c4@AcuMS.aculab.com>
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Date: Fri, 6 Dec 2024 11:15:20 -0800
-X-Gmail-Original-Message-ID: <CAHk-=win8afdcergvJ6f2=rRrff8giGUW62qmYs9Ae6aw=wcnA@mail.gmail.com>
-Message-ID: <CAHk-=win8afdcergvJ6f2=rRrff8giGUW62qmYs9Ae6aw=wcnA@mail.gmail.com>
-Subject: Re: [PATCH 02/10] compiler.h: add is_const() as a replacement of __is_constexpr()
-To: David Laight <David.Laight@aculab.com>
-Cc: Vincent Mailhol <vincent.mailhol@gmail.com>, 
-	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Nathan Chancellor <nathan@kernel.org>, 
-	Nick Desaulniers <ndesaulniers@google.com>, Bill Wendling <morbo@google.com>, 
-	Justin Stitt <justinstitt@google.com>, Yury Norov <yury.norov@gmail.com>, 
-	Rasmus Villemoes <linux@rasmusvillemoes.dk>, Kees Cook <kees@kernel.org>, 
-	"Gustavo A. R. Silva" <gustavoars@kernel.org>, Jani Nikula <jani.nikula@linux.intel.com>, 
-	Joonas Lahtinen <joonas.lahtinen@linux.intel.com>, Rodrigo Vivi <rodrigo.vivi@intel.com>, 
-	Tvrtko Ursulin <tursulin@ursulin.net>, David Airlie <airlied@gmail.com>, 
-	Simona Vetter <simona@ffwll.ch>, Suzuki K Poulose <suzuki.poulose@arm.com>, 
-	Mike Leach <mike.leach@linaro.org>, James Clark <james.clark@linaro.org>, 
-	Alexander Shishkin <alexander.shishkin@linux.intel.com>, 
-	Rikard Falkeborn <rikard.falkeborn@gmail.com>, 
-	"linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, 
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, 
-	"llvm@lists.linux.dev" <llvm@lists.linux.dev>, 
-	"linux-hardening@vger.kernel.org" <linux-hardening@vger.kernel.org>, 
-	"intel-gfx@lists.freedesktop.org" <intel-gfx@lists.freedesktop.org>, 
-	"dri-devel@lists.freedesktop.org" <dri-devel@lists.freedesktop.org>, 
-	"coresight@lists.linaro.org" <coresight@lists.linaro.org>, 
-	"linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, 
-	"uecker@tugraz.at" <uecker@tugraz.at>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+X-Mimecast-Spam-Score: 0
+X-Mimecast-MFC-PROC-ID: c5KbH2M_GzFsEdBonp8eGHttMT75ZdfhR5i4sBW6sp8_1733513966
+X-Mimecast-Originator: aculab.com
+Content-Language: en-US
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: base64
 
-On Fri, 6 Dec 2024 at 11:07, David Laight <David.Laight@aculab.com> wrote:
->
-> I'm missing the compiler version and options to generate the error.
+RnJvbTogTGludXMgVG9ydmFsZHMNCj4gU2VudDogMDYgRGVjZW1iZXIgMjAyNCAxOToxNQ0KPiBP
+biBGcmksIDYgRGVjIDIwMjQgYXQgMTE6MDcsIERhdmlkIExhaWdodCA8RGF2aWQuTGFpZ2h0QGFj
+dWxhYi5jb20+IHdyb3RlOg0KPiA+DQo+ID4gSSdtIG1pc3NpbmcgdGhlIGNvbXBpbGVyIHZlcnNp
+b24gYW5kIG9wdGlvbnMgdG8gZ2VuZXJhdGUgdGhlIGVycm9yLg0KPiANCj4gSnVzdCAtV2FsbCB3
+aXRoIG1vc3QgcmVjZW50IGdjYyB2ZXJzaW9ucyBzZWVtcyB0byBkbyBpdC4gQXQgbGVhc3QgSQ0K
+PiBjYW4gcmVwcm8gaXQgd2l0aCBnY2MtMTQuMi4xIGFuZCBzb21ldGhpbmcgc2lsbHkgbGlrZSB0
+aGlzOg0KDQpJIG1heSBoYXZlIGp1c3QgbWlzc2VkIGdvbGJvbHQgcmV0dXJuaW5nIGEgd2Fybmlu
+Zy4NCi4uLg0KPiA+IERvZXMgYSAnKyAwJyBoZWxwPyAgIih2YXIgPDwgMikgKyAwID8gMCA6IDAi
+DQo+IA0KPiBZZWFoLCB0aGF0IGFjdHVhbGx5IHdvcmtzLg0KPiANCj4gQW5kICIrMCIgaXMgbmlj
+ZSBpbiB0aGF0IGl0IHNob3VsZCB3b3JrIGluIGFueSBjb250ZXh0Lg0KDQpVbmxlc3MgaXQgZmFs
+bHMgZm91bCBvZiB0aGUgY2xhbmcgdGVzdCBmb3IgYXJ0aG1ldGljIG9uIE5VTEwgcG9pbnRlcnMu
+DQooSSdtIHN1cmUgdGhhdCBpcyBvbmx5IGEgcHJvYmxlbSBpZiBOVUxMIGlzbid0IHRoZSBhbGwt
+emVybyBiaXQgcGF0dGVybi4NCkFuZCBwcmV0dHkgbXVjaCBubyBDIGNvZGUgaGFzIGV2ZXIgYmVl
+biAndGhhdCBwb3J0YWJsZScuKQ0KDQpBZGRpbmcgMCBjYW4gYWxzbyBoZWxwIHdoZW4gY29tcGxp
+ZXJzIGFyZSBiZWluZyBwaWNreSBhYm91dCBlbnVtcy4NClNpbmNlIG5vbmUgaGF2ZSAoeWV0KSBt
+YWRlIHRoZW0gbW9yZSBsaWtlIGEgMzJiaXQgcG9pbnRlciB0byBhIG9uZQ0KYnl0ZSBzdHJ1Y3R1
+cmUgKG9yIHRoZSBQYXNjYWwgZW51bSkuDQpJbiBjYXNlIHRoZSByZWxldmFudCBwZW9wbGUgYXJl
+IHJlYWRpbmcgdGhpcywgbWF5YmUgb25seSBkbyBhbnkNCm5vbi1pbnRlZ2VyIHdhcm5pbmdzIGZv
+ciBuYW1lZCBlbnVtcz8NCg0KPiA+ICNkZWZpbmUgY29uc3RfTlVMTCh4KSBfR2VuZXJpYygwID8g
+KHgpIDogKGNoYXIgKikwLCBjaGFyICo6IDEsIHZvaWQgKjogMCkNCj4gPiAjZGVmaW5lIGNvbnN0
+X3RydWUoeCkgY29uc3RfTlVMTCgoeCkgPyBOVUxMIDogKHZvaWQgKikxTCkpDQo+ID4gI2RlZmlu
+ZSBjb25zdF9leHByKHgpIGNvbnN0X05VTEwoKHgpID8gTlVMTCA6IE5VTEwpKQ0KPiA+IEkgc2Vu
+ZCB0aGlzIG1vcm5pbmcuDQo+ID4gTmVlZHMgJ3MvY2hhci9zdHJ1Y3Qga2pramtqa2p1aS8nIGFw
+cGxpZWQuDQo+IA0KPiBPaCBDaHJpc3QuIFlvdSByZWFsbHkgYXJlIHRha2luZyB0aGlzIHdob2xl
+IHVnbHkgdG8gYW5vdGhlciBsZXZlbC4NCg0KSSBzb3J0IG9mIGxpa2VkIHRoYXQgdmVyc2lvbiBp
+biBhIHBlcnZlcnNlIHNvcnQgb2Ygd2F5Lg0KSXQgZG9lcyBnaXZlIHlvdSBhIHNpbXBsZSB0ZXN0
+IGZvciBOVUxMICh1bmxlc3MgeW91J3ZlIHVzZWQgJ3N0cnVjdCBramtqa2pranVpJykuDQoNCglE
+YXZpZA0KDQotDQpSZWdpc3RlcmVkIEFkZHJlc3MgTGFrZXNpZGUsIEJyYW1sZXkgUm9hZCwgTW91
+bnQgRmFybSwgTWlsdG9uIEtleW5lcywgTUsxIDFQVCwgVUsNClJlZ2lzdHJhdGlvbiBObzogMTM5
+NzM4NiAoV2FsZXMpDQo=
 
-Just -Wall with most recent gcc versions seems to do it. At least I
-can repro it with gcc-14.2.1 and something silly like this:
-
-  $ cat t.c
-  int fn(int a) { return (a<<2)?1:2; }
-  $ gcc -Wall -S t.c
-  t.c: In function =E2=80=98fn=E2=80=99:
-  t.c:1:26: warning: =E2=80=98<<=E2=80=99 in boolean context, did you mean =
-=E2=80=98<=E2=80=99?
-[-Wint-in-bool-context]
-
-> Does a '+ 0' help?  "(var << 2) + 0 ? 0 : 0"
-
-Yeah, that actually works.
-
-And "+0" is nice in that it should work in any context.
-
-> #define const_NULL(x) _Generic(0 ? (x) : (char *)0, char *: 1, void *: 0)
-> #define const_true(x) const_NULL((x) ? NULL : (void *)1L))
-> #define const_expr(x) const_NULL((x) ? NULL : NULL))
-> I send this morning.
-> Needs 's/char/struct kjkjkjkjui/' applied.
-
-Oh Christ. You really are taking this whole ugly to another level.
-
-           Linus
