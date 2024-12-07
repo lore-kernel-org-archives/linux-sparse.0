@@ -1,163 +1,130 @@
-Received: from eu-smtp-delivery-151.mimecast.com (eu-smtp-delivery-151.mimecast.com [185.58.85.151])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ej1-f48.google.com (mail-ej1-f48.google.com [209.85.218.48])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 393BF5A7B8
-	for <linux-sparse@vger.kernel.org>; Sat,  7 Dec 2024 18:08:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.58.85.151
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7A43F14B96E
+	for <linux-sparse@vger.kernel.org>; Sat,  7 Dec 2024 18:26:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733594914; cv=none; b=kKDfTZX0M+YmcASrxZ0JZ1S0kNfszL1ICVqbODUgmJMYQ8c8cFBgK3v8HfxkMs3f59b/AfAG9SajFBLTmshp92MBYJDIAUV1bh31HW2LZStbjVFyT4tyYD5H3GbI51cLfb5/nUfwPgFa/11Olq93iAKIoYRx23LSdKmvEi50b/g=
+	t=1733595983; cv=none; b=ditvYYobL9XPNczlAGX5ua0lr6JYu/4xw6NZiIOyuJXfnP0M+5CLDbQWozy2FUhDZc7YHJX58W3eoqJX+62lypYQVrttTYG27VYDNGWSJi0J4aTIqzOtinsPrpDfYzTFUJPWKqpO4mgvgmy397muInp532HS8Kz0nWqpg16tzRQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733594914; c=relaxed/simple;
-	bh=UF0WAhqtVuc+q4G3+Pd3EKlZbpDJq8VuO3E01WBbySA=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 MIME-Version:Content-Type; b=ePKEDlu8Zt8ZYgRmnjon13KLV+NlsITDDBBoVBnkrEeQEfHdSO1kNg0jKA2UnJoO/SniENL2uuJuZN0CNdihiXRQRbYkGhfwbFUxS6SCWQTDUovW0YwKSI42TqqvndTz+tLXHkotOgXWs4pdoZJ5APXQrE7wyDdskQG9OWIwcBk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ACULAB.COM; spf=pass smtp.mailfrom=aculab.com; arc=none smtp.client-ip=185.58.85.151
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ACULAB.COM
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=aculab.com
-Received: from AcuMS.aculab.com (156.67.243.121 [156.67.243.121]) by
- relay.mimecast.com with ESMTP with both STARTTLS and AUTH (version=TLSv1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id
- uk-mta-90-ibaGRZ9SPyGPO9gonrHa7A-1; Sat, 07 Dec 2024 18:08:29 +0000
-X-MC-Unique: ibaGRZ9SPyGPO9gonrHa7A-1
-X-Mimecast-MFC-AGG-ID: ibaGRZ9SPyGPO9gonrHa7A
-Received: from AcuMS.Aculab.com (10.202.163.6) by AcuMS.aculab.com
- (10.202.163.6) with Microsoft SMTP Server (TLS) id 15.0.1497.48; Sat, 7 Dec
- 2024 18:07:38 +0000
-Received: from AcuMS.Aculab.com ([::1]) by AcuMS.aculab.com ([::1]) with mapi
- id 15.00.1497.048; Sat, 7 Dec 2024 18:07:38 +0000
-From: David Laight <David.Laight@ACULAB.COM>
-To: 'Vincent Mailhol' <vincent.mailhol@gmail.com>, Martin Uecker
-	<muecker@gwdg.de>
-CC: Linus Torvalds <torvalds@linux-foundation.org>, Luc Van Oostenryck
-	<luc.vanoostenryck@gmail.com>, Nathan Chancellor <nathan@kernel.org>, "Nick
- Desaulniers" <ndesaulniers@google.com>, Bill Wendling <morbo@google.com>,
-	Justin Stitt <justinstitt@google.com>, Yury Norov <yury.norov@gmail.com>,
-	Rasmus Villemoes <linux@rasmusvillemoes.dk>, Kees Cook <kees@kernel.org>,
-	"Gustavo A. R. Silva" <gustavoars@kernel.org>, Jani Nikula
-	<jani.nikula@linux.intel.com>, Joonas Lahtinen
-	<joonas.lahtinen@linux.intel.com>, Rodrigo Vivi <rodrigo.vivi@intel.com>,
-	Tvrtko Ursulin <tursulin@ursulin.net>, David Airlie <airlied@gmail.com>,
-	Simona Vetter <simona@ffwll.ch>, Suzuki K Poulose <suzuki.poulose@arm.com>,
-	Mike Leach <mike.leach@linaro.org>, James Clark <james.clark@linaro.org>,
-	Alexander Shishkin <alexander.shishkin@linux.intel.com>, Rikard Falkeborn
-	<rikard.falkeborn@gmail.com>, "linux-sparse@vger.kernel.org"
-	<linux-sparse@vger.kernel.org>, "linux-kernel@vger.kernel.org"
-	<linux-kernel@vger.kernel.org>, "llvm@lists.linux.dev"
-	<llvm@lists.linux.dev>, "linux-hardening@vger.kernel.org"
-	<linux-hardening@vger.kernel.org>, "intel-gfx@lists.freedesktop.org"
-	<intel-gfx@lists.freedesktop.org>, "dri-devel@lists.freedesktop.org"
-	<dri-devel@lists.freedesktop.org>, "coresight@lists.linaro.org"
-	<coresight@lists.linaro.org>, "linux-arm-kernel@lists.infradead.org"
-	<linux-arm-kernel@lists.infradead.org>
-Subject: RE: [PATCH 02/10] compiler.h: add is_const() as a replacement of
- __is_constexpr()
-Thread-Topic: [PATCH 02/10] compiler.h: add is_const() as a replacement of
- __is_constexpr()
-Thread-Index: AQHbROFPJXcuwP9wN0+yRzIQ2cx/pbLWa+gggAFf14CAACMqUIAC5S1rgAA568A=
-Date: Sat, 7 Dec 2024 18:07:38 +0000
-Message-ID: <00d233a607a84f73942cd706cc29f088@AcuMS.aculab.com>
-References: <20241203-is_constexpr-refactor-v1-0-4e4cbaecc216@wanadoo.fr>
- <20241203-is_constexpr-refactor-v1-2-4e4cbaecc216@wanadoo.fr>
- <1d807c7471b9434aa8807e6e86c964ec@AcuMS.aculab.com>
- <CAMZ6RqLJLP+4d8f5gLfBdFeDVgqy23O+Eo8HRgKCthqBjSHaaw@mail.gmail.com>
- <9ef03cebb4dd406885d8fdf79aaef043@AcuMS.aculab.com>
- <abdd7862f136aa676b2d2c324369f4a43ff9909c.camel@gwdg.de>
- <CAMZ6RqKzGiRNMeLsQKRNrxvW_bXB-kEi11udQ82kKX6tGCrqcg@mail.gmail.com>
- <9607300dfca5d71ca9570b1e1de0864e524f356b.camel@gwdg.de>
- <CAMZ6RqJGqBqvgxzp5yPFY1pk0WkkwEMM34qU-dZ3kXfsnKaqEg@mail.gmail.com>
- <429e7c6713ecc94494d9107e5f5a1f0c8e854f23.camel@gwdg.de>
- <CAMZ6RqL+iS6GVsY20=O6GdQakRpp7XdewZJsUbmE5OCsKaHR6Q@mail.gmail.com>
-In-Reply-To: <CAMZ6RqL+iS6GVsY20=O6GdQakRpp7XdewZJsUbmE5OCsKaHR6Q@mail.gmail.com>
-Accept-Language: en-GB, en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-ms-exchange-transport-fromentityheader: Hosted
+	s=arc-20240116; t=1733595983; c=relaxed/simple;
+	bh=pCyqxQB1wqSB6HSVhdTXB/6ltiXA8UsqI4BL9ES1zGU=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=TD8G1sBSIbrmyUut9nL927oJlOb7d0qrcsem9+wxre/TNoiI/9QD/YGMiYDBiARUSdf+sLdhpS9cqAcxZPV0sT29n+hx0Fvn1sCjI2qdNXTswEvyrb7aDq+5UDgBVAlPbQQy78+J6lJ7iL6cBFfphJAFtEYck6K3vIJsCTYtMb4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org; spf=pass smtp.mailfrom=linuxfoundation.org; dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b=Xkrv+T+P; arc=none smtp.client-ip=209.85.218.48
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linuxfoundation.org
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="Xkrv+T+P"
+Received: by mail-ej1-f48.google.com with SMTP id a640c23a62f3a-aa560a65fd6so561935866b.0
+        for <linux-sparse@vger.kernel.org>; Sat, 07 Dec 2024 10:26:21 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linux-foundation.org; s=google; t=1733595980; x=1734200780; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=V/vNc5nALUWVUmfD8b/aC22BtPTbXjUkByw6MJHP530=;
+        b=Xkrv+T+PdpVlV5hRmiNOaFXx1KGBy2icNh2XQWOLGEO6tCgTaZIlsgrN0LHPgbk1dW
+         XFhiY1K20e29MmAAgGNqvxggm1KK2rEOq3Ht5VermQqbeWytJAXtJtW3RZOkCihjPgob
+         nTOwlP5j0lbqX0ebI9eKgadwlPP8WN9+cPNZE=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1733595980; x=1734200780;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=V/vNc5nALUWVUmfD8b/aC22BtPTbXjUkByw6MJHP530=;
+        b=LMkhZF3aasdvs9A75lrgePnNvdTfdhoxrczm/nGvYeX2oJI+miwesX7Js7hI7sa+Mv
+         Fe4/2rwRcC2ndJOT6uPd4DdbptwRjxd9jWaGvoSMDXjN2NY6mhWmle/Vmp/2h2tIjcCO
+         HONM+KOTavjNEEeqxj7cC3fd3nAP0BeEK16HAuec7I/PLvFJhLFbpB3u/GDtA4nSgd6G
+         1vteApHk7Z5ZFMu95gHq7bprf2MdH17Ca267hqHk8f2n2MpiOmA6/J4twAv43Wfg1nVP
+         6h7+81PdvU8QRWrdJC2nMtsfaskNUIMO1MKfbzNDx96UAN2YMVxCci0N/CBEQDUiTX/O
+         7iZQ==
+X-Forwarded-Encrypted: i=1; AJvYcCVnXmlMLVE4gy/dhaeUYc7slXFzf8C2N5dxV5iSyokFbi75NIO0Wta5WDhnUr5FqPM+9r2gS3P8lMxtSNg=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yz7lyriOrWSNyoA65VkEtZn1AtiSjc91y1iq87sgbQJMVVb8BAC
+	1e6ocSNNauZToABGRiu305xBpUkvbe+Uf78IYAcItaY5YyzoHg9gZrbQt3+VLhNH8edeJDTi+ac
+	4yoJiig==
+X-Gm-Gg: ASbGncughPKOVIYfNIwAfcMN07fMszjP8G3pTsMxiPkHS/v6UVgifBKfV+mgwtiLd33
+	T+KCzIYoII5boBKne0zwf+h06b0DK5x2602GKmAlDU/P50RopDotIW7i8VMCGWfQu938Dgj9bNB
+	rYJLIpEt+PmBUko0CFfbUKS2tckF3QJKAhSFcu81Qjgy2VkXQ9sU/2So1XprJgZYsMlW/OlZcLU
+	jBgloUCO43FoIEF1TQBOITBR00EhN7R04OkxgSWkgQ7yRitXrgdrDTO0qui9ku0WEVLJsBIkfH8
+	R/fDtGDHAYxMiHjjljWzEMW0
+X-Google-Smtp-Source: AGHT+IG8C/qv1z/JD5ZieQDwZeJMvbfTCSGTAtSy1CTRYWyTy2m21IzsEjl2WbwBucOiaNMqveIN1Q==
+X-Received: by 2002:a17:907:9707:b0:aa5:55b6:8080 with SMTP id a640c23a62f3a-aa620332febmr1230139766b.12.1733595979681;
+        Sat, 07 Dec 2024 10:26:19 -0800 (PST)
+Received: from mail-ej1-f53.google.com (mail-ej1-f53.google.com. [209.85.218.53])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-aa663334859sm87984766b.39.2024.12.07.10.26.18
+        for <linux-sparse@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sat, 07 Dec 2024 10:26:18 -0800 (PST)
+Received: by mail-ej1-f53.google.com with SMTP id a640c23a62f3a-aa64e1dc9b8so128315166b.0
+        for <linux-sparse@vger.kernel.org>; Sat, 07 Dec 2024 10:26:18 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCUffXQkx3ei8nL886bSLghjxwYlEyCBF6/H8xkzjQVz0gvS9Q76wpoB5KSIE2Y4ZDQ7evM/C6p2ru4v2xc=@vger.kernel.org
+X-Received: by 2002:a17:906:32c2:b0:a9e:85f8:2a3a with SMTP id
+ a640c23a62f3a-aa6373494a2mr765427966b.2.1733595978237; Sat, 07 Dec 2024
+ 10:26:18 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Mimecast-Spam-Score: 0
-X-Mimecast-MFC-PROC-ID: 8hQ0ariTqHVpjMSjVFjgCSAMJL2y4HLC3Lyg6NDrFPs_1733594908
-X-Mimecast-Originator: aculab.com
-Content-Language: en-US
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: base64
+References: <20241203-is_constexpr-refactor-v1-0-4e4cbaecc216@wanadoo.fr>
+ <20241203-is_constexpr-refactor-v1-2-4e4cbaecc216@wanadoo.fr>
+ <1d807c7471b9434aa8807e6e86c964ec@AcuMS.aculab.com> <CAMZ6RqLJLP+4d8f5gLfBdFeDVgqy23O+Eo8HRgKCthqBjSHaaw@mail.gmail.com>
+ <9ef03cebb4dd406885d8fdf79aaef043@AcuMS.aculab.com> <abdd7862f136aa676b2d2c324369f4a43ff9909c.camel@gwdg.de>
+ <CAMZ6RqKzGiRNMeLsQKRNrxvW_bXB-kEi11udQ82kKX6tGCrqcg@mail.gmail.com>
+ <9607300dfca5d71ca9570b1e1de0864e524f356b.camel@gwdg.de> <344b4cf41a474377b3d2cbf6302de703@AcuMS.aculab.com>
+ <9a0c041b6143ba07c2b3e524572fccd841f5374b.camel@gwdg.de>
+In-Reply-To: <9a0c041b6143ba07c2b3e524572fccd841f5374b.camel@gwdg.de>
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Date: Sat, 7 Dec 2024 10:26:01 -0800
+X-Gmail-Original-Message-ID: <CAHk-=wjpVXEjX16PP=-hi4CgLqEGJ_U-WvKWq+J3C+FW-hSSfg@mail.gmail.com>
+Message-ID: <CAHk-=wjpVXEjX16PP=-hi4CgLqEGJ_U-WvKWq+J3C+FW-hSSfg@mail.gmail.com>
+Subject: Re: [PATCH 02/10] compiler.h: add is_const() as a replacement of __is_constexpr()
+To: Martin Uecker <muecker@gwdg.de>
+Cc: David Laight <David.Laight@aculab.com>, Vincent Mailhol <mailhol.vincent@wanadoo.fr>, 
+	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Nathan Chancellor <nathan@kernel.org>, 
+	Nick Desaulniers <ndesaulniers@google.com>, Bill Wendling <morbo@google.com>, 
+	Justin Stitt <justinstitt@google.com>, Yury Norov <yury.norov@gmail.com>, 
+	Rasmus Villemoes <linux@rasmusvillemoes.dk>, Kees Cook <kees@kernel.org>, 
+	"Gustavo A. R. Silva" <gustavoars@kernel.org>, Jani Nikula <jani.nikula@linux.intel.com>, 
+	Joonas Lahtinen <joonas.lahtinen@linux.intel.com>, Rodrigo Vivi <rodrigo.vivi@intel.com>, 
+	Tvrtko Ursulin <tursulin@ursulin.net>, David Airlie <airlied@gmail.com>, 
+	Simona Vetter <simona@ffwll.ch>, Suzuki K Poulose <suzuki.poulose@arm.com>, 
+	Mike Leach <mike.leach@linaro.org>, James Clark <james.clark@linaro.org>, 
+	Alexander Shishkin <alexander.shishkin@linux.intel.com>, 
+	Rikard Falkeborn <rikard.falkeborn@gmail.com>, 
+	"linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, 
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, 
+	"llvm@lists.linux.dev" <llvm@lists.linux.dev>, 
+	"linux-hardening@vger.kernel.org" <linux-hardening@vger.kernel.org>, 
+	"intel-gfx@lists.freedesktop.org" <intel-gfx@lists.freedesktop.org>, 
+	"dri-devel@lists.freedesktop.org" <dri-devel@lists.freedesktop.org>, 
+	"coresight@lists.linaro.org" <coresight@lists.linaro.org>, 
+	"linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="UTF-8"
 
-RnJvbTogVmluY2VudCBNYWlsaG9sDQo+IFNlbnQ6IDA3IERlY2VtYmVyIDIwMjQgMTM6NTENCi4u
-Lg0KPiA+ID4gSXQgc2VlbXMgdG8gbWUgdGhhdCB0aGUgbG9uZyB0ZXJtIHNvbHV0aW9uIHRvIHRo
-aXMgcHJvYmxlbSBhcmUgdGhlDQo+ID4gPiBjb25zdGV4cHIgZnVuY3Rpb25zLg0KPiA+DQo+ID4g
-SG93IHdvdWxkIGNvbnN0ZXhwciBmdW5jdGlvbnMgaGVscCBoZXJlPyAgKEkgYW0gYSBiaXQgc2Nl
-cHRpY2FsIGFib3V0DQo+ID4gY29uc3RleHByIGZ1bmN0aW9ucy4pDQo+IA0KPiBJIHdhcyB0aGlu
-a2luZyBvZiBzb21lIG9mIHRoZSAic2lkZSBmZWF0dXJlcyIgb2YgY29uc3RleHByIGZ1bmN0aW9u
-cy4gTmFtZWx5Og0KPiANCj4gICAtIHN0ZDo6aXNfY29uc3RhbnRfZXZhbHVhdGVkDQo+ICAgTGlu
-azogaHR0cHM6Ly9lbi5jcHByZWZlcmVuY2UuY29tL3cvY3BwL3R5cGVzL2lzX2NvbnN0YW50X2V2
-YWx1YXRlZA0KPiANCj4gICAtIGlmIGNvbnN0ZXZhbA0KPiAgIExpbms6IGh0dHBzOi8vZW4uY3Bw
-cmVmZXJlbmNlLmNvbS93L2NwcC9sYW5ndWFnZS9pZiNDb25zdGV2YWxfaWYNCj4gDQo+IEkgZGlk
-IG5vdCB0cnkgaXQsIGJ1dCBsb29raW5nIGF0IHRoZXNlLCBJIGJlbGlldmUgdGhhdCB0aGlzIHdv
-dWxkDQo+IGFsbG93IHVzIHRvIHJld3JpdGUgbW9zdCBvZiBvdXIgbWFjcm9zIGludG8gc29tZSBj
-b25zdGV4cHIgZnVuY3Rpb25zLg0KDQpJSVJDIChhbmQgdHJ5aW5nIHRvIHVuZGVyc3RhbmQgdGhl
-IGRlZmluaXRpb25zKSB0aGV5IGFyZSBiYWNrd2FyZHMNCmZyb20gd2hhdCB0aGUga2VybmVsIHRl
-c3RzIGFyZSB0cnlpbmcgdG8gYWNoaWV2ZS4NClRoZSBrZXJuZWwgd2FucyB0byBhZGQgYWRkaXRp
-b25hbCBjb21waWxlLXRpbWUgdGVzdHMgd2hlcmUgcG9zc2libGUuDQpUaGlzIGlzIG9mdGVuIHJl
-c3RyaWN0ZWQgdG8gY2hlY2tpbmcgdmFsdWVzIHRoYXQgYXJlIGNvbXBpbGUgdGltZQ0KY29uc3Rh
-bnRzIChmb3Igc29tZSBkZWZpbml0aW9uIG9mIGNvbnN0YW50KS4NClRoZSBDKysgJ2NvbnN0ZXhw
-cicgaXMgYWJvdXQgZGV0ZXJtaW5pbmcgdGhlIGNvbnRleHQgaW4gd2hpY2ggYQ0KZnVuY3Rpb24g
-aXMgY2FsbGVkLg0KDQpSZW1lbWJlciBpbiBDICdzdGF0aWMgaW50IHggPSBleHByOycgcmVxdWly
-ZXMgdGhhdCAnZXhwcicgaXMgYSBjb25zdGFudA0Kc28gdGhhdCB0aGUgYXNtIGNhbiBjb250YWlu
-ICd4OiAud29yZCB2YWx1ZScsIGJ1dCBDKysgaXMgcGVyZmVjdGx5IHdpbGxpbmcNCnRvIGFkZCBh
-biBlbnRyeSB0byB0aGUgJ2dsb2JhbCBjb25zdHJ1Y3RvcnMnIGFuZCBjYWxsIGEgZnVuY3Rpb24g
-Zm9yIHlvdS4NClRoaXMgaXMgbm90IHVzZWZ1bCBkZWZhdWx0IGJlaGF2aW91ci4NClRoZSAnY29u
-c3RleHByJyBzdHVmZiBzZWVtcyB0byBiZSBhYm91dCBkZXRlY3Rpbmcgc29tZSBvZiB0aGVzZSBj
-YXNlcw0Kc28gdGhlIGZ1bmN0aW9uIGNhbiByZXR1cm4gYSBkaWZmZXJlbnQgdmFsdWUgLSBhbmQg
-dGhlbiBwb3NzaWJseSBiZQ0Kb3B0aW1pc2VkIGF3YXkuDQpUaGUga2VybmVsIGlzIHRyeWluZyB0
-byBnZXQgc29tZSB0ZXN0IGNvdmVyYWdlIGF0IGNvbXBpbGUgdGltZQ0Kd2l0aG91dCBhZmZlY3Rp
-bmcgcnVuLXRpbWUuDQoNClRoZSBjb21waWxlLXRpbWUgY2hlY2tzIGFsbCBnZXQgbW9yZSBjb21w
-bGljYXRlZCBiZWNhdXNlIHRoaW5ncyBsaWtlDQppbml0aWFsaXNlcnMgaGF2ZSB0byBiZSAnaW50
-ZWdlciBjb25zdGFudCBleHByZXNzaW9ucycgcmF0aGVyIHRoYW4gdGhlDQptb3JlIHJlbGF4ZWQg
-J2NvbXBpbGUgdGltZSBjb25zdGFudCcgKGFycmF5IGJvdW5kcyBwcm9iYWJseSBkbyBuZWVkDQp0
-byBiZSB0aGUgZm9ybWVyKS4NClRoaXMgaXMgKHByb2JhYmx5KSB3aGF0IHN0b3BzICh7IGV4cHI7
-IH0pIGJlaW5nIHVzZWQgZm9yIGluaXRpYWxpc2Vycw0KZXZlbiB3aGVuIHRoZSB2YWx1ZSBpcyBh
-IGNvbXBpbGUgdGltZSBjb25zdGFudC4NClJlbGF4aW5nIHRoYXQgcnVsZSB3b3VsZCBiZSB1c2Vm
-dWwuDQoNClRoZW4gdGhlcmUgaXMgdGhlIGJyYWluLWRlYWQgZGVmaW5pdGlvbiBvZiBfU3RhdGlj
-X2Fzc2VydCgpIHRoYXQgbWFrZXMNCml0IHByZXR0eSBuZWFyIGNvbXBsZXRlbHkgdXNlbGVzcyAo
-SSBjYW4ndCByZW1lbWJlciBMaW51cydzIHdvcmRzKSBmb3INCmFueXRoaW5nIG5vbi10cml2aWFs
-Lg0KVG8gYmUgdXNlZnVsIGl0IHdvdWxkIG5lZWQgdG8gYmUgZGVmZXJyZWQgdW50aWwgYWZ0ZXIg
-dGhlIG9wdGltaXNlcg0KaGFzIGRvbmUgYWxsIGl0cyBwcm9jZXNzaW5nIGFuIG9ubHkgdHJpZ2dl
-ciBpZiB0aGUgY2FsbCBoYXNuJ3QgYmVlbg0Kb3B0aW1pc2VkIGF3YXkgYW5kIHRoZSBjb25kaXRp
-b24gaXMgZWl0aGVyIG5vbi1jb25zdGFudCBvciBmYWxzZS4NCmNsYW5nJ3MgJ2luZmluaXRlIHdp
-c2RvbScgZGVjaWRlZCB0byB1bmNvbmRpdGlvbmFsbHkgb3V0cHV0IHRoZSBjcHANCm91dHB1dCBv
-ZiB0aGUgZXhwcmVzc2lvbiBpbiB0aGUgZXJyb3IgbWVzc2FnZSAoZXZlbiB3aGVuIHRoZXJlIHdh
-cw0KYSBjYWxsZXIgcHJvdmlkZWQgbWVzc2FnZSkuIFdoZW4gbWluKCkgd2FzIHVzaW5nIGl0IHRo
-YXQgY291bGQgYmUNCmEgZmV3IGh1bmRyZWQgYnl0ZXMgb2YgaW1wZW5ldHJhYmxlIHRleHQgaW4g
-YSBub3JtYWwgY2FsbCAtIG5ldmVyDQptaW5kIHRoZSBuZXN0ZWQgb25lcyB0aGF0IGhpdCAxMCtN
-QiBiZWNhdXNlIG9mIGEgcmVxdWlyZW1lbnQgdG8gcmV0dXJuDQonY29uc3RhbnQgaW50ZWdlciBl
-eHByZXNzaW9ucycuDQoNCkl0IHdvdWxkIGFsc28gYmUgdXNlZnVsIHRvIGhhdmUgYSAnd2Fybmlu
-ZycgZm9ybSAob3IgZXZlbiBhbiAnaW5mbycNCnRoYXQgaXNuJ3QgYW4gZXJyb3IgZXZlbiB3aXRo
-IC1XZXJyb3IpLg0KDQpUaGVuIHlvdSBnZXQgX0dlbmVyaWMoKS4NCldURiBkbyB0aGUgdW5zZWxl
-Y3RlZCBjYXNlcyBub3Qgb25seSBoYXZlIHRvIGJlIHZhbGlkIEMgYnV0IGFsc28gZ2V0DQpjaGVj
-a2VkIGZvciBzb21lIHdhcm5pbmdzIChsaWtlIC1Xc2lnbi1jb21wYXJlIGFuZCAndW5zaWduZWQg
-Pj0gMCcpLg0KDQouLi4NCj4gSSB3YXMgaW52aXRlZCB0byBXRzE0IHRoaXMgU2VwdGVtYmVyLiBG
-b3Igbm93LCBJIGFtIG9ubHkgbHVya2luZy4gVGhlDQo+IHRoaW5nIEkgaGF2ZSBpbiBtaW5kIHJp
-Z2h0IG5vdyBpcyB0byB3cml0ZSBhIHBhcGVyIHRvIGFsbG93IHRoZSB1c2Ugb2YNCj4gc3RhdGlj
-X2Fzc2VydCgpIGluIGV4cHJlc3Npb25zIChpLmUuIG1ha2UgaXQgcmV0dXJuIDAgb24gc3VjY2Vz
-cykuDQo+IFRoYXQgc2hvdWxkIGJlIGEgcmVsYXRpdmVseSBzbWFsbCBjaGFuZ2UsIGJ1dCB3b3Vs
-ZCBicmluZyBhIG5pY2UNCj4gcXVhbGl0eSBvZiBsaWZlIGltcHJvdmVtZW50Lg0KDQpBZGRpbmcg
-Z2NjJ3MgKHsgZXhwcjsgfSkgdG8gdGhlIHN0YW5kYXJkIGFuZCBhbGxvd2luZyBpdHMgb3V0cHV0
-IHRvDQpiZSBhcyAnY29uc3RhbnQnIGFzIGFueXRoaW5nIGluICdleHByJyB3b3VsZCBzb2x2ZSBh
-IGxvdCBvZiBpc3N1ZXMuDQoNCllvdSBuZWVkIHRvIGJlIGFibGUgdG8gaGF2ZToNCglpZiAoeCkN
-CgkJc3RhdGljX2Fzc2VydCh5KQ0KZm9yIHN0YXRpY19hc3NlcnQoKSB0byBiZSB1c2FibGUgYXMg
-dGhlIG1haW4gbWV0aG9kIG9mIHJlcG9ydGluZw0KdGhlc2Ugc29ydCBvbiBtZXNzYWdlcy4NClRo
-ZSBiZXN0IG9uZSBpbiB0aGUga2VybmVsIChhYil1c2VzIHRoZSBtZXNzYWdlIGZvciBjYWxsaW5n
-IGEgZGVwcmVjYXRlZA0KZnVuY3Rpb24uDQoNClRoZXJlIGFyZSBvdGhlciB0aGluZ3MgdGhhdCBn
-ZXQgYW5ub3lpbmcuDQpJIHVuZGVyc3RhbmQgd2h5IG9mZnNldG9mKCkgbmVlZHMgdG8gYmUgYSAn
-Y29tcGlsZSB0aW1lIGNvbnN0YW50JywNCmJ1dCB0aGF0IHNob3VsZCBvbmx5IGJlIGZvciBjb25z
-dGFudCBpbnB1dC4NClRoZXJlIGlzIG5vIHJlYXNvbiB3aHkgb2Zmc2V0b2YoeCwgeVtleHByZXNz
-aW9uXSkgc2hvdWxkIGJlIGludmFsaWQNCkMgZm9yIGEgbm9uLWNvbnN0YW50IGV4cHJlc3Npb24u
-DQooQWx0aG91Z2ggSSd2ZSBoYWQgaXNzdWVzIGV2ZW4gd2l0aCBhIGNvbnN0YW50IGV4cHJlc3Np
-b24gd2l0aCBhDQpjZXJ0YWluIGNvbXBpbGVyIEknbSBmb3JjZWQgdG8gdXNlIHNvbWV0aW1lcy4p
-DQoNCglEYXZpZA0KDQotDQpSZWdpc3RlcmVkIEFkZHJlc3MgTGFrZXNpZGUsIEJyYW1sZXkgUm9h
-ZCwgTW91bnQgRmFybSwgTWlsdG9uIEtleW5lcywgTUsxIDFQVCwgVUsNClJlZ2lzdHJhdGlvbiBO
-bzogMTM5NzM4NiAoV2FsZXMpDQo=
+On Sat, 7 Dec 2024 at 05:07, Martin Uecker <muecker@gwdg.de> wrote:
+>
+> VLA use *less* stack than a fixed size arrays with fixed bound.
 
+Not really. You end up with tons of problems, not the least of which
+is how to actually analyze the stack size. It also gets *very* nasty
+to have code that declares the VLA size using an argument that is then
+checked afterwards - and if you have a strong preference for
+"declarations before code", you end up with *horrific* issues.
+
+And even if you are super-careful, and you solved the analysis
+problem, in practice VLAs will cause huge stack issues simply due to
+code generation issues.  The compiler will end up doing extra
+alignment and extra frame handling and saving, to the point where any
+advantages the VLA would bring is completely dwarfed by all the
+disadvantages.
+
+We went through this. We are so *much* better off without VLAs that
+it's not even funny.
+
+Now when the compiler says "your stack size is big", you just look
+"Oh, that struct should be allocated with kmalloc, not on the stack".
+Boom. Done.
+
+            Linus
