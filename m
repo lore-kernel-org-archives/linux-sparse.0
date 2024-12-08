@@ -1,55 +1,34 @@
-Received: from mx-2023-1.gwdg.de (mx-2023-1.gwdg.de [134.76.10.21])
+Received: from eu-smtp-delivery-151.mimecast.com (eu-smtp-delivery-151.mimecast.com [185.58.86.151])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B888D9461;
-	Sun,  8 Dec 2024 09:18:54 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=134.76.10.21
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1FA9F145B00
+	for <linux-sparse@vger.kernel.org>; Sun,  8 Dec 2024 11:27:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.58.86.151
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733649538; cv=none; b=nG+FKkgy239Ms3dCYjn/gG37bz8JNCXNoLKAJ1AlpdhJjUGa6OYglNkAXZlcVM/3aOuOB/Ko1HuDhppx4xI8P07hXdkioNCGf6HsxfR+qUtCYwOORSyosHcSQ4Qel4zTqJUz0gOUD2LCvyfHWSb4BejgeEyfDWwAU+WpIfqZ7OI=
+	t=1733657263; cv=none; b=N07ngqogDWC3CoQPmX3T7lF9MGt3jtL4bm2Y78P2aqMh097WnP31BzKQWJKyKQEGVLDXgh3avGbzN/ZwdAljWU7lzhF+ANlmaY2orHlC2wwvqHw3LFDhGVHCUK/en6jKpYLKSA6fwdSfjtE7mbW8//oT5HKPKDJKHoS/2238LV8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733649538; c=relaxed/simple;
-	bh=KwaQAzddSYnu9vcLie6k6ok9qNzm4PTtfMoMlLyy2fg=;
-	h=Message-ID:Subject:From:To:CC:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=erqOQY8HZxPKkBxS92UdutKmY6iLsahYd+G4NzW/MfQ2pcEu/FwgByCGV6jm9UeOckPgpy/NZ+cCMiz2VPAHWrEfPa/6ScZy3YyMGhjk1yoTvFRS7quXkibtRLZoiQ/IGm3dGw/OJBB0xAWh0STjJgPnNDeKt5Rg1ihO5RHGfCY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gwdg.de; spf=pass smtp.mailfrom=gwdg.de; dkim=pass (2048-bit key) header.d=gwdg.de header.i=@gwdg.de header.b=NV4r6sre; arc=none smtp.client-ip=134.76.10.21
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gwdg.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gwdg.de
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gwdg.de header.i=@gwdg.de header.b="NV4r6sre"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=gwdg.de;
-	s=2023-rsa; h=MIME-Version:Content-Transfer-Encoding:Content-Type:References:
-	In-Reply-To:Date:CC:To:From:Subject:Message-ID:Sender:Reply-To:Content-ID:
-	Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc
-	:Resent-Message-ID:List-Id:List-Help:List-Unsubscribe:List-Subscribe:
-	List-Post:List-Owner:List-Archive;
-	bh=KwaQAzddSYnu9vcLie6k6ok9qNzm4PTtfMoMlLyy2fg=; b=NV4r6sre7Ok3wo0w1M1IjH9x5v
-	ilQNDn/XPZdX75phM23l8dDuOB1VNLxPMKKvbXXgd2p5V1uHMsRuNlgUvf3AeH+1FHymLdhoiVhYb
-	Ysg5PIEKxMJsc40fxHSui5EdG6IyQ779QS2vQL/KCo23F0ru06QpS7EqMxsnFyRsGJUOxjFPdQrFF
-	dMiLRhK4dzQ+XzC7th2Qi5Cn/nbNKPbxR8YQrAOeUvar7hboo1TVeI0RknC5cICOBS4weA5dqdt5G
-	klU9eXU4tnOo08f48hmQEaTj/tdZySI5WFrnz0HUUZJt7JKdf1ztGZMduj6rbs6dzv6RXPuDvBedP
-	Kjj2AMww==;
-Received: from xmailer.gwdg.de ([134.76.10.29]:43999)
-	by mailer.gwdg.de with esmtp (GWDG Mailer)
-	(envelope-from <muecker@gwdg.de>)
-	id 1tKDR4-004WKp-2q;
-	Sun, 08 Dec 2024 10:18:42 +0100
-Received: from mbx19-fmz-06.um.gwdg.de ([10.108.142.65] helo=email.gwdg.de)
-	by mailer.gwdg.de with esmtps (TLS1.2:ECDHE-RSA-AES128-GCM-SHA256:128)
-	(GWDG Mailer)
-	(envelope-from <muecker@gwdg.de>)
-	id 1tKDR4-000HH6-2Q;
-	Sun, 08 Dec 2024 10:18:42 +0100
-Received: from [192.168.0.221] (10.250.9.200) by MBX19-FMZ-06.um.gwdg.de
- (10.108.142.65) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.2.1544.14; Sun, 8 Dec
- 2024 10:18:41 +0100
-Message-ID: <aeb1c27d320800dcd8375771022e11e8c27b0d1a.camel@gwdg.de>
-Subject: Re: [PATCH 02/10] compiler.h: add is_const() as a replacement of
- __is_constexpr()
-From: Martin Uecker <muecker@gwdg.de>
-To: Linus Torvalds <torvalds@linux-foundation.org>
-CC: David Laight <David.Laight@aculab.com>, Vincent Mailhol
-	<mailhol.vincent@wanadoo.fr>, Luc Van Oostenryck
+	s=arc-20240116; t=1733657263; c=relaxed/simple;
+	bh=IC1BSP6s4QUw64NREgnsJ9Jd1oTUjpn8Z4FelgQCuuc=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 MIME-Version:Content-Type; b=hVqFkhP6pn12/3DCF+88B0wXlqjtc/peFEV4o6Kjn/cLcQAXFZTxcJqq8MA9f9qvmpzrRQGZZlku0Bgf7hU9xeJ3R+RMHqpuJYmtZOlX+LNnCyVhdtd4JiX6TGgyEHT6aRBQAACNTTGqMDI1SG2yl702hUd3/jsqBGo6Ne4af3s=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ACULAB.COM; spf=pass smtp.mailfrom=aculab.com; arc=none smtp.client-ip=185.58.86.151
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ACULAB.COM
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=aculab.com
+Received: from AcuMS.aculab.com (156.67.243.121 [156.67.243.121]) by
+ relay.mimecast.com with ESMTP with both STARTTLS and AUTH (version=TLSv1.2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id
+ uk-mta-403-bJ36nNrvNzSLRwjrBnXqBQ-1; Sun, 08 Dec 2024 11:27:38 +0000
+X-MC-Unique: bJ36nNrvNzSLRwjrBnXqBQ-1
+X-Mimecast-MFC-AGG-ID: bJ36nNrvNzSLRwjrBnXqBQ
+Received: from AcuMS.Aculab.com (10.202.163.6) by AcuMS.aculab.com
+ (10.202.163.6) with Microsoft SMTP Server (TLS) id 15.0.1497.48; Sun, 8 Dec
+ 2024 11:26:44 +0000
+Received: from AcuMS.Aculab.com ([::1]) by AcuMS.aculab.com ([::1]) with mapi
+ id 15.00.1497.048; Sun, 8 Dec 2024 11:26:44 +0000
+From: David Laight <David.Laight@ACULAB.COM>
+To: 'Martin Uecker' <muecker@gwdg.de>, Linus Torvalds
+	<torvalds@linux-foundation.org>
+CC: Vincent Mailhol <mailhol.vincent@wanadoo.fr>, Luc Van Oostenryck
 	<luc.vanoostenryck@gmail.com>, Nathan Chancellor <nathan@kernel.org>, "Nick
  Desaulniers" <ndesaulniers@google.com>, Bill Wendling <morbo@google.com>,
 	Justin Stitt <justinstitt@google.com>, Yury Norov <yury.norov@gmail.com>,
@@ -70,8 +49,13 @@ CC: David Laight <David.Laight@aculab.com>, Vincent Mailhol
 	<dri-devel@lists.freedesktop.org>, "coresight@lists.linaro.org"
 	<coresight@lists.linaro.org>, "linux-arm-kernel@lists.infradead.org"
 	<linux-arm-kernel@lists.infradead.org>
-Date: Sun, 8 Dec 2024 10:18:40 +0100
-In-Reply-To: <CAHk-=wgVGmj+nAju2XuWWD_FZHdeytRW2XX5D-L3MqDuRRciVg@mail.gmail.com>
+Subject: RE: [PATCH 02/10] compiler.h: add is_const() as a replacement of
+ __is_constexpr()
+Thread-Topic: [PATCH 02/10] compiler.h: add is_const() as a replacement of
+ __is_constexpr()
+Thread-Index: AQHbSQMFJXcuwP9wN0+yRzIQ2cx/pbLcMkGA
+Date: Sun, 8 Dec 2024 11:26:44 +0000
+Message-ID: <b71056c1b9e04aa383f2e5608c27290f@AcuMS.aculab.com>
 References: <20241203-is_constexpr-refactor-v1-0-4e4cbaecc216@wanadoo.fr>
 	 <20241203-is_constexpr-refactor-v1-2-4e4cbaecc216@wanadoo.fr>
 	 <1d807c7471b9434aa8807e6e86c964ec@AcuMS.aculab.com>
@@ -85,67 +69,45 @@ References: <20241203-is_constexpr-refactor-v1-0-4e4cbaecc216@wanadoo.fr>
 	 <CAHk-=wjpVXEjX16PP=-hi4CgLqEGJ_U-WvKWq+J3C+FW-hSSfg@mail.gmail.com>
 	 <0a2996a7c63930b9d9a8d3792358dd9e494e27c1.camel@gwdg.de>
 	 <CAHk-=wjsfYYKBYuW8_6yKjdwHih0MMa2GwUJh_LHcuUNFR7-QA@mail.gmail.com>
-	 <9d9567dbdaf39688bbd0d240e29dec826a5931ee.camel@gwdg.de>
-	 <CAHk-=wgVGmj+nAju2XuWWD_FZHdeytRW2XX5D-L3MqDuRRciVg@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-User-Agent: Evolution 3.46.4-2 
+ <9d9567dbdaf39688bbd0d240e29dec826a5931ee.camel@gwdg.de>
+In-Reply-To: <9d9567dbdaf39688bbd0d240e29dec826a5931ee.camel@gwdg.de>
+Accept-Language: en-GB, en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-ms-exchange-transport-fromentityheader: Hosted
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-ClientProxiedBy: mbx19-gwd-02.um.gwdg.de (10.108.142.51) To
- MBX19-FMZ-06.um.gwdg.de (10.108.142.65)
-X-EndpointSecurity-0xde81-EV: v:7.9.17.458, d:out, a:y, w:t, t:5, sv:1733619932, ts:1733649522
-X-Virus-Scanned: (clean) by clamav
-X-Spam-Level: -
+X-Mimecast-Spam-Score: 0
+X-Mimecast-MFC-PROC-ID: 5efeiauNkPGEN_VZSTSraxRjT-vU8V4rpkhsQLuLQbs_1733657257
+X-Mimecast-Originator: aculab.com
+Content-Language: en-US
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: base64
 
-Am Samstag, dem 07.12.2024 um 17:58 -0800 schrieb Linus Torvalds:
-> On Sat, 7 Dec 2024 at 15:52, Martin Uecker <muecker@gwdg.de> wrote:
-> >=20
-> > Can you point me to some horror stories?
->=20
-> So the main issues tended to be about various static verification tools.
->=20
-> Ranging from things like the stackleak plugin for gcc, where handling
-> VLA's and alloca() (which are pretty much the same thing with
-> different syntax) was just very much added complexity, to perhaps
-> overly simplistic tools that literally just check the stack usage by
-> parsing "objdump --disassemble" output and then building up
-> approximate "this is the combined deepest stack" call chain
-> approximations.
->=20
-> And even in the *basic* infrastructure like gcc itself, VLA's simply
-> made -Wframe-larger-than=3D just simply not work.
->=20
-> I also have this memory of bad code generation (again, this is 5=3D
-> years ago, so take this with a pinch of salt: dim memories), where gcc
-> wouldn't end up re-using VLA stack slots, so VLA's made the frame
-> bigger for that reason or something like that.
->=20
-> We explicitly use "-fconserve-stack" to get gcc to reuse spill slots,
-> because gcc has been known to sometimes makes insanely piggish stack
-> frames when it just creates a spill slot for *everything*, even if the
-> spills aren't live at the same time (think big functions with lots of
-> case statements).
->=20
-> We also had several cases of the VLA's just being silly, when a simple
-> constant-sized allocation just worked fine and didn't generate
-> pointless extra code.
->=20
-> Pretty much none of the code core actually ever wanted VLA's, so the
-> end result was that we had these bad patterns mainly in random drivers
-> etc. Don't do that.
-
-Thanks. This confirms that the tooling around VLAs is rather poor.
-
-
-Martin
-
-
-
-
-
+RnJvbTogTWFydGluIFVlY2tlcg0KPiBTZW50OiAwNyBEZWNlbWJlciAyMDI0IDIzOjUyDQouLi4N
+Cj4gV2hpbGUgdGhlIGNvbXBpbGVyIGNhbiBub3QgYXV0b21hdGljYWxseSBwcm92ZSBldmVyeSB1
+c2UNCj4gb2YgVkxBIGJvdW5kZWQsIGl0IGNhbiByZWxpYWJseSBkaWFnbm9zZSB0aGUgY2FzZXMg
+d2hlcmUgaXQNCj4gY2FuwqAqbm90KiBzZWUgdGhhdCBpdCBpcyBib3VuZGVkLiBDb25zaWRlciB0
+aGlzIGV4YW1wbGU6DQo+IA0KPiB2b2lkIG9vYihpbnQgbiwgY2hhciBwW25dKTsNCj4gdm9pZCBm
+KHVuc2lnbmVkIGludCBuKQ0KPiB7DQo+ICAgICBjaGFyIGJ1ZltNSU4obiwgMTAwKV07IC8vIGJv
+dW5kZWQNCj4gICAgIG9vYihuICsgMTAsIGJ1Zik7IC8vIHdhcm5pbmcNCj4gfQ0KLi4uDQoNClRo
+ZSBrZXJuZWwgc3RhY2sgaGFzIHRvIGhhdmUgZW5vdWdoIHNwYWNlIGZvciB0aGUgWzEwMF0NCnNv
+IHRoZSBmdWxsIGFtb3VudCBtaWdodCBhcyB3ZWxsIGFsd2F5cyBiZSBhbGxvY2F0ZWQuDQpUaGUg
+Y2hhbmNlIG9mICd0cmFkaW5nIG9mZicgc3RhY2sgdXNhZ2Ugd2l0aCBhbm90aGVyIGZ1bmN0aW9u
+DQppbiB0aGUgc2FtZSBjYWxsIHN0YWNrIHRoYXQgaXMgZ3VhcmFudGVlZCB0byB1c2UgbGVzcyB0
+aGFuDQppdHMgbWF4aW11bSBpcyBhYm91dCB6ZXJvLg0KDQpUaGUgVkxBIGNvZGUgYWxzbyBhZGRz
+IGFuIGV4dHJhIHN0YWNrIGZyYW1lLCB0aGlzIHByZXR0eSBtdWNoDQpwZXNzaW1pc2VzIGV2ZXJ5
+dGhpbmcuDQpUaGlzIGhhcHBlbmVkIGZvciAnY29uc3RhbnQnIHNpemVzIGZyb20gbWluKDE2LCBz
+aXplb2YgKHN0cnVjdCkpDQpiZWNhdXNlIG1pbigpIG5lZWRzIHRvIGJlIGEgc3RhdGVtZW50IGZ1
+bmN0aW9uIHRvIGF2b2lkIHJlLWV2YWx1YXRpbmcNCml0cyBhcmd1bWVudHMuDQooVGhlIHZlcnNp
+b24gb2YgbWluKCkgdGhhdCBtYW5hZ2VkIHRvIHJldHVybiBjb25zdGFudCBmcm9tIGNvbnN0YW50
+DQppbnB1dCBqdXN0IGV4cGxvZGVkIGluIGNwcCwgcGFydGlhbGx5IHJlc3BvbnNpYmxlIGZvciAx
+OE1CIGxpbmVzDQpiZWluZyBmZWQgaW50byB0aGUgY29tcGlsZXIgcGFydC4pDQoNCglEYXZpZA0K
+DQotDQpSZWdpc3RlcmVkIEFkZHJlc3MgTGFrZXNpZGUsIEJyYW1sZXkgUm9hZCwgTW91bnQgRmFy
+bSwgTWlsdG9uIEtleW5lcywgTUsxIDFQVCwgVUsNClJlZ2lzdHJhdGlvbiBObzogMTM5NzM4NiAo
+V2FsZXMpDQo=
 
