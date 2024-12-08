@@ -1,32 +1,53 @@
-Received: from eu-smtp-delivery-151.mimecast.com (eu-smtp-delivery-151.mimecast.com [185.58.86.151])
+Received: from mx-2023-1.gwdg.de (mx-2023-1.gwdg.de [134.76.10.21])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 943D214A4F0
-	for <linux-sparse@vger.kernel.org>; Sun,  8 Dec 2024 16:49:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.58.86.151
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BA86D4690;
+	Sun,  8 Dec 2024 18:10:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=134.76.10.21
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733676598; cv=none; b=kBH9XiqCzECciQ4nRfDGAHg2RpXBKm78VAiM+SA4Pr/S0VoDspzWSo/wbjbRgdksIuDFyYPhWHoBR9YOFj1mUz4lNTGlPqymPJQDmre0K5uxq/pxcZbSxPTf9pNAMUSjU3Q+Z3reWphhxAVsnaxSMwg+pIvL5+wQcHty7CrlmaY=
+	t=1733681464; cv=none; b=iw+Um61UULrAhqsj2l9/KUend7jcegqQ07Jw3zke2CSPSrb/3jUXpvputGOUJbsa+Lc4SBG/eXPD1zMM0/dq6DtSuUUw/aibpR1Qj6aGsrKJduh4ZZoHAP9J9qlrR/W7qFYFOLBd3YSXYZfUu7xkCeeUA1e9YzbwT5BF8uMoXL8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733676598; c=relaxed/simple;
-	bh=OjHSu0chH6D5R/rd9eVc2iPaHwtB/NxSL39vZLmKwVY=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 MIME-Version:Content-Type; b=EXuj20V/ycHa/kFmzV2yeMLcfQ3DS357HC4b5/W1FwuqdsM7k3tusPUvVQqghGisUtePmcKt15E+63YUls2QsZpXUK88fGt80mPfL0mqS/57MCvNfk9JfrjdjxUotva9IK95G1RnRg/u+ZpvKfjFGtXduaB3pMTILibMT+2Zzjo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ACULAB.COM; spf=pass smtp.mailfrom=aculab.com; arc=none smtp.client-ip=185.58.86.151
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ACULAB.COM
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=aculab.com
-Received: from AcuMS.aculab.com (156.67.243.121 [156.67.243.121]) by
- relay.mimecast.com with ESMTP with both STARTTLS and AUTH (version=TLSv1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id
- uk-mta-319--F_qy5D-N-uYQShe1NBsMw-1; Sun, 08 Dec 2024 16:49:52 +0000
-X-MC-Unique: -F_qy5D-N-uYQShe1NBsMw-1
-X-Mimecast-MFC-AGG-ID: -F_qy5D-N-uYQShe1NBsMw
-Received: from AcuMS.Aculab.com (10.202.163.4) by AcuMS.aculab.com
- (10.202.163.4) with Microsoft SMTP Server (TLS) id 15.0.1497.48; Sun, 8 Dec
- 2024 16:48:58 +0000
-Received: from AcuMS.Aculab.com ([::1]) by AcuMS.aculab.com ([::1]) with mapi
- id 15.00.1497.048; Sun, 8 Dec 2024 16:48:58 +0000
-From: David Laight <David.Laight@ACULAB.COM>
-To: 'Martin Uecker' <muecker@gwdg.de>, Linus Torvalds
+	s=arc-20240116; t=1733681464; c=relaxed/simple;
+	bh=9CnchKfxWy5z81rg/thnHuLoK1IGJfcPdUPOZRSDVlE=;
+	h=Message-ID:Subject:From:To:CC:Date:In-Reply-To:References:
+	 Content-Type:MIME-Version; b=ARZ6c9IgexGDTboh6vuRJPp2UGqso7xwIt/Gmm1gMyo1AyQAFZbIMFHQh/v3IDZvnT3YR0FnmknMKcE6IXX4Am9BcbI+jFO7pV++M+RZayOP062Gcevuh5sFebznx39Za+PBIH1ymvwzcyrRnvgEjQ9gDCOPgsMtn4uJ7PYOIqc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gwdg.de; spf=pass smtp.mailfrom=gwdg.de; dkim=pass (2048-bit key) header.d=gwdg.de header.i=@gwdg.de header.b=CJKS3qLo; arc=none smtp.client-ip=134.76.10.21
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gwdg.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gwdg.de
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=gwdg.de header.i=@gwdg.de header.b="CJKS3qLo"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=gwdg.de;
+	s=2023-rsa; h=MIME-Version:Content-Transfer-Encoding:Content-Type:References:
+	In-Reply-To:Date:CC:To:From:Subject:Message-ID:Sender:Reply-To:Content-ID:
+	Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc
+	:Resent-Message-ID:List-Id:List-Help:List-Unsubscribe:List-Subscribe:
+	List-Post:List-Owner:List-Archive;
+	bh=9FB2GPk7COCoX9cEFVKvQVosxysJZseEWA2qS7zkWkM=; b=CJKS3qLo2nmU8RTYUGjkHdxbqz
+	ns3qD6CiJJHSo/fxpi0OkfvH8JDQQZdboDlvM/X5DcOKtxOEKZHO1DDbUS7ibZ6KyG6Zk/SU7+Rph
+	Te6kIRiApeS89pXKvOVY+/VJ3wXYA9Z9G+I2/zCcCa/XvLG7AmRxVqASLRJcXP5LXQrdAXnUEcvrs
+	O2/01MVDPrEC4QD/XJf1NbP4rjXcQJ8Qs8VhOvKcazkXGe4hH97QTcLqKzLARCv8+BY4s5fBYP0Go
+	K8CQW9PwNvu3ayOiSb1QPTX1xyvg4/5600xSFeHb+Ar6vPZsB/cK/rcDMH/V4blTmcT3RaT4DwSed
+	W3JC06dw==;
+Received: from xmailer.gwdg.de ([134.76.10.29]:57248)
+	by mailer.gwdg.de with esmtp (GWDG Mailer)
+	(envelope-from <muecker@gwdg.de>)
+	id 1tKLk3-004b6U-2I;
+	Sun, 08 Dec 2024 19:10:51 +0100
+Received: from mbx19-fmz-06.um.gwdg.de ([10.108.142.65] helo=email.gwdg.de)
+	by mailer.gwdg.de with esmtps (TLS1.2:ECDHE-RSA-AES128-GCM-SHA256:128)
+	(GWDG Mailer)
+	(envelope-from <muecker@gwdg.de>)
+	id 1tKLk3-000BW3-1w;
+	Sun, 08 Dec 2024 19:10:51 +0100
+Received: from vra-173-64.tugraz.at (10.250.9.200) by MBX19-FMZ-06.um.gwdg.de
+ (10.108.142.65) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.2.1544.14; Sun, 8 Dec
+ 2024 19:10:49 +0100
+Message-ID: <87dd9b7b52e7cea874c1899f56efdd3d7c5b7243.camel@gwdg.de>
+Subject: Re: [PATCH 02/10] compiler.h: add is_const() as a replacement of
+ __is_constexpr()
+From: Martin Uecker <muecker@gwdg.de>
+To: David Laight <David.Laight@ACULAB.COM>, Linus Torvalds
 	<torvalds@linux-foundation.org>
 CC: Vincent Mailhol <mailhol.vincent@wanadoo.fr>, Luc Van Oostenryck
 	<luc.vanoostenryck@gmail.com>, Nathan Chancellor <nathan@kernel.org>, "Nick
@@ -49,13 +70,8 @@ CC: Vincent Mailhol <mailhol.vincent@wanadoo.fr>, Luc Van Oostenryck
 	<dri-devel@lists.freedesktop.org>, "coresight@lists.linaro.org"
 	<coresight@lists.linaro.org>, "linux-arm-kernel@lists.infradead.org"
 	<linux-arm-kernel@lists.infradead.org>
-Subject: RE: [PATCH 02/10] compiler.h: add is_const() as a replacement of
- __is_constexpr()
-Thread-Topic: [PATCH 02/10] compiler.h: add is_const() as a replacement of
- __is_constexpr()
-Thread-Index: AQHbSQMFJXcuwP9wN0+yRzIQ2cx/pbLcMkGAgAAXzACAADyVgA==
-Date: Sun, 8 Dec 2024 16:48:58 +0000
-Message-ID: <e71fffb7ff0e4bf29692d006c0fe77c2@AcuMS.aculab.com>
+Date: Sun, 8 Dec 2024 19:10:49 +0100
+In-Reply-To: <e71fffb7ff0e4bf29692d006c0fe77c2@AcuMS.aculab.com>
 References: <20241203-is_constexpr-refactor-v1-0-4e4cbaecc216@wanadoo.fr>
 	 <20241203-is_constexpr-refactor-v1-2-4e4cbaecc216@wanadoo.fr>
 	 <1d807c7471b9434aa8807e6e86c964ec@AcuMS.aculab.com>
@@ -71,97 +87,116 @@ References: <20241203-is_constexpr-refactor-v1-0-4e4cbaecc216@wanadoo.fr>
 	 <CAHk-=wjsfYYKBYuW8_6yKjdwHih0MMa2GwUJh_LHcuUNFR7-QA@mail.gmail.com>
 	 <9d9567dbdaf39688bbd0d240e29dec826a5931ee.camel@gwdg.de>
 	 <b71056c1b9e04aa383f2e5608c27290f@AcuMS.aculab.com>
- <6658618490381cf5ec35edbb66f1478024174e67.camel@gwdg.de>
-In-Reply-To: <6658618490381cf5ec35edbb66f1478024174e67.camel@gwdg.de>
-Accept-Language: en-GB, en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-ms-exchange-transport-fromentityheader: Hosted
+	 <6658618490381cf5ec35edbb66f1478024174e67.camel@gwdg.de>
+	 <e71fffb7ff0e4bf29692d006c0fe77c2@AcuMS.aculab.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+User-Agent: Evolution 3.46.4-2 
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Mimecast-Spam-Score: 0
-X-Mimecast-MFC-PROC-ID: LBFvtXPtKrVed6RiEzWnRowjiE4qrIFViLIjhZ5fyc0_1733676591
-X-Mimecast-Originator: aculab.com
-Content-Language: en-US
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: base64
+X-ClientProxiedBy: MBX19-GWD-03.um.gwdg.de (10.108.142.56) To
+ MBX19-FMZ-06.um.gwdg.de (10.108.142.65)
+X-EndpointSecurity-0xde81-EV: v:7.9.17.458, d:out, a:y, w:t, t:5, sv:1733649613, ts:1733681451
+X-Virus-Scanned: (clean) by clamav
+X-Spam-Level: -
 
-RnJvbTogTWFydGluIFVlY2tlcg0KPiBTZW50OiAwOCBEZWNlbWJlciAyMDI0IDEyOjM4DQo+IA0K
-PiBBbSBTb25udGFnLCBkZW0gMDguMTIuMjAyNCB1bSAxMToyNiArMDAwMCBzY2hyaWViIERhdmlk
-IExhaWdodDoNCj4gPiBGcm9tOiBNYXJ0aW4gVWVja2VyDQo+ID4gPiBTZW50OiAwNyBEZWNlbWJl
-ciAyMDI0IDIzOjUyDQo+ID4gLi4uDQo+ID4gPiBXaGlsZSB0aGUgY29tcGlsZXIgY2FuIG5vdCBh
-dXRvbWF0aWNhbGx5IHByb3ZlIGV2ZXJ5IHVzZQ0KPiA+ID4gb2YgVkxBIGJvdW5kZWQsIGl0IGNh
-biByZWxpYWJseSBkaWFnbm9zZSB0aGUgY2FzZXMgd2hlcmUgaXQNCj4gPiA+IGNhbsKgKm5vdCog
-c2VlIHRoYXQgaXQgaXMgYm91bmRlZC4gQ29uc2lkZXIgdGhpcyBleGFtcGxlOg0KPiA+ID4NCj4g
-PiA+IHZvaWQgb29iKGludCBuLCBjaGFyIHBbbl0pOw0KPiA+ID4gdm9pZCBmKHVuc2lnbmVkIGlu
-dCBuKQ0KPiA+ID4gew0KPiA+ID4gICAgIGNoYXIgYnVmW01JTihuLCAxMDApXTsgLy8gYm91bmRl
-ZA0KPiA+ID4gICAgIG9vYihuICsgMTAsIGJ1Zik7IC8vIHdhcm5pbmcNCj4gPiA+IH0NCj4gPiAu
-Li4NCj4gPg0KPiA+IFRoZSBrZXJuZWwgc3RhY2sgaGFzIHRvIGhhdmUgZW5vdWdoIHNwYWNlIGZv
-ciB0aGUgWzEwMF0NCj4gPiBzbyB0aGUgZnVsbCBhbW91bnQgbWlnaHQgYXMgd2VsbCBhbHdheXMg
-YmUgYWxsb2NhdGVkLg0KPiA+IFRoZSBjaGFuY2Ugb2YgJ3RyYWRpbmcgb2ZmJyBzdGFjayB1c2Fn
-ZSB3aXRoIGFub3RoZXIgZnVuY3Rpb24NCj4gPiBpbiB0aGUgc2FtZSBjYWxsIHN0YWNrIHRoYXQg
-aXMgZ3VhcmFudGVlZCB0byB1c2UgbGVzcyB0aGFuDQo+ID4gaXRzIG1heGltdW0gaXMgYWJvdXQg
-emVyby4NCj4gDQo+IEluIG51bWVyaWNhbCBjb21wdXRpbmcgdGhpcyBpcyBhIGJpZyBtb3RpdmF0
-aW9uIGJlY2F1c2UNCj4geW91IGNhbiByZWR1Y2Ugc3RhY2sgdXNhZ2UgaW4gcmVjdXJzaXZlIGRp
-dmlkZS1hbmQtY29ucXVlcg0KPiBhbGdvcml0aG1zLiAgRm9yIHRoZSBrZXJuZWwsIEkgYWdyZWUg
-dGhpcyBpcyBub3QgYQ0KPiBjb21wZWxsaW5nIHVzZSBjYXNlLCBhbmQgdGhlIGJldHRlciBtb3Rp
-dmF0aW9uIHdvdWxkIGJlDQo+IHByZWNpc2UgYm91bmRzIGNoZWNraW5nIGFuZCBjbGVhcmVyIHNl
-bWFudGljcyBmb3IgYnVmZmVyDQo+IG1hbmFnZW1lbnQuDQoNCkV4Y2VwdCB0aGF0IGNoYW5naW5n
-IHRoZSBzaXplIG9mIHRoZSBvbi1zdGFjayBhcnJheSBtYWtlcw0KYWJzb2x1dGVseSBubyBkaWZm
-ZXJlbmNlLg0KSWRlYWxseSB0aGUga2VybmVsIHN0YWNrIHdvdWxkIGJlIGEgc2luZ2xlIDRrIHBh
-Z2UsIGJ1dCB0b28NCm11Y2ggY29kZSB1c2VzIG9uLXN0YWNrIGJ1ZmZlcnMgc28gaXQgaGFzIGJl
-ZW4gaW5jcmVhc2VkIGFuZA0KbWlnaHQgYmUgMTZrIChvciBtb3JlISkuDQpSZW1lbWJlciB0aGlz
-IGlzIHBoeXNpY2FsIG1lbW9yeSBhbGxvY2F0ZWQgdG8gZXZlcnkgdXNlciB0aHJlYWQuDQpPbiBM
-aW51eCBpdCBpcyBub3Qgc3dhcHBhYmxlLg0KDQouLi4NCj4gPiBUaGlzIGhhcHBlbmVkIGZvciAn
-Y29uc3RhbnQnIHNpemVzIGZyb20gbWluKDE2LCBzaXplb2YgKHN0cnVjdCkpDQo+ID4gYmVjYXVz
-ZSBtaW4oKSBuZWVkcyB0byBiZSBhIHN0YXRlbWVudCBmdW5jdGlvbiB0byBhdm9pZCByZS1ldmFs
-dWF0aW5nDQo+ID4gaXRzIGFyZ3VtZW50cy4NCj4gDQo+IENhbiB5b3UgY2xhcmlmeSB0aGlzPyAg
-SWYgdGhlIFZMQSBzaXplIGlzIGNvbnN0YW50LCBldmVuIHdoZW4NCj4gaXQgaXMgbm90IGFuIGlu
-dGVnZXIgY29uc3RhbnQgZXhwcmVzc2lvbiBhY2NvcmRpbmcgdG8gSVNPIEMsDQo+IHRoZSBjb21w
-aWxlciBzaG91bGQgbm90IHByb2R1Y2Ugd29yc2UgY29kZS4gIEZvciBleGFtcGxlLA0KDQpJIGp1
-c3QgdHJpZWQgdG8gcmVwcm9kdWNlIHRoZSBmYWlsaW5nIGNhc2UgLSBhbmQgZmFpbGVkLg0KSXQg
-d2FzIHNpbWlsYXIgdG8gX19idWlsdGluX2NvbnN0YW50X3AoKSBpbml0aWFsbHkgcmV0dXJuaW5n
-ICdkb24ndCBrbm93Jw0Kc28gdGhlICd2YXJpYWJsZSBzaXplZCcgYXJyYXkgY29kZSBnb3QgYWRk
-ZWQsIHRoZW4gbXVjaCBsYXRlcg0KYWZ0ZXIgZnVydGhlciBvcHRpbWlzYXRpb24gcGFzc2VzIHRo
-ZSBleHByZXNzaW9uIGJlY2FtZSBjb25zdGFudC4NClNvIHlvdSBlbmRlZCB1cCB3aXRoIGEgJ2Zp
-eGVkIHNpemUnIFZMQS4NCg0KQ29tcGlsZSB3aXRoIC1Xbm8tdmxhIChhbmQgLVdlcnJvcikgYW5k
-IHRoZSBjb21waWxlIGZhaWxlZC4NCg0KLi4uDQo+IFNvIGEgbG90IG9mIHRoaXMgbWFjcm8gYnVz
-aW5lc3Mgc2VlbXMgdG8gYmUgbmVjZXNzYXJ5DQo+IHRvIGF2b2lkIGNyZWF0aW5nIHdhcm5pbmdz
-IGZvciBJU08gVkxBcyB3aGVuIGluc3RlYWQgeW91IHJlYWxseQ0KPiBjYXJlIGFib3V0IHRoZSBj
-cmVhdGVkIGNvZGUgbm90IGhhdmluZyBhIGR5bmFtaWMgYWxsb2NhdGlvbiBvbg0KPiB0aGUgc3Rh
-Y2suDQoNCkEgbG90IG9mIHRoZSAnbWFjcm8gYnVzaW5lc3MnIGZvciBtaW4vbWF4IGlzIGF2b2lk
-aW5nIHVuZXhwZWN0ZWQNCmNvbnZlcnNpb24gb2YgbmVnYXRpdmUgdmFsdWVzIHRvIHZlcnkgbGFy
-Z2UgdW5zaWduZWQgb25lcy4NCkFuZCBubywgLVdzaWduLWNvbXBhcmUgaXMgc3BlY3RhY3VsYXJs
-eSB1c2VsZXNzLg0KDQouLg0KPiBUaGUgaXNzdWUgaGVyZSBpcyB0aGF0IHdlIG1pc3MgYSBsYW5n
-dWFnZSBmZWF0dXJlIGluIEMgdG8NCj4gaW50cm9kdWNlIGxvY2FsIHZhcmlhYmxlcyB0aGF0IGhl
-bHAgYXZvaWQgbXVsdGlwbGUgZXhwYW5zaW9uDQo+IG9mIG1hY3JvIGFyZ3VtZW50cy4gIEdDQydz
-IHN0YXRlbWVudCBleHByZXNzaW9ucyBhbmQgX19hdXRvX3R5cGUNCj4gYXJlIGEgc29sdXRpb24N
-Cg0Kb3IgaGlzdG9yaWNhbGx5ICd0eXBlb2YoeCkgX3ggPSB4Jw0KDQo+ICNkZWZpbmUgZm9vKHgp
-ICh7IF9fYXV0b190eXBlIF9feCA9ICh4KTsgLi4uIH0pDQo+IA0KPiBidXQgdGhpcyBydW5zIGlu
-dG8gdGhlIGN1cnJlbnQgbGltaXRhdGlvbnMgdGhhdCAoeyB9KSBjYW4gbm90IGJlIHVzZWQNCj4g
-YXQgZmlsZS1zY29wZSBhbmQgY2FuIG5vdCByZXR1cm4gY29uc3RhbnQgZXhwcmVzc2lvbnMuDQo+
-IA0KPiANCj4gRm9yIG90aGVyIHJlYXNvbnMgSSB3YXMgdGhpbmtpbmcgYWJvdXQgYWRkaW5nIG5h
-bWVzIHRvIF9HZW5lcmljLA0KPiBhcyBpbg0KPiANCj4gX0dlbmVyaWMoeCwgaW50IGk6IChpICsg
-MSkpOw0KPiANCj4gYmVjYXVzZSBvbmUgZGVzaWduIGlzc3VlcyB3aXRoIF9HZW5lcmljIGlzIHRo
-YXQgaXQgdHlwZWNoZWNrcw0KPiBhbHNvIHRoZSB1bnRha2VuIGFzc29jaWF0aW9ucyBhbmQgdGhl
-cmUgdGhlICd4JyB0aGVuIGhhcyB0aGUgd3JvbmcNCj4gdHlwZS4gIEhhdmluZyBhbiAnaScgd2l0
-aCB0aGUgcmlnaHQgdHlwZSB3aGljaCBpcyBzZXQgdG8gdGhlIHZhbHVlDQo+IG9mICd4JyB3aGVu
-IHRoZSBicmFuY2ggaXMgdGFrZW4gd291bGQgZml4IHRoaXMgaXNzdWUuDQoNClRoYXQgbG9va3Mg
-ZXZlbiBtb3JlIHN5bnRhY3RpY2FsbHkgb2JzY3VyZSB0aGFuIF9HZW5lcmljIGl0c2VsZi4NCldo
-eSBkb2VzIGl0IG5lZWQgdG8gZG8gbW9yZSB0aGFuIHZlcnkgc2ltcGxlIHN5bnRheCBhbmFseXNp
-cyBvZg0KdGhlIHVud2FudGVkIGJyYW5jaGVzIC0gb3IgdGhleSBjb3VsZCBhdXRvbWF0aWNhbGx5
-IGJlIGFuYWx5c2VkDQp3aXRoIHRoZSBuYW1lZCB2YXJpYWJsZSBoYXZlIHRoZSBzcGVjaWZpZWQg
-dHlwZT8NCg0KPiBCdXQgdGhpcyBmZWF0dXJlIG1pZ2h0IGFsc28gYWxsb3cgd3JpdGluZyBtYWNy
-b3MgdGhhdCBhdm9pZA0KPiBkb3VibGUgZXhwYW5zaW9uIHdpdGhvdXQgcmVxdWlyaW5nIHN0YXRl
-bWVudCBleHByZXNzaW9ucyAod2hpY2gNCj4gYXJlIG1vcmUgZGlmZmljdWx0IHRvIGZpeCk6DQo+
-IA0KPiAjZGVmaW5lIGZvbyh4KSBfR2VuZXJpYyh4LCBpbnQgaTogKGkgKyBpKSk7DQoNCkhvdyBj
-YW4gdGhhdCB3b3JrIGZvciB0aGluZ3MgbGlrZSBtaW4oKSB0aGF0IGhhdmUgbXVsdGlwbGUgYXJn
-dW1lbnRzPw0KTm90IGdvaW5nIHRvIHdvcmsgaWYgeW91IG5lZWQgX19hdXRvX3R5cGUgZWl0aGVy
-Lg0KDQoJRGF2aWQNCg0KLQ0KUmVnaXN0ZXJlZCBBZGRyZXNzIExha2VzaWRlLCBCcmFtbGV5IFJv
-YWQsIE1vdW50IEZhcm0sIE1pbHRvbiBLZXluZXMsIE1LMSAxUFQsIFVLDQpSZWdpc3RyYXRpb24g
-Tm86IDEzOTczODYgKFdhbGVzKQ0K
+Am Sonntag, dem 08.12.2024 um 16:48 +0000 schrieb David Laight:
+> From: Martin Uecker
+> > Sent: 08 December 2024 12:38
+
+...
+> ...
+> > So a lot of this macro business seems to be necessary
+> > to avoid creating warnings for ISO VLAs when instead you really
+> > care about the created code not having a dynamic allocation on
+> > the stack.
+>=20
+> A lot of the 'macro business' for min/max is avoiding unexpected
+> conversion of negative values to very large unsigned ones.
+> And no, -Wsign-compare is spectacularly useless.
+
+This is a different topic, but what would be needed here?
+>=20
+> ..
+> > The issue here is that we miss a language feature in C to
+> > introduce local variables that help avoid multiple expansion
+> > of macro arguments.  GCC's statement expressions and __auto_type
+> > are a solution
+>=20
+> or historically 'typeof(x) _x =3D x'
+>=20
+> > #define foo(x) ({ __auto_type __x =3D (x); ... })
+> >=20
+> > but this runs into the current limitations that ({ }) can not be used
+> > at file-scope and can not return constant expressions.
+> >=20
+> >=20
+> > For other reasons I was thinking about adding names to _Generic,
+> > as in
+> >=20
+> > _Generic(x, int i: (i + 1));
+> >=20
+> > because one design issues with _Generic is that it typechecks
+> > also the untaken associations and there the 'x' then has the wrong
+> > type.  Having an 'i' with the right type which is set to the value
+> > of 'x' when the branch is taken would fix this issue.
+>=20
+> That looks even more syntactically obscure than _Generic itself.
+> Why does it need to do more than very simple syntax analysis of
+> the unwanted branches=C2=A0
+
+This would be possible and GCC does turn of some warnings in
+the unwanted branches.  I added this to GCC 14 I think.
+
+But so far, ISO C requires that all branches are valid and this
+was an intentional design decision to detect errors.
+
+> - or they could automatically be analysed
+> with the named variable have the specified type?
+
+Inside a macro there is no variable 'x' but
+the macro argument 'x' is replaced by some expression.
+
+Also there is the general problem of multiple expansion which
+can only be addressed by introducing an identifier.
+
+>=20
+> > But this feature might also allow writing macros that avoid
+> > double expansion without requiring statement expressions (which
+> > are more difficult to fix):
+> >=20
+> > #define foo(x) _Generic(x, int i: (i + i));
+>=20
+> How can that work for things like min() that have multiple arguments?
+
+You would need to nest it:
+
+#define foo(x, y) _Generic(x, int i: _Generic(y, int j: i + j))
+
+Otherwise one could invent syntax for matching multiple arguments
+at the same time.
+
+There is still the problem of name collision, but this is already
+a problem with=C2=A0
+
+({ int i =3D (x); int j =3D (x); i + j; })=20
+
+> Not going to work if you need __auto_type either.
+
+If we allowed an identifier for the default branch too, this
+would work:  _Generic(x, default i: (2 * i))
+
+
+But hey, I am not saying  this is perfect, it is just
+a possible improvement I was thinking about and which could be
+implemented easily, would automatically return constant expressions,
+and could be used at file scope without further changes.
+
+There are certainly better long-term solutions.
+
+Martin
 
