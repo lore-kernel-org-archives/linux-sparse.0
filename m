@@ -1,32 +1,53 @@
-Received: from eu-smtp-delivery-151.mimecast.com (eu-smtp-delivery-151.mimecast.com [185.58.86.151])
+Received: from mx-2023-1.gwdg.de (mx-2023-1.gwdg.de [134.76.10.21])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1FA9F145B00
-	for <linux-sparse@vger.kernel.org>; Sun,  8 Dec 2024 11:27:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.58.86.151
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A1D051442F6;
+	Sun,  8 Dec 2024 12:38:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=134.76.10.21
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733657263; cv=none; b=N07ngqogDWC3CoQPmX3T7lF9MGt3jtL4bm2Y78P2aqMh097WnP31BzKQWJKyKQEGVLDXgh3avGbzN/ZwdAljWU7lzhF+ANlmaY2orHlC2wwvqHw3LFDhGVHCUK/en6jKpYLKSA6fwdSfjtE7mbW8//oT5HKPKDJKHoS/2238LV8=
+	t=1733661504; cv=none; b=cDbbYQer2L+31Cts8uZWhGohc+VoCNtP9SbBybMErYy8jvnYL7gDqn7CUCFA2SHM0emYFVcro0hJbF+DXjmSJ9+4IQ4jy34tWgS6+ahnQ6sqZRkdiojMb84KIR9Jyzn5sV9vQRmSlRbMkUe3bOAzbl9WK5n6CJhZRTsptFAdpjw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733657263; c=relaxed/simple;
-	bh=IC1BSP6s4QUw64NREgnsJ9Jd1oTUjpn8Z4FelgQCuuc=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 MIME-Version:Content-Type; b=hVqFkhP6pn12/3DCF+88B0wXlqjtc/peFEV4o6Kjn/cLcQAXFZTxcJqq8MA9f9qvmpzrRQGZZlku0Bgf7hU9xeJ3R+RMHqpuJYmtZOlX+LNnCyVhdtd4JiX6TGgyEHT6aRBQAACNTTGqMDI1SG2yl702hUd3/jsqBGo6Ne4af3s=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ACULAB.COM; spf=pass smtp.mailfrom=aculab.com; arc=none smtp.client-ip=185.58.86.151
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ACULAB.COM
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=aculab.com
-Received: from AcuMS.aculab.com (156.67.243.121 [156.67.243.121]) by
- relay.mimecast.com with ESMTP with both STARTTLS and AUTH (version=TLSv1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id
- uk-mta-403-bJ36nNrvNzSLRwjrBnXqBQ-1; Sun, 08 Dec 2024 11:27:38 +0000
-X-MC-Unique: bJ36nNrvNzSLRwjrBnXqBQ-1
-X-Mimecast-MFC-AGG-ID: bJ36nNrvNzSLRwjrBnXqBQ
-Received: from AcuMS.Aculab.com (10.202.163.6) by AcuMS.aculab.com
- (10.202.163.6) with Microsoft SMTP Server (TLS) id 15.0.1497.48; Sun, 8 Dec
- 2024 11:26:44 +0000
-Received: from AcuMS.Aculab.com ([::1]) by AcuMS.aculab.com ([::1]) with mapi
- id 15.00.1497.048; Sun, 8 Dec 2024 11:26:44 +0000
-From: David Laight <David.Laight@ACULAB.COM>
-To: 'Martin Uecker' <muecker@gwdg.de>, Linus Torvalds
+	s=arc-20240116; t=1733661504; c=relaxed/simple;
+	bh=eERcuawd5J1MVjtrw/DRwxxwUZq2oPg8NGbVxZ6hKuY=;
+	h=Message-ID:Subject:From:To:CC:Date:In-Reply-To:References:
+	 Content-Type:MIME-Version; b=SWYTeSNpZBBOXDS281FEsXjfKwl6CzC3vBP18HVzr5SMxDSf62iBjnq81v+oxPuIvi+z3rwDwjrJU2w+VvCnIyGHykD28MoKenUaIc6HbBPSAQPsMmu0hjqtUqGM7WhLhX4X6E9sePHX2zA/AgFRvtnHjBvZ8vP/7PDJoKSa+RI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gwdg.de; spf=pass smtp.mailfrom=gwdg.de; dkim=pass (2048-bit key) header.d=gwdg.de header.i=@gwdg.de header.b=byU3IfeK; arc=none smtp.client-ip=134.76.10.21
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gwdg.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gwdg.de
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=gwdg.de header.i=@gwdg.de header.b="byU3IfeK"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=gwdg.de;
+	s=2023-rsa; h=MIME-Version:Content-Transfer-Encoding:Content-Type:References:
+	In-Reply-To:Date:CC:To:From:Subject:Message-ID:Sender:Reply-To:Content-ID:
+	Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc
+	:Resent-Message-ID:List-Id:List-Help:List-Unsubscribe:List-Subscribe:
+	List-Post:List-Owner:List-Archive;
+	bh=CYPZ6zhZQZZegU5YKzAwbOa7JzOMQMMoi9xo6uKq+Yo=; b=byU3IfeK/Jszh3px4gBXWsVxW4
+	/Uy3hONFmadHud3NLgWfq93VfyrCzySJiBjGY46NRtsG0PTQ8UVc4PR7AgDtSIJqLAJkLA3syPYL6
+	nkFWCkAkLylaC6XsqCc0WsaNIOKeN2D8IOjdmo//of3IyUSS/sgrXcfheXQ4zpEoatupVAUiGoAVl
+	EomUTq2W0/3CLTbnEmtixebgfjOVO7rkINYp3CSPnt6aPMdKEfxYw7RQy6DGK3/S30Erx3MkajS49
+	pF7KWi6Qami3L7TVwTQ6MUSACAnhnv+/wG2V4IQHLwhiacw28v9qP97n6GWPhzQScMCOGUH5OX7MT
+	bFFz2glA==;
+Received: from xmailer.gwdg.de ([134.76.10.29]:42336)
+	by mailer.gwdg.de with esmtp (GWDG Mailer)
+	(envelope-from <muecker@gwdg.de>)
+	id 1tKGY8-004Y8O-3C;
+	Sun, 08 Dec 2024 13:38:13 +0100
+Received: from mbx19-fmz-06.um.gwdg.de ([10.108.142.65] helo=email.gwdg.de)
+	by mailer.gwdg.de with esmtps (TLS1.2:ECDHE-RSA-AES128-GCM-SHA256:128)
+	(GWDG Mailer)
+	(envelope-from <muecker@gwdg.de>)
+	id 1tKGY8-0006nC-2q;
+	Sun, 08 Dec 2024 13:38:12 +0100
+Received: from vra-173-64.tugraz.at (10.250.9.200) by MBX19-FMZ-06.um.gwdg.de
+ (10.108.142.65) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.2.1544.14; Sun, 8 Dec
+ 2024 13:38:11 +0100
+Message-ID: <6658618490381cf5ec35edbb66f1478024174e67.camel@gwdg.de>
+Subject: Re: [PATCH 02/10] compiler.h: add is_const() as a replacement of
+ __is_constexpr()
+From: Martin Uecker <muecker@gwdg.de>
+To: David Laight <David.Laight@ACULAB.COM>, Linus Torvalds
 	<torvalds@linux-foundation.org>
 CC: Vincent Mailhol <mailhol.vincent@wanadoo.fr>, Luc Van Oostenryck
 	<luc.vanoostenryck@gmail.com>, Nathan Chancellor <nathan@kernel.org>, "Nick
@@ -49,13 +70,8 @@ CC: Vincent Mailhol <mailhol.vincent@wanadoo.fr>, Luc Van Oostenryck
 	<dri-devel@lists.freedesktop.org>, "coresight@lists.linaro.org"
 	<coresight@lists.linaro.org>, "linux-arm-kernel@lists.infradead.org"
 	<linux-arm-kernel@lists.infradead.org>
-Subject: RE: [PATCH 02/10] compiler.h: add is_const() as a replacement of
- __is_constexpr()
-Thread-Topic: [PATCH 02/10] compiler.h: add is_const() as a replacement of
- __is_constexpr()
-Thread-Index: AQHbSQMFJXcuwP9wN0+yRzIQ2cx/pbLcMkGA
-Date: Sun, 8 Dec 2024 11:26:44 +0000
-Message-ID: <b71056c1b9e04aa383f2e5608c27290f@AcuMS.aculab.com>
+Date: Sun, 8 Dec 2024 13:38:10 +0100
+In-Reply-To: <b71056c1b9e04aa383f2e5608c27290f@AcuMS.aculab.com>
 References: <20241203-is_constexpr-refactor-v1-0-4e4cbaecc216@wanadoo.fr>
 	 <20241203-is_constexpr-refactor-v1-2-4e4cbaecc216@wanadoo.fr>
 	 <1d807c7471b9434aa8807e6e86c964ec@AcuMS.aculab.com>
@@ -69,45 +85,131 @@ References: <20241203-is_constexpr-refactor-v1-0-4e4cbaecc216@wanadoo.fr>
 	 <CAHk-=wjpVXEjX16PP=-hi4CgLqEGJ_U-WvKWq+J3C+FW-hSSfg@mail.gmail.com>
 	 <0a2996a7c63930b9d9a8d3792358dd9e494e27c1.camel@gwdg.de>
 	 <CAHk-=wjsfYYKBYuW8_6yKjdwHih0MMa2GwUJh_LHcuUNFR7-QA@mail.gmail.com>
- <9d9567dbdaf39688bbd0d240e29dec826a5931ee.camel@gwdg.de>
-In-Reply-To: <9d9567dbdaf39688bbd0d240e29dec826a5931ee.camel@gwdg.de>
-Accept-Language: en-GB, en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-ms-exchange-transport-fromentityheader: Hosted
+	 <9d9567dbdaf39688bbd0d240e29dec826a5931ee.camel@gwdg.de>
+	 <b71056c1b9e04aa383f2e5608c27290f@AcuMS.aculab.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+User-Agent: Evolution 3.46.4-2 
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Mimecast-Spam-Score: 0
-X-Mimecast-MFC-PROC-ID: 5efeiauNkPGEN_VZSTSraxRjT-vU8V4rpkhsQLuLQbs_1733657257
-X-Mimecast-Originator: aculab.com
-Content-Language: en-US
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: base64
+X-ClientProxiedBy: MBX19-GWD-05.um.gwdg.de (10.108.142.58) To
+ MBX19-FMZ-06.um.gwdg.de (10.108.142.65)
+X-EndpointSecurity-0xde81-EV: v:7.9.17.458, d:out, a:y, w:t, t:6, sv:1733639668, ts:1733661492
+X-Virus-Scanned: (clean) by clamav
+X-Spam-Level: -
 
-RnJvbTogTWFydGluIFVlY2tlcg0KPiBTZW50OiAwNyBEZWNlbWJlciAyMDI0IDIzOjUyDQouLi4N
-Cj4gV2hpbGUgdGhlIGNvbXBpbGVyIGNhbiBub3QgYXV0b21hdGljYWxseSBwcm92ZSBldmVyeSB1
-c2UNCj4gb2YgVkxBIGJvdW5kZWQsIGl0IGNhbiByZWxpYWJseSBkaWFnbm9zZSB0aGUgY2FzZXMg
-d2hlcmUgaXQNCj4gY2FuwqAqbm90KiBzZWUgdGhhdCBpdCBpcyBib3VuZGVkLiBDb25zaWRlciB0
-aGlzIGV4YW1wbGU6DQo+IA0KPiB2b2lkIG9vYihpbnQgbiwgY2hhciBwW25dKTsNCj4gdm9pZCBm
-KHVuc2lnbmVkIGludCBuKQ0KPiB7DQo+ICAgICBjaGFyIGJ1ZltNSU4obiwgMTAwKV07IC8vIGJv
-dW5kZWQNCj4gICAgIG9vYihuICsgMTAsIGJ1Zik7IC8vIHdhcm5pbmcNCj4gfQ0KLi4uDQoNClRo
-ZSBrZXJuZWwgc3RhY2sgaGFzIHRvIGhhdmUgZW5vdWdoIHNwYWNlIGZvciB0aGUgWzEwMF0NCnNv
-IHRoZSBmdWxsIGFtb3VudCBtaWdodCBhcyB3ZWxsIGFsd2F5cyBiZSBhbGxvY2F0ZWQuDQpUaGUg
-Y2hhbmNlIG9mICd0cmFkaW5nIG9mZicgc3RhY2sgdXNhZ2Ugd2l0aCBhbm90aGVyIGZ1bmN0aW9u
-DQppbiB0aGUgc2FtZSBjYWxsIHN0YWNrIHRoYXQgaXMgZ3VhcmFudGVlZCB0byB1c2UgbGVzcyB0
-aGFuDQppdHMgbWF4aW11bSBpcyBhYm91dCB6ZXJvLg0KDQpUaGUgVkxBIGNvZGUgYWxzbyBhZGRz
-IGFuIGV4dHJhIHN0YWNrIGZyYW1lLCB0aGlzIHByZXR0eSBtdWNoDQpwZXNzaW1pc2VzIGV2ZXJ5
-dGhpbmcuDQpUaGlzIGhhcHBlbmVkIGZvciAnY29uc3RhbnQnIHNpemVzIGZyb20gbWluKDE2LCBz
-aXplb2YgKHN0cnVjdCkpDQpiZWNhdXNlIG1pbigpIG5lZWRzIHRvIGJlIGEgc3RhdGVtZW50IGZ1
-bmN0aW9uIHRvIGF2b2lkIHJlLWV2YWx1YXRpbmcNCml0cyBhcmd1bWVudHMuDQooVGhlIHZlcnNp
-b24gb2YgbWluKCkgdGhhdCBtYW5hZ2VkIHRvIHJldHVybiBjb25zdGFudCBmcm9tIGNvbnN0YW50
-DQppbnB1dCBqdXN0IGV4cGxvZGVkIGluIGNwcCwgcGFydGlhbGx5IHJlc3BvbnNpYmxlIGZvciAx
-OE1CIGxpbmVzDQpiZWluZyBmZWQgaW50byB0aGUgY29tcGlsZXIgcGFydC4pDQoNCglEYXZpZA0K
-DQotDQpSZWdpc3RlcmVkIEFkZHJlc3MgTGFrZXNpZGUsIEJyYW1sZXkgUm9hZCwgTW91bnQgRmFy
-bSwgTWlsdG9uIEtleW5lcywgTUsxIDFQVCwgVUsNClJlZ2lzdHJhdGlvbiBObzogMTM5NzM4NiAo
-V2FsZXMpDQo=
+Am Sonntag, dem 08.12.2024 um 11:26 +0000 schrieb David Laight:
+> From: Martin Uecker
+> > Sent: 07 December 2024 23:52
+> ...
+> > While the compiler can not automatically prove every use
+> > of VLA bounded, it can reliably diagnose the cases where it
+> > can=C2=A0*not* see that it is bounded. Consider this example:
+> >=20
+> > void oob(int n, char p[n]);
+> > void f(unsigned int n)
+> > {
+> >     char buf[MIN(n, 100)]; // bounded
+> >     oob(n + 10, buf); // warning
+> > }
+> ...
+>=20
+> The kernel stack has to have enough space for the [100]
+> so the full amount might as well always be allocated.
+> The chance of 'trading off' stack usage with another function
+> in the same call stack that is guaranteed to use less than
+> its maximum is about zero.
+
+In numerical computing this is a big motivation because
+you can reduce stack usage in recursive divide-and-conquer
+algorithms.  For the kernel, I agree this is not a
+compelling use case, and the better motivation would be
+precise bounds checking and clearer semantics for buffer
+management. =C2=A0
+
+But don't get me wrong, if the kernel is happier without VLA
+this is fine with me, I am just trying to understand the
+underlying issues better and the "VLAs are security problem"
+or "VLA use more stack"  arguments do not convince me, while
+the points Linus raises make much more sense to me.
+
+>=20
+> The VLA code also adds an extra stack frame, this pretty much
+> pessimises everything.
+
+Yes, but this is something which seems could be improved
+on the compiler side, e.g. by simply transforming
+small VLAs automatically to a fixed size array while
+preserving their semantics for bound checking.
+
+
+> This happened for 'constant' sizes from min(16, sizeof (struct))
+> because min() needs to be a statement function to avoid re-evaluating
+> its arguments.
+
+Can you clarify this?  If the VLA size is constant, even when
+it is not an integer constant expression according to ISO C,
+the compiler should not produce worse code.  For example,
+
+void g(void*);
+
+void foo()
+{
+    int n =3D 10;
+    char buf[n];
+    g(buf);
+}
+
+void bar()
+{
+    char buf[10];
+    g(buf);
+}
+
+So a lot of this macro business seems to be necessary
+to avoid creating warnings for ISO VLAs when instead you really
+care about the created code not having a dynamic allocation on
+the stack.
+
+So one might wonder whether a compiler warning that warns more
+specifically about this would help.
+
+> (The version of min() that managed to return constant from constant
+> input just exploded in cpp, partially responsible for 18MB lines
+> being fed into the compiler part.)
+
+The issue here is that we miss a language feature in C to
+introduce local variables that help avoid multiple expansion
+of macro arguments.  GCC's statement expressions and __auto_type
+are a solution
+
+#define foo(x) ({ __auto_type __x =3D (x); ... })
+
+but this runs into the current limitations that ({ }) can not be used
+at file-scope and can not return constant expressions.
+
+
+For other reasons I was thinking about adding names to _Generic,
+as in
+
+_Generic(x, int i: (i + 1));
+
+because one design issues with _Generic is that it typechecks=C2=A0
+also the untaken associations and there the 'x' then has the wrong
+type.  Having an 'i' with the right type which is set to the value
+of 'x' when the branch is taken would fix this issue.
+
+But this feature might also allow writing macros that avoid
+doublel expansion without requiring statement expressions (which
+are more difficult to fix):
+
+#define foo(x) _Generic(x, int i: (i + i));
+
+
+Martin
+
 
