@@ -1,219 +1,265 @@
-Received: from mail-ej1-f54.google.com (mail-ej1-f54.google.com [209.85.218.54])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from EUR02-DB5-obe.outbound.protection.outlook.com (mail-db5eur02on2066.outbound.protection.outlook.com [40.107.249.66])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7AE163E47B
-	for <linux-sparse@vger.kernel.org>; Sun,  8 Dec 2024 19:11:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.54
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733685091; cv=none; b=Y00kp17KFN/SF1DTYYGiJuKit5zzWcRCwwLEE6sCsTN+VCxaLP0c4SDx6hxtjujwgBYaaQanj6ZAOdpLWrCwja5IIGkpx5tsgfNpTzRrSmku95VHcRWpV49sWmJ+7G+FPTLzLINJD/XYkvpeAl/P5C+Pu5m1V9Q+9XUuL0a8I3k=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733685091; c=relaxed/simple;
-	bh=6Hln1NJrynRFPSlOkJsikZnjs05QWUijpiLr2fyjuQA=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=rKEp7pakJnusm9WovVtQIsU6eFHbjdPYH4FjQorYUnmgrNSETFXgu1W/of3rwx6Y2B6ihuDGdUnFGXjwxPRIj06gFjjx/zLPP4K7H5EcviPRdCXk8Hp0v+CJf3d3QD2Zok6JG0W8lQ4JJGxn/6Bf8Nk4kc5gtLIc+pbl2GqM51A=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org; spf=pass smtp.mailfrom=linuxfoundation.org; dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b=Q73OzPGU; arc=none smtp.client-ip=209.85.218.54
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linuxfoundation.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DF2D41D555;
+	Mon,  9 Dec 2024 10:00:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.249.66
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1733738435; cv=fail; b=MxOP93jiiTXpUyOTHFUPlVYweJEclJeOEVNwRwHYMH9b5+G/Qn/gEZxszyvWxMtp5VA0+V9jlIUD3IXUAqEX4p3ApVrVDUhi/Lqi1/ki/R629JDsVpEsaSkwIzkT/S0wLJklyYoa3n8ashANJxwLyxlXJZycziaYGejik8KK8Rc=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1733738435; c=relaxed/simple;
+	bh=21JQldRCAZbgIEFvA1i75PdFqKp48m/YOIPa6d9CI1c=;
+	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
+	 Content-Type:MIME-Version; b=ao2LvCF9dH7OH7+3SdGFxE58LoC0nfShJBfjvsvAxYLzlvvEKRDH3XsJLLVvoipJe39YMT9vl2QHmVz6k5jWBIQ/OFcqvt2z1c6nuXD4JYsq2zdxYsy7jqkUrTC4ITzHFdUJ4wNb5Lc2yKVa4/Zgzm8ZLzKoAG0afoDiX7jR43E=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=prevas.dk; spf=pass smtp.mailfrom=prevas.dk; dkim=pass (1024-bit key) header.d=prevas.dk header.i=@prevas.dk header.b=JmeIoc+N; arc=fail smtp.client-ip=40.107.249.66
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=prevas.dk
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=prevas.dk
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="Q73OzPGU"
-Received: by mail-ej1-f54.google.com with SMTP id a640c23a62f3a-aa64f3c5a05so244196866b.3
-        for <linux-sparse@vger.kernel.org>; Sun, 08 Dec 2024 11:11:27 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linux-foundation.org; s=google; t=1733685086; x=1734289886; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=XjK1bZri5pPYXLEPg3pfsInYn2WFK+u61JXJym8gukc=;
-        b=Q73OzPGUW2IZbQ4c/NOaGh1at1E2d6jHmuSoAki+Ru22+4fDrcAO+h3bInx6pfanTJ
-         iC4qAQDpRCoatBYCKgC6OPtabq8ynm20w71OA0/XsNXIgZi4+XQgQSn8UTAh4V3jXWb4
-         xuI3tLwMswER+UcVFbApPZ+lNLDpVer14pB+U=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1733685086; x=1734289886;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=XjK1bZri5pPYXLEPg3pfsInYn2WFK+u61JXJym8gukc=;
-        b=jsNb6OPmNPNyDU1oqt5uFgxGj/5Kp40N4hmzk9bhshron9yrRCH7NB6elvlqC8rmB/
-         CHMZkHMzpFC0FZTXmkCHocPq/TLudwRUUC28N3X6fKdSAk8MeQgEjKxKJ2w6vyrEHb4K
-         xd3Tqe01yYvhBl5r87C2ndlbXgZ2I3bgJiYvRIv7ffmR1LKJh/a011NdramRCc3WQBCj
-         2lZrGbm9FxqUYPOBDgF4LjuaPRXr7/j4lxhC6whtK1DNiA3dz2BOopUHWNvLXWbrCAlf
-         QKrv/pmkEL7GmGmJfMfneabTGJSbcF4bR1rRRqeJN6R0TOctR7GekJlkfdNfgMNG6xdP
-         +M2w==
-X-Forwarded-Encrypted: i=1; AJvYcCVrvcCatj+9nEwzV9KdbSjAkiZ+pxNZx7780xDf5loQgyBTH/3X9rok08hWFQWkHH+IDPAcEobUTW/WdGI=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yyc10I/MODau/LcyWIjsY/60fMHQsHpiMskJLABohq6TYB5A7cW
-	YY9gNAoXgk0ClVQolDqP63ToOt/o2mCWIq7Ulwkz34qBpPrYJ9keYE38qn0FGtfpAZkzjQCXhoD
-	dR0FIHg==
-X-Gm-Gg: ASbGncvZybfimmRo2aZ/eq3deHsWtngDM+rmC1ti+H40PNpuctYrDR2aBrn2zQjX6YE
-	OLQ2fEYcjasccYDA902vJTyVSZwoMdg+2caIGGltbLOxYL7SL8viEK//xn38Fs9DLmUhXyIHdEd
-	0ZDOr9R81v3oOTZ8tfWAlKleWsfhOWnB7J1dqQpj3GIeMagU3pFD7gAuY37XHCtp7dyxMU9ZvoL
-	VnkfX37XhBJLuVHLhfnwAUkNGjj/vXo9WbcUe/9hqyQ1sIa93EWl6/O/Eqz53VYOFPdovBSIsB4
-	Va6KlBLPO/JD6BctUXUQ53P7
-X-Google-Smtp-Source: AGHT+IF1JjNHq4etxsa2RVwRU8nmMFkkSW+BTWjgBIguCScq0Y7vey6fbuQ32wX5XAIZ+0uOgLr37Q==
-X-Received: by 2002:a17:907:784f:b0:aa6:7bc1:ba16 with SMTP id a640c23a62f3a-aa67bc1baabmr302221866b.29.1733685086242;
-        Sun, 08 Dec 2024 11:11:26 -0800 (PST)
-Received: from mail-ej1-f52.google.com (mail-ej1-f52.google.com. [209.85.218.52])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-aa685669acesm58426766b.189.2024.12.08.11.11.25
-        for <linux-sparse@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 08 Dec 2024 11:11:25 -0800 (PST)
-Received: by mail-ej1-f52.google.com with SMTP id a640c23a62f3a-a9ec267b879so707389666b.2
-        for <linux-sparse@vger.kernel.org>; Sun, 08 Dec 2024 11:11:25 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCVCinxur0raYv6HRB+qi54Um8AWYQVdhNL9bw3p0dVwMFa7F77DNXG9P1DEKJKyxi4yobNeeWKAOXsiUFc=@vger.kernel.org
-X-Received: by 2002:a17:906:8a53:b0:aa5:4d96:ec7 with SMTP id
- a640c23a62f3a-aa63a21bf90mr809950866b.44.1733684751478; Sun, 08 Dec 2024
- 11:05:51 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=prevas.dk header.i=@prevas.dk header.b="JmeIoc+N"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=YUbou6e+sK+S2Yj2BgQe5wbPxIGCuI8n4jokB0CW4uxJspO810SKC3nNvIEX4Zx6bntq6Zuj27KeMr7G4JH1HUy9regRxdP/ECdl1dGltKn5kUEBe3EUlxYudXHXcP/mNX4ZNS1dLNfGwjduIEli3W+aLXK/Hcf9RDoWHZ6RjApXKlmhA/ClzcIP3fkcFlY2+7CFpTDcQm4jcahJq87gsEkeaF6G7MuCJevVzC3m6tdHYQrFtEYfcUlajmQZCRiowYv8taGSZFv2kppt9gPEWt6aZpgi6xgvMHdw1B8ZkRzQd3hiqUfTcqJedsIdFoVdKjAYiqdjdLIL11gfyyDDdw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=gKZ6DyLGscSAuAthfhVQuNWggzDufR5tnqxVrg3vmU8=;
+ b=NhMmy46po16F1eGYOvb3O6i5QDwLjVcf0RiVrvuDx0avPiA0gWjczh8F/+5uHK1k/mPTZHLgFQEL6OWoluBAyNwhAzQ73TQJwAUvijst79DP51YiJ0YzUK9BysxyrZhktDht78IEzs137I4WsSpCkISRYa16F3wcIOEXhfR7hElIGlUZgWuBZe7+RbTEoWC0kL5dRNAhCRrDqvzcOX7b0EOjcIRc74olzd87DyOHS++og61HpuCeYHhQam+e+28fy8WdOefjB6zpWvGRRw5AcEHZxhL0MMMIncotKt19Y9/mZHKCBnukoUztHyizt5w0h7Kvi5y/rKoRZdNa4DwgOg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=prevas.dk; dmarc=pass action=none header.from=prevas.dk;
+ dkim=pass header.d=prevas.dk; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=prevas.dk;
+ s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=gKZ6DyLGscSAuAthfhVQuNWggzDufR5tnqxVrg3vmU8=;
+ b=JmeIoc+NiYCpj9lzPr7YzocWoOxlF8dVKSPacSd+t9z54gFX5bcdX+m1hyYGQ9v5nosNiZKa/jS91CCNNVt9kwA+SUpcZnbm7uVWWdteDeyAYHYcpO9+VgXMpBeiPMCvu7p1mbgLjv0IO14+eO8VrXN+2cSUmtTeDTHv4Vm5TwI=
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=prevas.dk;
+Received: from DB7PR10MB2475.EURPRD10.PROD.OUTLOOK.COM (2603:10a6:10:41::17)
+ by GVXPR10MB8863.EURPRD10.PROD.OUTLOOK.COM (2603:10a6:150:1de::20) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8251.12; Mon, 9 Dec
+ 2024 09:59:48 +0000
+Received: from DB7PR10MB2475.EURPRD10.PROD.OUTLOOK.COM
+ ([fe80::7e2c:5309:f792:ded4]) by DB7PR10MB2475.EURPRD10.PROD.OUTLOOK.COM
+ ([fe80::7e2c:5309:f792:ded4%5]) with mapi id 15.20.8251.011; Mon, 9 Dec 2024
+ 09:59:47 +0000
+From: Rasmus Villemoes <ravi@prevas.dk>
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Vincent Mailhol <vincent.mailhol@gmail.com>,  David Laight
+ <David.Laight@aculab.com>,  "w@1wt.eu" <w@1wt.eu>,  Luc Van Oostenryck
+ <luc.vanoostenryck@gmail.com>,  Nathan Chancellor <nathan@kernel.org>,
+  Nick Desaulniers <ndesaulniers@google.com>,  Bill Wendling
+ <morbo@google.com>,  Justin Stitt <justinstitt@google.com>,  Yury Norov
+ <yury.norov@gmail.com>,  Kees Cook <kees@kernel.org>,  "Gustavo A. R.
+ Silva" <gustavoars@kernel.org>,  Jani Nikula
+ <jani.nikula@linux.intel.com>,  Joonas Lahtinen
+ <joonas.lahtinen@linux.intel.com>,  Rodrigo Vivi <rodrigo.vivi@intel.com>,
+  Tvrtko Ursulin <tursulin@ursulin.net>,  David Airlie <airlied@gmail.com>,
+  Simona Vetter <simona@ffwll.ch>,  Suzuki K Poulose
+ <suzuki.poulose@arm.com>,  Mike Leach <mike.leach@linaro.org>,  James
+ Clark <james.clark@linaro.org>,  Alexander Shishkin
+ <alexander.shishkin@linux.intel.com>,  Rikard Falkeborn
+ <rikard.falkeborn@gmail.com>,  "linux-sparse@vger.kernel.org"
+ <linux-sparse@vger.kernel.org>,  "linux-kernel@vger.kernel.org"
+ <linux-kernel@vger.kernel.org>,  "llvm@lists.linux.dev"
+ <llvm@lists.linux.dev>,  "linux-hardening@vger.kernel.org"
+ <linux-hardening@vger.kernel.org>,  "intel-gfx@lists.freedesktop.org"
+ <intel-gfx@lists.freedesktop.org>,  "dri-devel@lists.freedesktop.org"
+ <dri-devel@lists.freedesktop.org>,  "coresight@lists.linaro.org"
+ <coresight@lists.linaro.org>,  "linux-arm-kernel@lists.infradead.org"
+ <linux-arm-kernel@lists.infradead.org>,  "uecker@tugraz.at"
+ <uecker@tugraz.at>
+Subject: Re: [PATCH 02/10] compiler.h: add is_const() as a replacement of
+ __is_constexpr()
+In-Reply-To: <CAHk-=wjpN4GWtnsWQ8XJvf=gBQ3UvBk512xK1S35=nGXA6yTiw@mail.gmail.com>
+	(Linus Torvalds's message of "Sat, 7 Dec 2024 10:19:34 -0800")
+References: <20241203-is_constexpr-refactor-v1-0-4e4cbaecc216@wanadoo.fr>
+	<20241203-is_constexpr-refactor-v1-2-4e4cbaecc216@wanadoo.fr>
+	<1d807c7471b9434aa8807e6e86c964ec@AcuMS.aculab.com>
+	<CAMZ6RqLJLP+4d8f5gLfBdFeDVgqy23O+Eo8HRgKCthqBjSHaaw@mail.gmail.com>
+	<9ef03cebb4dd406885d8fdf79aaef043@AcuMS.aculab.com>
+	<CAHk-=wjmeU6ahyuwAymqkSpxX-gCNa3Qc70UXjgnxNiC8eiyOw@mail.gmail.com>
+	<CAMZ6Rq+SzTA25XcMZnMnOJcrrq1VZpeT1xceinarqbXgDDo8VA@mail.gmail.com>
+	<CAHk-=wiP8111QZZJNbcDNsYQ_JC-xvwRKr0qV9UdKn3HKK+-4Q@mail.gmail.com>
+	<d23fe8a5dbe84bfeb18097fdef7aa4c4@AcuMS.aculab.com>
+	<CAHk-=win8afdcergvJ6f2=rRrff8giGUW62qmYs9Ae6aw=wcnA@mail.gmail.com>
+	<0f5c07b827c3468c8fa3928a93a98bfa@AcuMS.aculab.com>
+	<e806dd51b1ac4e289131297fbf30fc37@AcuMS.aculab.com>
+	<CAMZ6RqLOR3aCRW_js2agV+VFiHdazb4S2+NdT5G4=WbDKNB8bA@mail.gmail.com>
+	<b1ff4a65594a4d39b2e9b8b44770214e@AcuMS.aculab.com>
+	<CAMZ6RqJFReLJTd-O8s02oQNeB0SPQh3C-Mg+Nif5vMB9gFtQww@mail.gmail.com>
+	<CAHk-=wjpN4GWtnsWQ8XJvf=gBQ3UvBk512xK1S35=nGXA6yTiw@mail.gmail.com>
+Date: Mon, 09 Dec 2024 10:59:44 +0100
+Message-ID: <87ldwpgorz.fsf@prevas.dk>
+User-Agent: Gnus/5.13 (Gnus v5.13)
+Content-Type: text/plain
+X-ClientProxiedBy: MM0P280CA0066.SWEP280.PROD.OUTLOOK.COM (2603:10a6:190:8::9)
+ To DB7PR10MB2475.EURPRD10.PROD.OUTLOOK.COM (2603:10a6:10:41::17)
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241203-is_constexpr-refactor-v1-0-4e4cbaecc216@wanadoo.fr>
- <20241203-is_constexpr-refactor-v1-2-4e4cbaecc216@wanadoo.fr>
- <1d807c7471b9434aa8807e6e86c964ec@AcuMS.aculab.com> <CAMZ6RqLJLP+4d8f5gLfBdFeDVgqy23O+Eo8HRgKCthqBjSHaaw@mail.gmail.com>
- <9ef03cebb4dd406885d8fdf79aaef043@AcuMS.aculab.com> <abdd7862f136aa676b2d2c324369f4a43ff9909c.camel@gwdg.de>
- <CAMZ6RqKzGiRNMeLsQKRNrxvW_bXB-kEi11udQ82kKX6tGCrqcg@mail.gmail.com>
- <9607300dfca5d71ca9570b1e1de0864e524f356b.camel@gwdg.de> <344b4cf41a474377b3d2cbf6302de703@AcuMS.aculab.com>
- <9a0c041b6143ba07c2b3e524572fccd841f5374b.camel@gwdg.de> <CAHk-=wjpVXEjX16PP=-hi4CgLqEGJ_U-WvKWq+J3C+FW-hSSfg@mail.gmail.com>
- <0a2996a7c63930b9d9a8d3792358dd9e494e27c1.camel@gwdg.de> <CAHk-=wjsfYYKBYuW8_6yKjdwHih0MMa2GwUJh_LHcuUNFR7-QA@mail.gmail.com>
- <9d9567dbdaf39688bbd0d240e29dec826a5931ee.camel@gwdg.de> <b71056c1b9e04aa383f2e5608c27290f@AcuMS.aculab.com>
- <6658618490381cf5ec35edbb66f1478024174e67.camel@gwdg.de> <e71fffb7ff0e4bf29692d006c0fe77c2@AcuMS.aculab.com>
- <87dd9b7b52e7cea874c1899f56efdd3d7c5b7243.camel@gwdg.de>
-In-Reply-To: <87dd9b7b52e7cea874c1899f56efdd3d7c5b7243.camel@gwdg.de>
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Date: Sun, 8 Dec 2024 11:05:34 -0800
-X-Gmail-Original-Message-ID: <CAHk-=wg+_6eQnLWm-kihFxJo1_EmyLSGruKVGzuRUwACE=osrA@mail.gmail.com>
-Message-ID: <CAHk-=wg+_6eQnLWm-kihFxJo1_EmyLSGruKVGzuRUwACE=osrA@mail.gmail.com>
-Subject: Re: [PATCH 02/10] compiler.h: add is_const() as a replacement of __is_constexpr()
-To: Martin Uecker <muecker@gwdg.de>
-Cc: David Laight <David.Laight@aculab.com>, Vincent Mailhol <mailhol.vincent@wanadoo.fr>, 
-	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Nathan Chancellor <nathan@kernel.org>, 
-	Nick Desaulniers <ndesaulniers@google.com>, Bill Wendling <morbo@google.com>, 
-	Justin Stitt <justinstitt@google.com>, Yury Norov <yury.norov@gmail.com>, 
-	Rasmus Villemoes <linux@rasmusvillemoes.dk>, Kees Cook <kees@kernel.org>, 
-	"Gustavo A. R. Silva" <gustavoars@kernel.org>, Jani Nikula <jani.nikula@linux.intel.com>, 
-	Joonas Lahtinen <joonas.lahtinen@linux.intel.com>, Rodrigo Vivi <rodrigo.vivi@intel.com>, 
-	Tvrtko Ursulin <tursulin@ursulin.net>, David Airlie <airlied@gmail.com>, 
-	Simona Vetter <simona@ffwll.ch>, Suzuki K Poulose <suzuki.poulose@arm.com>, 
-	Mike Leach <mike.leach@linaro.org>, James Clark <james.clark@linaro.org>, 
-	Alexander Shishkin <alexander.shishkin@linux.intel.com>, 
-	Rikard Falkeborn <rikard.falkeborn@gmail.com>, 
-	"linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, 
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, 
-	"llvm@lists.linux.dev" <llvm@lists.linux.dev>, 
-	"linux-hardening@vger.kernel.org" <linux-hardening@vger.kernel.org>, 
-	"intel-gfx@lists.freedesktop.org" <intel-gfx@lists.freedesktop.org>, 
-	"dri-devel@lists.freedesktop.org" <dri-devel@lists.freedesktop.org>, 
-	"coresight@lists.linaro.org" <coresight@lists.linaro.org>, 
-	"linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: DB7PR10MB2475:EE_|GVXPR10MB8863:EE_
+X-MS-Office365-Filtering-Correlation-Id: ea4590a2-863d-4110-87b1-08dd183836b6
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|7416014|52116014|376014|366016|1800799024|38350700014|7053199007;
+X-Microsoft-Antispam-Message-Info:
+	=?us-ascii?Q?4B0ZrxED3OiHZsTFT9kC1l86G7YgQtZuDxnhH3SHqIIkVL03UDIURSkm+NNM?=
+ =?us-ascii?Q?U0RgsT8nvJ+7ajYSlvk5GFiaanv5I4p8bicbc95VliPxLEJplS3/2zgw6GJl?=
+ =?us-ascii?Q?hHMjSzgP7Jf6LB3gvQMeP05sIotkqeOI2MrqehGnwE0KnQXfjGHBydrIVdHA?=
+ =?us-ascii?Q?US2YhKqSPWIR27X9uQHAguBq8/pcClCYuq5KFpgkfWyhGrbmUW+CtV1BWZru?=
+ =?us-ascii?Q?lzJjwy/rDpOq4iYFqTHB/VxwH8lZkq10wUyUOo9Q6QZZZhqmDdvS9Q221iSY?=
+ =?us-ascii?Q?+kEWg8aq5gUUbd5fCzdVCdxCMrirdrJWM/jCh+/te5cTGRdt+ibTMYh0Cbs4?=
+ =?us-ascii?Q?MnlXevhVniSIPjC29PBM846Ue7Y2qdrFeBnpXFC0e8aijzZ28IaPKbVtbRa2?=
+ =?us-ascii?Q?g4ijCttNOTqu/NiYt7S9huvQUGWV7dVJx6HUmAGUOBfE65g4/AngFaoCnEny?=
+ =?us-ascii?Q?J8J4Aj7oNgWhE9PDZQYeMuI3SnoDpLCfcGit7GB0nCozGkBoMdHbuy6eQqao?=
+ =?us-ascii?Q?L9h2LunAfgYFGsYS8mA0sdPyrOhFzMtnv5evz7Bl0Ftt6ie1Gut2fDJKXmWM?=
+ =?us-ascii?Q?H0y8P9+3uEhoevDPWQmVWl7nJBjvB29LwQfS/d5qrOhbxeMyOAZQQkRBMHn3?=
+ =?us-ascii?Q?D1otU9/ParlT0/SIlycFw4Lq5UYJ5hWJ9Mr5bN5/xak0YffQxUaBp+y9VwDR?=
+ =?us-ascii?Q?Atl4h1DJrBPfYVWBLQ2inGW6J2whZzB4qaCqqSnjbzleX+ME9IkA2IWZrbZH?=
+ =?us-ascii?Q?RoYshuxL4Ol7ReLOKWLczJRWIayHanuBYJO6MEl1Q4ipAfIfo2/K9KC1lEhD?=
+ =?us-ascii?Q?TDfnU9NY6p0atFfoRxY63aRycLw6YvYQxUiaIt+k4+sZDlzaaX+CDUz5H8f0?=
+ =?us-ascii?Q?yMg2Z3j58E30X9iWagczOmiDPjqNYoFi5L4YLby7s14PmrT1PBAevHERDJ9k?=
+ =?us-ascii?Q?d4nXK9/YgSXUIO1NI+kKcDmcKp7bdOh3DjrkmMuwIrc4rK3zVDTnWiYgCybN?=
+ =?us-ascii?Q?HiizSJlUPCvDnRQ21aZbuL2xZ96MuqhmplrlLVTik5+z6pZJpl0ZiiVIQKUh?=
+ =?us-ascii?Q?2YtcC/n5HJA//zvx9VDXxMvezhV50sJOHh2dqMVpifCr3wXNgTMHnB1igOVB?=
+ =?us-ascii?Q?LqSVI0MEGtMkzoDeeEPHHKNsp9sPogv3wkQdeYLwzdVIZCAkXHEDBUYGlimO?=
+ =?us-ascii?Q?b/Yu9KldxrU4R/K5+DXwhvtXCkyUB2As9lW3pX4fzy31lKgKJ53x+9of9BnW?=
+ =?us-ascii?Q?A9juIdm/Aifv5TlLSAdlcawpjphaolFNTJOaM/lXBp6EXTszgJc5v/jmR2KT?=
+ =?us-ascii?Q?uDlbtTyQ2Q1oIOjmO0JSb3I4Nh3ULzFSyr8CtMsnkxhI7udqiofXwW+E94zk?=
+ =?us-ascii?Q?50EuZFlRnHty5I7gwQHe5VeIm9FgBUNC0oLn87HB3vFEsVDbXg=3D=3D?=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DB7PR10MB2475.EURPRD10.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(7416014)(52116014)(376014)(366016)(1800799024)(38350700014)(7053199007);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?us-ascii?Q?IKHc/f15B2xAJZtBJJOOMaNPOtnBNo8MVKYk+1LOo03j7A121MwxPeNtfnIE?=
+ =?us-ascii?Q?DGWKjrilryPWn3POYUMa24MiElNyfk+kFiB/5mN2lSuBCC1gYbPlHPXsmPAw?=
+ =?us-ascii?Q?6b2qjD4DU0djhWygfIxMFJazrjGnS5Qrw5ijTx3XDVT0WEhRMaRsw9myj7mi?=
+ =?us-ascii?Q?EZY/fRBHigL4WXvwOmyTdzAMs2EUTezhFdqmCPvHxe8UVD4khLrxIFiyeUJ1?=
+ =?us-ascii?Q?5KSz9thjGsA/Zbw6DciOeGCSdFG5cJdIBoeMo/q8j7xLeybSGjQa778BtO9i?=
+ =?us-ascii?Q?sO+KkWxyqiE9s1OrJ7evONsyGk06nU9Ual1v4Ite0FRSR+1r2GJMlGyC/eje?=
+ =?us-ascii?Q?o2VtByIPoRP+6vyLhA+HIK9sMCDzV6HI/XO6QS+fwTGbgi7dudILKMeuli/x?=
+ =?us-ascii?Q?D/8Cm1xKHyOWaNoJIF1yxfVvrwilHa4aF/RGK2XgJ+34TRV+WSxXsvyN55Lm?=
+ =?us-ascii?Q?IHdCsFKTC++/p9DG3qLYF9zac0GkzzFBzsGOiWuExVvjpaXrQyS1GIacst4W?=
+ =?us-ascii?Q?d3NEzNOHNgFI5+dQ8OjjuLaiDfH/KVhoeDSCmnxe4UeLi/44NPvOdsQCohmO?=
+ =?us-ascii?Q?nnt4qjNF32jqVWJeWzbHguJPmeCmFUMTEIXnsLHZf3lbfchrebEu57PZQ20Y?=
+ =?us-ascii?Q?fATdNtaQzvb9sanLMc+x0F0w+xDoCzUsTVOSeNTkk9EKJYrDCg5w+GJGNy61?=
+ =?us-ascii?Q?L1NKlHEE0m7KIKRXAEo9bu8zHKUdyiQNm6gi9cLfGyIk6KaTsTtDfaT4JRK4?=
+ =?us-ascii?Q?JU3JpiZY88nm0EHqIBIQw5UNzp46RbDo0J5gVrSmPSIXv7Tl6KHtQfAq2xA0?=
+ =?us-ascii?Q?4GSQ/tJtx6gtXZxuy5Jj+5OK9wQkVQ7qU74Y0mW1MJDQ/Z+IPMrPpD16gog1?=
+ =?us-ascii?Q?o6Pi7x2tKL0ejdzSAMUsWheW5DeTY0d5OB+QzRlgVrGuHYpxEcoXCEQEW3Ky?=
+ =?us-ascii?Q?T5x3FxLvUvOqPWUcgIR8T9UXkVw3hkKrs9d7i+/2muTWxT403JX6WiXP3DBt?=
+ =?us-ascii?Q?+7W68ibymWlNyG12hAlNSUjoikRSFg6qUg1ZtAO/4kNrYT97UVozVNCVMVjj?=
+ =?us-ascii?Q?rDXSRdA3IwRisV44val9pB/2LSgYWIM5/nN1EYxbS9RXgF392bRjVp+y7AN8?=
+ =?us-ascii?Q?MrXvXyDUUf0TG/p3BrMG+Omy0wA6f1EQX/90wa+7qdoWQ/0S/IoqdUc/u9aM?=
+ =?us-ascii?Q?buktPtIjZqxOn0iLO+Z3VGzFhwzHAsot12eEFd2CuMuigc8dVzeLkZS3UKCd?=
+ =?us-ascii?Q?DVH1Fjm6IDnh44E6WSAOMaQjHRmewOH3mwV+w6fzCUzCScBU7V3U/teNfTdv?=
+ =?us-ascii?Q?rnoP+Ds8bCemevOsDlHHJnP/EvXhqQ6344alJK7Dn3trAxcgueYKfhuH4ZzF?=
+ =?us-ascii?Q?1fsY9PZdYboIOhKj39Jk2Q/BqoSUaqOP8hCSPakquraeM52BeHe7iProW/F4?=
+ =?us-ascii?Q?SiV+zbgJSffH1hl1ee6B/tj4YT3VFCOafcKWUBTi5//5tmmyGSIa70Tt59lA?=
+ =?us-ascii?Q?/c6WFa5G8sj7CL6aohz1MCH6AkmpQ4ghTDTxYe2fTnjl2fFIE/+lxZI7WC+j?=
+ =?us-ascii?Q?jTT/DhvY7Kcgafy+Hk3s1HSEjkdF7gv54dO4QVIk2vzDRTt41U8t2QsOpQYL?=
+ =?us-ascii?Q?bA=3D=3D?=
+X-OriginatorOrg: prevas.dk
+X-MS-Exchange-CrossTenant-Network-Message-Id: ea4590a2-863d-4110-87b1-08dd183836b6
+X-MS-Exchange-CrossTenant-AuthSource: DB7PR10MB2475.EURPRD10.PROD.OUTLOOK.COM
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 09 Dec 2024 09:59:47.8517
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: d350cf71-778d-4780-88f5-071a4cb1ed61
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: YW4gvq7Lmc552Yrwl1NChpyOiYc0/58yyyNk1GNo7S5rdHRqd+2DnGiDF1w8ptFhsGgzYD2NIrrCgTy/NcsPNsU5Si+L2VunuBCKtSish8w=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: GVXPR10MB8863
 
-On Sun, 8 Dec 2024 at 10:11, Martin Uecker <muecker@gwdg.de> wrote:
-> >
-> > A lot of the 'macro business' for min/max is avoiding unexpected
-> > conversion of negative values to very large unsigned ones.
-> > And no, -Wsign-compare is spectacularly useless.
+On Sat, Dec 07 2024, Linus Torvalds <torvalds@linux-foundation.org> wrote:
+
+> On Sat, 7 Dec 2024 at 04:24, Vincent Mailhol <vincent.mailhol@gmail.com> wrote:
+>>
+>> > No good - expands everything twice.
+>>
+>> And? __is_const_zero() does not evaluate its arguments, so no side effect:
 >
-> This is a different topic, but what would be needed here?
+> No, the problem is literally the expansion.
+>
+> Double expansion of these fundamental helpers gets exponential,
+> because they are used in various nested ways in other fundamental
+> helpers.
+>
+> That's why we then spent so much effort on trying to clean up the
+> min/max macros, because a single line of code would expand to
+> literally tens of megabytes of horrific expansions.
+>
+> And the problem with these things is that you can't make them inline
+> functions, so they have to be macros, and then you build up other
+> macros using them (like that "clamp()" macro), and it really gets
+> horrendous and affects the build time.
+>
+> And yes, it is very sad. Particularly since a compiler would have a
+> really easy time with some nice helper builtins.
+>
+> Of course, often the compiler *does* have helper builtins, but we
+> can't use them, because they aren't *quite* the right thing.
 
-Dan Carpenter actually wrote up some of the issues in:
+One thing I've been thinking about when all this comes up is: What if
+the compilers gave us (and the same for _min):
 
-   https://staticthinking.wordpress.com/2023/07/25/wsign-compare-is-garbage=
-/
+  __builtin_max(T, e1, e2, ...)
+  __builtin_max(e1, e2, ...)
 
-but the basic issue is that -Wsign-compare has over the years been
-truly spectacularly bad.
+with T being a type, e1... expressions, the latter being the former with
+T being the result of usual promotion on the types of the expressions,
+and the former having these semantics:
 
-It has literally started out from the completely nonsensical and
-incorrect assumption that the types of a comparison have to match in
-signedness, and it shows in the name itself, but it also showed in
-early implementations.
+(1) If all the expressions are ICE, so is the whole thing.
 
-The very first versions of gcc that did -Wsign-compare literally
-complained about code like
+(2) It's a compile-time error if the values of the expressions are not
+    guaranteed to fit in T (that also applies in case (1)), but this
+    should not be thrown by the front-end but only after optimizations
+    have had a chance.
 
-     sizeof(x) < 5
+(3) Obviously: Every expression is evaluated exactly once and the result
+    is the maximum of those, of type T.
 
-because obviously one side is an unsigned 'size_t', and the other side
-is a signed 'int'. So comparing the two is clearly invalid, right?
+For (2), I'd expect trivial value-range analysis to allow something like
 
-No.
+  int x;
 
-It's obviously *not* invalid, and any compiler that complains about
-different signedness of that compare is just complete useless garbage.
-It's literally checking two constants against each other, and the
-result doesn't depend on the signedness or the silent C implicit type
-conversion.
+  ...
+  if (x < 0)
+    bail;
+  size_t y = max(x, sizeof(foo));
 
-And no, gcc doesn't complain about that particular code any more.
-*That* particular problem was I think only visible in a gcc
-pre-release that sadly did actually ship as part of a SUSE release, so
-we saw it in the wild even if it was never in an official gcc release.
+Of course, specifying exactly which optimizations one can rely on having
+been applied is impossible, but it's the same with our current
+BUILD_BUG_ON() - many of them would trigger at -O0.
 
-I'm pointing out the history because it's relevant due to explaining
-*why* the whole concept of looking at just the type is so broken, and
-how the whole background to the warning was broken from the very
-beginning. The very name of the warning is a sign of the problem.
+Then we could just have _one_ simple #define max __builtin_max , which
+would work at file-scope, automatically have max3 etc. (because I'd
+imagine it would not be much harder for the compiler to just provide the
+variadic version if it has code to compute the max of two already), and
+none of the preprocessor issues would apply.
 
-Because gcc still *does* complain about entirely valid code, where
-"fixing" the warning just means you have to write worse code.
+Dear Santa: Pretty please?
 
-I think Dan's example from the link above is a good one: if
+Rasmus
 
-        for (int i =3D 0; i < sizeof(x); i++)
+Footnotes:
 
-causes a warning, the compiler got things entirely wrong.
+This is of course very kernel-centric. A compiler developer
+doing this would probably have to think about "what if floating point
+types are in the mix". I wouldn't mind if that was just disallowed, but
+I can see how that might be a bit odd. I don't think it's hard to amend
+the rules to that case - rule 2 could probably be used as-is, and (3)
+could say "if any expr are NaN, so is the whole thing" (and if one cares
+which NaN, just the first among the expressions); inf values don't need
+special treatment wrt. min/max.
 
-And yes, modern gcc very much warns about that:
-
-  t.c:4:27: warning: comparison of integer expressions of different
-signedness: =E2=80=98int=E2=80=99 and =E2=80=98long unsigned int=E2=80=99 [=
--Wsign-compare]
-      4 |         for (int i =3D 0; i < sizeof(b); i++)
-        |                           ^
-
-So if you want a general-purpose "Warn about dangerous comparisons",
-you need to get away from the mindset that it's about different signs.
-
-A compiler needs to do proper value range analysis before warning
-about comparing said values. Not just mindlessly say "different types
-bad" like some marsupial that has been dropped on its head a few too
-many times.
-
-End result: calling it "Warn about sign compare" is a disease. It
-shows a lack of understanding of how complex the warning logic needs
-to be.
-
-Now, I'm not claiming that our min/max type warnings are great either:
-they *do* end up basically being the same silly "just check signs, but
-at least don't complain about signed positive constants being used for
-unsigned comparisons".
-
-So our min/max macros most definitely are *not* doing that "value
-range analysis" that I claim is required for a *general* comparison
-thing.
-
-But our min//max macros aren't some general thing. They are very
-specific, and so it's a lot easier to accept the not-great-analysis
-for those specific cases where we then may have to change types
-explicitly or do some other massaging to avoid the warning.
-
-Put another way: a warning that triggers on really basic C absolutely
-*must*not* have silly easily triggerable false positives for good and
-idiomatic source code.
-
-Such a warning is worse than useless, and gets disabled.
-
-But a warning that is overly restrictive and gives silly false
-positives can still be entirely acceptable when the context of that
-warning is very limited.
-
-So this is why in the kernel we disable '-Wsign-compare' in the
-general case, but *do* basically manually then implement that very
-same logic in the very _specific_ case of the min/max() macros.
-
-What is unacceptable nonsense in one case may be acceptable "good
-enough" in another. Life is not fair, I'm afraid.
-
-                Linus
+With my math hat on, I'd want the zero-expressions variant
+__builtin_max(int) to evaluate to INT_MIN ('cause that's the neutral
+element for the binary max of two ints) and similarly for other types,
+but it's probably better to just require at least two expressions.
