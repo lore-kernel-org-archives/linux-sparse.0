@@ -1,114 +1,105 @@
-Received: from mail-ej1-f54.google.com (mail-ej1-f54.google.com [209.85.218.54])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from 009.lax.mailroute.net (009.lax.mailroute.net [199.89.1.12])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D87571F37C1
-	for <linux-sparse@vger.kernel.org>; Wed,  8 Jan 2025 18:11:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.54
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B6F46522F;
+	Sat,  8 Feb 2025 02:53:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=199.89.1.12
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736359869; cv=none; b=kUuXd7bY9SGxRyuTE09sMqrJGmHJs8nFJtraELJiTXlkEYIKDSd0JvoUA9M0ux0a41vbOx7AnUYNjXhRJc//3BwI3X2IY/j5rSWwBERGDKzFl88GPXnj7t3hK0vAIipUebp175A7iskv6pSIQ9zbopmomdfkmxnVC+sEn3a7sRE=
+	t=1738983185; cv=none; b=Vc0Q49LNjpgLDO0CIefCw06UDbELRx4YYtXMKqmEmQS9r3+GGmz2uXQUUl+ncrk3eBtqW8lL2BvJdjxyLOjCVfR4gu3mKUcOwSCOoX6uQD20CrETHKlwbOQCWC2L2U04L+jAW/UjUsY/sSQEydW5rqfJlKmqFwNQPRyIqzC/AGg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736359869; c=relaxed/simple;
-	bh=yRlykbKSn5jYsW8wxQz5WQX3Mpwcq2FfRltURMyGjwo=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=JbIZif3r8uccQD3TDbp+p6Qf3p/pJJciTSRyc5kr0sF6abAyXWgABhmzsHfdkjxVsfws5lSijdJK4zqbCvum+pK3xe0qL3drA6yU4UxlL0Gu6emByRcrLIglgHUS4wPsRTiLR/eE22oOB04+HVEiz0i5zRsLupz5fvPps6iUCA8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org; spf=pass smtp.mailfrom=linuxfoundation.org; dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b=gndXhtlZ; arc=none smtp.client-ip=209.85.218.54
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linuxfoundation.org
+	s=arc-20240116; t=1738983185; c=relaxed/simple;
+	bh=oh6DENofgUHMz/8AVMYVJvixcYcOidKWKaEz5d0gzS0=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=LJPhW3ygG7BVCkBrYlRGJzSP0sFejJa5ZFX8q2q3OoLJvdmHEqjEVfemaNgBxMWWGp+pX+ezNxNqrzU1+9HAQ6OdBDyLB/W+T4Xsoq7I1fVpMZJHL+W2O7tEefnWKe/piUfZTVvTTz2TePnIVRSLtl0FSzgDK360qtQj/hS4Utk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org; spf=pass smtp.mailfrom=acm.org; dkim=pass (2048-bit key) header.d=acm.org header.i=@acm.org header.b=ovK51B/j; arc=none smtp.client-ip=199.89.1.12
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=acm.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="gndXhtlZ"
-Received: by mail-ej1-f54.google.com with SMTP id a640c23a62f3a-aaf900cc7fbso23711766b.3
-        for <linux-sparse@vger.kernel.org>; Wed, 08 Jan 2025 10:11:07 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linux-foundation.org; s=google; t=1736359866; x=1736964666; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=g4L1kpXD4CvIKxF3DPmBbxJe2C0jfudiA06dORui5cI=;
-        b=gndXhtlZegR0I9OVouy7athat+bGF3qv+HfIEbE2iNgvMZrfMOWtc/7fuziiSD8/3u
-         RaNI9iyhwouHGymQXn+i3W6CyHbC9V+BYy4v5ipaSj141dOxNZDiWxQKMmBRetD+eKvu
-         gjzNwXEAUuVu3jBURfPOo9WYwijbcdBD1yTrc=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1736359866; x=1736964666;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=g4L1kpXD4CvIKxF3DPmBbxJe2C0jfudiA06dORui5cI=;
-        b=w8cPax3Db/lipW08FWfpl2r9RZutrm4FpYiACPI0q54QCSp2NpdQS9+TGsTNAVPHsZ
-         H6J+1GtKGOLf0W+4BHefcnWTQqku4N+Q0cdlxleA6kdFOMDxz/nt+46nwQeE2wDh5rdP
-         mBq6UuL1DUL6cH0Oo0ILjqXTSBC6fLqvZrAhWx4+k1CBizmhZv0G/nK+lXgC2+jVG1QU
-         XY+/08nSs//H/773BdCo6V9lh2W523UgCMd4FPINkcNb6meP4Yu58ozgYxCU8rU/1hqf
-         y0eGeELKKzLb7vt1fYcqzSrJWauOxa6plXtlGQY9QYEi9YHbzyGNLMzTMvHMq2WK78uP
-         gUpQ==
-X-Forwarded-Encrypted: i=1; AJvYcCWEpXR6uIR/pvHiYZ5nsRxMgHEnNBulBdGHM/C5SFCMcJIK7mx1HmdHL9vkcy3lTosLQ9scEfeFyMZw0To=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyBYavUT5AHXAVNU5AmVgRTsXbcaEdHHzs41+aoave95UyRglXp
-	1e8vZgBxRX/N6KbMuiA3jrXsYrGjDjI1S1NS0QOyUFLO77P1/94H6OsjjNXJKJO0z7W+XXf/2Q7
-	3c/S9lQ==
-X-Gm-Gg: ASbGncu+hCGoZmAmjdhbt7FynNoXHDrTJGvOipuXsK9D3AXh+92qmdWbHZ2hEUEIR8q
-	NpEzpaevRluoyoxKZXQP0uDy4f+h1XR3G8iL78kmaz7M2Sv+nyo1QegW/PbZ3dwzQmKrewsEoNB
-	s3H/o0Uyh9G0OPDd/OymGBUw8LIkqrEa9pLfKJoOm/jxLSxlcrxpreXC07s+ZYTsC28fn9O6tAR
-	hSN7As4s75g74sb6p6QV7ePFe0FkfElWI+3UAIpOBaZKMQh9u0AZQFArpCt5ph1N3ZZVmlNZPKr
-	QyCqK0/xvTxVCBr2HCC6la7rxJoJNTU=
-X-Google-Smtp-Source: AGHT+IFS5EQSFTEYxv0+xVi3206fLMTRaYtHWb/wcO1AH/4vXPwYI3WZv8Grbz9A8xVsbJwERVM/ow==
-X-Received: by 2002:a17:907:97ce:b0:aac:2128:c89e with SMTP id a640c23a62f3a-ab2abdc0a39mr363598166b.43.1736359865944;
-        Wed, 08 Jan 2025 10:11:05 -0800 (PST)
-Received: from mail-ej1-f53.google.com (mail-ej1-f53.google.com. [209.85.218.53])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-aac0eae71desm2500876366b.89.2025.01.08.10.11.05
-        for <linux-sparse@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 08 Jan 2025 10:11:05 -0800 (PST)
-Received: by mail-ej1-f53.google.com with SMTP id a640c23a62f3a-aaeec07b705so21549266b.2
-        for <linux-sparse@vger.kernel.org>; Wed, 08 Jan 2025 10:11:05 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCWWL0Mc9TVko/gSU/mRotYmdY/3ywShftv85nTuMsB7PZViBBC0MsrHp39losT5Od3IdHhPVVJcD118AMI=@vger.kernel.org
-X-Received: by 2002:a17:907:1c93:b0:aae:8692:902b with SMTP id
- a640c23a62f3a-ab2ab748eeamr327286666b.31.1736359864937; Wed, 08 Jan 2025
- 10:11:04 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=acm.org header.i=@acm.org header.b="ovK51B/j"
+Received: from localhost (localhost [127.0.0.1])
+	by 009.lax.mailroute.net (Postfix) with ESMTP id 4Yqb4G6s6MzlgTwQ;
+	Sat,  8 Feb 2025 02:53:02 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=acm.org; h=
+	content-transfer-encoding:content-type:content-type:in-reply-to
+	:from:from:content-language:references:subject:subject
+	:user-agent:mime-version:date:date:message-id:received:received;
+	 s=mr01; t=1738983177; x=1741575178; bh=4FFbTlx5LV+h8M1IzCJ0Rk7p
+	GIZ7DeOsHyH8TXJjSDA=; b=ovK51B/jZfMCkN27WBqitmpJjcsYl7CTAtYOJ0ru
+	g1M6jfDtDMRRgfL/kHBZaxJ0HvMS1TpS1gQ0+p3wiCNL0lTp1KSSnB4TFJLfMNI1
+	c8Y0ZuG46K1qUEPN5obo2BuL13OonTffTaTNhilC7u73/vgetPQztL9ZlPk1uX/6
+	991DT1LAkrZpAv1+UJz3KoVldfu/sIV5zeX8GGq98ehGtCDWNvUlf2gtlkKl/Rgz
+	p9ew5F56/F8sRtxZfKxQwO0vIhcPY1KdID2OrYF8FIXlbNtjc64c46NBpZHphrVN
+	2kO0yXLiAaNweHv9mbUf1gkZgyevGNkd5+0XUFOPRH1XgA==
+X-Virus-Scanned: by MailRoute
+Received: from 009.lax.mailroute.net ([127.0.0.1])
+ by localhost (009.lax [127.0.0.1]) (mroute_mailscanner, port 10029) with LMTP
+ id Kc81cGdEH4Xr; Sat,  8 Feb 2025 02:52:57 +0000 (UTC)
+Received: from [192.168.51.14] (c-73-231-117-72.hsd1.ca.comcast.net [73.231.117.72])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	(Authenticated sender: bvanassche@acm.org)
+	by 009.lax.mailroute.net (Postfix) with ESMTPSA id 4Yqb434XJHzlgTwF;
+	Sat,  8 Feb 2025 02:52:50 +0000 (UTC)
+Message-ID: <e56577db-b94c-4f38-868b-dd3be65f780d@acm.org>
+Date: Fri, 7 Feb 2025 18:52:48 -0800
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <202501030516.uZrwnuQQ-lkp@intel.com> <CAMuHMdW-DYPp_2nAaBdvgoa6Yr9et2cNS_260H-9H_CT4yEasw@mail.gmail.com>
- <CAHk-=wj4tYCytRshQGkWSNmZS=59PtKEUpG7f4Sy_46n+WYtXw@mail.gmail.com> <CAMuHMdVLQ2z=U1YJ18GsnJcej2mwGg02GVtKQLQKr0yNtA-7Hg@mail.gmail.com>
-In-Reply-To: <CAMuHMdVLQ2z=U1YJ18GsnJcej2mwGg02GVtKQLQKr0yNtA-7Hg@mail.gmail.com>
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Date: Wed, 8 Jan 2025 10:10:48 -0800
-X-Gmail-Original-Message-ID: <CAHk-=whmhoFfty4GoAnN6u1K2EsjhWkoS767fa-+Lsf1Ya6A+w@mail.gmail.com>
-X-Gm-Features: AbW1kvaDHAgFTamUSR1ieUMfa_7UpkwDHNwGJjelV-I2cxYJy3aNc-RISQlIhjU
-Message-ID: <CAHk-=whmhoFfty4GoAnN6u1K2EsjhWkoS767fa-+Lsf1Ya6A+w@mail.gmail.com>
-Subject: Re: [geert-m68k:master 2/2] lib/muldi3.c:53:28: sparse: sparse: asm
- output is not an lvalue
-To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: kernel test robot <lkp@intel.com>, Greg Ungerer <gerg@linux-m68k.org>, oe-kbuild-all@lists.linux.dev, 
-	linux-m68k@lists.linux-m68k.org, Arnd Bergmann <arnd@arndb.de>, 
-	linux-sparse@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla Thunderbird
+Subject: Re: [RFC 0/2] refcount: attempt to avoid imbalance warnings
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>,
+ Marco Elver <elver@google.com>, Nick Desaulniers <ndesaulniers@google.com>,
+ Alexander Aring <aahringo@redhat.com>, Will Deacon <will@kernel.org>,
+ Peter Zijlstra <peterz@infradead.org>, Boqun Feng <boqun.feng@gmail.com>,
+ Mark Rutland <mark.rutland@arm.com>, thunder.leizhen@huawei.com,
+ jacob.e.keller@intel.com, Andrew Morton <akpm@linux-foundation.org>,
+ Sparse Mailing-list <linux-sparse@vger.kernel.org>,
+ cluster-devel <cluster-devel@redhat.com>,
+ Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+References: <20220630135934.1799248-1-aahringo@redhat.com>
+ <CAHk-=wjZfO9hGqJ2_hGQG3U_XzSh9_XaXze=HgPdvJbgrvASfA@mail.gmail.com>
+Content-Language: en-US
+From: Bart Van Assche <bvanassche@acm.org>
+In-Reply-To: <CAHk-=wjZfO9hGqJ2_hGQG3U_XzSh9_XaXze=HgPdvJbgrvASfA@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-On Wed, 8 Jan 2025 at 06:19, Geert Uytterhoeven <geert@linux-m68k.org> wrote:
->
-> That leaves us with the "not addressable" sparse error.
+On 6/30/22 9:34 AM, Linus Torvalds wrote:
+> On Thu, Jun 30, 2022 at 6:59 AM Alexander Aring <aahringo@redhat.com> wrote:
+>>
+>> I send this patch series as RFC because it was necessary to do a kref
+>> change after adding __cond_lock() to refcount_dec_and_lock()
+>> functionality.
+> 
+> Can you try something like this instead?
+> 
+> This is two separate patches - one for sparse, and one for the kernel.
+> 
+> This is only *very* lightly tested (ie I tested it on a single kernel
+> file that used refcount_dec_and_lock())
+> 
+>                  Linus
 
-Hmm. That one is actually a sparse mis-feature.
+(replying to an email from two years ago -- see also
+https://lore.kernel.org/linux-kernel/CAHk-=wjZfO9hGqJ2_hGQG3U_XzSh9_XaXze=HgPdvJbgrvASfA@mail.gmail.com/)
 
-Sparse sees that
+Hi Luc,
 
-          "dmi" ((USItype)(v))
+Are there any plans to add support for __cond_acquires() in sparse?
 
-input, and the 'm' makes it go "it's a memory location" and that makes
-sparse go "it must be addressable".
+Marco Elver (Cc-ed) and I are looking into enabling the Clang 
+-Wthread-safety compiler flag for Linux kernel code. If we want to keep the
+sparse locking annotations, a first step would be to convert all
+__cond_lock() annotations into __cond_acquires(). When I tried to make
+that change I noticed that sparse does not yet support
+__cond_acquires(). Hence my question about the plan to support
+__cond_acquires() in sparse?
 
-But for asm inputs, it just means that the compiler should *put* the
-thing in memory to be an input.
+Thanks,
 
-And this is hidden on x86, because sparse recognizes "r" for register,
-and says "if it can be either a register or memory, I don't require
-memory". So there's various x86 inline asm that does something like
-
-        "rm" (0)
-
-and sparse won't complain about the zero not being addressable.
-
-But in your case, just making the inputs lvalues will fix the sparse
-problem, so I guess that's the right thing to do. I sadly don't see
-sparse being fixed because we don't have a maintainer..
-
-                 Linus
+Bart.
