@@ -1,77 +1,107 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-oo1-f59.google.com (mail-oo1-f59.google.com [209.85.161.59])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6ED7A1E3769;
-	Mon, 21 Apr 2025 16:43:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3D0B63C01
+	for <linux-sparse@vger.kernel.org>; Thu, 29 May 2025 06:12:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.161.59
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745253790; cv=none; b=HDMHdTsQa1NgSaJbFJtepCCGM5VYbzMsjFYWiSktEgw2juXbUPPF64FlRV+k5m6dWS2SvVLDG8s9wlTv1XSMV5PZpynaRyvufnwzHd3XHd7LbnRsJhs5ZBbdgfloq6UWuegOiKP8JQ8JigXvd9KZRSGcg1LL4OiEy6DNf1Ke8hQ=
+	t=1748499181; cv=none; b=jZwx+HED5p1KZm+l7BU/n5Z8AfX/YKThGWCOGJMeh54r/p461IPwNLhI0fHelQoJXmxHsuNok0rHxEhrXN2O436WcgW7VEFGFuDWoqlPzVMafde0iWKNTbJP+/yOny6hnIibczHx5gr9SBVX8mhe5iqnPXTwR1CwhKDN7t6DLHM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745253790; c=relaxed/simple;
-	bh=nU2NB+tnAZnt1MsC8/QTTW/qtrU+1eXEvM7zijUvmBA=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=t0G3SuZO0JeVZumqw5/R0qgK3icZuuK804Awk/TaLKhpSuuthDTEGQfOn4pwCFtiw5cnnNwPhBFuguMeJ2XHH3Uuzqag43GnnYingZjZtm1bcjikfi2Rbwlbd0rWKuCp7Jm8OIpjxlMxUK+8VBqPhHGmUS7VK69XeDQUpxy8tpU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ecXGgq2l; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1748499181; c=relaxed/simple;
+	bh=e4M8URB6UTFdtC/9h3URv/5IvUb2w5I9sJ2NtfJpcYQ=;
+	h=Date:From:To:Cc:Message-Id:Subject:MIME-Version:Content-Type; b=k84RxdsvPi673zIucfhv/Gu48+6/86UNeaqw3zlfd5flFyHv2ePys2FX+mc2AlcClXlxHDSPXtGDX74uWB5wkDF8Janoon+O8VfGfOe4uAB04ogxySPvvjYRbi2+ceeVGafS5ouxfGAFu8dyLnHjxX7be0DzNU6aWxKt+vIlgXw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=ancd.us; spf=none smtp.mailfrom=ancd.us; dkim=pass (2048-bit key) header.d=ancd-us.20230601.gappssmtp.com header.i=@ancd-us.20230601.gappssmtp.com header.b=NqvVKfJN; arc=none smtp.client-ip=209.85.161.59
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=ancd.us
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=ancd.us
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ecXGgq2l"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BA3E2C4CEE4;
-	Mon, 21 Apr 2025 16:43:09 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1745253789;
-	bh=nU2NB+tnAZnt1MsC8/QTTW/qtrU+1eXEvM7zijUvmBA=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=ecXGgq2lx4aAuRbCi5U79Qj0tVT7lYsxum+Siq7PjrHVJOkbtHk9fb3/TfTGfjHdd
-	 3KHPMLY2eZtQHzRJEAvetJIwJOKLQyffRLKZQfFzJKfOelyje1/JPDYHlqTwh9nsZq
-	 k5InamI1EivEJyXYRQTy0IwezLCbwd7w2igBDjBrICBsfkZWRqd/0mpldv/Kusglzo
-	 qRApxCnUSZdvtLlfCvvAPLIEGYbwRwMJQGh5yOgy3tc82QhgGeIOoRZxbbmjSNv9LC
-	 aeF1NNYpNTFhSXxxK1uBbcZ9OHL/bdZ1utxz5f+dtjPUmTLzKwyWd4FSLk31pF+/as
-	 /5OOVmtLL9DGQ==
-Date: Mon, 21 Apr 2025 09:43:06 -0700
-From: Kees Cook <kees@kernel.org>
-To: Christoph Hellwig <hch@lst.de>
-Cc: Masahiro Yamada <masahiroy@kernel.org>,
-	Andrew Morton <akpm@linux-foundation.org>,
-	Andrey Ryabinin <ryabinin.a.a@gmail.com>,
-	Alexander Potapenko <glider@google.com>,
-	Andrey Konovalov <andreyknvl@gmail.com>,
-	Dmitry Vyukov <dvyukov@google.com>,
-	Vincenzo Frascino <vincenzo.frascino@arm.com>,
-	Nathan Chancellor <nathan@kernel.org>,
-	Nicolas Schier <nicolas.schier@linux.dev>,
-	Nick Desaulniers <nick.desaulniers+lkml@gmail.com>,
-	Bill Wendling <morbo@google.com>,
-	Justin Stitt <justinstitt@google.com>, kasan-dev@googlegroups.com,
-	linux-mm@kvack.org, linux-kbuild@vger.kernel.org,
-	llvm@lists.linux.dev, linux-kernel@vger.kernel.org,
-	linux-hardening@vger.kernel.org, linux-sparse@vger.kernel.org,
-	luc.vanoostenryck@gmail.com
-Subject: Re: [PATCH] kbuild: Switch from -Wvla to -Wvla-larger-than=0
-Message-ID: <202504210940.8B3E06C4F7@keescook>
-References: <20250418213235.work.532-kees@kernel.org>
- <20250421091233.GA21118@lst.de>
+	dkim=pass (2048-bit key) header.d=ancd-us.20230601.gappssmtp.com header.i=@ancd-us.20230601.gappssmtp.com header.b="NqvVKfJN"
+Received: by mail-oo1-f59.google.com with SMTP id 006d021491bc7-60bad055108so488395eaf.1
+        for <linux-sparse@vger.kernel.org>; Wed, 28 May 2025 23:12:59 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=ancd-us.20230601.gappssmtp.com; s=20230601; t=1748499179; x=1749103979; darn=vger.kernel.org;
+        h=mime-version:subject:message-id:cc:to:from:date:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=oXv+s8ox6hcAutw1/GW6lc+HHbm+saRgVf7+OD4ofZo=;
+        b=NqvVKfJNYX1THG6f+7aD+yA7EHjsZ3+9VruI+TAX7RJkcG7t6Mc6uM7ACUmfYu1482
+         kTVMt6nSsDtDXKKihbtiv46aSg6hJSma/OmE126ios1xjCTcI+jFyuNa8xm06V/i7CTG
+         Rq/b6ZCMn2+9MfwxtjSXNI7TIqFo7OD/8I56DBqrogvu6OosZR2F5aiP0+a0EcROEADn
+         rXrvkpeY7Jqfk4T6D+GQe7ZC+o6ZGA4slmhivXd+zA64F1Pq260F9dTBzIz4d9B1qCJU
+         n8qumnIOOJ3qX+FxjlMhaNYA15YfJamXHwqyxoH32H6TeMRsrW+pJv+BBtkmCalK6uAk
+         d0dA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1748499179; x=1749103979;
+        h=mime-version:subject:message-id:cc:to:from:date:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=oXv+s8ox6hcAutw1/GW6lc+HHbm+saRgVf7+OD4ofZo=;
+        b=mnhC9am8D5pZr/noGT11MJhgU859pXFgtXPiR7c9TRrB3TNuvu+IJqt6h0AEJHOcMT
+         VVyFBdTUpE8h0JG1EgfnyEwMZ+0YBOUGClbh+FnHiGbjMdXEkIFKJ+No/EqFgLo5NXTM
+         y6M3NtcCjtXmolZPE3Nuw/HOCOCfcMkqf7DouRWb7rul1wtuCwCSKRmWsA53CbwBIpE4
+         UoSddIlbAn+GCV/Cz+8CGY7T7E8RhViSrvkvUiH+AjATDX3sjykEkLGS1CtrS23SE67Z
+         fo7meNz99Uq64G21/Cj/nKthzZ4oqL7qRDkNhxDe1UCB1uVG5colth2MAJ/HIpCr5Sr4
+         4e2w==
+X-Forwarded-Encrypted: i=1; AJvYcCW9e+BObMfRI2R061L1jGrI9rrYayzsHM9B5miA7RNP9BbpKVzLWZzTH7deXzn1qSXuICjyGvRcjPu4jLk=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yz8acT8yLiko7t+n4dSyi/oVrf7SWL2aHSouusH5Xr08oFysKUW
+	MMyIfPr3+NjFbtlQwtrarYfFKnlff63fXiuH/SBEhqlWN3U9FjQFZGHWAap1b7PmbJ5T2L44GpJ
+	q2cQ/AU9XUuYygA==
+X-Google-Smtp-Source: AGHT+IGOyDVqw/WYuB29GwddScmwBfOM3dPe/6j+z0EImWJ76A/tD2vQoj5ZJzdpzUGrffRp82Y8cK9psg==
+X-Received: by 2002:a05:6808:4c81:b0:404:e2fe:ee91 with SMTP id 5614622812f47-40670742d59mr529891b6e.8.1748499179006;
+        Wed, 28 May 2025 23:12:59 -0700 (PDT)
+X-Google-Already-Archived: Yes
+X-Google-Already-Archived-Group-Id: b7f2e0059d
+X-Google-Doc-Id: 3d1a1ccdf363
+X-Google-Thread-Id: 3aa39a2dcb2f6049
+X-Google-Message-Url: http://groups.google.com/a/ancd.us/group/tarkanberenger/msg/3d1a1ccdf363
+X-Google-Thread-Url: http://groups.google.com/a/ancd.us/group/tarkanberenger/t/3aa39a2dcb2f6049
+X-Google-Web-Client: true
+Date: Wed, 28 May 2025 23:12:58 -0700 (PDT)
+From: Email marketing software <tarkanberenger@ancd.us>
+To: Email marketing software <tarkanberenger@ancd.us>
+Cc: s.choudhary@sheffield.ac.uk, laura@baxterflaming.com,
+	Crewwriterlily@capilanocourier.com, marijasmederevac@imsi.rs,
+	john_slater@ajg.com, oldbrewery@youngs.co.uk,
+	Info@tenvouscancercare.org.uk, N.Wint@Swansea.ac.uk,
+	sree_kala_nair@ssus.ac.in, admin@brookfieldhealth.co.nz,
+	jasmijnkok@nina.care, linux-sparse@vger.kernel.org,
+	wds-info@wifo.ac.at, shelley.raveendran1@nhs.net,
+	gdpr@sqdigital.co.uk, Jordan.heys@cowgills.co.uk,
+	Bernard.Schneuwly@unige.ch, secretary@westhouseprep.com,
+	customerservice@cpp.ca, gavin@huddersfieldbid.co.uk,
+	msandone@pvsd.org,  <mlazzara@stpeteedc.com>
+Message-Id: <983b0c13-2488-4e95-9dbd-95b493414597n@ancd.us>
+Subject: =?UTF-8?Q?Automated_Bulk_email_sending_sof?=
+ =?UTF-8?Q?tware:_http_protocol,Fully_Autom?=
+ =?UTF-8?Q?ated,_High-speed,_Bulk,_Multi-th?=
+ =?UTF-8?Q?readed,__Built-in_Proxies=EF=BC=8E__=EF=BC=8E_=EF=BC=8E2?=
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250421091233.GA21118@lst.de>
+Content-Type: multipart/mixed; 
+	boundary="----=_Part_1138776_1457139099.1748499178578"
 
-On Mon, Apr 21, 2025 at 11:12:33AM +0200, Christoph Hellwig wrote:
-> Looks good:
-> 
-> Reviewed-by: Christoph Hellwig <hch@lst.de>
-> 
-> Note that sparse currently also can't cope with VLAs including the
-> prototype syntax, which also needs addressing.
+------=_Part_1138776_1457139099.1748499178578
+Content-Type: multipart/alternative; 
+	boundary="----=_Part_1138777_694179960.1748499178578"
 
-Hm, it looks like it's been over a year since a commit to the sparse
-git.
+------=_Part_1138777_694179960.1748499178578
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
-Luc, are function prototypes with VLAs likely to be supported by sparse
-soon?
 
--- 
-Kees Cook
+
+=E2=97=8F Thousands to hundreds of thousands of emails sent per day.
+
+SITE: shorturl.at/u8Mtr
+TG:  wowofrom2008
+
+------=_Part_1138777_694179960.1748499178578
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+<p>=E2=97=8F Thousands to hundreds of thousands of emails sent per day.</p>=
+<p>SITE: shorturl.at/u8Mtr<br />TG:&nbsp; wowofrom2008</p>
+------=_Part_1138777_694179960.1748499178578--
+
+------=_Part_1138776_1457139099.1748499178578--
