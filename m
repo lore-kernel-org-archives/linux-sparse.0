@@ -1,201 +1,187 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.15])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ot1-f56.google.com (mail-ot1-f56.google.com [209.85.210.56])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 143DE2E628;
-	Sat, 31 May 2025 06:14:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.15
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CB4752A1B2
+	for <linux-sparse@vger.kernel.org>; Mon,  9 Jun 2025 01:09:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.56
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748672053; cv=none; b=k1ShI9MViGXBGe4BJ//65btguJwbR+28Q9elbcqrWfgF/KfP6epESP2sdycbPHRe+cWL1P87F99nzrYpnRkLYAT6C2Trgvxn7ULKBMRKuH88gOKaSOSH1aaJ5MUHGhQSjZ+hW/cKlfNCG4p2lITR81YUwgJ/DjiiO2D4OrxUvhA=
+	t=1749431375; cv=none; b=Yj9q27JlL6UjkCqUWsqzQj3oRIN/gOP/zotQcPVHW6XY3H2lMn40RNo9gwHhDK3a7lnvdEfqAoRPievvMEaeKYV64jyrkMWI95Y3Mh2g6c6oNBdVlSlebobhilD7KiCTGTlog8hOa6fuY3MFyCn9YxlUh/15Z0seGze24L/aYZ4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748672053; c=relaxed/simple;
-	bh=bqi6rJ0hiVr8slNOa6h3sST0DYxL7m3H/YQ3HcJjmhU=;
-	h=From:Date:To:cc:Subject:In-Reply-To:Message-ID:References:
-	 MIME-Version:Content-Type; b=X4blWRPMl8InCGvqO31UfsTw+JLUqZJd9VYzlIzHZ45iC8FG3Cb2hK1BFaZYRW5Xy9VvVbxhi20wWNqcwaYPcl1n7iqjT5yJp140ocDHB1/AD777xMxtg0kKdHIMqLlLCGzTi57kAg7m1Jo7JAa40ZUG5q0eKurE9nZ3BNKw7NY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.mailfrom=linux.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=Szt+Gcdq; arc=none smtp.client-ip=198.175.65.15
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=linux.intel.com
+	s=arc-20240116; t=1749431375; c=relaxed/simple;
+	bh=oWhH+dV9wtZCYQJdr0mgsmexPw66r8Pp+UdeMWwfEdo=;
+	h=Date:From:To:Cc:Message-Id:Subject:MIME-Version:Content-Type; b=Td/I7bfPNMa3zezIzxfr2fTjXay4pKucr+EQeOrnKHSlc+JDjiVWUhJWVP15CFy6U9Cj2AUtdyzs2AhS1+GEA87vZLG7gc4X1/wFUSBWeaFa+PyEDQHkX5j7FYIK+GXB6IOtABRqwrBE8qpRjVqwnzc19cko4udT19VNbsl1RdA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=ancd.us; spf=none smtp.mailfrom=ancd.us; dkim=pass (2048-bit key) header.d=ancd-us.20230601.gappssmtp.com header.i=@ancd-us.20230601.gappssmtp.com header.b=WWae5Ri8; arc=none smtp.client-ip=209.85.210.56
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=ancd.us
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=ancd.us
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="Szt+Gcdq"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1748672051; x=1780208051;
-  h=from:date:to:cc:subject:in-reply-to:message-id:
-   references:mime-version:content-id;
-  bh=bqi6rJ0hiVr8slNOa6h3sST0DYxL7m3H/YQ3HcJjmhU=;
-  b=Szt+GcdqjnF/v8/IqrJT10YH79e8Xfvvm/qcf6QQ8HMfHVWk3eGHgIsK
-   cuk2wTgweD8nXsL3HUOYPWgS56DvOxxpp/5GAdueOqVPkYprz5hEbdM9X
-   6Mzs1XZrhht1CIu7qFk3oysh70knsdYTRBNJhvWrYJxNFAHFH/QxscubE
-   X5JrgwIybzVMflDhWsvZKJviZla9RY5Cd3XAczvJqb1HAmhtMlsWOBQpE
-   tpdSxeQRsmZ4dwfMiy92Ug9d6Xg+Ne+91bx+Ke9ZVVxB5dym8s9I2LmfT
-   KMObahQD6glgIQMTpfNk52kURMDp0cJ77ttU36z1HR6MnsuaOnCynHln7
-   Q==;
-X-CSE-ConnectionGUID: g3AVgr+tQrSNQrz/s1Kdsg==
-X-CSE-MsgGUID: HJlWUEPJSSiSXgO55qFOAg==
-X-IronPort-AV: E=McAfee;i="6700,10204,11449"; a="54429665"
-X-IronPort-AV: E=Sophos;i="6.16,197,1744095600"; 
-   d="scan'208";a="54429665"
-Received: from orviesa010.jf.intel.com ([10.64.159.150])
-  by orvoesa107.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 May 2025 23:14:10 -0700
-X-CSE-ConnectionGUID: zk+4zkahSJioxj5UcKUAKg==
-X-CSE-MsgGUID: vHJUI23TQWCCrPFGUJPBIQ==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.16,197,1744095600"; 
-   d="scan'208";a="144038811"
-Received: from ijarvine-mobl1.ger.corp.intel.com (HELO localhost) ([10.245.245.71])
-  by orviesa010-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 May 2025 23:14:03 -0700
-From: =?UTF-8?q?Ilpo=20J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>
-Date: Sat, 31 May 2025 09:14:00 +0300 (EEST)
-To: Derek John Clark <derekjohn.clark@gmail.com>, 
-    Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, 
-    linux-sparse@vger.kernel.org
-cc: Hans de Goede <hdegoede@redhat.com>, Armin Wolf <W_Armin@gmx.de>, 
-    Jonathan Corbet <corbet@lwn.net>, Mario Limonciello <superm1@kernel.org>, 
-    Luke Jones <luke@ljones.dev>, Xino Ni <nijs1@lenovo.com>, 
-    Zhixin Zhang <zhangzx36@lenovo.com>, Mia Shao <shaohz1@lenovo.com>, 
-    Mark Pearson <mpearson-lenovo@squebb.ca>, 
-    "Pierre-Loup A . Griffais" <pgriffais@valvesoftware.com>, 
-    "Cody T . -H . Chiu" <codyit@gmail.com>, 
-    John Martens <johnfanv2@gmail.com>, Kurt Borja <kuurtb@gmail.com>, 
-    platform-driver-x86@vger.kernel.org, linux-doc@vger.kernel.org, 
-    LKML <linux-kernel@vger.kernel.org>
-Subject: Re: [PATCH v11 0/6] platform/x86: Add Lenovo WMI Gaming Series
- Drivers
-In-Reply-To: <CAFqHKTnp2zMTAfdYBpxestSErpsgwSf_TmkLjjU0W5HOFiC9bA@mail.gmail.com>
-Message-ID: <e98eccf5-1006-3d1b-d2fb-783637807ac7@linux.intel.com>
-References: <20250522015350.471070-1-derekjohn.clark@gmail.com> <2972c4c6-7080-e058-ec39-b8c1dc603f7a@linux.intel.com> <2c7ffaa6-e639-e215-42d0-78a2b185ad45@linux.intel.com> <CAFqHKTnp2zMTAfdYBpxestSErpsgwSf_TmkLjjU0W5HOFiC9bA@mail.gmail.com>
+	dkim=pass (2048-bit key) header.d=ancd-us.20230601.gappssmtp.com header.i=@ancd-us.20230601.gappssmtp.com header.b="WWae5Ri8"
+Received: by mail-ot1-f56.google.com with SMTP id 46e09a7af769-72bc266dc24so4656300a34.2
+        for <linux-sparse@vger.kernel.org>; Sun, 08 Jun 2025 18:09:33 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=ancd-us.20230601.gappssmtp.com; s=20230601; t=1749431373; x=1750036173; darn=vger.kernel.org;
+        h=mime-version:subject:message-id:cc:to:from:date:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=xecOpGwNrtLz7obrC6XSIWlvvhqJkOHNo19WBt5fr6I=;
+        b=WWae5Ri8rbHtojoHJbOsQ8MabZ4mbbCfEqR+5piKlqTYt0GIw4uilaDnMojLLYOeh3
+         kSr12M3FRxLgZsZTwCeSllCNTbRwOWxlbCfuDVee8bAxBTcF98IM9bPqujARujgz96WD
+         RocJJJNswcCZPmwKmMOVWoQLZdhZnYfSOxNftp4tJGaVAFPGs57grivue7Mess4kVSrs
+         Qpiy1uLP7OxTM8AdOIJJaTsFEYPXxtDsB4GJso0IHcY4eiugi5QDzWglkO2sy6+NLQuB
+         B+NZZ0T/+ApYUbvGw0PEVYeeqia6JiAxfGVJMLjqaSQ/8h3yUA1FSJlyDyxP7W+J3EX4
+         VBDQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1749431373; x=1750036173;
+        h=mime-version:subject:message-id:cc:to:from:date:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=xecOpGwNrtLz7obrC6XSIWlvvhqJkOHNo19WBt5fr6I=;
+        b=A1na6lUoNkshisgGw7U1b+q2oYv7t+fe76XO9wpUC8h7LF3PzrlHaN4zHtotxebsJ8
+         H+afGNM+Q20E5B7AHoMsJuBheOhlrPwt7Xj6aXj81m7KLxZ5SmJbFoD6Un0DFsk+Zdf5
+         FU9lMvxMb8EOJKj6/AMNN2d7/MSK/EitqfnxewUQastqdtW4ymVUkCQBhBscF2nlq3C2
+         9hYopKj0M+gMvbs3kjJn5c7wtba7ZUozGVBUq/XcHI2LYme/66qjx/S+58JZXNzeQZv3
+         QaizKi/VofWMHUkUve4rJL1qfShyGEn/wu1LZq4mkX9yTXagFz8aWATSUrnnxcr8rZ1M
+         HqmA==
+X-Forwarded-Encrypted: i=1; AJvYcCWmlyIXoP7Qs0K18eYUDNPQd66pIJsFD/3RafJ9jAcuD3yE+lD1kue65TfYaDjLL//GephmjV524D9scZA=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzKTfLzVwXhacvCp4Y6HvGWKPQdYdIDqO8wUASFqq4vOLxOnLt7
+	SASdybhZ/Xbbdmf9z3FfTgS+CedgghHp7VRDrAiRH7fzCK7RDY3pIE1VIltxn2kmtA5ZeJt5fqa
+	Gj9Sx9Fkz7j5p4A==
+X-Google-Smtp-Source: AGHT+IGtPfZ2YOtBqj/+aFTy5hU7J6U6t1b5j7pCWCoREcHOTP0sOGhCIXfzGFPZ7TL7xqWqWqZ9hqZYIw==
+X-Received: by 2002:a05:6808:384c:b0:403:3c95:3683 with SMTP id 5614622812f47-409051ccdedmr8280770b6e.19.1749431373007;
+        Sun, 08 Jun 2025 18:09:33 -0700 (PDT)
+X-Google-Already-Archived: Yes
+X-Google-Already-Archived-Group-Id: 8a5741539f
+X-Google-Doc-Id: 296b780e8574c
+X-Google-Thread-Id: c5ea258ede0beffa
+X-Google-Message-Url: http://groups.google.com/a/ancd.us/group/hubareevesami/msg/296b780e8574c
+X-Google-Thread-Url: http://groups.google.com/a/ancd.us/group/hubareevesami/t/c5ea258ede0beffa
+X-Google-Web-Client: true
+Date: Sun, 8 Jun 2025 18:09:32 -0700 (PDT)
+From: Email Marketing software <hubareevesami@ancd.us>
+To: Email Marketing software <hubareevesami@ancd.us>
+Cc: shssafe@uhb.nhs.uk, william.sanderson@fraserhealth.ca,
+	dao-ban-bih@nic.in, teking@gannett.com, f.RCBA-CABIN.f@ec.gc.ca,
+	president@villageretirementwa.org.au, inessa@gardentranslation.com,
+	jcfahselt@seattleschools.org, linux-sparse@vger.kernel.org,
+	snb5@delsot.ru, contact@lawyerforall.com, james.hutton@sarasin.co.uk,
+	Charles.Brogan@greatheartstxschools.org, m.kubanek@schoenherr.eu,
+	s.cannon@oceans.ubc.ca, info@docscentre.com.au, zakup@termet.com.pl,
+	ricardo@delgo.com.br, advertising@junkjaunt.com,
+	olemcya@rcdea.org.uk, support@oqtima.com,
+	 <daniel.miggitsch@villach.at>
+Message-Id: <305f4b5b-6691-4705-9016-8649db504ee2n@ancd.us>
+Subject: =?UTF-8?Q?High-speed,_Bulk,_Multi-th?=
+ =?UTF-8?Q?readed,_Built-in_Proxies_=EF=BC=8E=EF=BC=8E?=
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/mixed; BOUNDARY="8323328-43950218-1748671245=:937"
-Content-ID: <8ecdec3f-fb03-044b-ec92-17e1a21e1ebd@linux.intel.com>
+Content-Type: multipart/mixed; 
+	boundary="----=_Part_332764_934419141.1749431372392"
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+------=_Part_332764_934419141.1749431372392
+Content-Type: multipart/alternative; 
+	boundary="----=_Part_332765_2044906908.1749431372392"
 
---8323328-43950218-1748671245=:937
-Content-Type: text/plain; CHARSET=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Content-ID: <f0193626-50b6-a117-7794-a28eb0b5443e@linux.intel.com>
+------=_Part_332765_2044906908.1749431372392
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: base64
 
-+ Cc sparse people.
+CgrinJQuINCi0YvRgdGP0YfQuCDQuCDRgdC+0YLQvdC4INGC0YvRgdGP0Ycg0L/QuNGB0LXQvCDQ
+vtGC0L/RgNCw0LLQu9GP0Y7RgtGB0Y8g0LIg0LTQtdC90YwuCgrinJQuINCV0LTQuNC90YHRgtCy
+0LXQvdC90L7QtSDQv9GA0L7Qs9GA0LDQvNC80L3QvtC1INC+0LHQtdGB0L/QtdGH0LXQvdC40LUg
+0L3QsCDRgNGL0L3QutC1LCDQutC+0YLQvtGA0L7QtSDQuNGB0L/QvtC70YzQt9GD0LXRgiAK0LLQ
+tdCxLdGA0LXQttC40LwgKyDQv9GA0L7RgtC+0LrQvtC7IEhUVFAg0LTQu9GPINC+0YLQv9GA0LDQ
+stC60Lgg0L/QvtGH0YLRiy4g0J7QvdC+INC/0L7Qu9C90L7RgdGC0YzRjiDQuNC80LjRgtC40YDR
+g9C10YIgCtGA0YPRh9C90L7QuSDQstGF0L7QtCDQuCDQvtGC0L/RgNCw0LLQutGDINCx0YDQsNGD
+0LfQtdGA0LAgQ2hyb21lLgoK4pyULiDQl9Cw0L/Rg9GB0Log0L7QtNC90LjQvCDRidC10LvRh9C6
+0L7QvCwg0L/RgNC+0YLQvtC60L7QuyBIVFRQLCDQv9C+0LvQvdC+0YHRgtGM0Y4g0LDQstGC0L7Q
+vNCw0YLQuNC30LjRgNC+0LLQsNC90L3Ri9C5LCAK0LLRi9GB0L7QutC+0YHQutC+0YDQvtGB0YLQ
+vdC+0LksINC80LDRgdGB0L7QstGL0LksINC80L3QvtCz0L7Qv9C+0YLQvtGH0L3Ri9C5LCDQstGB
+0YLRgNC+0LXQvdC90YvQtSDQv9GA0L7QutGB0LguCgrinJQuINCR0LXRgdC/0LvQsNGC0L3QsNGP
+INC/0L7Qu9C90L7RhNGD0L3QutGG0LjQvtC90LDQu9GM0L3QsNGPINC/0YDQvtCx0L3QsNGPINCy
+0LXRgNGB0LjRjyDQvdCwIDMg0LTQvdGPLgoKU0lURTogc2hvcnR1cmwuYXQvdThNdHIgCgpURzog
+d293b2Zyb20yMDA4Cgoo0K3RgtC+INGN0LvQtdC60YLRgNC+0L3QvdC+0LUg0L/QuNGB0YzQvNC+
+INCw0LLRgtC+0LzQsNGC0LjRh9C10YHQutC4INC+0YLQv9GA0LDQstC70Y/QtdGC0YHRjyDQvdCw
+0YjQuNC8INC/0YDQvtCz0YDQsNC80LzQvdGL0LwgCtC+0LHQtdGB0L/QtdGH0LXQvdC40LXQvCkK
+Ciphc3N1cmUgZmVhc2libGUuKgo=
+------=_Part_332765_2044906908.1749431372392
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-On Fri, 30 May 2025, Derek John Clark wrote:
+<p><font color=3D#800000><font color=3D#000000 size=3D5 face=3D"Times New R=
+oman"><span style=3D'FONT-SIZE: medium; FONT-FAMILY: "Microsoft YaHei"; WHI=
+TE-SPACE: normal; WORD-SPACING: 0px; TEXT-TRANSFORM: none; FLOAT: none; FON=
+T-WEIGHT: 400; COLOR: rgb(0,102,0); FONT-STYLE: normal; TEXT-ALIGN: left; O=
+RPHANS: 2; WIDOWS: 2; DISPLAY: inline !important; LETTER-SPACING: normal; T=
+EXT-INDENT: 0px; font-variant-ligatures: normal; font-variant-caps: normal;=
+ -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-d=
+ecoration-style: initial; text-decoration-color: initial'>=E2=9C=94. <font =
+color=3D#800000>=D0=A2=D1=8B=D1=81=D1=8F=D1=87=D0=B8 =D0=B8 =D1=81=D0=BE=D1=
+=82=D0=BD=D0=B8 =D1=82=D1=8B=D1=81=D1=8F=D1=87 =D0=BF=D0=B8=D1=81=D0=B5=D0=
+=BC =D0=BE=D1=82=D0=BF=D1=80=D0=B0=D0=B2=D0=BB=D1=8F=D1=8E=D1=82=D1=81=D1=
+=8F =D0=B2 =D0=B4=D0=B5=D0=BD=D1=8C.</font></span></font></font></p><p><fon=
+t color=3D#800000><font color=3D#000000 size=3D5 face=3D"Times New Roman"><=
+span style=3D'FONT-SIZE: medium; FONT-FAMILY: "Microsoft YaHei"; WHITE-SPAC=
+E: normal; WORD-SPACING: 0px; TEXT-TRANSFORM: none; FLOAT: none; FONT-WEIGH=
+T: 400; COLOR: rgb(0,102,0); FONT-STYLE: normal; TEXT-ALIGN: left; ORPHANS:=
+ 2; WIDOWS: 2; DISPLAY: inline !important; LETTER-SPACING: normal; TEXT-IND=
+ENT: 0px; font-variant-ligatures: normal; font-variant-caps: normal; -webki=
+t-text-stroke-width: 0px; text-decoration-thickness: initial; text-decorati=
+on-style: initial; text-decoration-color: initial'>=E2=9C=94. <font color=
+=3D#800000>=D0=95=D0=B4=D0=B8=D0=BD=D1=81=D1=82=D0=B2=D0=B5=D0=BD=D0=BD=D0=
+=BE=D0=B5 =D0=BF=D1=80=D0=BE=D0=B3=D1=80=D0=B0=D0=BC=D0=BC=D0=BD=D0=BE=D0=
+=B5 =D0=BE=D0=B1=D0=B5=D1=81=D0=BF=D0=B5=D1=87=D0=B5=D0=BD=D0=B8=D0=B5 =D0=
+=BD=D0=B0 =D1=80=D1=8B=D0=BD=D0=BA=D0=B5, =D0=BA=D0=BE=D1=82=D0=BE=D1=80=D0=
+=BE=D0=B5 =D0=B8=D1=81=D0=BF=D0=BE=D0=BB=D1=8C=D0=B7=D1=83=D0=B5=D1=82 =D0=
+=B2=D0=B5=D0=B1-=D1=80=D0=B5=D0=B6=D0=B8=D0=BC + =D0=BF=D1=80=D0=BE=D1=82=
+=D0=BE=D0=BA=D0=BE=D0=BB HTTP =D0=B4=D0=BB=D1=8F =D0=BE=D1=82=D0=BF=D1=80=
+=D0=B0=D0=B2=D0=BA=D0=B8 =D0=BF=D0=BE=D1=87=D1=82=D1=8B. =D0=9E=D0=BD=D0=BE=
+ =D0=BF=D0=BE=D0=BB=D0=BD=D0=BE=D1=81=D1=82=D1=8C=D1=8E =D0=B8=D0=BC=D0=B8=
+=D1=82=D0=B8=D1=80=D1=83=D0=B5=D1=82 =D1=80=D1=83=D1=87=D0=BD=D0=BE=D0=B9 =
+=D0=B2=D1=85=D0=BE=D0=B4 =D0=B8 =D0=BE=D1=82=D0=BF=D1=80=D0=B0=D0=B2=D0=BA=
+=D1=83 =D0=B1=D1=80=D0=B0=D1=83=D0=B7=D0=B5=D1=80=D0=B0 Chrome.<br /></font=
+></span></font></font><font color=3D#800000><font color=3D#000000 size=3D5 =
+face=3D"Times New Roman"><span style=3D'FONT-SIZE: medium; FONT-FAMILY: "Mi=
+crosoft YaHei"; WHITE-SPACE: normal; WORD-SPACING: 0px; TEXT-TRANSFORM: non=
+e; FLOAT: none; FONT-WEIGHT: 400; COLOR: rgb(0,102,0); FONT-STYLE: normal; =
+TEXT-ALIGN: left; ORPHANS: 2; WIDOWS: 2; DISPLAY: inline !important; LETTER=
+-SPACING: normal; TEXT-INDENT: 0px; font-variant-ligatures: normal; font-va=
+riant-caps: normal; -webkit-text-stroke-width: 0px; text-decoration-thickne=
+ss: initial; text-decoration-style: initial; text-decoration-color: initial=
+'><br />=E2=9C=94. <font color=3D#800000>=D0=97=D0=B0=D0=BF=D1=83=D1=81=D0=
+=BA =D0=BE=D0=B4=D0=BD=D0=B8=D0=BC =D1=89=D0=B5=D0=BB=D1=87=D0=BA=D0=BE=D0=
+=BC, =D0=BF=D1=80=D0=BE=D1=82=D0=BE=D0=BA=D0=BE=D0=BB HTTP, =D0=BF=D0=BE=D0=
+=BB=D0=BD=D0=BE=D1=81=D1=82=D1=8C=D1=8E =D0=B0=D0=B2=D1=82=D0=BE=D0=BC=D0=
+=B0=D1=82=D0=B8=D0=B7=D0=B8=D1=80=D0=BE=D0=B2=D0=B0=D0=BD=D0=BD=D1=8B=D0=B9=
+, =D0=B2=D1=8B=D1=81=D0=BE=D0=BA=D0=BE=D1=81=D0=BA=D0=BE=D1=80=D0=BE=D1=81=
+=D1=82=D0=BD=D0=BE=D0=B9, =D0=BC=D0=B0=D1=81=D1=81=D0=BE=D0=B2=D1=8B=D0=B9,=
+ =D0=BC=D0=BD=D0=BE=D0=B3=D0=BE=D0=BF=D0=BE=D1=82=D0=BE=D1=87=D0=BD=D1=8B=
+=D0=B9, =D0=B2=D1=81=D1=82=D1=80=D0=BE=D0=B5=D0=BD=D0=BD=D1=8B=D0=B5 =D0=BF=
+=D1=80=D0=BE=D0=BA=D1=81=D0=B8.</font></span></font></font></p><p><font col=
+or=3D#800000><font color=3D#000000 size=3D5 face=3D"Times New Roman"><span =
+style=3D'FONT-SIZE: medium; FONT-FAMILY: "Microsoft YaHei"; WHITE-SPACE: no=
+rmal; WORD-SPACING: 0px; TEXT-TRANSFORM: none; FLOAT: none; FONT-WEIGHT: 40=
+0; COLOR: rgb(0,102,0); FONT-STYLE: normal; TEXT-ALIGN: left; ORPHANS: 2; W=
+IDOWS: 2; DISPLAY: inline !important; LETTER-SPACING: normal; TEXT-INDENT: =
+0px; font-variant-ligatures: normal; font-variant-caps: normal; -webkit-tex=
+t-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-st=
+yle: initial; text-decoration-color: initial'>=E2=9C=94. <font color=3Dred =
+size=3D5>=D0=91=D0=B5=D1=81=D0=BF=D0=BB=D0=B0=D1=82=D0=BD=D0=B0=D1=8F =D0=
+=BF=D0=BE=D0=BB=D0=BD=D0=BE=D1=84=D1=83=D0=BD=D0=BA=D1=86=D0=B8=D0=BE=D0=BD=
+=D0=B0=D0=BB=D1=8C=D0=BD=D0=B0=D1=8F =D0=BF=D1=80=D0=BE=D0=B1=D0=BD=D0=B0=
+=D1=8F =D0=B2=D0=B5=D1=80=D1=81=D0=B8=D1=8F =D0=BD=D0=B0 3 =D0=B4=D0=BD=D1=
+=8F.</font></span></font></font></p><p><font size=3D6><font color=3Dred><fo=
+nt face=3D"Microsoft YaHei"></font></font></font></p><p><font size=3D4>SITE=
+: <font color=3Dblue>shorturl.at/u8Mtr </font></font></p><p><font size=3D4>=
+<font color=3D#333300>TG</font>: <font color=3Dgreen>wowofrom2008</font></f=
+ont></p><p><font color=3D#800000 size=3D4>(=D0=AD=D1=82=D0=BE =D1=8D=D0=BB=
+=D0=B5=D0=BA=D1=82=D1=80=D0=BE=D0=BD=D0=BD=D0=BE=D0=B5 =D0=BF=D0=B8=D1=81=
+=D1=8C=D0=BC=D0=BE =D0=B0=D0=B2=D1=82=D0=BE=D0=BC=D0=B0=D1=82=D0=B8=D1=87=
+=D0=B5=D1=81=D0=BA=D0=B8 =D0=BE=D1=82=D0=BF=D1=80=D0=B0=D0=B2=D0=BB=D1=8F=
+=D0=B5=D1=82=D1=81=D1=8F =D0=BD=D0=B0=D1=88=D0=B8=D0=BC =D0=BF=D1=80=D0=BE=
+=D0=B3=D1=80=D0=B0=D0=BC=D0=BC=D0=BD=D1=8B=D0=BC =D0=BE=D0=B1=D0=B5=D1=81=
+=D0=BF=D0=B5=D1=87=D0=B5=D0=BD=D0=B8=D0=B5=D0=BC)</font></p><p><strong>assu=
+re feasible.</strong><font color=3D#0000ff><br /></font></p>
+------=_Part_332765_2044906908.1749431372392--
 
-> On Sun, May 25, 2025 at 2:42=E2=80=AFPM Ilpo J=C3=A4rvinen
-> <ilpo.jarvinen@linux.intel.com> wrote:
-> >
-> > On Mon, 26 May 2025, Ilpo J=C3=A4rvinen wrote:
-> >
-> > > On Wed, 21 May 2025, Derek J. Clark wrote:
-> > >
-> > > > Adds support for the Lenovo "Gaming Series" of laptop hardware that=
- use
-> > > > WMI interfaces that control various power settings. There are multi=
-ple WMI
-> > > > interfaces that work in concert to provide getting and setting valu=
-es as
-> > > > well as validation of input. Currently only the "Gamezone", "Other
-> > > > Mode", and "LENOVO_CAPABILITY_DATA_01" interfaces are implemented, =
-but
-> > > > I attempted to structure the driver so that adding the "Custom Mode=
-",
-> > > > "Lighting", and other data block interfaces would be trivial in lat=
-er
-> > > > patches.
-> > > >
-> > > > This driver attempts to standardize the exposed sysfs by mirroring =
-the
-> > > > asus-armoury driver currently under review. As such, a lot of
-> > > > inspiration has been drawn from that driver.
-> > > > https://lore.kernel.org/platform-driver-x86/20250319065827.53478-1-=
-luke@ljones.dev/#t
-> > > >
-> > > > The drivers have been tested by me on the Lenovo Legion Go and Legi=
-on Go
-> > > > S.
-> > > >
-> > > > Suggested-by: Mario Limonciello <superm1@kernel.org>
-> > > > Reviewed-by: Armin Wolf <W_Armin@gmx.de>
-> > > > Signed-off-by: Derek J. Clark <derekjohn.clark@gmail.com>
-> > > > ---
-> > > > v11:
-> > > >   - Fix formmating issues.
-> > >
-> > > Thanks for the update, I've applied this now into the review-ilpo-nex=
-t
-> > > branch. BUT, this is very late in the cycle now and if there's a buil=
-d
-> > > issue (or LKP doesn't build test it in reasonable time), I'll have to=
- drop
-> > > this series and postpone it into the next cycle as I don't want to de=
-lay
-> > > the main PR to Linus too long.
-> > >
-> > > But lets hope for the best, I think some depends on issues were fixed
-> > > earlier (IIRC), so hopefully it works good enough now. :-)
-> >
-> > Hmpf, these give me a few new warnings related to this series:
-> >
-> > make W=3D1 drivers/platform/x86/
-> > make C=3D2 drivers/platform/x86/
->=20
-> When I use scoped_guard the warnings go away.
-
-Okay, not that it helps much because the implementation of guard() and=20
-scoped_guard() is dramatically different.
-
-> It seems to be a
-> limitation of sparse in that its not correctly identifying the guard
-> will be unlocked on the return perhaps?
-
-It's odd because we'd have those warnings all over the place if it would=20
-be general thing for sparse to not understand how guard() works. Maybe=20
-sparse people have some idea what's so special here?
-
-To give context to sparse people, this patch triggers two false=20
-positives in sparse:
-
-https://lore.kernel.org/platform-driver-x86/20250522015350.471070-6-derekjo=
-hn.clark@gmail.com/
-
-$ make C=3D2 drivers/platform/x86/lenovo-wmi-gamezone.o
-  CHECK   scripts/mod/empty.c
-  CALL    scripts/checksyscalls.sh
-  DESCEND objtool
-  INSTALL libsubcmd_headers
-  CHECK   drivers/platform/x86/lenovo-wmi-gamezone.c
-drivers/platform/x86/lenovo-wmi-gamezone.c:155:12: warning: context=20
-imbalance in 'lwmi_gz_profile_get' - different lock contexts for basic=20
-block
-drivers/platform/x86/lenovo-wmi-gamezone.c:206:12: warning: context=20
-imbalance in 'lwmi_gz_profile_set' - different lock contexts for basic=20
-block
-
-https://git.kernel.org/pub/scm/linux/kernel/git/pdx86/platform-drivers-x86.=
-git/tree/drivers/platform/x86/lenovo-wmi-gamezone.c?h=3Dreview-ilpo-next#n1=
-90
-
-(That code link is just for convinience, it's not a perma one, I'll be=20
-overwriting that branch eventually once the merge window is over, if not=20
-sooner.)
-
-> In any case, if you're okay
-> with a scoped guard here (matches both other invocations) I'll send it
-> up.
-
-I'd prefer to keep using guard() for now as this looks clearly a false=20
-positive from sparse, not a problem in your code.
-
-> I also took care of the warnings for W=3D1.
-
-Thanks.
-
-> > ...I really don't know why sparse complains about the lock context
-> > imbalance though, those functions use guard().
-
---=20
- i.
---8323328-43950218-1748671245=:937--
+------=_Part_332764_934419141.1749431372392--
