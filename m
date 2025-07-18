@@ -1,67 +1,67 @@
-Received: from mail-lf1-f47.google.com (mail-lf1-f47.google.com [209.85.167.47])
+Received: from mail-ed1-f49.google.com (mail-ed1-f49.google.com [209.85.208.49])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5C9901799F
-	for <linux-sparse@vger.kernel.org>; Fri, 18 Jul 2025 22:56:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.47
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C005F7D098
+	for <linux-sparse@vger.kernel.org>; Fri, 18 Jul 2025 23:04:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.49
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1752879365; cv=none; b=m3+Ve1eUUcvrCUD6YU2v9yaD29PtOrqGmOzort+yaq7zwcSMg0jHZJuUNTqde1x2lIvHe4+ATVRnLy35fzpTHZJAHLSfmJU1M/BWuXmA1Rr4elBVRfaEi4lumVI5QwAMrtpN1t+PLGU3dGHq4XDf4tb0N0hNq5UpPjcHkDGYZnw=
+	t=1752879864; cv=none; b=OMeuOAjuONDBpLUCobWXyaFsmjMeazgmiRo00l92Qa9wgYZtWYfYr74i542tl3O8ch46qUeK99NoMkIsLHQh2SLTwncUMTyZ4l3sjkoilLdeICZf5g05CbSBpLEzAyqz4F+ONiTxlxfv2FHVe2NOisV1WlRc7LqqU6i9wb6cHoY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1752879365; c=relaxed/simple;
-	bh=qo67utYF/ovAn2X4y/cKDIWgVFy2L9OSLb/CZy1qQmg=;
+	s=arc-20240116; t=1752879864; c=relaxed/simple;
+	bh=H40tep0Rv0U6gqMR0evT7Pj2Me2Gk77w4/2xIDdHb+A=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=ePgQeiMmDMal2D70/C0qBzU8hh5Yoy+T42+wwaYt30mEwOfOMpdmNh7XeOm11Y899VZwXgX9lzcnGDLRmMdH/9A6nv24KrruWPE8/UDEGzwIFrKZCksegm4WJC3JS/IKy06HurgyrLs2YOe1NAlhSda2vfpD+9wyckCUL0EeLKc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org; spf=pass smtp.mailfrom=linuxfoundation.org; dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b=ZI6eqht2; arc=none smtp.client-ip=209.85.167.47
+	 To:Cc:Content-Type; b=ePoRz6UzBYhMD1zYD3EsaJelY+dEW/BZ/CyOR//kNfwe3JkO56zi4aWLxIrr29tZ61c4H6JLf2QDInrP/aCk9zTc6pSKVtxX0CfMF59ScAn4KvCk37TDZriPAISMSrj6DFYHlC8JZN9Loau5mvNdo0azDbLwzgn2ra7LTlFZfbo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org; spf=pass smtp.mailfrom=linuxfoundation.org; dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b=YRl8Q0t4; arc=none smtp.client-ip=209.85.208.49
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linuxfoundation.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="ZI6eqht2"
-Received: by mail-lf1-f47.google.com with SMTP id 2adb3069b0e04-55502821bd2so3250745e87.2
-        for <linux-sparse@vger.kernel.org>; Fri, 18 Jul 2025 15:56:03 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="YRl8Q0t4"
+Received: by mail-ed1-f49.google.com with SMTP id 4fb4d7f45d1cf-60867565fb5so4279402a12.3
+        for <linux-sparse@vger.kernel.org>; Fri, 18 Jul 2025 16:04:21 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linux-foundation.org; s=google; t=1752879361; x=1753484161; darn=vger.kernel.org;
+        d=linux-foundation.org; s=google; t=1752879860; x=1753484660; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=UqwKREBTKqb14178is+L3e4wy7hqQP2KCNVEXG6C+zY=;
-        b=ZI6eqht2CsoRk2oZKvIHFAH2QA+0J6BbparYfQPO5WZZwf4kZ0VB5KiyvHM5MRQctf
-         pmRxXyOXym7uXMDnHPecGBo6XTWENqM5KaOHnlHjCC5x3FlgqQVIYTItMtEHSkEi9IQ0
-         QZ6K0zqlE5a/nOg03t7TEL3hukK3uTGq5m5o4=
+        bh=p0G8yeUdMDA9tVTNUd0r33p22vJCTOHruEzV0haxXnE=;
+        b=YRl8Q0t4or1G/gZltApuhrg+WIHIAZFVZ7DlG7rs8DJJD5+H0TnWEvgYUoxgFsgq13
+         bGBgDOdtHoI8WJgY9sxPV+5hf1WLbJ8DlQr91KInMYRfVvosQwW8DyVoeOmxUvD/ELxC
+         3lfFtID6ALq2dpM8P/YkJvWoJ+8MJTOEXh8Rc=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1752879361; x=1753484161;
+        d=1e100.net; s=20230601; t=1752879860; x=1753484660;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=UqwKREBTKqb14178is+L3e4wy7hqQP2KCNVEXG6C+zY=;
-        b=gfKgaor6GQe4kPeU492aPuOKbQWKMye0pn+dezqMfIkq10AaUc9TZ57efNIyzp8FDz
-         7NtnBOYhb+GNlxlW0Xn2sgIBK5PVGp7/FtVvWHc1ke1V74oyMWSbbTJUQhCeq+jVgUfx
-         whBtGz1yQklhdJkjKpEoNvvL7+XQkqg/REnqhNR9nw0dT5dQUg2qvEsefK4SrMoHZMcQ
-         im7xrKlNmWnfpZfkzYzFpBLNYiNiYxe5ktmYX7ZVDBycd3OigG0AFqBr0gPsfgpe0c+g
-         WhUHfpTFBVdFH6e6sgTG+9KNVTSRKbhn0D/5zaHMaD+G/X3phmXB1V48OfDVy4Hz+E32
-         dcjQ==
-X-Forwarded-Encrypted: i=1; AJvYcCUxaES0IXG/uZmv1dG3RPzBe9FnmgagC8kksWnCpwCfywO5O48i19T0/g9Zi+Hvdlyzl3ZeefZlyA9i/eE=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzEFI04B7i2RV/fjni1/HgJA5Oz9X5ejYopyw8Ac/UzTl9w5xIG
-	ldCLfJa2WaNQ3IsKqqB5qs58sdBi/pupGQwTMLzSQ2sBdWBNTwqVCqU9fKDVc33by2EZjcYkkzv
-	T6n0HfWBWzw==
-X-Gm-Gg: ASbGncsnMQHPHxNCYc6aMH4NyvBTdzSYX8cVVdKhfSVRCMqhpkgd/ozYrEOFiijfTtY
-	kT+4v7kG8CH2amLiPcYc35nnyM9GI3J+z7sF8o41j9lXebK2P/taxlV/dvS36Y3LrJx7rrQsQAO
-	ONUnQdvRYAtApI1v23JJHyhZ6ZwP81aJgTQXxQ0NnXGuJ0J0t821ya9u8bsqTtlV6yVrFKoMGbA
-	I2nEZldqKD4lNTT6VnN3j3bAPFLaFU+XhIR2C5pBZJqWzYt1aaX15pPUD76vvP3aJnornnl6Ypv
-	QHVlbzz8FZY/+UjRMpUoPggmYQEwkn2Os+z03VAFIK7YypTklJq0x7WlOWJL6XCEeAvIlV6fOI0
-	Y2eKx8bENY13f3kiq+/taJHsE+tIGjgfbw5/DOq/YXa3Lx20MYh1WXkmW2Gt8q2azEgieGogw
-X-Google-Smtp-Source: AGHT+IF+Nj0lHNlkklI39OiK/hSvAS5cPkYiSrV+s1wOxQn2gveIOAqbxreBTdlnc3WzOHDgsnU4Og==
-X-Received: by 2002:a05:6512:b17:b0:553:2bb2:789c with SMTP id 2adb3069b0e04-55a23f3f09dmr2828348e87.37.1752879361246;
-        Fri, 18 Jul 2025 15:56:01 -0700 (PDT)
-Received: from mail-lf1-f41.google.com (mail-lf1-f41.google.com. [209.85.167.41])
-        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-55a31dadf33sm424055e87.214.2025.07.18.15.55.59
+        bh=p0G8yeUdMDA9tVTNUd0r33p22vJCTOHruEzV0haxXnE=;
+        b=HYwOQFHl+XlVKK3or+quTdBLkuuiCrIOCmi8vDmZEAdfDInU2CW5+1dOpjx62SUvfQ
+         YcGzfevsgikeh3oZfIBtp4O3TC5PBh0VpL2/oQi1t6OaxyJWdy4LpJGdw5D4hlSrpSS8
+         ciLucJtihAH1NkxfELZM61kkcgh6yKTQ2shVveSLj+/loMMU+QWd2ImyZatAbnWEBrFt
+         0IuBuoKfc77h6OMXDCrtlyINeUxjgq/EwVkURSPAl6IVzKm2fcm1QyOuen+2NMFg6aoV
+         Jvbg3z1+Rd3IKtLeeCxTtoJprOCGYTouiCkEqVo2fkZ5KCTMNSS54Yt/ERVOWsVFB/Sk
+         7T3g==
+X-Forwarded-Encrypted: i=1; AJvYcCX5iiyNe6wcPBrvijLqtg5iDgYck1+w6TbX6UjlQX9I6skP+6Sdah0xPG27O5yHphgq7Z13kyYG5OzJxys=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyQsww7x4kcMRGAt29J2XbfAW0ijbF0cReyaK8aO8jVgSIg8a+w
+	8vseRpE9AKqc3h6gZyKXKGI8IndE57qZ3FPBGmVfperivbImG273R0A5gBRRujWIwfOufYcaNok
+	aRzOmoJRQsg==
+X-Gm-Gg: ASbGncvjYtVl01B94pB+JnOlAqPNhkCU13aIWkmlZqjKROpG4mDRv27EOuWKsnnQol/
+	gI3TaE7RpfIshSEnagViN6A8r58o2TWzunTIEincHRWvb0sG1zUhe8jMQ4DFSouxprAnfsmBE54
+	ReJs96/3bMxD8rAMqF9Uev62z0qUq3jDZtdGNEbllFAyTWiOK77OuH1X3E5TCEQwxbEj1zTSlG1
+	nYGNcutWxOeUC1BmOuOFHYOHRtibH/ivfAEFU6S9rGduWieKr5RepqGjl31icL/Cj1fB/QpvQNr
+	83ipmoNfyb8YBS9KO0i0RmQDtkzxBLjYNLbSX7MYAlq2EYhKo0iixL4HlycIFCiap91uPxZmLNF
+	bIJ1zAHdmLnjlZnkaR+wPQgALw83WLeJzg/L0pACToTj6BlBhttPQQqaEFaxy/l/5lQDfre+6
+X-Google-Smtp-Source: AGHT+IGFFPoJro1K0AdQA15LFzj+0XdT4jTGahwKLm/3oBhk57IsvPUgBxTbZ6pEI/Q25Ctaj23jFg==
+X-Received: by 2002:a17:907:da3:b0:ae0:c976:cc84 with SMTP id a640c23a62f3a-ae9c9988bb3mr1267515366b.24.1752879859751;
+        Fri, 18 Jul 2025 16:04:19 -0700 (PDT)
+Received: from mail-wr1-f47.google.com (mail-wr1-f47.google.com. [209.85.221.47])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-aec6ca2ec42sm199463766b.78.2025.07.18.16.04.19
         for <linux-sparse@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 18 Jul 2025 15:56:00 -0700 (PDT)
-Received: by mail-lf1-f41.google.com with SMTP id 2adb3069b0e04-55511c3e203so2453667e87.3
-        for <linux-sparse@vger.kernel.org>; Fri, 18 Jul 2025 15:55:59 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AJvYcCWLp8DqplFveaipk5yisV4dpGJwn6Vh+BVpXRtqOfo5GvLfHMyY6Jqhg5R1PK4Hwj6x+giaMpKmsOel45A=@vger.kernel.org
-X-Received: by 2002:a05:6402:84d:b0:60c:3f77:3f44 with SMTP id
- 4fb4d7f45d1cf-61285ba5366mr11281504a12.17.1752878941898; Fri, 18 Jul 2025
- 15:49:01 -0700 (PDT)
+        Fri, 18 Jul 2025 16:04:19 -0700 (PDT)
+Received: by mail-wr1-f47.google.com with SMTP id ffacd0b85a97d-3b45edf2303so2378969f8f.2
+        for <linux-sparse@vger.kernel.org>; Fri, 18 Jul 2025 16:04:19 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCUf7lg5PNSx7bEwkY9Jsgb03J6vxon6dbjSStxrX8s8Kma4FkazGHCbf91CJ13ykPioiGXrP474D4/ZQzM=@vger.kernel.org
+X-Received: by 2002:a05:6402:510f:b0:607:6097:2faa with SMTP id
+ 4fb4d7f45d1cf-61281ebe074mr11282976a12.8.1752879516873; Fri, 18 Jul 2025
+ 15:58:36 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
@@ -69,13 +69,13 @@ List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 References: <20250718213252.2384177-1-hpa@zytor.com> <20250718213252.2384177-5-hpa@zytor.com>
- <CAHk-=whGcopJ_wewAtzfTS7=cG1yvpC90Y-xz5t-1Aw0ew682w@mail.gmail.com>
-In-Reply-To: <CAHk-=whGcopJ_wewAtzfTS7=cG1yvpC90Y-xz5t-1Aw0ew682w@mail.gmail.com>
+ <CAHk-=whGcopJ_wewAtzfTS7=cG1yvpC90Y-xz5t-1Aw0ew682w@mail.gmail.com> <CAHk-=whrbqBn_rCnPNwtLuoGHwjkqsLgDXYgjA0NW2ShAwqNkw@mail.gmail.com>
+In-Reply-To: <CAHk-=whrbqBn_rCnPNwtLuoGHwjkqsLgDXYgjA0NW2ShAwqNkw@mail.gmail.com>
 From: Linus Torvalds <torvalds@linux-foundation.org>
-Date: Fri, 18 Jul 2025 15:48:44 -0700
-X-Gmail-Original-Message-ID: <CAHk-=whrbqBn_rCnPNwtLuoGHwjkqsLgDXYgjA0NW2ShAwqNkw@mail.gmail.com>
-X-Gm-Features: Ac12FXwPQm0wFuMqO4T5e7rkg71dcrU60Bx64WOT68AUbiGf34w2BtStF_AEh5c
-Message-ID: <CAHk-=whrbqBn_rCnPNwtLuoGHwjkqsLgDXYgjA0NW2ShAwqNkw@mail.gmail.com>
+Date: Fri, 18 Jul 2025 15:58:19 -0700
+X-Gmail-Original-Message-ID: <CAHk-=whiL-ieTm19zuPqC9HLHh_-L_3pSMRUwsaN4Czp0PW6iA@mail.gmail.com>
+X-Gm-Features: Ac12FXzEvcUEKGC31NKbtJTOHrioow4MaXx8l9_sG1eUWxP_1nSQ3xv-ujuWcb8
+Message-ID: <CAHk-=whiL-ieTm19zuPqC9HLHh_-L_3pSMRUwsaN4Czp0PW6iA@mail.gmail.com>
 Subject: Re: [PATCH 4/7] arch/nios: replace "__auto_type" with "auto"
 To: "H. Peter Anvin" <hpa@zytor.com>
 Cc: =?UTF-8?Q?Eugenio_P=C3=A9rez?= <eperezma@redhat.com>, 
@@ -107,57 +107,46 @@ Cc: =?UTF-8?Q?Eugenio_P=C3=A9rez?= <eperezma@redhat.com>,
 	linux-sparse@vger.kernel.org, virtualization@lists.linux.dev, x86@kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Fri, 18 Jul 2025 at 14:49, Linus Torvalds
+On Fri, 18 Jul 2025 at 15:48, Linus Torvalds
 <torvalds@linux-foundation.org> wrote:
 >
-> On Fri, 18 Jul 2025 at 14:34, H. Peter Anvin <hpa@zytor.com> wrote:
-> >
-> > -       __auto_type __pu_ptr = (ptr);                                   \
-> > +       auto __pu_ptr = (ptr);                                  \
-> >         typeof(*__pu_ptr) __pu_val = (typeof(*__pu_ptr))(x);            \
+> And while looking at this, I think we have a similar mis-feature / bug
+> on x86 too: the unsafe_put_user() macro does exactly that cast:
 >
-> But that second case obviously is exactly the "auto type" case, just
-> written using __typeof__.
+>   #define unsafe_put_user(x, ptr, label)  \
+>         __put_user_size((__typeof__(*(ptr)))(x), ..
+>
+> and I think that cast is wrong.
+>
+> I wonder if it's actively hiding some issue with unsafe_put_user(), or
+> if I'm just missing something.
 
-Actually, looking at it, I actually think the NIOS2 header is a bit
-buggy here, exactly because it should *not* have that cast to force
-the types the same.
+... and I decided to try to look into it by just removing the cast.
 
-It's the exact same situation that on x86 is inside
-do_put_user_call(), and on x86 uses that
+And yes indeed, there's a reason for the cast - or at least it's
+hiding problems:
 
-        __typeof__(*(ptr)) __x = (x); /* eval x once */
+arch/x86/kernel/signal_64.c:128:
+        unsafe_put_user(fpstate, (unsigned long __user *)&sc->fpstate, Efault);
 
-pattern instead: we don't want a cast, because we actually want just
-the implicit type conversions, and a warning if the types aren't
-compatible. Writing things to user space is still supposed to catch
-type safety issues.
+arch/x86/kernel/signal_64.c:188:
+        unsafe_put_user(ksig->ka.sa.sa_restorer, &frame->pretcode, Efault);
 
-So having that '(typeof(*__pu_ptr))' cast of the value of '(x)' is
-actually wrong, because it will silently (for example) convert a
-pointer into a 'unsigned long' or vice versa, and __put_user() just
-shouldn't do that.
+arch/x86/kernel/signal_64.c:332:
+        unsafe_put_user(restorer, (unsigned long __user
+*)&frame->pretcode, Efault);
 
-If the user access is to a 'unsigned long __user *' location, the
-kernel shouldn't be writing pointers into it.
+The one on line 188 at least makes some sense. The other ones are
+literally hiding the fact that we explicitly cast things to the wrong
+pointer.
 
-Do we care? No. This is obviously nios2-specific, and the x86 version
-will catch any generic mis-uses where somebody would try to
-'put_user()' the wrong type.
+I suspect it's just very old historical "we have been lazy and mixing
+'unsigned long' and 'pointer value'" issues.
 
-And any "auto" conversion wouldn't change the bug anyway. But I
-thought I'd mention it since it started bothering me and I went and
-looked closer at that case I quoted.
+Oh well. None of these are actual *bugs*, they are more just ugly. And
+the cast that is hiding this ugliness might be hiding other things.
 
-And while looking at this, I think we have a similar mis-feature / bug
-on x86 too: the unsafe_put_user() macro does exactly that cast:
+Not worth the churn at least late in the release cycle, but one of
+those "this might be worth cleaning up some day" issues.
 
-  #define unsafe_put_user(x, ptr, label)  \
-        __put_user_size((__typeof__(*(ptr)))(x), ..
-
-and I think that cast is wrong.
-
-I wonder if it's actively hiding some issue with unsafe_put_user(), or
-if I'm just missing something.
-
-            Linus
+              Linus
