@@ -1,37 +1,37 @@
 Received: from mail.zytor.com (terminus.zytor.com [198.137.202.136])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EC39720C000;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F25C420E70B;
 	Fri, 18 Jul 2025 21:35:18 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.136
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1752874520; cv=none; b=QXJd3EuXWXdLr8RKfLfTkfxeZCGJDI+bgNWOf5nzEqXAP1iNxslBevHbd/HBqzvRjLR75B/Q6Mo6sIhoIlcF0uraGCkU9MX1v2vUkVReW5YabPnjKupxDiChqPjw7wux2pYy3smb1IG3xYEDBqCkRsjsV6V21H5kF/5oKzB+Yvw=
+	t=1752874520; cv=none; b=F1COb3XW6XjCd9RNMtFygV2TYfNbxMhNI0o4P+1wEhnmrlG2/TWEShtX64Y2w5r00v7GUcZG3+csjoREjT7pkY0r2oAm3yX35+BCeXPGQP5ZujLp7lpRLdbzBtnVE5fgXVFPHBTgK8WfYQcaFxDh1xemQYKT33Whyx7/1cvHqgo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1752874520; c=relaxed/simple;
-	bh=+dM1bld6YqFuWFqTeVy2M0W6B7tgTC8OPQdbIxYR2qs=;
+	bh=wMzR91h+TTsVUPy1C9Ptk1wSfGkXWgH6/ZpbQTxAPyQ=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=LKD8yqmcxqS7hhj5NAzeG60l+pV8TDclhzLctSfelycwy5o+GO4+Tn9UEPvdUg2j6NMZlPqOXYhy6FU2k3GwgVs0bxKQPmwq3PPVvSS1lgQu7rFk/n+FOTvGynodi7gTuwwY7PibuHuQ+qh8T0WzgXzMYfltBg5f/s3+15FAYbk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zytor.com; spf=pass smtp.mailfrom=zytor.com; dkim=pass (2048-bit key) header.d=zytor.com header.i=@zytor.com header.b=Kx/7ty58; arc=none smtp.client-ip=198.137.202.136
+	 MIME-Version; b=jyyh4xdqcqFlKo5KLth0pWWCkxqg4LBddXNgFq5Vp2B1fxCfQNQgd0zQnqxedOw1JqEEhJS+qjt7LI9ttagOXKnnaD9HCfHH4sKTycigX1Rwfr2qMLxHe+U5Tw8wxmEVIKl8v1XyjlUSmw9LXI4Nj9YJZZS/IQI+JXXxySp/fiw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zytor.com; spf=pass smtp.mailfrom=zytor.com; dkim=pass (2048-bit key) header.d=zytor.com header.i=@zytor.com header.b=IW9rzXlw; arc=none smtp.client-ip=198.137.202.136
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zytor.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=zytor.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=zytor.com header.i=@zytor.com header.b="Kx/7ty58"
+	dkim=pass (2048-bit key) header.d=zytor.com header.i=@zytor.com header.b="IW9rzXlw"
 Received: from mail.zytor.com ([IPv6:2601:646:8081:9482:197f:c1e5:8ae9:2d06])
 	(authenticated bits=0)
-	by mail.zytor.com (8.18.1/8.17.1) with ESMTPSA id 56ILX0sj2795198
+	by mail.zytor.com (8.18.1/8.17.1) with ESMTPSA id 56ILX0sn2795198
 	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NO);
-	Fri, 18 Jul 2025 14:33:08 -0700
-DKIM-Filter: OpenDKIM Filter v2.11.0 mail.zytor.com 56ILX0sj2795198
+	Fri, 18 Jul 2025 14:33:23 -0700
+DKIM-Filter: OpenDKIM Filter v2.11.0 mail.zytor.com 56ILX0sn2795198
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=zytor.com;
-	s=2025062101; t=1752874392;
-	bh=vsGxPzzTTwhbkBTwSIw4sMhUPUpWMkx20cB75uEuQgk=;
+	s=2025062101; t=1752874406;
+	bh=qL1eHen7HIDVH6yqsXjkpDMtAGllh3zedpoW2tNYpvo=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=Kx/7ty58HGwlQQ9wukr5GLlArF7WbH8FuLxY3YsNTqgBvNvDn0WLESCp9yJlEkRvK
-	 D4v3jsyACGn/Zs+sckVl4E860FaFow+wHRJOWxoCMXIYb5M2IMBAuSPrJjBVrsUBhD
-	 /z/2WYf/0/n2ZRIQN1GkLQfeh2VxSfqhR08ebExZYrzLD/q2cp0wIUqMd8i/5oolkG
-	 m9q4A3UgO3CxGt0qZyknk+aBLuIVgK4P11GErU8wEHk64cwd2VWdUQYXO2EbfL8jqY
-	 h9urWUThtVvbUsShKEJP0wwRg/YQQwYh6tfsnwTvBJ48CiN2PxQ0jt/Wp6SDYN/z5X
-	 4iujXkUVnsq5A==
+	b=IW9rzXlwv/uOkas2T3V1khmJxnERsM2el1H1phxIc7qBkga4MRMTJqZm/DomFnl35
+	 13DgyxteCdDLxQXAMTjZT4QCKOAa2XlTB4RRqROrWiW8v+aUAPtPup3VvZX79UZ0w4
+	 M/Dp8YZJJo3weiB7ePx+x6MdyGAJbnCehkeS7eAUcBdDl/7qWeHNyKvwq3+ywo09lV
+	 mh4Yp6iGpkGN+EVv1osRLkRAXVmGvmJ47UjqsYwnHpb7etq5FpyBctcUjTEvClOX1r
+	 JSTu9U0f1LXRMf0PUUcicVM0fKa34mwPaZF94RKc1s4ReHsuyk9Bm5gpbcgdPuY4rE
+	 N9SyHnaYWmTrg==
 From: "H. Peter Anvin" <hpa@zytor.com>
 To: 
 Cc: "H. Peter Anvin" <hpa@zytor.com>,
@@ -79,9 +79,9 @@ Cc: "H. Peter Anvin" <hpa@zytor.com>,
         linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-kselftest@vger.kernel.org, linux-sparse@vger.kernel.org,
         virtualization@lists.linux.dev, x86@kernel.org
-Subject: [PATCH 1/7] compiler_types.h: add "auto" as a macro for "__auto_type"
-Date: Fri, 18 Jul 2025 14:32:44 -0700
-Message-ID: <20250718213252.2384177-2-hpa@zytor.com>
+Subject: [PATCH 5/7] arch/x86: replace "__auto_type" with "auto"
+Date: Fri, 18 Jul 2025 14:32:48 -0700
+Message-ID: <20250718213252.2384177-6-hpa@zytor.com>
 X-Mailer: git-send-email 2.50.1
 In-Reply-To: <20250718213252.2384177-1-hpa@zytor.com>
 References: <20250718213252.2384177-1-hpa@zytor.com>
@@ -93,52 +93,76 @@ List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-"auto" was defined as a keyword back in the K&R days, but as a storage
-type specifier.  No one ever used it, since it was and is the default
-storage type for local variables.
+Replace instances of "__auto_type" with "auto" in:
 
-C++11 recycled the keyword to allow a type to be declared based on the
-type of an initializer.  This was finally adopted into standard C in
-C23.
-
-gcc and clang provide the "__auto_type" alias keyword as an extension
-for pre-C23, however, there is no reason to pollute the bulk of the
-source base with this temporary keyword; instead define "auto" as a
-macro unless the compiler is running in C23+ mode.
-
-This macro is added in <linux/compiler_types.h> because that header is
-included in some of the tools headers, wheres <linux/compiler.h> is
-not as it has a bunch of very kernel-specific things in it.
+	arch/x86/include/asm/bug.h
+	arch/x86/include/asm/string_64.h
+	arch/x86/include/asm/uaccess_64.h
 
 Signed-off-by: H. Peter Anvin (Intel) <hpa@zytor.com>
 ---
- include/linux/compiler_types.h | 13 +++++++++++++
- 1 file changed, 13 insertions(+)
+ arch/x86/include/asm/bug.h        | 2 +-
+ arch/x86/include/asm/string_64.h  | 6 +++---
+ arch/x86/include/asm/uaccess_64.h | 2 +-
+ 3 files changed, 5 insertions(+), 5 deletions(-)
 
-diff --git a/include/linux/compiler_types.h b/include/linux/compiler_types.h
-index 2b77d12e07b2..c8b1ee37934e 100644
---- a/include/linux/compiler_types.h
-+++ b/include/linux/compiler_types.h
-@@ -13,6 +13,19 @@
+diff --git a/arch/x86/include/asm/bug.h b/arch/x86/include/asm/bug.h
+index f0e9acf72547..4cce2ce8657b 100644
+--- a/arch/x86/include/asm/bug.h
++++ b/arch/x86/include/asm/bug.h
+@@ -94,7 +94,7 @@ do {								\
+  */
+ #define __WARN_FLAGS(flags)					\
+ do {								\
+-	__auto_type __flags = BUGFLAG_WARNING|(flags);		\
++	auto __flags = BUGFLAG_WARNING|(flags);		\
+ 	instrumentation_begin();				\
+ 	_BUG_FLAGS(ASM_UD2, __flags, ANNOTATE_REACHABLE(1b));	\
+ 	instrumentation_end();					\
+diff --git a/arch/x86/include/asm/string_64.h b/arch/x86/include/asm/string_64.h
+index 79e9695dc13e..4635616863f5 100644
+--- a/arch/x86/include/asm/string_64.h
++++ b/arch/x86/include/asm/string_64.h
+@@ -31,7 +31,7 @@ KCFI_REFERENCE(__memset);
+ #define __HAVE_ARCH_MEMSET16
+ static inline void *memset16(uint16_t *s, uint16_t v, size_t n)
+ {
+-	const __auto_type s0 = s;
++	const auto s0 = s;
+ 	asm volatile (
+ 		"rep stosw"
+ 		: "+D" (s), "+c" (n)
+@@ -44,7 +44,7 @@ static inline void *memset16(uint16_t *s, uint16_t v, size_t n)
+ #define __HAVE_ARCH_MEMSET32
+ static inline void *memset32(uint32_t *s, uint32_t v, size_t n)
+ {
+-	const __auto_type s0 = s;
++	const auto s0 = s;
+ 	asm volatile (
+ 		"rep stosl"
+ 		: "+D" (s), "+c" (n)
+@@ -57,7 +57,7 @@ static inline void *memset32(uint32_t *s, uint32_t v, size_t n)
+ #define __HAVE_ARCH_MEMSET64
+ static inline void *memset64(uint64_t *s, uint64_t v, size_t n)
+ {
+-	const __auto_type s0 = s;
++	const auto s0 = s;
+ 	asm volatile (
+ 		"rep stosq"
+ 		: "+D" (s), "+c" (n)
+diff --git a/arch/x86/include/asm/uaccess_64.h b/arch/x86/include/asm/uaccess_64.h
+index c8a5ae35c871..b0e4533ce625 100644
+--- a/arch/x86/include/asm/uaccess_64.h
++++ b/arch/x86/include/asm/uaccess_64.h
+@@ -72,7 +72,7 @@ static inline void __user *mask_user_address(const void __user *ptr)
+ 	return ret;
+ }
+ #define masked_user_access_begin(x) ({				\
+-	__auto_type __masked_ptr = (x);				\
++	auto __masked_ptr = (x);				\
+ 	__masked_ptr = mask_user_address(__masked_ptr);		\
+ 	__uaccess_begin(); __masked_ptr; })
  
- #ifndef __ASSEMBLY__
- 
-+/*
-+ * C23 introduces "auto" as a standard way to define type-inferred
-+ * variables, but "auto" has been a (useless) keyword even since K&R C,
-+ * so it has always been "namespace reserved."
-+ *
-+ * Until at some future time we require C23 support, we need the gcc
-+ * extension __auto_type, but there is no reason to put that elsewhere
-+ * in the source code.
-+ */
-+#if __STDC_VERSION__ < 202311L
-+# define auto __auto_type
-+#endif
-+
- /*
-  * Skipped when running bindgen due to a libclang issue;
-  * see https://github.com/rust-lang/rust-bindgen/issues/2244.
 -- 
 2.50.1
 
