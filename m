@@ -1,133 +1,132 @@
-Received: from mail-ej1-f41.google.com (mail-ej1-f41.google.com [209.85.218.41])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mail.zytor.com (terminus.zytor.com [198.137.202.136])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C3EB016DEB3;
-	Sat, 19 Jul 2025 14:26:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.41
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 67E09273FD;
+	Sun, 20 Jul 2025 06:53:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.136
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1752935196; cv=none; b=ZVI2qda5ogANCJ/LhUsaGDhZxbhA9A55vhdSiCE+GE2lkiexQwTeAMl0bc0jZwjeBfSVcOW9pcJW6zlOK7v9H3EY1FXxznga//H17+1921+14fJHf9ISfsdr/i4iTgvaLqtenGfPMkiUToT28kP3V6HfuUQE0y31P7kKH9h/61Q=
+	t=1752994384; cv=none; b=eqr6/v0dk8NQCwiWRb2ekx0OuUTJ/cjr0e6NZ1sePg/EsM10EDVsdJd8YNVfwdm7AcqCGPJgrUCzm91wOAAsk/rNB73Noge8iQ693YW1EgEjENU92WmW/parUunciOAnlW4AjkVoh12khbMmQJHGwAVUfuQWTTpbTm+lwyeGAKY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1752935196; c=relaxed/simple;
-	bh=Q9VM8+RfTrjN07A2gob6Pf9y9R1h/h3neejkCLSzKKw=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=VRvLI40P0A9QSKkIXKce02Nnfv/7tAcWa9Qi1Ftex4idoYkeT8k7KkNvZVmorttG9w3lQHuDDoDpvmEH8mLVB93qZaCjQxvRVZT4TqtSIGxZBWag6hDssAnBACH4x/0xE/Fmz3VbNNk6u0/UIm940m07bSKdQi6FSctbIg1o+dk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=PCdD8nAq; arc=none smtp.client-ip=209.85.218.41
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1752994384; c=relaxed/simple;
+	bh=LsNKexgn6BXks9XAt1SRbHnNEwPRhDi/Uja4dX8cv2o=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=KDFRrub2P+Svp6YaQWM5W0AmOUoRlRRlIzo9O6civT8N4JpfimONeA/+bkBLLsClMQE8bnqF5QXESZefeEuEVg+Y5k0e1rPt78ZfS8LeUwBItvpJ4ucYB6DFSRzC/ID8r9k/n8ZleNv+amd2uDPwhXmKJXc8Wffd8vbpWg7PJkU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zytor.com; spf=pass smtp.mailfrom=zytor.com; dkim=pass (2048-bit key) header.d=zytor.com header.i=@zytor.com header.b=bfT8wB4N; arc=none smtp.client-ip=198.137.202.136
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zytor.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=zytor.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="PCdD8nAq"
-Received: by mail-ej1-f41.google.com with SMTP id a640c23a62f3a-ae6fa02d8feso446099866b.0;
-        Sat, 19 Jul 2025 07:26:34 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1752935193; x=1753539993; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=/azvO26ioqqebf0mIHfr/fJKozOpQTGU5YXwyKRsJps=;
-        b=PCdD8nAqo1B3kyYHPxA+s2IO3NwamEmErvSmVhWuwdkLxaR8FYwrDdGBSVi5lbtWnZ
-         FSSGF8M8WB7FxErsO8ljuuYGj/Ro6z2ONsxCGVjgwt4NzUj24EQdv5PShwrWfLgSPZN8
-         gISkgMhzNs+I0e2zy8i+DYfYPPBhb3W7BXe5oaRESgm9S/V3JLbeVflf8YTTHkxSBKai
-         NemOMJ9pdHxndjctBuMZE5TuNl/K4J8rU7RyhoyA29xyHOQ1LArGyZdomJXoSpsTqprp
-         b5nxjhfMWJWBzwt8UZNcBXg1BXRTftZmTs29JUaCeVe4Yd6vH5qfwM1xm/rrGn5k4Gh0
-         IOqA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1752935193; x=1753539993;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=/azvO26ioqqebf0mIHfr/fJKozOpQTGU5YXwyKRsJps=;
-        b=Q6bi/dRzViQ3YkAmKHMzedlMXMIuGsTADRRfoaXzsQS216W7kuS3BJUlTwX0S/yhOB
-         m0ScojG6zcNLjqaxga64O/WZwrmzWEG5Ho5aaGSXzd3Fpoo+tycfpvkZY2iak3+HvBj3
-         +HdmQ6l888xezZTU/z6cm8Cglgfu6a17pavbVmavYgzt1dO8LZoBqC55zV8WUQqgaap0
-         +MOMei0j3O8dygiUMV+6KvCWnVt5vP6ZX1mIG/8P9iHhLBY692UXi9h7l2e4QJj5cbXp
-         Pit5O0xjKovqMMZftajZBo/H1rL8UKJ0hAiuDuAD+5wTEPIecZgnr6wwotfeaLkeTTtE
-         ep6A==
-X-Forwarded-Encrypted: i=1; AJvYcCU/FQLfB8pyre9O0wJkXGFrQnHV1kJs+liL7YWRbfhrqT73Zqa/ebyLfKMp+ViM39my1uaPPcPn7/S5JJ/b@vger.kernel.org, AJvYcCUUwlpXrFvjTJx5xhCMUDPR2J+mm0rR2gY17L6Frrtv35dgriyWsCZ9GTxC2Nms1IGr5lA=@vger.kernel.org, AJvYcCWWhoLvRq5eOyPlEfEX3FMzoxNo6KjAYMdpdpVB8Fob106ZuLxq2QZqz7ChY/uqZn1OHPi5RfRIUHRlvO5F@vger.kernel.org, AJvYcCWaflZ/ZJ6+erwRh2euM8Sc9AmNYNd5Ypu4eAxomdpm6N65eIJ3vVMi6crBQ1x8OGbjlv7VYkSAUNAJH1vNnA==@vger.kernel.org, AJvYcCXLiW1fxIipARiseOoVr7/1LRSFpQ3aj1TOwwbY/t2qbOAa+1Czjbn9JayanLfwubDPsmBv2vl1KTdGJn8YwkMR@vger.kernel.org
-X-Gm-Message-State: AOJu0YwuyiypG5mhBi8Z63rMnHD76kdiMqu4twVyE43x/BrVfGnLirQp
-	Bx1IE/raUEoE18Ee5rj6tfpe2OG0nQV75P8tWPzrjKHoBq6Bnkl+3K4=
-X-Gm-Gg: ASbGncu5inb91x6b8pjwqzMAppQzJtqGjSYDe+KJEJiZYxlNoJG4+aSzVMKyoe+G1AE
-	UjKE+o73EfXVs7bql2WjSLzP8YlfvWUfJZJoKHG+59p518GhvNyUC2DwR9TRUTNAlkWjlAjRtLS
-	vgFb17FiZh5DKAFU819ftseL8DIrbqN7Bq2bGt7iIrXIUgds/wKw5H27Htkye/Duhf5Asyy1Ifr
-	HwHaqxh1Wa/aVNoM0f6n5+bDgZkSpPuY/WIdKFPZIf9/Ox+hNDPzhtaa5OerzMdjATtDqAYHySw
-	xWWzBpDKn56v5PMN3HVht78CFuIY8pKmPWEuo3BngvbG/2LFT1IIimIUbsJyX4u/cvH60dC6FkR
-	pZmRfhnzfKXn3Nxs9F6Td
-X-Google-Smtp-Source: AGHT+IH4rIX/bypehArMCYVoJKbKtQr7DZ+CDQF06CuILCUV9Hj7vLhxbEx9C5tE4wNvPK/j+RVLfA==
-X-Received: by 2002:a17:907:80b:b0:aec:5516:239c with SMTP id a640c23a62f3a-aec55163f91mr913241166b.58.1752935192840;
-        Sat, 19 Jul 2025 07:26:32 -0700 (PDT)
-Received: from p183 ([46.53.249.160])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-aec6c79ae67sm317872366b.11.2025.07.19.07.26.29
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 19 Jul 2025 07:26:32 -0700 (PDT)
-Date: Sat, 19 Jul 2025 17:26:28 +0300
-From: Alexey Dobriyan <adobriyan@gmail.com>
-To: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Eugenio =?utf-8?B?UMOpcmV6?= <eperezma@redhat.com>,
-	Ilpo =?utf-8?B?SsOkcnZpbmVu?= <ilpo.jarvinen@linux.intel.com>,
-	"Michael S. Tsirkin" <mst@redhat.com>,
-	Al Viro <viro@zeniv.linux.org.uk>,
-	Alexei Starovoitov <ast@kernel.org>,
-	Andrew Morton <akpm@linux-foundation.org>,
-	Andrii Nakryiko <andrii@kernel.org>,
-	Arnd Bergmann <arnd@kernel.org>, Borislav Petkov <bp@alien8.de>,
-	Cong Wang <cong.wang@bytedance.com>,
-	Dan Williams <dan.j.williams@intel.com>,
-	Daniel Borkmann <daniel@iogearbox.net>,
-	Dave Hansen <dave.hansen@linux.intel.com>,
-	David Laight <David.Laight@aculab.com>,
-	David Lechner <dlechner@baylibre.com>,
-	Dinh Nguyen <dinguyen@kernel.org>,
-	Eduard Zingerman <eddyz87@gmail.com>,
-	Gatlin Newhouse <gatlin.newhouse@gmail.com>,
-	Hao Luo <haoluo@google.com>, Ingo Molnar <mingo@redhat.com>,
-	Linus Torvalds <torvalds@linux-foundation.org>,
-	Jakub Sitnicki <jakub@cloudflare.com>,
-	Jan Hendrik Farr <kernel@jfarr.cc>,
-	Jason Wang <jasowang@redhat.com>, Jiri Olsa <jolsa@kernel.org>,
-	John Fastabend <john.fastabend@gmail.com>,
-	Jonathan Cameron <Jonathan.Cameron@huawei.com>,
-	Josh Poimboeuf <jpoimboe@kernel.org>, KP Singh <kpsingh@kernel.org>,
-	Kees Cook <kees@kernel.org>,
-	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
-	Marc Herbert <Marc.Herbert@linux.intel.com>,
-	Martin KaFai Lau <martin.lau@linux.dev>,
-	Mateusz Guzik <mjguzik@gmail.com>, Michal Luczaj <mhal@rbox.co>,
-	Miguel Ojeda <ojeda@kernel.org>, Mykola Lysenko <mykolal@fb.com>,
-	NeilBrown <neil@brown.name>, Peter Zijlstra <peterz@infradead.org>,
-	Przemek Kitszel <przemyslaw.kitszel@intel.com>,
-	Sami Tolvanen <samitolvanen@google.com>,
-	Shuah Khan <shuah@kernel.org>, Song Liu <song@kernel.org>,
-	Stanislav Fomichev <sdf@fomichev.me>,
-	Thomas Gleixner <tglx@linutronix.de>,
-	Thorsten Blum <thorsten.blum@linux.dev>,
-	Uros Bizjak <ubizjak@gmail.com>,
-	Xuan Zhuo <xuanzhuo@linux.alibaba.com>,
-	Yafang Shao <laoar.shao@gmail.com>, Ye Bin <yebin10@huawei.com>,
-	Yonghong Song <yonghong.song@linux.dev>,
-	Yufeng Wang <wangyufeng@kylinos.cn>, bpf@vger.kernel.org,
-	linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-kselftest@vger.kernel.org, linux-sparse@vger.kernel.org,
-	virtualization@lists.linux.dev, x86@kernel.org
-Subject: Re: [PATCH 3/7] fs/proc: replace "__auto_type" with "auto"
-Message-ID: <63adc48b-9b81-4f35-9462-0de103474d13@p183>
-References: <20250718213252.2384177-1-hpa@zytor.com>
- <20250718213252.2384177-4-hpa@zytor.com>
+	dkim=pass (2048-bit key) header.d=zytor.com header.i=@zytor.com header.b="bfT8wB4N"
+Received: from mail.zytor.com ([IPv6:2601:646:8081:9484:f04a:f27d:fd66:5c61])
+	(authenticated bits=0)
+	by mail.zytor.com (8.18.1/8.17.1) with ESMTPSA id 56K6oq0b3555973
+	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NO);
+	Sat, 19 Jul 2025 23:51:11 -0700
+DKIM-Filter: OpenDKIM Filter v2.11.0 mail.zytor.com 56K6oq0b3555973
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=zytor.com;
+	s=2025062101; t=1752994275;
+	bh=WjknFaojsifwlKw0WpmL9PxEqgNG67NL4pP5k1y5h+E=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+	b=bfT8wB4NnCNiFno5TmtLgXp0LHSfcSGYno/ulj/mwTg2eV/U0U5mXDDLkhxIzDOWu
+	 Yn//5eN6IgvkaZZDalhvPMYwur4x5RPsQ7ukQRJcrbbrK5lkTRFRTsAEs0YAqnTsPG
+	 KVJoTRtRhgCnSRb34YM7GgdSHICF6a09oJQVKyQLhuvVtLgvE2/1xBl/RDnYXBAkev
+	 Qo0cU9LsowrnxbikFqwbodWZTVIg3zcTvssyJbemvXwN/BWEB4DW/lxarrXqkESIdP
+	 s/enNrRqYcsNdynt5gF54xwhvSV3wuw+Zb75z4P8GR2cdk44p6eOJhauAxKrWxCXLp
+	 wi9VYu2Mnq6Fg==
+From: "H. Peter Anvin" <hpa@zytor.com>
+To: 
+Cc: "H. Peter Anvin" <hpa@zytor.com>,
+        =?UTF-8?q?Eugenio=20P=C3=A9rez?= <eperezma@redhat.com>,
+        =?UTF-8?q?Ilpo=20J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>,
+        "Michael S. Tsirkin" <mst@redhat.com>,
+        Al Viro <viro@zeniv.linux.org.uk>, Alexei Starovoitov <ast@kernel.org>,
+        Alexey Dobriyan <adobriyan@gmail.com>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        Andrii Nakryiko <andrii@kernel.org>, Arnd Bergmann <arnd@kernel.org>,
+        Borislav Petkov <bp@alien8.de>,
+        Dan Williams <dan.j.williams@intel.com>,
+        Daniel Borkmann <daniel@iogearbox.net>,
+        Dave Hansen <dave.hansen@linux.intel.com>,
+        David Laight <David.Laight@ACULAB.COM>,
+        David Lechner <dlechner@baylibre.com>,
+        Dinh Nguyen <dinguyen@kernel.org>,
+        Eduard Zingerman <eddyz87@gmail.com>,
+        Gatlin Newhouse <gatlin.newhouse@gmail.com>,
+        Hao Luo <haoluo@google.com>, Ingo Molnar <mingo@redhat.com>,
+        Linus Torvalds <torvalds@linux-foundation.org>,
+        Jakub Sitnicki <jakub@cloudflare.com>,
+        Jan Hendrik Farr <kernel@jfarr.cc>, Jason Wang <jasowang@redhat.com>,
+        Jiri Olsa <jolsa@kernel.org>,
+        John Fastabend <john.fastabend@gmail.com>,
+        Jonathan Cameron <Jonathan.Cameron@huawei.com>,
+        Josh Poimboeuf <jpoimboe@kernel.org>, KP Singh <kpsingh@kernel.org>,
+        Kees Cook <kees@kernel.org>,
+        Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
+        Marc Herbert <Marc.Herbert@linux.intel.com>,
+        Martin KaFai Lau <martin.lau@linux.dev>,
+        Mateusz Guzik <mjguzik@gmail.com>, Michal Luczaj <mhal@rbox.co>,
+        Miguel Ojeda <ojeda@kernel.org>, Mykola Lysenko <mykolal@fb.com>,
+        NeilBrown <neil@brown.name>, Peter Zijlstra <peterz@infradead.org>,
+        Przemek Kitszel <przemyslaw.kitszel@intel.com>,
+        Sami Tolvanen <samitolvanen@google.com>, Shuah Khan <shuah@kernel.org>,
+        Song Liu <song@kernel.org>, Stanislav Fomichev <sdf@fomichev.me>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Thorsten Blum <thorsten.blum@linux.dev>,
+        Uros Bizjak <ubizjak@gmail.com>,
+        Xuan Zhuo <xuanzhuo@linux.alibaba.com>,
+        Yafang Shao <laoar.shao@gmail.com>, Ye Bin <yebin10@huawei.com>,
+        Yonghong Song <yonghong.song@linux.dev>,
+        Yufeng Wang <wangyufeng@kylinos.cn>, bpf@vger.kernel.org,
+        linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-kselftest@vger.kernel.org, linux-sparse@vger.kernel.org,
+        virtualization@lists.linux.dev, x86@kernel.org
+Subject: [PATCH v2 4/7] arch/nios2: replace "__auto_type" and adjacent equivalent with "auto"
+Date: Sat, 19 Jul 2025 23:50:41 -0700
+Message-ID: <20250720065045.2859105-5-hpa@zytor.com>
+X-Mailer: git-send-email 2.50.1
+In-Reply-To: <20250720065045.2859105-1-hpa@zytor.com>
+References: <20250720065045.2859105-1-hpa@zytor.com>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <20250718213252.2384177-4-hpa@zytor.com>
+Content-Transfer-Encoding: 8bit
 
-On Fri, Jul 18, 2025 at 02:32:46PM -0700, H. Peter Anvin wrote:
-> Replace uses of "__auto_type" in fs/proc/inode.c with "auto".
+Replace uses of "__auto_type" in arch/nios2/include/asm/uaccess.h with
+"auto", and equivalently convert an adjacent cast to the analogous
+form.
 
->  static ssize_t pde_read(struct proc_dir_entry *pde, struct file *file, char __user *buf, size_t count, loff_t *ppos)
->  {
-> -	__auto_type read = pde->proc_ops->proc_read;
-> +	auto read = pde->proc_ops->proc_read;
+Suggested-by: Linus Torvalds <torvalds@linux-foundation.org>
+Signed-off-by: H. Peter Anvin (Intel) <hpa@zytor.com>
+---
+ arch/nios2/include/asm/uaccess.h | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-Thanks! I'd prefer "const auto" but OK.
+diff --git a/arch/nios2/include/asm/uaccess.h b/arch/nios2/include/asm/uaccess.h
+index b8299082adbe..6ccc9a232c23 100644
+--- a/arch/nios2/include/asm/uaccess.h
++++ b/arch/nios2/include/asm/uaccess.h
+@@ -172,15 +172,15 @@ do {									\
+ 
+ #define __put_user(x, ptr)						\
+ ({									\
+-	__auto_type __pu_ptr = (ptr);					\
+-	typeof(*__pu_ptr) __pu_val = (typeof(*__pu_ptr))(x);		\
++	auto __pu_ptr = (ptr);						\
++	auto __pu_val = (typeof(*__pu_ptr))(x);				\
+ 	__put_user_common(__pu_val, __pu_ptr);				\
+ })
+ 
+ #define put_user(x, ptr)						\
+ ({									\
+-	__auto_type __pu_ptr = (ptr);					\
+-	typeof(*__pu_ptr) __pu_val = (typeof(*__pu_ptr))(x);		\
++	auto __pu_ptr = (ptr);						\
++	auto __pu_val = (typeof(*__pu_ptr))(x);				\
+ 	access_ok(__pu_ptr, sizeof(*__pu_ptr)) ?			\
+ 		__put_user_common(__pu_val, __pu_ptr) :			\
+ 		-EFAULT;						\
+-- 
+2.50.1
 
-Reviewed-by: Alexey Dobriyan <adobriyan@gmail.com>
