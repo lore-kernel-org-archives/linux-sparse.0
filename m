@@ -1,37 +1,37 @@
 Received: from mail.zytor.com (terminus.zytor.com [198.137.202.136])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 67E09273FD;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 99C581917ED;
 	Sun, 20 Jul 2025 06:53:03 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.136
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1752994384; cv=none; b=eqr6/v0dk8NQCwiWRb2ekx0OuUTJ/cjr0e6NZ1sePg/EsM10EDVsdJd8YNVfwdm7AcqCGPJgrUCzm91wOAAsk/rNB73Noge8iQ693YW1EgEjENU92WmW/parUunciOAnlW4AjkVoh12khbMmQJHGwAVUfuQWTTpbTm+lwyeGAKY=
+	t=1752994385; cv=none; b=BVg2InmxzawkC/kdxPE642ANGK1Q9ZDUq8yybvfmODbXziTnsXSh7YilDJIRDoyBC8UV8ZVoHjPu7XpxxBK+gFF4tnorUewrBSB/mkoUQbEyzwgUOrK9Xfkown2iGc5IEIS827U5HgPJosiQiHjnbEGpd8FGTSv9ZTT3nVfmeFs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1752994384; c=relaxed/simple;
-	bh=LsNKexgn6BXks9XAt1SRbHnNEwPRhDi/Uja4dX8cv2o=;
+	s=arc-20240116; t=1752994385; c=relaxed/simple;
+	bh=QJYX1MFqg9BEnLun28Yp5CaUuKwFY/3raKGCnx2LRNk=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=KDFRrub2P+Svp6YaQWM5W0AmOUoRlRRlIzo9O6civT8N4JpfimONeA/+bkBLLsClMQE8bnqF5QXESZefeEuEVg+Y5k0e1rPt78ZfS8LeUwBItvpJ4ucYB6DFSRzC/ID8r9k/n8ZleNv+amd2uDPwhXmKJXc8Wffd8vbpWg7PJkU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zytor.com; spf=pass smtp.mailfrom=zytor.com; dkim=pass (2048-bit key) header.d=zytor.com header.i=@zytor.com header.b=bfT8wB4N; arc=none smtp.client-ip=198.137.202.136
+	 MIME-Version; b=uB5FZeze9saFzNd+LJsl+HFQN3Ef++0/xDEUpB2I0j2raVEQbogvYOZ9k3mEDDvSA/2tet6tGdEN7f+Q0dyCZOxPQKpX2WzcVsK2VVprHhtef0ArkNHrMTpNZliYoYz5mooOtPENvNeh07m1biVBu7P/+ux0g2K1/O85PeyHI7k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zytor.com; spf=pass smtp.mailfrom=zytor.com; dkim=pass (2048-bit key) header.d=zytor.com header.i=@zytor.com header.b=IyaoOebw; arc=none smtp.client-ip=198.137.202.136
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zytor.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=zytor.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=zytor.com header.i=@zytor.com header.b="bfT8wB4N"
+	dkim=pass (2048-bit key) header.d=zytor.com header.i=@zytor.com header.b="IyaoOebw"
 Received: from mail.zytor.com ([IPv6:2601:646:8081:9484:f04a:f27d:fd66:5c61])
 	(authenticated bits=0)
-	by mail.zytor.com (8.18.1/8.17.1) with ESMTPSA id 56K6oq0b3555973
+	by mail.zytor.com (8.18.1/8.17.1) with ESMTPSA id 56K6oq0Z3555973
 	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NO);
-	Sat, 19 Jul 2025 23:51:11 -0700
-DKIM-Filter: OpenDKIM Filter v2.11.0 mail.zytor.com 56K6oq0b3555973
+	Sat, 19 Jul 2025 23:51:04 -0700
+DKIM-Filter: OpenDKIM Filter v2.11.0 mail.zytor.com 56K6oq0Z3555973
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=zytor.com;
-	s=2025062101; t=1752994275;
-	bh=WjknFaojsifwlKw0WpmL9PxEqgNG67NL4pP5k1y5h+E=;
+	s=2025062101; t=1752994267;
+	bh=ELa2jqTmRsp27qDcEQ9Wkl+L9BhxZJU1zyGapTBoOEw=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=bfT8wB4NnCNiFno5TmtLgXp0LHSfcSGYno/ulj/mwTg2eV/U0U5mXDDLkhxIzDOWu
-	 Yn//5eN6IgvkaZZDalhvPMYwur4x5RPsQ7ukQRJcrbbrK5lkTRFRTsAEs0YAqnTsPG
-	 KVJoTRtRhgCnSRb34YM7GgdSHICF6a09oJQVKyQLhuvVtLgvE2/1xBl/RDnYXBAkev
-	 Qo0cU9LsowrnxbikFqwbodWZTVIg3zcTvssyJbemvXwN/BWEB4DW/lxarrXqkESIdP
-	 s/enNrRqYcsNdynt5gF54xwhvSV3wuw+Zb75z4P8GR2cdk44p6eOJhauAxKrWxCXLp
-	 wi9VYu2Mnq6Fg==
+	b=IyaoOebwCvNMxsbv8ant0kY7MOMwXoHKo25+4RBG5+U3uhKvfmj5aVg2EaAOi2yxd
+	 alZKTjrWigRHG3wWOvHyRHl158c/jnUUc2kx+rfHgVF7ytc+keMlp1f6UJaPZWLhBS
+	 xYNPr1xvNLrPoZ7nihezY/kliWsi1cStyLblbAPF+seEOt4BrdHQUmAwW4NDYzWYSx
+	 ybSlFTvxXT8TbUWZg2OlgUDSXzSl3Yi/aJ7/q5zUQB78Dqns8DXZfDV6gON/faQHjH
+	 cUDK6QX//Mp+t1HPJui7r42qiQC2FJtW0me/gkCx100dbyZg5bJV7Be97Om3sakIm0
+	 a1SG8Lt8KPPpw==
 From: "H. Peter Anvin" <hpa@zytor.com>
 To: 
 Cc: "H. Peter Anvin" <hpa@zytor.com>,
@@ -79,9 +79,9 @@ Cc: "H. Peter Anvin" <hpa@zytor.com>,
         linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-kselftest@vger.kernel.org, linux-sparse@vger.kernel.org,
         virtualization@lists.linux.dev, x86@kernel.org
-Subject: [PATCH v2 4/7] arch/nios2: replace "__auto_type" and adjacent equivalent with "auto"
-Date: Sat, 19 Jul 2025 23:50:41 -0700
-Message-ID: <20250720065045.2859105-5-hpa@zytor.com>
+Subject: [PATCH v2 2/7] include/linux: change "__auto_type" to "auto"
+Date: Sat, 19 Jul 2025 23:50:39 -0700
+Message-ID: <20250720065045.2859105-3-hpa@zytor.com>
 X-Mailer: git-send-email 2.50.1
 In-Reply-To: <20250720065045.2859105-1-hpa@zytor.com>
 References: <20250720065045.2859105-1-hpa@zytor.com>
@@ -93,40 +93,77 @@ List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Replace uses of "__auto_type" in arch/nios2/include/asm/uaccess.h with
-"auto", and equivalently convert an adjacent cast to the analogous
-form.
+Replace instances of "__auto_type" with "auto" in include/linux.
 
-Suggested-by: Linus Torvalds <torvalds@linux-foundation.org>
 Signed-off-by: H. Peter Anvin (Intel) <hpa@zytor.com>
 ---
- arch/nios2/include/asm/uaccess.h | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+ include/linux/cleanup.h  | 6 +++---
+ include/linux/compiler.h | 2 +-
+ include/linux/minmax.h   | 6 +++---
+ 3 files changed, 7 insertions(+), 7 deletions(-)
 
-diff --git a/arch/nios2/include/asm/uaccess.h b/arch/nios2/include/asm/uaccess.h
-index b8299082adbe..6ccc9a232c23 100644
---- a/arch/nios2/include/asm/uaccess.h
-+++ b/arch/nios2/include/asm/uaccess.h
-@@ -172,15 +172,15 @@ do {									\
+diff --git a/include/linux/cleanup.h b/include/linux/cleanup.h
+index 7093e1d08af0..c7f3031ae400 100644
+--- a/include/linux/cleanup.h
++++ b/include/linux/cleanup.h
+@@ -199,10 +199,10 @@
  
- #define __put_user(x, ptr)						\
+ #define __free(_name)	__cleanup(__free_##_name)
+ 
+-#define __get_and_null(p, nullvalue)   \
++#define __get_and_null(p, nullvalue)	    \
+ 	({                                  \
+-		__auto_type __ptr = &(p);   \
+-		__auto_type __val = *__ptr; \
++		auto __ptr = &(p);	    \
++		auto __val = *__ptr;	    \
+ 		*__ptr = nullvalue;         \
+ 		__val;                      \
+ 	})
+diff --git a/include/linux/compiler.h b/include/linux/compiler.h
+index 6f04a1d8c720..7fef5cd41dfc 100644
+--- a/include/linux/compiler.h
++++ b/include/linux/compiler.h
+@@ -186,7 +186,7 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
+ #define data_race(expr)							\
  ({									\
--	__auto_type __pu_ptr = (ptr);					\
--	typeof(*__pu_ptr) __pu_val = (typeof(*__pu_ptr))(x);		\
-+	auto __pu_ptr = (ptr);						\
-+	auto __pu_val = (typeof(*__pu_ptr))(x);				\
- 	__put_user_common(__pu_val, __pu_ptr);				\
+ 	__kcsan_disable_current();					\
+-	__auto_type __v = (expr);					\
++	auto __v = (expr);						\
+ 	__kcsan_enable_current();					\
+ 	__v;								\
  })
+diff --git a/include/linux/minmax.h b/include/linux/minmax.h
+index eaaf5c008e4d..a0158db54a04 100644
+--- a/include/linux/minmax.h
++++ b/include/linux/minmax.h
+@@ -89,7 +89,7 @@
+ 	__cmp_once_unique(op, type, x, y, __UNIQUE_ID(x_), __UNIQUE_ID(y_))
  
- #define put_user(x, ptr)						\
- ({									\
--	__auto_type __pu_ptr = (ptr);					\
--	typeof(*__pu_ptr) __pu_val = (typeof(*__pu_ptr))(x);		\
-+	auto __pu_ptr = (ptr);						\
-+	auto __pu_val = (typeof(*__pu_ptr))(x);				\
- 	access_ok(__pu_ptr, sizeof(*__pu_ptr)) ?			\
- 		__put_user_common(__pu_val, __pu_ptr) :			\
- 		-EFAULT;						\
+ #define __careful_cmp_once(op, x, y, ux, uy) ({		\
+-	__auto_type ux = (x); __auto_type uy = (y);	\
++	auto ux = (x); auto uy = (y);			\
+ 	BUILD_BUG_ON_MSG(!__types_ok(ux, uy),		\
+ 		#op"("#x", "#y") signedness error");	\
+ 	__cmp(op, ux, uy); })
+@@ -129,7 +129,7 @@
+ 	__careful_cmp(max, (x) + 0u + 0ul + 0ull, (y) + 0u + 0ul + 0ull)
+ 
+ #define __careful_op3(op, x, y, z, ux, uy, uz) ({			\
+-	__auto_type ux = (x); __auto_type uy = (y);__auto_type uz = (z);\
++	auto ux = (x); auto uy = (y); auto uz = (z);			\
+ 	BUILD_BUG_ON_MSG(!__types_ok3(ux, uy, uz),			\
+ 		#op"3("#x", "#y", "#z") signedness error");		\
+ 	__cmp(op, ux, __cmp(op, uy, uz)); })
+@@ -203,7 +203,7 @@
+  * This macro checks @val/@lo/@hi to make sure they have compatible
+  * signedness.
+  */
+-#define clamp(val, lo, hi) __careful_clamp(__auto_type, val, lo, hi)
++#define clamp(val, lo, hi) __careful_clamp(auto, val, lo, hi)
+ 
+ /**
+  * clamp_t - return a value clamped to a given range using a given type
 -- 
 2.50.1
 
