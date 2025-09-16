@@ -1,58 +1,121 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from fra-out-005.esa.eu-central-1.outbound.mail-perimeter.amazon.com (fra-out-005.esa.eu-central-1.outbound.mail-perimeter.amazon.com [63.176.194.123])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BEE3C26281;
-	Sat, 13 Sep 2025 11:44:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3A28D287515;
+	Tue, 16 Sep 2025 21:23:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=63.176.194.123
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1757763860; cv=none; b=ge8yU/yykbmuHaHDorgV3FpkvLE/3WQp+7xef/C+4Bmha05Rw3MfPSOUAGCou/ZPWRlDL6+VcawDbIggNUOCkK/vHlLp7KoUlHMdOZAIlahr0dk2IGGbMRRccp/OyC3r6GKXsCXHAhwksD/X08Rcj9RvhRni2kY4OH5jeni7miM=
+	t=1758057812; cv=none; b=P+ncE4NQ+yBF9qntfKFIWkJYa7apBZI0iLz+Z27d4gT0p4dSS4QH7P0bZl37XNqAt78+Ki41Zsu+iPWbTjbYt67YLCsqQfgE58ifLoB1PoqR2RJxFuV+bIj85skPICZPqe/kztBbYRYVEmJI3P3E9wf0FLeMqXkUxuVnsciY1nA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1757763860; c=relaxed/simple;
-	bh=OX/8ExrAvr+0QCe8fRUnJcR44aTmTRK7r3dF/K1NSlk=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=LQlcjufkru0Xw+AmFOUwnuZteQowf+KBorag83kRDvlqkDQq5zy1V/vOdd4/o5Hnp9zi3zy6GJM1i+VmGb/0umyrCRWeLmeDjr7s8s5sqYBgBhm6SE5McLwkjFT7JYTIhDWKv5R5IdNYFAfRCifY48mJsA76VQBW9qowvorUbxo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b=KMKUgEqP; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1758057812; c=relaxed/simple;
+	bh=esyAzSji+adnp9bEMrjhOKGtohfgrOrb8yIfBdZNEx0=;
+	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=jWqM+oJcYks00jNYFoynBzU899knxLSji5vf6mviQqzCfWv3thn8RcuVlKwqK3WcinRa4AEgcEeUR9X4N+geMnEAo1wJeFQvcOS+7/IZZ26kamm9ZGqxcLakJd6yAZFMvhoFcHvvH4cL7JGe3ZJHCatWFbTsd4sfsWXoM3L5sDg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=amazon.com; spf=pass smtp.mailfrom=amazon.com; dkim=pass (2048-bit key) header.d=amazon.com header.i=@amazon.com header.b=icF3vNmX; arc=none smtp.client-ip=63.176.194.123
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=amazon.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=amazon.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b="KMKUgEqP"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B8AACC4CEEB;
-	Sat, 13 Sep 2025 11:44:19 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-	s=korg; t=1757763860;
-	bh=OX/8ExrAvr+0QCe8fRUnJcR44aTmTRK7r3dF/K1NSlk=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=KMKUgEqPbO3SG1OaT89uMny0EjiYJf+W+KXq/Fod8jlmtK5x40xR6SJPomJ+uzdm0
-	 voRW6XKdMq0qys3i8aSvK4HLyhUcq83j8/YRYtO3Lx1yXHYr1VPmft3i01is3aGOGb
-	 M7mVgyhiyJpsnsatS7SULgS8HjYlUrPyNg9Vv2jk=
-Date: Sat, 13 Sep 2025 13:44:17 +0200
-From: Greg KH <gregkh@linuxfoundation.org>
-To: Eliav Farber <farbere@amazon.com>
-Cc: luc.vanoostenryck@gmail.com, rostedt@goodmis.org, mingo@redhat.com,
-	natechancellor@gmail.com, ndesaulniers@google.com,
-	keescook@chromium.org, sashal@kernel.org, akpm@linux-foundation.org,
-	ojeda@kernel.org, elver@google.com, kbusch@kernel.org,
-	sj@kernel.org, bvanassche@acm.org, leon@kernel.org, jgg@ziepe.ca,
-	linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org,
-	clang-built-linux@googlegroups.com, stable@vger.kernel.org,
-	jonnyc@amazon.com, Rasmus Villemoes <linux@rasmusvillemoes.dk>
-Subject: Re: [PATCH v3 4/4 5.10.y] tracing: Define the is_signed_type() macro
- once
-Message-ID: <2025091303-collector-outtakes-51d0@gregkh>
-References: <20250912185518.39980-1-farbere@amazon.com>
- <20250912185518.39980-5-farbere@amazon.com>
+	dkim=pass (2048-bit key) header.d=amazon.com header.i=@amazon.com header.b="icF3vNmX"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+  d=amazon.com; i=@amazon.com; q=dns/txt; s=amazoncorp2;
+  t=1758057810; x=1789593810;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=e/vB7Zs9aHMwYsXkTiYJPhWtLpilAdRV0YFCpKnteE0=;
+  b=icF3vNmXJ9OatxNza2d4xwas3+sPt+TM1CSlEkLQZuhde4sqzApnXm/h
+   FbV5tRY9GnJ32DlKFXB/WjRLBdwgVgAI36PROpDIYJGWUZAcRCbyXXuTp
+   +IIdBtIAqwqKGoPLQlpH+G2fzN1UCKPxbQEdixo9IEQfwfV/Zutr9sg2G
+   aySqZrosRIP0S3hTodw3zwzftMGYb9krwFg0kbk6YmDOpoYzV9B+L+FIR
+   B1rB4jn0jggMfdCV3zBKFEgjWRbiryeerb3f0xiejFeYEHNVXDuDJcKPn
+   ireP716p92H96nG3Q78fp9T7Yl1g6Vp9/raWUtlFQ9B0l1wT3w6dEcYBS
+   w==;
+X-CSE-ConnectionGUID: G9gJrqgFR5iQk+BTToyKSw==
+X-CSE-MsgGUID: JPHEJVGKQsuVHRVhQjZNkA==
+X-IronPort-AV: E=Sophos;i="6.18,270,1751241600"; 
+   d="scan'208";a="2214755"
+Received: from ip-10-6-3-216.eu-central-1.compute.internal (HELO smtpout.naws.eu-central-1.prod.farcaster.email.amazon.dev) ([10.6.3.216])
+  by internal-fra-out-005.esa.eu-central-1.outbound.mail-perimeter.amazon.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Sep 2025 21:23:20 +0000
+Received: from EX19MTAEUB002.ant.amazon.com [54.240.197.232:29113]
+ by smtpin.naws.eu-central-1.prod.farcaster.email.amazon.dev [10.0.39.25:2525] with esmtp (Farcaster)
+ id d5687765-781d-4aee-8ed0-c911a128d4b7; Tue, 16 Sep 2025 21:23:20 +0000 (UTC)
+X-Farcaster-Flow-ID: d5687765-781d-4aee-8ed0-c911a128d4b7
+Received: from EX19D018EUA004.ant.amazon.com (10.252.50.85) by
+ EX19MTAEUB002.ant.amazon.com (10.252.51.79) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA) id 15.2.2562.20;
+ Tue, 16 Sep 2025 21:23:17 +0000
+Received: from dev-dsk-farbere-1a-46ecabed.eu-west-1.amazon.com
+ (172.19.116.181) by EX19D018EUA004.ant.amazon.com (10.252.50.85) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA) id 15.2.2562.20; Tue, 16 Sep 2025
+ 21:23:12 +0000
+From: Eliav Farber <farbere@amazon.com>
+To: <luc.vanoostenryck@gmail.com>, <rostedt@goodmis.org>, <mingo@redhat.com>,
+	<akpm@linux-foundation.org>, <gregkh@linuxfoundation.org>, <sj@kernel.org>,
+	<David.Laight@ACULAB.COM>, <Jason@zx2c4.com>,
+	<andriy.shevchenko@linux.intel.com>, <bvanassche@acm.org>,
+	<keescook@chromium.org>, <linux-sparse@vger.kernel.org>,
+	<linux-kernel@vger.kernel.org>
+CC: <jonnyc@amazon.com>, <farbere@amazon.com>, <stable@vger.kernel.org>
+Subject: [PATCH 0/7 5.10.y] Cherry pick of minmax.h commits from 5.15.y
+Date: Tue, 16 Sep 2025 21:22:52 +0000
+Message-ID: <20250916212259.48517-1-farbere@amazon.com>
+X-Mailer: git-send-email 2.47.3
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250912185518.39980-5-farbere@amazon.com>
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: EX19D038UWC001.ant.amazon.com (10.13.139.213) To
+ EX19D018EUA004.ant.amazon.com (10.252.50.85)
 
-On Fri, Sep 12, 2025 at 06:55:16PM +0000, Eliav Farber wrote:
-> From: Bart Van Assche <bvanassche@acm.org>
-> 
-> commit a49a64b5bf195381c09202c524f0f84b5f3e816f upstream.
+This series backports seven commits from v5.15.y that update minmax.h
+and related code:
 
-This is not a valid upstream commit id :(
+ - ed6e37e30826 ("tracing: Define the is_signed_type() macro once")
+ - 998f03984e25 ("minmax: sanity check constant bounds when clamping")
+ - d470787b25e6 ("minmax: clamp more efficiently by avoiding extra
+   comparison")
+ - 1c2ee5bc9f11 ("minmax: fix header inclusions")
+ - d53b5d862acd ("minmax: allow min()/max()/clamp() if the arguments
+   have the same signedness.")
+ - 7ed91c5560df ("minmax: allow comparisons of 'int' against 'unsigned
+   char/short'")
+ - 22f7794ef5a3 ("minmax: relax check to allow comparison between
+   unsigned arguments and signed constants")
+
+The main motivation is commit d53b5d862acd, which removes the strict
+type check in min()/max() when both arguments have the same signedness.
+Without this, kernel 5.10 builds can emit warnings that become build
+failures when -Werror is used.
+
+Additionally, commit ed6e37e30826 from tracing is required as a
+dependency; without it, compilation fails.
+
+Andy Shevchenko (1):
+  minmax: fix header inclusions
+
+Bart Van Assche (1):
+  tracing: Define the is_signed_type() macro once
+
+David Laight (3):
+  minmax: allow min()/max()/clamp() if the arguments have the same
+    signedness.
+  minmax: allow comparisons of 'int' against 'unsigned char/short'
+  minmax: relax check to allow comparison between unsigned arguments and
+    signed constants
+
+Jason A. Donenfeld (2):
+  minmax: sanity check constant bounds when clamping
+  minmax: clamp more efficiently by avoiding extra comparison
+
+ include/linux/compiler.h     |  6 +++
+ include/linux/minmax.h       | 89 ++++++++++++++++++++++++++----------
+ include/linux/overflow.h     |  1 -
+ include/linux/trace_events.h |  2 -
+ 4 files changed, 70 insertions(+), 28 deletions(-)
+
+-- 
+2.47.3
 
