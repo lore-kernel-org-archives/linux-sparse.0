@@ -1,68 +1,43 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.19])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B6D36305950;
-	Wed, 17 Sep 2025 08:00:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.19
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0158521FF5B;
+	Wed, 17 Sep 2025 08:40:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758096018; cv=none; b=RujAkSfiDUSnh+/A3NDVOWCiZFlBiviNb+Fa7+N9DmPmdbhtzx1+21Jkha61n1HXChyG+77u5xaArpY44f/UPbgeHBJMahT/i5NddHBxaGmbfFd3TlVPbpAUjztfwTLeIyjIxgej6oRTsCSIwaHLywFhNMv2YiSzjEe6lKWLdJM=
+	t=1758098459; cv=none; b=P6/VYEPb80jnG5cEoopP+1sZdRhSvbM6li50/0S+myfUnC6sxrSJcwqCEVtSK1xrRIi5TFgAWTDdxncRi/69LuuZR0MAk83NggcLlVwWhITS49rsyeeM32kvhtXcQyHBs6bdaxI2HxzlexboKPx5GlN89uDO4MDttif4mNyu6KE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1758096018; c=relaxed/simple;
-	bh=+lPbCwnvydXGpJMfWZxi4MK9LlwSOPbLnA6B1hvpGeo=;
+	s=arc-20240116; t=1758098459; c=relaxed/simple;
+	bh=5zAmcq3SlqCf6dm0pQE7jGyJ05jsVMAEDVuzqlPLnf8=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=VYStf2tNqhKzhzmg6uZWM+AP+iOVAVIYZ6oXn84WX95pXRFU+7r+idyj2XCX1sjfnQCzExPPv0FpVdMy4FvhavCEr9h+nBQ1T7kTxxh8aBEhiVaeluZz1PS763bdbAHptvPZGO/uYUtICoh46/FuKOCCbyWIumpewKhnQ31kVJw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.mailfrom=linux.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=Lu+OHD5w; arc=none smtp.client-ip=192.198.163.19
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=linux.intel.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=uPyp/a08faz089mqs52f+Thh75phiVT4g7ykBv4aVG77yTNCegqJxm0bePwpNZBtVn8YtW336rcAp6Zn0ZKPIOPovb9ffqiPzWoLxkWe2lCMuaOrmxV5i+qWSR2msVIj1fGo8slAycZeL5vrN8U5DcAovH8bMNKbGXPzb3l6n90=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b=R+GfaeLh; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="Lu+OHD5w"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1758096016; x=1789632016;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=+lPbCwnvydXGpJMfWZxi4MK9LlwSOPbLnA6B1hvpGeo=;
-  b=Lu+OHD5wiyquaZ86CUdbTo475xTZ2JNIXAoMlqXNNFVUjAL+ocHxVKth
-   fFZ58MiVA+tj+dEfJzOvrP4fkq8eo0Fc+BGww6Rb8Pv+mV8Xv3z3j+NIB
-   LErcLGF5/VRV6D7LkMkcpXpkTFHJZtnSTFEKLCxwDH4Mo4n5ORkdIaCf9
-   7uu8z9jyNGIUOGOv0En5ssGNrSq4eK668arhcQk++cHYbRO4q46pWeqzW
-   s9chQL8mXjDw9paO7+qoMyqM0IDa8anV+02CVeHcuhmLOC9pUvDB1WJga
-   LW2+kL16HOEi5RYgQhPQJPncX9MX0hvoiBrz/+AaRhUiVztM2xl1CN8JR
-   A==;
-X-CSE-ConnectionGUID: W7rLVIZIQuGmGOpuBgjpyA==
-X-CSE-MsgGUID: OErq57ntTcOjHsNoXMj2Ww==
-X-IronPort-AV: E=McAfee;i="6800,10657,11555"; a="59436998"
-X-IronPort-AV: E=Sophos;i="6.18,271,1751266800"; 
-   d="scan'208";a="59436998"
-Received: from fmviesa001.fm.intel.com ([10.60.135.141])
-  by fmvoesa113.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Sep 2025 01:00:15 -0700
-X-CSE-ConnectionGUID: ci7lXjY9RMqXGvxvfzsK3A==
-X-CSE-MsgGUID: wI2jDybqQGCsIQxbpq2ZRQ==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.18,271,1751266800"; 
-   d="scan'208";a="206126852"
-Received: from smile.fi.intel.com ([10.237.72.51])
-  by fmviesa001.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Sep 2025 01:00:11 -0700
-Received: from andy by smile.fi.intel.com with local (Exim 4.98.2)
-	(envelope-from <andriy.shevchenko@linux.intel.com>)
-	id 1uyn5E-00000003kKW-1j4X;
-	Wed, 17 Sep 2025 11:00:08 +0300
-Date: Wed, 17 Sep 2025 11:00:08 +0300
-From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+	dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b="R+GfaeLh"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D9564C4CEF0;
+	Wed, 17 Sep 2025 08:40:57 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
+	s=korg; t=1758098458;
+	bh=5zAmcq3SlqCf6dm0pQE7jGyJ05jsVMAEDVuzqlPLnf8=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=R+GfaeLhnzcZhPU70xy6FDHZVraIMFm3KZ6rhTeGaMt1go88Z+7uBd5qiZtpESo28
+	 09GcqKdiOvV7/p2No6M4v5aRLXS4P1q+XD4/y/Utm+9VzGURNvP4kRCCs2KYNL5ezQ
+	 AHoIYIdyG7mpw/CAjeqXEL6gXJpbm541AUE+E1GM=
+Date: Wed, 17 Sep 2025 10:40:55 +0200
+From: Greg KH <gregkh@linuxfoundation.org>
 To: Eliav Farber <farbere@amazon.com>
 Cc: luc.vanoostenryck@gmail.com, rostedt@goodmis.org, mingo@redhat.com,
-	akpm@linux-foundation.org, gregkh@linuxfoundation.org,
-	sj@kernel.org, David.Laight@aculab.com, Jason@zx2c4.com,
+	akpm@linux-foundation.org, sj@kernel.org, David.Laight@aculab.com,
+	Jason@zx2c4.com, andriy.shevchenko@linux.intel.com,
 	bvanassche@acm.org, keescook@chromium.org,
 	linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org,
 	jonnyc@amazon.com, stable@vger.kernel.org,
-	Christoph Hellwig <hch@infradead.org>,
-	Linus Torvalds <torvalds@linux-foundation.org>,
-	"Matthew Wilcox (Oracle)" <willy@infradead.org>
-Subject: Re: [PATCH 5/7 5.10.y] minmax: allow min()/max()/clamp() if the
- arguments have the same signedness.
-Message-ID: <aMpqiHZ8tGQHpCiP@smile.fi.intel.com>
-References: <20250916213125.8952-1-farbere@amazon.com>
+	Rasmus Villemoes <linux@rasmusvillemoes.dk>
+Subject: Re: [PATCH 1/7 5.10.y] tracing: Define the is_signed_type() macro
+ once
+Message-ID: <2025091717-snowflake-subtract-40f7@gregkh>
+References: <20250916212259.48517-1-farbere@amazon.com>
+ <20250916212259.48517-2-farbere@amazon.com>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
@@ -71,16 +46,33 @@ List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250916213125.8952-1-farbere@amazon.com>
-Organization: Intel Finland Oy - BIC 0357606-4 - c/o Alberga Business Park, 6
- krs, Bertel Jungin Aukio 5, 02600 Espoo
+In-Reply-To: <20250916212259.48517-2-farbere@amazon.com>
 
-On Tue, Sep 16, 2025 at 09:31:25PM +0000, Eliav Farber wrote:
+On Tue, Sep 16, 2025 at 09:22:53PM +0000, Eliav Farber wrote:
+> From: Bart Van Assche <bvanassche@acm.org>
+> 
+> commit 92d23c6e94157739b997cacce151586a0d07bb8a upstream.
 
-Your series is split in terms of email chain. Please, fix your tools.
+This is only in 6.1, and not other trees, why is it needed here?
 
--- 
-With Best Regards,
-Andy Shevchenko
+> 
+> There are two definitions of the is_signed_type() macro: one in
+> <linux/overflow.h> and a second definition in <linux/trace_events.h>.
+> 
+> As suggested by Linus, move the definition of the is_signed_type() macro
+> into the <linux/compiler.h> header file.  Change the definition of the
+> is_signed_type() macro to make sure that it does not trigger any sparse
+> warnings with future versions of sparse for bitwise types.
+> 
+> Link: https://lore.kernel.org/all/CAHk-=whjH6p+qzwUdx5SOVVHjS3WvzJQr6mDUwhEyTf6pJWzaQ@mail.gmail.com/
+> Link: https://lore.kernel.org/all/CAHk-=wjQGnVfb4jehFR0XyZikdQvCZouE96xR_nnf5kqaM5qqQ@mail.gmail.com/
+> Cc: Rasmus Villemoes <linux@rasmusvillemoes.dk>
+> Cc: Steven Rostedt <rostedt@goodmis.org>
+> Acked-by: Kees Cook <keescook@chromium.org>
+> Signed-off-by: Bart Van Assche <bvanassche@acm.org>
+> Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+> (cherry picked from commit a49a64b5bf195381c09202c524f0f84b5f3e816f)
 
+This is not a valid git id in the tree at all.
 
+greg k-h
