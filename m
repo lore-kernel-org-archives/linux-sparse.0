@@ -1,55 +1,55 @@
-Received: from mail-wm1-f74.google.com (mail-wm1-f74.google.com [209.85.128.74])
+Received: from mail-wr1-f73.google.com (mail-wr1-f73.google.com [209.85.221.73])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3557F3164D8
-	for <linux-sparse@vger.kernel.org>; Thu, 18 Sep 2025 14:06:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.74
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 81B0C3176E6
+	for <linux-sparse@vger.kernel.org>; Thu, 18 Sep 2025 14:06:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.73
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758204397; cv=none; b=eyv6vLtGc8MSGHqoplF6i9oVDEYVGowCBIVp6BxWF+NjmivwGKXhtZ2EKC4pXrTix11a/IVqtWz7UbZ4BBSXaRkuEBDlhQ6hJ/YKjdoS456maHRHTVX02AV1eSaz8wFrZOXF2QqsJCwMHf6SITDRAGEp0I+2b0Ih5hFCIjbNzt4=
+	t=1758204399; cv=none; b=BsE1WCH2T/E1kLcuRUMJGr55c6kctWwqCESRT0BP7pU5xX2r1g3X2cvemBPpoG0xxdPsOftSEM/K20G1lwcEnuuu81iqU5fFgM6aXRIwoDt9L8pyATsTvdtvuqi4npqoJ5+hvlQnlBg5YUuxw21DwiUSj1r27TH7hdq0wwQAcew=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1758204397; c=relaxed/simple;
-	bh=SpUgVrjaDm3RLrxadQdn2hAFpCJXInTkIERb02PmxvQ=;
+	s=arc-20240116; t=1758204399; c=relaxed/simple;
+	bh=zoLiY2UcfrfuFf9/eJmfFwA3ddXeQm8aQATv6UNlqMA=;
 	h=Date:In-Reply-To:Mime-Version:References:Message-ID:Subject:From:
-	 To:Cc:Content-Type; b=jJZCKzB0RfKpHuQJggSguE1TLfGm9SO704TF48yl9H1SyVasvXsm99oYZ0f0abYzvfW1E7nRpGHXkKwOqZX6PR3XUMte/kbVa94cU0BtEY09C0hWRSN5RQA0pfzztJ9gx2/+4X7DBctQxttTUE4uuBjHADlxNUbG0BduOMeZpgc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--elver.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=L1uA/9VD; arc=none smtp.client-ip=209.85.128.74
+	 To:Cc:Content-Type; b=ab8y16GQTPtJYJ5cfOwJJf/d0xTEhXOCnCYzCF9N0rCdhA+LmpiB84nKAvVVlZIEKQQV2ivfaHIm1i/XFq73CcBXgSE0Or/NCkXSrM+5pcBpzaCO7OfZqYC25y61sbXlXfSV5AIMaOJXfMCeEubeYw/EWKci3P5/xMl98Iqe7IA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--elver.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=rA0CgK/n; arc=none smtp.client-ip=209.85.221.73
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--elver.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="L1uA/9VD"
-Received: by mail-wm1-f74.google.com with SMTP id 5b1f17b1804b1-45b986a7b8aso5468555e9.0
-        for <linux-sparse@vger.kernel.org>; Thu, 18 Sep 2025 07:06:34 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="rA0CgK/n"
+Received: by mail-wr1-f73.google.com with SMTP id ffacd0b85a97d-3ee10a24246so556923f8f.3
+        for <linux-sparse@vger.kernel.org>; Thu, 18 Sep 2025 07:06:36 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20230601; t=1758204393; x=1758809193; darn=vger.kernel.org;
+        d=google.com; s=20230601; t=1758204395; x=1758809195; darn=vger.kernel.org;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:from:to:cc:subject:date:message-id:reply-to;
-        bh=i8w2QAEoYIuf5bb1DymlH6d9mwXwlVHoZjcMp7ct6B4=;
-        b=L1uA/9VDqbJaGdqqtHo/OL9pnsP8oet6onqIEH64y/qeODBcf7lSJZJSaH/hHRPYkY
-         dlgrkhIeLf4I97h6NnGur/dlQ1RAPZqgw3VZ0GN4XdUVf5WTptQhyJyUTSvp4KZV52fM
-         Lo/VEZRxHYlL02fc5oOgEv7OwFHaa4EeWB6ALKOU2ZzWmZgN8MiJcwSOn+mhSdj9JOzW
-         HS8CbzdvYms6ni44YeEWBJwkI+5/AesME0Ss0qhiXunz1w1eMe29CL3GiYM2zA7KZIOu
-         42B99SWk4E1XN3oitKhOu19HTKdKpPYhjGcO3wd76hXf/opzI/F2RIxBb2baAbcZmuNk
-         MWxA==
+        bh=rgYM57a4+YilIGK6iKKshTwAf6EJSKpu76VpXrklnPU=;
+        b=rA0CgK/nBD9BDdq9rID1XB8wPBhqUxDoK8e6TleJp4eoRuC+t26XqkM+Lphzpje/SH
+         nHsQFK48n9rmW1qb6dk9H0c2U0HDfz+6QXln6nUoWy4w35IMk8bs3wfwB/Gb2DMF2RDW
+         zi7hLDQ8KcTkzJKAnOQ9NPMCbJquIOwHucCkX6JH6bG/MVJFC7jY1ZepnH7jTlTbsohM
+         Fd4kGBHkUnfjEdHzHrNszPPjCPy5Q0MT5JkVAEVv+ZOdUZ+qH97XECiIc15WNvBBd6Z0
+         0KzzD+bly1UZxwZPL7MlxGoIX62G+9iXWmVoZYE2+x9hafmtUct6nkVV5p9FRfoevbTS
+         0PZQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1758204393; x=1758809193;
+        d=1e100.net; s=20230601; t=1758204395; x=1758809195;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=i8w2QAEoYIuf5bb1DymlH6d9mwXwlVHoZjcMp7ct6B4=;
-        b=Sq/yvqzN7QIUpTwEQZHNsQeSQ7v1xRnRXqdbUaOTGWMFNFoLb2VlxcWielXYVEITBn
-         AabsS50eENdzPXcXFK/XnGLxxZrmyCisdtskltwsv6fNGMLV5LKepAcTm7nQqAEE6Pvo
-         Get7g5yZCEBIoLVmwLEkSuvLRDi+o6yXfeUJ8eYpcVEjAuN3fRjKNgRnkGMsciTDesds
-         erI67wcCl4Al3sf6eJkWYsugSKwj29GLdsZYy5NC7FNcyYZLXI6P7TcRBl1+5vGuY5EN
-         m2pxQRh92YKtWwuYxhHAf4fENvSeCuIRpdDWTREOX7id0ZoluORAVNWLnHnSz2iKHwX0
-         2QQA==
-X-Forwarded-Encrypted: i=1; AJvYcCXN6mXmfu+KmUCy9144V/vPBYQ0Sa+kex3E687CkBVu3lkzewXJv2yN3wEFO5Zqri1a9eB51J9tGREiNko=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxeN2u3ESHucO70/vRwSCOSElMcuG1BB+s2oMiAYCmcdCXJ7Ygi
-	YmRTY4dRAxz+C7nL38evll/vIHtomIcbIt8mjB9uQJVih20+MOuHu3uHN333K7IWtF8qKYHZiHr
-	56g==
-X-Google-Smtp-Source: AGHT+IHWNzp66JVSJfWTxCRHilc0nDbHIqmddDpVoeLyiEVjC/MpaqVSH0JrUfOsI8FVYQkmBD96f8iDCw==
-X-Received: from wrbfr7.prod.google.com ([2002:a05:6000:2a87:b0:3e7:6467:c475])
- (user=elver job=prod-delivery.src-stubby-dispatcher) by 2002:a05:6000:2506:b0:3da:27c2:f51d
- with SMTP id ffacd0b85a97d-3ecdfa5f1bamr5332225f8f.45.1758204392094; Thu, 18
- Sep 2025 07:06:32 -0700 (PDT)
-Date: Thu, 18 Sep 2025 15:59:35 +0200
+        bh=rgYM57a4+YilIGK6iKKshTwAf6EJSKpu76VpXrklnPU=;
+        b=XQbbDevasF2lVUrSJa93S+HaAmEfeima4UPO4aad4Z3KxftqDfUn8d740eLhRW8i8w
+         szrMtbeGeoouM5nRsWorI8eNlJq15GmpIrxLZfI8tQIzQhlzrNF3VWDRjYRUujn7dAgq
+         wJW2ebeLjTHn1X02CNNIKuQJH7fOSbcJ3myrQi1yXsso/Y0qy8WQSM7lUgZjHLkcVCiR
+         axhb80bu1fMfsY71FI+uekivqpmr7BiHQAVKTkSl20t/1BliD0yuZxgPMsv+JOOw7a/I
+         OS9jfW7Zb3OOZ7Bz82LWQ6HvVuzEgdlM9tjolxXPIDHG5tXak1h4OQ0HEMyKyVjHP5E0
+         zK7g==
+X-Forwarded-Encrypted: i=1; AJvYcCX3eKYJ+kluuZynwjdPVJA/SvEey3fG51h5cF3cOtUgaztYsgQIlCUjtch+WDW9JbulhnF4dJdTW7MxA2U=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxvecHCdd6gUlFATJYVqVQe6UzaUuu8Qnoa0nZ6gCfEmBCwjTA8
+	g4iGUkYgKCswDCBh2C5Pz3p1FZwSUgUkRM/MMrRunB7WRtrmfvqaAvIct73eZdUhP7yBIkeFjvc
+	6Mw==
+X-Google-Smtp-Source: AGHT+IGyq2ix4kSVUhNc102rzu/+pi5sWigmai5zeC1C+WvM8GfTqI/Oxr6AI/FM5MqgBjTC/NiJq7z9XA==
+X-Received: from wrbbs6.prod.google.com ([2002:a05:6000:706:b0:3ed:665b:ec9d])
+ (user=elver job=prod-delivery.src-stubby-dispatcher) by 2002:adf:ce0c:0:b0:3ee:10b1:17bb
+ with SMTP id ffacd0b85a97d-3ee10b11893mr1782304f8f.61.1758204394951; Thu, 18
+ Sep 2025 07:06:34 -0700 (PDT)
+Date: Thu, 18 Sep 2025 15:59:36 +0200
 In-Reply-To: <20250918140451.1289454-1-elver@google.com>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
@@ -59,8 +59,8 @@ List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 Mime-Version: 1.0
 References: <20250918140451.1289454-1-elver@google.com>
 X-Mailer: git-send-email 2.51.0.384.g4c02a37b29-goog
-Message-ID: <20250918140451.1289454-25-elver@google.com>
-Subject: [PATCH v3 24/35] compiler-capability-analysis: Introduce header suppressions
+Message-ID: <20250918140451.1289454-26-elver@google.com>
+Subject: [PATCH v3 25/35] compiler: Let data_race() imply disabled capability analysis
 From: Marco Elver <elver@google.com>
 To: elver@google.com, Peter Zijlstra <peterz@infradead.org>, 
 	Boqun Feng <boqun.feng@gmail.com>, Ingo Molnar <mingo@kernel.org>, Will Deacon <will@kernel.org>
@@ -87,84 +87,51 @@ Cc: "David S. Miller" <davem@davemloft.net>, Luc Van Oostenryck <luc.vanoostenry
 	llvm@lists.linux.dev, rcu@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-While we can opt in individual subsystems which add the required
-annotations, such subsystems inevitably include headers from other
-subsystems which may not yet have the right annotations, which then
-result in false positive warnings.
+Many patterns that involve data-racy accesses often deliberately ignore
+normal synchronization rules to avoid taking a lock.
 
-Making compatible by adding annotations across all common headers
-currently requires an excessive number of __no_capability_analysis
-annotations, or carefully analyzing non-trivial cases to add the correct
-annotations. While this is desirable long-term, providing an incremental
-path causes less churn and headaches for maintainers not yet interested
-in dealing with such warnings.
-
-Rather than clutter headers unnecessary and mandate all subsystem
-maintainers to keep their headers working with capability analysis,
-suppress all -Wthread-safety warnings in headers. Explicitly opt in
-headers with capability-enabled primitives.
-
-With this in place, we can start enabling the analysis on more complex
-subsystems in subsequent changes.
+If we have a lock-guarded variable on which we do a lock-less data-racy
+access, rather than having to write capability_unsafe(data_race(..)),
+simply make the data_race(..) macro imply capability-unsafety. The
+data_race() macro already denotes the intent that something subtly
+unsafe is about to happen, so it should be clear enough as-is.
 
 Signed-off-by: Marco Elver <elver@google.com>
 ---
- scripts/Makefile.capability-analysis        |  4 +++
- scripts/capability-analysis-suppression.txt | 32 +++++++++++++++++++++
- 2 files changed, 36 insertions(+)
- create mode 100644 scripts/capability-analysis-suppression.txt
+v2:
+* New patch.
+---
+ include/linux/compiler.h       | 2 ++
+ lib/test_capability-analysis.c | 2 ++
+ 2 files changed, 4 insertions(+)
 
-diff --git a/scripts/Makefile.capability-analysis b/scripts/Makefile.capability-analysis
-index e137751a4c9a..76ef93ce2466 100644
---- a/scripts/Makefile.capability-analysis
-+++ b/scripts/Makefile.capability-analysis
-@@ -4,4 +4,8 @@ capability-analysis-cflags := -DWARN_CAPABILITY_ANALYSIS	\
- 	-fexperimental-late-parse-attributes -Wthread-safety	\
- 	-Wthread-safety-pointer -Wthread-safety-beta
+diff --git a/include/linux/compiler.h b/include/linux/compiler.h
+index 64ff73c533e5..eee60adb3645 100644
+--- a/include/linux/compiler.h
++++ b/include/linux/compiler.h
+@@ -186,7 +186,9 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
+ #define data_race(expr)							\
+ ({									\
+ 	__kcsan_disable_current();					\
++	disable_capability_analysis();					\
+ 	__auto_type __v = (expr);					\
++	enable_capability_analysis();					\
+ 	__kcsan_enable_current();					\
+ 	__v;								\
+ })
+diff --git a/lib/test_capability-analysis.c b/lib/test_capability-analysis.c
+index 12fd9716f0a4..513ad28ed06c 100644
+--- a/lib/test_capability-analysis.c
++++ b/lib/test_capability-analysis.c
+@@ -92,6 +92,8 @@ static void __used test_raw_spinlock_trylock_extra(struct test_raw_spinlock_data
+ {
+ 	unsigned long flags;
  
-+ifndef CONFIG_WARN_CAPABILITY_ANALYSIS_ALL
-+capability-analysis-cflags += --warning-suppression-mappings=$(srctree)/scripts/capability-analysis-suppression.txt
-+endif
++	data_race(d->counter++); /* no warning */
 +
- export CFLAGS_CAPABILITY_ANALYSIS := $(capability-analysis-cflags)
-diff --git a/scripts/capability-analysis-suppression.txt b/scripts/capability-analysis-suppression.txt
-new file mode 100644
-index 000000000000..95fb0b65a8e6
---- /dev/null
-+++ b/scripts/capability-analysis-suppression.txt
-@@ -0,0 +1,32 @@
-+# SPDX-License-Identifier: GPL-2.0
-+#
-+# The suppressions file should only match common paths such as header files.
-+# For individual subsytems use Makefile directive CAPABILITY_ANALYSIS := [yn].
-+#
-+# The suppressions are ignored when CONFIG_WARN_CAPABILITY_ANALYSIS_ALL is
-+# selected.
-+
-+[thread-safety]
-+src:*arch/*/include/*
-+src:*include/acpi/*
-+src:*include/asm-generic/*
-+src:*include/linux/*
-+src:*include/net/*
-+
-+# Opt-in headers:
-+src:*include/linux/bit_spinlock.h=emit
-+src:*include/linux/cleanup.h=emit
-+src:*include/linux/kref.h=emit
-+src:*include/linux/list*.h=emit
-+src:*include/linux/local_lock*.h=emit
-+src:*include/linux/lockdep.h=emit
-+src:*include/linux/mutex*.h=emit
-+src:*include/linux/rcupdate.h=emit
-+src:*include/linux/refcount.h=emit
-+src:*include/linux/rhashtable.h=emit
-+src:*include/linux/rwlock*.h=emit
-+src:*include/linux/rwsem.h=emit
-+src:*include/linux/seqlock*.h=emit
-+src:*include/linux/spinlock*.h=emit
-+src:*include/linux/srcu*.h=emit
-+src:*include/linux/ww_mutex.h=emit
+ 	if (raw_spin_trylock_irq(&d->lock)) {
+ 		d->counter++;
+ 		raw_spin_unlock_irq(&d->lock);
 -- 
 2.51.0.384.g4c02a37b29-goog
 
