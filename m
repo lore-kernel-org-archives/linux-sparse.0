@@ -1,100 +1,98 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ej1-f46.google.com (mail-ej1-f46.google.com [209.85.218.46])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EA7792459CF;
-	Thu, 18 Sep 2025 17:46:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C97192C08A2
+	for <linux-sparse@vger.kernel.org>; Thu, 18 Sep 2025 18:28:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.46
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758217569; cv=none; b=d20HE+H2OoF3+mZC/WJyIG+iCIWlj5qwTgt8GyWAL3zEASxUkG1tLVGHBAjEC4OWFCoSSDApC7SIyF68jwhcVGdnuRG+e/ExQcU/PMHFIIZeMg1rKZT49COJaxdRmjVYnIsAeLpA9Kx92MOox7uMN6TtSI0/iWlb6ZAKdYckFA8=
+	t=1758220142; cv=none; b=unmkMJ152zvG/KOsK0lQ1f+VLDP5mPTQGa5eXfejP+1iWGERvuD3DX/kGM7xbDisHn5EXkTkuSwKMVMPhmBB17hq9ku+/T6duLPciCSj1IThuxqN42/c3me7lom9uDfxj+vO1RduvO+6VfNcWtV9QKJJCYM20k7MBWc7kMkKwWk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1758217569; c=relaxed/simple;
-	bh=ZNTo/Y9EyxZmz/6UCc4XPFi8e1W38Mv8YYcq4WlZegE=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=dN5BlQwWq+yJ6icdhqmDLNLiu9vxKwpYFc1gxHeliavwFjnh/FCAIzd+FkGq7jC8sYdTTY4gTE6fBaQkwB6jH2s3uObXKUouK6BNoDW7bmFAtGua+HZAtLFufnDdKN13HyIMGNGcf9rKdJEbchbBGpHutizw7TiPKFvvkd55mCU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=i6Kqz0C2; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1758220142; c=relaxed/simple;
+	bh=GIdOGSSbwrFipBobYAUXpMiWLNqu9wX8DyCukfXEwV0=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=Ad2XcGdwbGG+LEqS4x5MlNJNN1ONm2Tly1HURqn2ix6rQE61LTjPnVSBxj+PR5Up/wiS1ML8zTW6GkcZrKsaGMb3X1T7Z5eg57kdWjE1/vGtRAjF3twMQoglAcBKXfugg3O2N2XN2VaNTGZkwmjHKx3MLoxHklXQZ9431jzl21k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org; spf=pass smtp.mailfrom=linuxfoundation.org; dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b=IPfM4GRy; arc=none smtp.client-ip=209.85.218.46
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linuxfoundation.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="i6Kqz0C2"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A6C0AC4CEE7;
-	Thu, 18 Sep 2025 17:45:58 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1758217568;
-	bh=ZNTo/Y9EyxZmz/6UCc4XPFi8e1W38Mv8YYcq4WlZegE=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=i6Kqz0C2bMyTxFSdnUrmZXomQZUKN6PrE+wxZtJczj7QbrNhByTVlq1eR7IvDe3Jy
-	 Rb0EVjsKlu7+xQR8iunNSXY3VfqUgyGCab6xsnZgBZl67tyBH/axKezDiuJ1cjPL/B
-	 9kfaRoWNLZ5V3wySAKqhDPOxfQhGSa1lzggNioVkRAcTy+hqrrr0X7H9JoiHVLVFUo
-	 mnNYoLhoteQ9EMMAi0FpYEfUzAKGMHcgiX/jB/qz83MmJDJnFzCuWf1/aH0MsAzimV
-	 sIMfY4OB0F6qYHUWlI8mz6IPqJvhYJpjwfv9gUvj1AZPTM7hciQh+uiQLZarv96/8X
-	 3zcI3CRc9uH8g==
-Date: Thu, 18 Sep 2025 10:45:55 -0700
-From: Nathan Chancellor <nathan@kernel.org>
-To: Christoph Hellwig <hch@lst.de>
-Cc: Marco Elver <elver@google.com>, Peter Zijlstra <peterz@infradead.org>,
-	Boqun Feng <boqun.feng@gmail.com>, Ingo Molnar <mingo@kernel.org>,
-	Will Deacon <will@kernel.org>,
-	"David S. Miller" <davem@davemloft.net>,
-	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
-	"Paul E. McKenney" <paulmck@kernel.org>,
-	Alexander Potapenko <glider@google.com>,
-	Arnd Bergmann <arnd@arndb.de>, Bart Van Assche <bvanassche@acm.org>,
-	Bill Wendling <morbo@google.com>,
-	Dmitry Vyukov <dvyukov@google.com>,
-	Eric Dumazet <edumazet@google.com>,
-	Frederic Weisbecker <frederic@kernel.org>,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	Herbert Xu <herbert@gondor.apana.org.au>,
-	Ian Rogers <irogers@google.com>, Jann Horn <jannh@google.com>,
-	Joel Fernandes <joelagnelf@nvidia.com>,
-	Jonathan Corbet <corbet@lwn.net>,
-	Josh Triplett <josh@joshtriplett.org>,
-	Justin Stitt <justinstitt@google.com>, Kees Cook <kees@kernel.org>,
-	Kentaro Takeda <takedakn@nttdata.co.jp>,
-	Lukas Bulwahn <lukas.bulwahn@gmail.com>,
-	Mark Rutland <mark.rutland@arm.com>,
-	Mathieu Desnoyers <mathieu.desnoyers@efficios.com>,
-	Miguel Ojeda <ojeda@kernel.org>,
-	Neeraj Upadhyay <neeraj.upadhyay@kernel.org>,
-	Nick Desaulniers <nick.desaulniers+lkml@gmail.com>,
-	Steven Rostedt <rostedt@goodmis.org>,
-	Tetsuo Handa <penguin-kernel@i-love.sakura.ne.jp>,
-	Thomas Gleixner <tglx@linutronix.de>, Thomas Graf <tgraf@suug.ch>,
-	Uladzislau Rezki <urezki@gmail.com>,
-	Waiman Long <longman@redhat.com>, kasan-dev@googlegroups.com,
-	linux-crypto@vger.kernel.org, linux-doc@vger.kernel.org,
-	linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-mm@kvack.org, linux-security-module@vger.kernel.org,
-	linux-sparse@vger.kernel.org, llvm@lists.linux.dev,
-	rcu@vger.kernel.org
-Subject: Re: [PATCH v3 00/35] Compiler-Based Capability- and Locking-Analysis
-Message-ID: <20250918174555.GA3366400@ax162>
-References: <20250918140451.1289454-1-elver@google.com>
- <20250918141511.GA30263@lst.de>
+	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="IPfM4GRy"
+Received: by mail-ej1-f46.google.com with SMTP id a640c23a62f3a-b2391596dcfso87456666b.0
+        for <linux-sparse@vger.kernel.org>; Thu, 18 Sep 2025 11:28:59 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linux-foundation.org; s=google; t=1758220138; x=1758824938; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=VQnfssjsrY+9woKgZUZYuw3ll89GvG821dWE8BX4Yz8=;
+        b=IPfM4GRygFSRMRZPTjf9R/HNt7L2HwyhpD1oM/pthhF+oUihGfzgM4BzipbHGEOoPB
+         ecPuVNAWNQQH6llCAp/o/TEYBagX0yBTXiMMnLac29pxmb94bNNgNi1W4lRfIeLT+HSC
+         4gb9XR9dk3Se56mLADMOIQ+7z27fr5bZrgRuw=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1758220138; x=1758824938;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=VQnfssjsrY+9woKgZUZYuw3ll89GvG821dWE8BX4Yz8=;
+        b=FV+Tqhkhi6RMWjKiwLpZQzTfZ029oS+UaDbpM1jaa9SJPRZVGPcy0jQxZL34IbMSkM
+         R0sbEvYRybEnAwijefHeqqL0D4J3HwHKNvw/cJ+bVrdvU6RYs4Fq+554zbEDBdf47yIU
+         0B7LC1saGwjKaTgL4+G47W42+MgXf7ElqTp5/HArjsMX2Tg6fhrrBe/f5sj9AfvjdnwK
+         flVjaPRXi3ay8GScKvT9JpRnzjsrAH420PGbnmOhp9IgO2gD5DXDrwv+Sw1rTZ5mPNMl
+         z2YxPPbvhyz2ucbGr6dRpj6/Wd+8k5PT9UGbCo846wLWyYhV27lZrhtsOf7v+XgfH0+Z
+         EZ6Q==
+X-Gm-Message-State: AOJu0Yz3oPbxE6cVEQKiGVmYjvt6EOabVY4D+XkNsWDLz13LwZ/r2YY5
+	zCoeeEruxcZQMvlifYPzPFiM2Li0LdAJ0KelkVOMOwS/r5UaV5+I4JaTX2M8QqxT4C2DNchK9mh
+	IEASwwVjt5w==
+X-Gm-Gg: ASbGncu3a++RsLfKdSnsjUqKOXAc5YgCYAZWDp0/6VAXVg+HQ1bsac6p9gtdoKUfVcG
+	ajheMZ3Fb5F5d4bh2XsiRbxr+YCPXp1asg7E7DLgZ9iUYysHqsSzbXhwVNyEoETnnAcPTU3s4pp
+	EcA4rdK4eALQtVYkjLBZVr1hAeNzpP7Cr8O6Wl0bk5aswhYCD++G7jpVqfyeCRGpPqJzUAM4otG
+	iCkFS/gcAzBnMsIqOMHhYav/4MJs1FeVNsXNkWOcfVmSlX4pBnC62g6LK22PUs7SRx1oU+Ggoyc
+	kcTCK/7NOhHUB7hB2VVfHNxK5Bh+7ZldRo1cxWWe89NITdoKU5Ey0Znabaju6Cw8KcgxXaQ9Dc7
+	4NzKpolATpC01XP5exDzgDSf0Usldm4+MsYW/SG68JriEoOfVPckiOANd8SZq/E/9PJo1LLbpfX
+	DT4GfTn/SYpSXUf0zigRbGf5jUOQ==
+X-Google-Smtp-Source: AGHT+IFP/7afEVV9pHIQQUja3qoKNw2YlWUoakrihzqmu3fgEaFHKUsnDcrcReSlN64D7dWk82aeoQ==
+X-Received: by 2002:a17:907:c21:b0:b0c:99b8:8aaa with SMTP id a640c23a62f3a-b24ec90a138mr26461566b.9.1758220137831;
+        Thu, 18 Sep 2025 11:28:57 -0700 (PDT)
+Received: from mail-ej1-f41.google.com (mail-ej1-f41.google.com. [209.85.218.41])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-b1fc890cc88sm245811666b.48.2025.09.18.11.28.56
+        for <linux-sparse@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 18 Sep 2025 11:28:57 -0700 (PDT)
+Received: by mail-ej1-f41.google.com with SMTP id a640c23a62f3a-b2391596dcfso87453166b.0
+        for <linux-sparse@vger.kernel.org>; Thu, 18 Sep 2025 11:28:56 -0700 (PDT)
+X-Received: by 2002:a17:907:6ea9:b0:b0c:6cae:51f5 with SMTP id
+ a640c23a62f3a-b24f3e5fdb6mr22488566b.43.1758220136507; Thu, 18 Sep 2025
+ 11:28:56 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250918141511.GA30263@lst.de>
+References: <CACePvbXDO1ZybDu3RaFhED9D-9gC6LTMpWrxoh5xD+ZO5SLdzA@mail.gmail.com>
+In-Reply-To: <CACePvbXDO1ZybDu3RaFhED9D-9gC6LTMpWrxoh5xD+ZO5SLdzA@mail.gmail.com>
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Date: Thu, 18 Sep 2025 11:28:40 -0700
+X-Gmail-Original-Message-ID: <CAHk-=whCP50Hru1efNTNj23-gMXcbXUEPzt09ivib5JDL5ycVw@mail.gmail.com>
+X-Gm-Features: AS18NWAgmvW3zXmVyLDGTSYyzMmAoOB3BrANgEWJwwEOTGza0T-epAsGWWMQrOs
+Message-ID: <CAHk-=whCP50Hru1efNTNj23-gMXcbXUEPzt09ivib5JDL5ycVw@mail.gmail.com>
+Subject: Re: Sparse maintainership
+To: Chris Li <sparse@chrisli.org>
+Cc: linux-sparse@vger.kernel.org, 
+	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Content-Type: text/plain; charset="UTF-8"
 
-On Thu, Sep 18, 2025 at 04:15:11PM +0200, Christoph Hellwig wrote:
-> On Thu, Sep 18, 2025 at 03:59:11PM +0200, Marco Elver wrote:
-> > A Clang version that supports `-Wthread-safety-pointer` and the new
-> > alias-analysis of capability pointers is required (from this version
-> > onwards):
-> > 
-> > 	https://github.com/llvm/llvm-project/commit/b4c98fcbe1504841203e610c351a3227f36c92a4 [3]
-> 
-> There's no chance to make say x86 pre-built binaries for that available?
+On Thu, 18 Sept 2025 at 08:46, Chris Li <sparse@chrisli.org> wrote:
+>
+> I would like to get some clarification on the mailing list:
+> Is the sparse project still maintained? I really don't want to step on
+> anybody's toe.
+>
+> If not, does anyone mind if I slowly resume some maintainer duty at a
+> very very slow pace?
 
-I can use my existing kernel.org LLVM [1] build infrastructure to
-generate prebuilt x86 binaries. Just give me a bit to build and upload
-them. You may not be the only developer or maintainer who may want to
-play with this.
+I'd love to have sparse maintained again, I think it's been
+effectively dead for the last two years or so.
 
-[1]: https://kernel.org/pub/tools/llvm/
+I don't think I've seen a commit since February 2024, so I don't think
+there are any feet to step on.
 
-Cheers,
-Nathan
+           Linus
