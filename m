@@ -1,90 +1,178 @@
-Received: from mail-yx1-f53.google.com (mail-yx1-f53.google.com [74.125.224.53])
+Received: from mail-lf1-f54.google.com (mail-lf1-f54.google.com [209.85.167.54])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2E274311964
-	for <linux-sparse@vger.kernel.org>; Thu, 18 Sep 2025 15:44:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6B004155A25
+	for <linux-sparse@vger.kernel.org>; Thu, 18 Sep 2025 15:58:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.54
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758210302; cv=none; b=LDwKdKY3jGIBvHf/MdLZ08fJZr0bmOCKfBXA+VAJO05NgeNL3KQilNqv+U9uRNe944UN0cE3dxkYn9HCm0iZenvESn55wmcv/IYxVzM6+8MtQifdwZNzXqFaPuQHqS2CIV+RcZ71v8b+ylxDjn3fDLREA8LIX5YQPyUImYHnn5I=
+	t=1758211088; cv=none; b=Wt5d/1d8CfTAAOmwLny23E7RdZ4Zdgji5/RTywtoYLORwxPGCHtZIw3Z3KQdRqWPtV8kK5goR2KIESwrdzN7DmCpIZ5+QohUJ0tSUdb/SJ2t10UvWO5oJ9XHxOdsj/wVlnKHf3euYueNiEjKkkNwza20WdzJAodGisczj4rGXhw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1758210302; c=relaxed/simple;
-	bh=LCEdDbRbEPo3BklIUvSAGmihyIaVBljZHKIihFLu7bQ=;
-	h=MIME-Version:From:Date:Message-ID:Subject:To:Cc:Content-Type; b=K2f0jQWgkFFroJ+5EfIQATWLUKSAAaJYLFycgh1qDOwXeA0sSJ2cqq0sDJKzeBNIx+Xz8/7ugxLA+91wJdd5uLn8ALzsbGAt+aiC+8E8qeaoGVJyUna4NmAkToMpeVUwDElcdwL98EIo13WrDz2zTJLxrGmUywbbbFLBPPNjC7I=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=chrisli.org; spf=pass smtp.mailfrom=chrisli.org; arc=none smtp.client-ip=74.125.224.53
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=chrisli.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=chrisli.org
-Received: by mail-yx1-f53.google.com with SMTP id 956f58d0204a3-6241ab7fc41so438206d50.2
-        for <linux-sparse@vger.kernel.org>; Thu, 18 Sep 2025 08:44:59 -0700 (PDT)
+	s=arc-20240116; t=1758211088; c=relaxed/simple;
+	bh=XhR1h2E8azi9+Iqslf03I/SakVc5s2CaBmw/N8HkwwM=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=mZSjbpinH72mtzLaS2LrC+cXq0IbOlMxgrBFxkMEuffV8fC1TEaftDxLsnXrjRBqB4KRjSoiThVt4DyT5sz3BND4DFUZPWU8x1AhnxZZPdXGXht5agVlGpOcWu51jpO949FBJ42fZrlwunMYPfOUogDeGZ5uZCy6+C0QOCZDW7c=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org; spf=pass smtp.mailfrom=linuxfoundation.org; dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b=dC+ag/Lu; arc=none smtp.client-ip=209.85.167.54
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linuxfoundation.org
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="dC+ag/Lu"
+Received: by mail-lf1-f54.google.com with SMTP id 2adb3069b0e04-55f98e7782bso1453306e87.0
+        for <linux-sparse@vger.kernel.org>; Thu, 18 Sep 2025 08:58:06 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linux-foundation.org; s=google; t=1758211084; x=1758815884; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=hpKO6CsQCuex3g+QZ22KGPC+ZgcKRmVKS1THDCqCkXc=;
+        b=dC+ag/LufgIaY/EgLUyyM42/rWto4TuKKcCB2dL6oEOJB1VAePjxxdJlZI0kc+NnAN
+         jeHXll5kdn5dWkK/epjHHi2X2pZTzGpe5EVv1svbEZfO1Ynf04ZmHF7HtPiu+PiA9VaQ
+         BRUZ+RtydqED5ueOtlC5WEMAkNgHueb78cON4=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1758210299; x=1758815099;
-        h=cc:to:subject:message-id:date:from:mime-version:x-gm-message-state
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=U9/xuzUuOfOJLkcPN2kNbunt3HY4sTAtBaVdykBHeac=;
-        b=AY7o631UJ0lOjV54wYVYMQ1Yk9AU7aETc37v3wzqi2DOEnfwJ0r5Cw8oCzjCm1EzJR
-         aectRzeCZJdkxTrC1Xo9DpeWzk3psilL9HKOv+zvUn1Le7FtGS4EVs2ypyMOITJfGPbY
-         2+Jvv5aLnlDsQDuNlM/tiJRu/eEGZuJzdVVVgNknZMZQqhfYLgiMppGv6GranHo3HNGX
-         DF1p4UbyCCY9HVJqKr6Jv6UDGdx5S558YHvFaNALAE1+lKZibJ7Ie2H91sNFV45CvH6w
-         9u35r7pOtqAFZb2HtXSf6YIAKGXIhWtmPkkWNW3ZwsXfIdKi8CqUAS9Y9q13UhW3fBt/
-         lVPA==
-X-Gm-Message-State: AOJu0YyLaeFcebOlG1k50B/gs8fHJHsBB6Wdt1Rj6/lGeHJKvuOK0L+e
-	b14qbZS44tU0ihw1xaqCH4eG3qedHmwXgJlmqwJAiyceGbcHtUbtRU+2oz/LtsF+fRsGvpVbmY6
-	dqPy3eN2fjMeA+eRLIOPEXbXCJGAESfl5fWP6dHeB4nfEcORXaBrWOYt4FA==
-X-Gm-Gg: ASbGncuZiUP500i29tdBFS/L9fCf9kN7bpNN457MoMRrfP0qDy+Rur7BsnAJ5g+sHYA
-	5CrGSP/cqhGv2tAmvgz1cv6I+k94BN2u10z6FQDKeHk9386+YeeqpOonExUAGlBPrINykTs2tvA
-	gki2GYwCstrZS1iHl1lgIbbGCEY5+cofYLJhbW6BS7jNul9EeaID3qIRmBUrSzrHOO/elIx733e
-	rJWsKtS3T3B53plbIOCb1tv
-X-Google-Smtp-Source: AGHT+IFV12SHd+jhPVdzsXzTEOX0xuKnH0+D2+zoInpZMxl12iJQRlpostvZWvwviMNXQ5l2H0KMCBG7f9gNmcnQ8aA=
-X-Received: by 2002:a05:690e:124a:b0:629:b4b5:6267 with SMTP id
- 956f58d0204a3-633b07381e8mr5701915d50.26.1758210298832; Thu, 18 Sep 2025
- 08:44:58 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1758211084; x=1758815884;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=hpKO6CsQCuex3g+QZ22KGPC+ZgcKRmVKS1THDCqCkXc=;
+        b=XjzCCluxpcY6Qp5mLx0/aMxNridqkIs3BbjFwnp8jzeiCqM7dHyoQzYeEASYfZWE66
+         EXhy5/XOpdQv9GPZZ/7irNtMH35E0zMNKQdeo3oMUOsxiqeEPcnkfVeEZctQ6hw74OrY
+         epd4qTanwtMVRAOU/MHaT30e+b4XANx5BzyHPvs5/W44bsdSBrsS0vRLZbjszOG7VHaq
+         r7cuVx+a089XmZSSEGnH6c3W5TSM/cpNj9Ny78NKhgBlTkuomcfWpfHqUXD+b/3asjim
+         m67x5Bq95zcibSVI/drbuAYO+WaH23UnP0jGCwPApZOXN4FqKC4DVWFyndy95pva7q6b
+         lQCA==
+X-Forwarded-Encrypted: i=1; AJvYcCWLYXETTRQQTbmvxOU2vLrF4wHB4tSRCQ/dUq/KjP7ddp2ZhtcLIlxdEDynxUj0Px3ggCmSWUm5blA9fds=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzKgwIkgp5Ly7r0gkEG6xZ0qE4TWxWUX6JOsEUfcwyxIVklJBlq
+	6pdBd99YEmeRbc+XGidaBcogAo+R9Tlv62VObjeiB8aFPAM+pdcEDQh5za9lit7+EP8/P4kjujY
+	J0wunXFaGZg==
+X-Gm-Gg: ASbGncvbZcQbr3/T/mPzHLd2k9U+PQbkkzu6OXEih6upSNZs8PdZcjNFNm/ATKeb6I5
+	d0iNazXEF16DJadx+x/ddat6PPtdPNgTN4DRHn6dcirN6/8seuj/7FZO8V3zR6+hwvjePUfffay
+	2ZfW1mLLv9DaDBT6Ox+PDmSeVizVcf9q3uvlYuIowFhjlwRe3EakxyVpyxERaHUDsuxSQbJdDIr
+	gZItpXZruEX84/jeyRPvsU02G7g8n6Y+0iIHQb9oIt18DVq3GtvdojKkTpiFievq3K9mQjPge8t
+	yJLz05qZ9fjr8gZArNDin95QuBe79gEvNOvJ4qRF4UPq/euxQQC2i73U4Q2DcoNYaCME+8KNr7H
+	XMrHZmE+PfNmUFcXbaLA40G9N3CQFq7seb4+muNONOR1Es5qeuMR4JOjAvV7sP1FhAjJ5AOHXwP
+	WZRbRCxY9SBOeFkMLt8so=
+X-Google-Smtp-Source: AGHT+IHplfKxQhEx/+6Ot75LqcvLarbei/PS2Qou28Po/G1SuWleoFowltJd6r7B7EdG3QgoQCeKBQ==
+X-Received: by 2002:a05:6512:3b0e:b0:55f:52d9:8e73 with SMTP id 2adb3069b0e04-579e3f2d3f1mr55645e87.19.1758211084276;
+        Thu, 18 Sep 2025 08:58:04 -0700 (PDT)
+Received: from mail-lj1-f170.google.com (mail-lj1-f170.google.com. [209.85.208.170])
+        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-578a6507259sm739597e87.35.2025.09.18.08.58.03
+        for <linux-sparse@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 18 Sep 2025 08:58:04 -0700 (PDT)
+Received: by mail-lj1-f170.google.com with SMTP id 38308e7fff4ca-3515a0bca13so25315251fa.1
+        for <linux-sparse@vger.kernel.org>; Thu, 18 Sep 2025 08:58:03 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCVPu/iy2MjSmN2KAyNqMTBlRj8wyl+EpzAH+pm9oFP5QlYMvqu2f351Acn0M82YQ2XFQNyEpCso4S/7cmI=@vger.kernel.org
+X-Received: by 2002:a17:907:9612:b0:b10:ecc6:5d8d with SMTP id
+ a640c23a62f3a-b1fac9c9b84mr417765966b.26.1758210601571; Thu, 18 Sep 2025
+ 08:50:01 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-From: Chris Li <sparse@chrisli.org>
-Date: Thu, 18 Sep 2025 08:44:47 -0700
-X-Gm-Features: AS18NWCi5E5nv4ppcUVipQpHC5cwajE45fjha9-vFPop4s6XuLxBtgL1wQgL-0c
-Message-ID: <CACePvbXDO1ZybDu3RaFhED9D-9gC6LTMpWrxoh5xD+ZO5SLdzA@mail.gmail.com>
-Subject: Sparse maintainership
-To: linux-sparse@vger.kernel.org
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+References: <20250918140451.1289454-1-elver@google.com>
+In-Reply-To: <20250918140451.1289454-1-elver@google.com>
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Date: Thu, 18 Sep 2025 08:49:44 -0700
+X-Gmail-Original-Message-ID: <CAHk-=wgd-Wcp0GpYaQnU7S9ci+FvFmaNw1gm75mzf0ZWdNLxvw@mail.gmail.com>
+X-Gm-Features: AS18NWBk4u9ObN57KesSGhJyt-aPlWZgKdxYhvzpAyoaxlNUF53WHe4dSKjzUBg
+Message-ID: <CAHk-=wgd-Wcp0GpYaQnU7S9ci+FvFmaNw1gm75mzf0ZWdNLxvw@mail.gmail.com>
+Subject: Re: [PATCH v3 00/35] Compiler-Based Capability- and Locking-Analysis
+To: Marco Elver <elver@google.com>
+Cc: Peter Zijlstra <peterz@infradead.org>, Boqun Feng <boqun.feng@gmail.com>, 
+	Ingo Molnar <mingo@kernel.org>, Will Deacon <will@kernel.org>, 
+	"David S. Miller" <davem@davemloft.net>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, 
+	"Paul E. McKenney" <paulmck@kernel.org>, Alexander Potapenko <glider@google.com>, Arnd Bergmann <arnd@arndb.de>, 
+	Bart Van Assche <bvanassche@acm.org>, Bill Wendling <morbo@google.com>, Christoph Hellwig <hch@lst.de>, 
+	Dmitry Vyukov <dvyukov@google.com>, Eric Dumazet <edumazet@google.com>, 
+	Frederic Weisbecker <frederic@kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, 
+	Herbert Xu <herbert@gondor.apana.org.au>, Ian Rogers <irogers@google.com>, 
+	Jann Horn <jannh@google.com>, Joel Fernandes <joelagnelf@nvidia.com>, 
+	Jonathan Corbet <corbet@lwn.net>, Josh Triplett <josh@joshtriplett.org>, 
+	Justin Stitt <justinstitt@google.com>, Kees Cook <kees@kernel.org>, 
+	Kentaro Takeda <takedakn@nttdata.co.jp>, Lukas Bulwahn <lukas.bulwahn@gmail.com>, 
+	Mark Rutland <mark.rutland@arm.com>, Mathieu Desnoyers <mathieu.desnoyers@efficios.com>, 
+	Miguel Ojeda <ojeda@kernel.org>, Nathan Chancellor <nathan@kernel.org>, 
+	Neeraj Upadhyay <neeraj.upadhyay@kernel.org>, 
+	Nick Desaulniers <nick.desaulniers+lkml@gmail.com>, Steven Rostedt <rostedt@goodmis.org>, 
+	Tetsuo Handa <penguin-kernel@i-love.sakura.ne.jp>, Thomas Gleixner <tglx@linutronix.de>, 
+	Thomas Graf <tgraf@suug.ch>, Uladzislau Rezki <urezki@gmail.com>, Waiman Long <longman@redhat.com>, 
+	kasan-dev@googlegroups.com, linux-crypto@vger.kernel.org, 
+	linux-doc@vger.kernel.org, linux-kbuild@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, linux-mm@kvack.org, 
+	linux-security-module@vger.kernel.org, linux-sparse@vger.kernel.org, 
+	llvm@lists.linux.dev, rcu@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-Very sorry that I disappeared from the project for a very long time.
+On Thu, 18 Sept 2025 at 07:05, Marco Elver <elver@google.com> wrote:
+>
+> Capability analysis is a C language extension, which enables statically
+> checking that user-definable "capabilities" are acquired and released where
+> required. An obvious application is lock-safety checking for the kernel's
+> various synchronization primitives (each of which represents a "capability"),
+> and checking that locking rules are not violated.
+>
+> Clang originally called the feature "Thread Safety Analysis" [1],
 
-I was the sparse maintainer until someone really wanted the sparse
-project maintenance and fought me over it.
+So this looks really interesting, but I absolutely *hate* the new
+"capability" name.
 
-I was deeply wounded at that time and felt sick of the situation. I
-pulled the plug completely, I stopped caring.
+We have existing and traditional - and very very different - meaning
+of "capabilities" in the kernel, and having this thing called
+"capability" is just wrong. Particularly as it then talks about
+"acquiring capabilities" - which is *EXACTLY* what our lon-existing
+capabilities are all about, but are something entirely and totally
+different.
 
-I was afraid to click on the sparse mailing list folder, even though I
-am still subscribed to it, like a wounded puppy afraid to lick the
-wound. I can observe the number of unread emails in the sparse folder
-is growing, I assume the project is doing great with the new
-maintainer. I am afraid to look inside.
+So please - call it something else. Even if clang then calls it
+'capability analysis", within the context of a kernel, please ignore
+that, and call it something that makes more sense (I don't think
+"capabilities" make sense even in the context of clang, but hey,
+that's _their_ choice - but we should not then take that bad choice
+and run with it).
 
-I accidentally clicked on this folder today. To my surprise  the
-project seems unmaintained.
-That breaks my heart, again.
+Sparse called it "context analysis", and while the "analysis" part is
+debatable - sparse never did much anything clever enough to merit
+calling it analysis - at least the "context" part of the name is I
+think somewhat sane.
 
-I would like to get some clarification on the mailing list:
-Is the sparse project still maintained? I really don't want to step on
-anybody's toe.
+Because it's about making decisions based on the context the code runs in.
 
-If not, does anyone mind if I slowly resume some maintainer duty at a
-very very slow pace?
+But I'm certainly not married to the "context" name either. I'd still
+claim it makes more sense than "capability", but the real problem with
+"capability" isn't that it doesn't make sense, it's that we already
+*HAVE* that as a concept, and old and traditional use is important.
 
-I have much less capacity in hobby projects than I used to nowadays.
-If I ever pick up again, I can't promise any capacity or SLO. It will
-be my own very slow peace. I just feel sad to see the project I used
-to care so much got unmaintained.
+But we do use the word "context" in this context quite widely even
+outside of the sparse usage, ie that's what we say when we talk about
+things like locking and RCU (ie we talk about running in "process
+context", or about "interrupt context" etc). That's obviously where
+the sparse naming comes from - it's not like sparse made that up.
 
-If there are any objections, please let me know in the mail list or privately.
+So I'm really happy to see compilers start exposing these kinds of
+interfaces, and the patches look sane apart from the absolutely
+horrible and unacceptable name. Really - there is no way in hell we
+can call this "capability" in a kernel context.
 
-Thanks and sorry about the disappearance. At least I feel brave enough
-to click on the sparse folder now.
+I'd suggest just doing a search-and-replace of 's/capability/context/'
+and it would already make things a ton better. But maybe there are
+better names for this still?
 
-Chris
+I mean, even apart from the fact that we have an existing meaning for
+"capability", just look at the documentation patch, and read the first
+sentence:
+
+  Capability analysis is a C language extension, which enables statically
+  checking that user-definable "capabilities" are acquired and released where
+  required.
+
+and just from a plain English language standpoint, the word
+"capability" makes zero sense. I think you even realized that, in that
+you put that word in quotes, because it's _so_ nonsensical.
+
+And if not "context", maybe some other word? But really, absolutely
+*not* "capability". Because that's just crazy talk.
+
+Please? Because other than this naming issue, I think this really is a
+good idea.
+
+           Linus
