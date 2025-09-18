@@ -1,148 +1,928 @@
 Received: from mail-wm1-f50.google.com (mail-wm1-f50.google.com [209.85.128.50])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0D9CE13B2A4
-	for <linux-sparse@vger.kernel.org>; Thu, 18 Sep 2025 21:01:09 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 768972F90DC
+	for <linux-sparse@vger.kernel.org>; Thu, 18 Sep 2025 21:26:27 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758229271; cv=none; b=qGZ9ZCXvJpsce9EfEoR1u+mebBXCBC2RN5sbX+V6ja5fXyBsJfs1E/+6pg2tN//UHtKNNfOFMGZ+8kVEsOpuVeWoAVIQhBMQJDsJ5VoGG7ElquBeTLhxsWz2No6g+bK5bpH7ZuHvtExyan6dF2F4Tb8fw0GWWMyCsqcO3Yp+oxw=
+	t=1758230791; cv=none; b=iLArMKygoeUdf2vBL60Us7O/8rwM4oh/cMI4kjW0RNhy4/yzdpSZZSDxXF3iX/8XsFeGV21Tuo9UP4PWU3HWvevDnINvmIYjDi2v7rB3rC5E9oY/wtW/xRywB+EFUMoj8OKK1BzKslyaFpYm297BvqSRk9/SlmTpZI4i+NRJp/k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1758229271; c=relaxed/simple;
-	bh=Y0aRlCDI5j7/xTKlaqyzsS75nTjo7oTyY2BP/Z6h+kc=;
-	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=Ul8jaPuwshROefPuDQQGzimU7x9MpDvC6bUXOWY6Q0odcHIGBLw76KMZnyzz/c7eBVxYgLcibVRkwP9luMZGcned7wnvyzBuLFhxuJfPZNSa2OCKW7BuPXHaSsrgw+7WN8OVm0JNIw4/PhRHHxZxQNbhQeMc8MPNS41y87sX7cA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=XBnuifSp; arc=none smtp.client-ip=209.85.128.50
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1758230791; c=relaxed/simple;
+	bh=6lurflfcZLY9lBkiycaUE6+vRIA9N3PiZYjC2HI5vjc=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=jtYMI+CBxnKy4rWg8sCpLNbJ1Q9ZaKGzhtsUnGSTWoLD6goJC0zWp00AOW5zKbRYikBlCj8n3xbGTwKHJSol7lqtkRYfuazDhfe1mZ3B4j8+IqefCf2imOChJ9zvVI8l8ysCjLcl0WHS1mLt3r32rfguL2WKePw6IGpuYQKe+6o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=qbeO8czd; arc=none smtp.client-ip=209.85.128.50
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="XBnuifSp"
-Received: by mail-wm1-f50.google.com with SMTP id 5b1f17b1804b1-45f29e5e89bso15347425e9.2
-        for <linux-sparse@vger.kernel.org>; Thu, 18 Sep 2025 14:01:09 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="qbeO8czd"
+Received: by mail-wm1-f50.google.com with SMTP id 5b1f17b1804b1-45ed646b656so14235085e9.3
+        for <linux-sparse@vger.kernel.org>; Thu, 18 Sep 2025 14:26:27 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1758229268; x=1758834068; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
+        d=google.com; s=20230601; t=1758230786; x=1758835586; darn=vger.kernel.org;
+        h=user-agent:in-reply-to:content-disposition:mime-version:references
          :message-id:subject:cc:to:from:date:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=8whsQSi0AUPF/mAlaYBaLE5rrzm7bWRBeC6D7X3U3TU=;
-        b=XBnuifSpk3ERatLsXf9I1n3d+weXBrk//nbzYl2YvWKXW0boogqe/YfRJxT9iK0cCQ
-         pW3L0MEYfi0l5pq0NzCFTPjuVrroW9a6NwqZZYgU0r3Y4Gl+T0FvX7V7IjY/hnoLOxo7
-         qNdJtHRVcjQJydbAn8ym0HKYMssZf0NXeZ6g9M9cUHCldzh0puIyQFzpss68UCKUg+By
-         EMxp2ZE0XUQmBAtW0WXxQKaVGTr6yVBBSj9bbFtEsO1x8nt5PLSvNuRt7Is/2FHKrXze
-         kKFcNdytcjzZwbyPEirg+RIXA9KcIlwMEfQ++2ktTVQ5GSvMJBABt4csX5dqr4msPgDu
-         iRrQ==
+        bh=Qlnjh+c5mlf0BAtXS8GQ76RVChldKpzM3ArSnwM9gZ4=;
+        b=qbeO8czd+sKTdh8XSc031g69orL6GWqKAhYuWBDUSFJH8QqqyhTMhUufVwVaT0n2nf
+         /Ad5bSBym7bgOldPkzW73ftv1E6ugYnKDFxCOcmOT6rCb7JBTlE3TdzJw3g9UjctIuQN
+         G24zwteHETmLXjBsgrDEfYkD2uxE7BO6/IIQrxmNRH6EVfPduCK45BmwtKYY3hpr5a8I
+         vLXj/W74XLQlBbj429r8u6mf4E0U+zEXj4GF/aZfxJZTQ/aoJUSNcyQOdTCjYLsdAl6M
+         2ZPw6wc6vRxeN5mjH6gEhEdrL+4wwsvQtzfQ2QwuxSW7P/a71rHDUDi1X4fc1Lpmlqpb
+         5dYQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1758229268; x=1758834068;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
+        d=1e100.net; s=20230601; t=1758230786; x=1758835586;
+        h=user-agent:in-reply-to:content-disposition:mime-version:references
          :message-id:subject:cc:to:from:date:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=8whsQSi0AUPF/mAlaYBaLE5rrzm7bWRBeC6D7X3U3TU=;
-        b=XzyOZDrGKt7HxW3nqBXEh/hGeZ5h+df5cBXXgbCDfJ7Dpt45on2+EgeOWeZP52YtrN
-         A5Z8dwuV1kT25KfYe4k/7kNTSZWVn2ts3/+AV8BEQmu4GAf00L8T8WZHGcZTbfGu0KDF
-         sGJn46LQYclOLpS3tnmTqVQun07bRNarJPsDsniQFbFHNVyWV741FfLUAEQTE9LEis2E
-         etYTCW0iy6nfUy0lH5H1yNnbHYtMpPNRTiAy+TkVqdIQkIEWpmLQ00N7OW7rEnSFMBe6
-         srXZdQOTigl6acLSJF3xU8bpL7OolbfuDNGhBdN7KCaoQ3NKpEKEn7KJmN7lC3S8jACd
-         DdSQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXv7e+PKs7Si1bu2qaA/JMFX/WbC2YZrTaBic6So2fIHNU5ycFc88fxuBbFJz+BUO/Qe2L2p5NeoIXB7Sk=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxaerkIftCZpTHUx/VoHjeklzd36amW2hjRUYk9k5ADJh3IyTUE
-	RoVtEBLyDTJhoDdSu79mQ2xCdVXODvbWpwFmRtDssXtdXpADlIzizbfv
-X-Gm-Gg: ASbGncvLrQ37QaJcp1Sl94G9E9tnN0o0iu5Y5I8YlxIZ9N6Hf/YNVkYR7UEfDUc67Rg
-	Zvm45XBeNKuiPolX1C4jLBnWY6zYKcl8SsfC7yj0tHhDU0v42Djtfk4fawDbkflbkJexWAFxCqY
-	DRByjCN3Hwh2Yh16S0gBXLB44UsCUwY5HTKPXt2nyV0y0LYaC4fYUrBSwyd1tJnHm/XtjUI2WV1
-	ToSDztL/Um0euPQfYWAJ7iWcK3YmASEeRWE1MaLQFYalEr6YjkWJk41iS4pWeNai0+uG9lcpM+f
-	lljFqDSefqvRLVCt39YN/RoBTle6k3aaFnsn2DCHJ2XTHK2dmigAKWwPAB+XwK0dZjxH2ZtPX8V
-	/YT9gB3c5wEEmBkmujkR47o2o42s5d5EcaZI0lSeXsBg/nNi9ZFEb5v6lKY3HhpQK/4lEiM2Qn/
-	f04tQ=
-X-Google-Smtp-Source: AGHT+IH/ADFhHy8Bccvk6S8WFFJzSRKrYkHXLYxTkOPeKEac1vyUf8zwVY5kJnjDYe07TnRqWgVkmQ==
-X-Received: by 2002:a05:600c:4588:b0:45b:7be1:be1f with SMTP id 5b1f17b1804b1-467eb325534mr3872295e9.32.1758229267977;
-        Thu, 18 Sep 2025 14:01:07 -0700 (PDT)
-Received: from pumpkin (82-69-66-36.dsl.in-addr.zen.co.uk. [82.69.66.36])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-46706f755b1sm24361325e9.11.2025.09.18.14.01.07
+        bh=Qlnjh+c5mlf0BAtXS8GQ76RVChldKpzM3ArSnwM9gZ4=;
+        b=DUkek7Zih2pbhm4YEVGwu+TYz51bufVlmDF2n+RB/Igu3hANwSiiQ+KZLQn0sehIEz
+         Z53jZh+V2F6C4PNyX+oi0qycCz5IXg+oQUCczQ5hTAmmXmjOu/f1vEEYHi4yBjqt4oSy
+         0pW/PuELcVHfdzX/n3c6TtoV3Tz8EHJbjV0D0sBe/wKddJLvpIyR27t3EwIIKezgju2O
+         WakqjrQItWlk8Y+1/rLxWKGVPcWYZ2Gw6MZwjXjR73/X0KWgKqXXhnHozma+aWBWLt/D
+         q8vI6rhEtXmjnanFa83pA60nVO7uDg+R1ABz7/JZ/V+e9/iXZsW/BFDXMJDgzZiWGWdV
+         LDFw==
+X-Forwarded-Encrypted: i=1; AJvYcCUz2QyrpFGmV9epKf7Is9ppqHyNMg6GZczF3WWzFOj57Q5k9lS02PylJf5KzruR8yn1ecCBtypl4INolGE=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzvP/zuDTGiEscJ5csSGaJs0hIAkL4TDAUMMFSu00u5oi/jCH6G
+	HPWJZ7OM06HElrNXZL+UtpW89mtWnfrs2iE87VLtyRoTyYGkg+pgH1Rtjl9n2T2yxA==
+X-Gm-Gg: ASbGnctJfclYJBvprymksBSe7pvvnBkse8O2re1yInO+CBJJzs5BWGd+iGx+2suCw4Z
+	YQQ+KslxQrC9s1/C4D5SM/VaiBH+784qAMM8zcObCHhvKHHWBG+7eaHVD4tR36i9wU07hcrViDT
+	CekADq0Vn1+WHiBitgPcDtcg0kOYSpZEgjKPzzlTNdANZ6Ip7TTCfLuSKF6wdVUY130qH6mvW+P
+	zWsSHoiwpPQ4AA0ubPsmIcrUxoSlpiRfmYH9pnizr1dqUTjGSZbKtFdLwB3kbAHLMt1ChBB0nqP
+	PO1cZAhpxsVF9RYHVLx5HDA7x/WrcfQLhKR8CjQS+8ZPftIBiROEVndznSxj/okcOsZsjRPz9BC
+	689pB3qT3SJ8jB528awlCl+IyoULDtDbnxk/oDeEdeoRo5f1JP0jx2DVZ3gC/zNpAWdx7Wd2X9z
+	ZZTVn0IdvWKlcCbcj2FW4=
+X-Google-Smtp-Source: AGHT+IGMtiwPsNbWfJnBBv9JGIRU+bQLPF7ZAhlfldivxo8u5uhAIK98oRxxcbAgw+UIqa6sty7d8Q==
+X-Received: by 2002:a05:600c:3512:b0:45d:db2a:ce32 with SMTP id 5b1f17b1804b1-467ecb1843amr4673355e9.9.1758230785247;
+        Thu, 18 Sep 2025 14:26:25 -0700 (PDT)
+Received: from elver.google.com ([2a00:79e0:2834:9:1f7a:8520:7568:dac6])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4613d14d564sm114132235e9.14.2025.09.18.14.26.21
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 18 Sep 2025 14:01:07 -0700 (PDT)
-Date: Thu, 18 Sep 2025 22:01:06 +0100
-From: David Laight <david.laight.linux@gmail.com>
-To: Eliav Farber <farbere@amazon.com>
-Cc: <luc.vanoostenryck@gmail.com>, <rostedt@goodmis.org>,
- <mingo@redhat.com>, <akpm@linux-foundation.org>,
- <gregkh@linuxfoundation.org>, <sj@kernel.org>, <David.Laight@ACULAB.COM>,
- <Jason@zx2c4.com>, <andriy.shevchenko@linux.intel.com>,
- <bvanassche@acm.org>, <keescook@chromium.org>,
- <linux-sparse@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
- <jonnyc@amazon.com>, <stable@vger.kernel.org>
-Subject: Re: [PATCH 0/7 5.10.y] Cherry pick of minmax.h commits from 5.15.y
-Message-ID: <20250918220106.75a8191b@pumpkin>
-In-Reply-To: <20250916212259.48517-1-farbere@amazon.com>
-References: <20250916212259.48517-1-farbere@amazon.com>
-X-Mailer: Claws Mail 4.1.1 (GTK 3.24.38; arm-unknown-linux-gnueabihf)
+        Thu, 18 Sep 2025 14:26:24 -0700 (PDT)
+Date: Thu, 18 Sep 2025 23:26:16 +0200
+From: Marco Elver <elver@google.com>
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Peter Zijlstra <peterz@infradead.org>,
+	Boqun Feng <boqun.feng@gmail.com>, Ingo Molnar <mingo@kernel.org>,
+	Will Deacon <will@kernel.org>,
+	"David S. Miller" <davem@davemloft.net>,
+	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
+	"Paul E. McKenney" <paulmck@kernel.org>,
+	Alexander Potapenko <glider@google.com>,
+	Arnd Bergmann <arnd@arndb.de>, Bart Van Assche <bvanassche@acm.org>,
+	Bill Wendling <morbo@google.com>, Christoph Hellwig <hch@lst.de>,
+	Dmitry Vyukov <dvyukov@google.com>,
+	Eric Dumazet <edumazet@google.com>,
+	Frederic Weisbecker <frederic@kernel.org>,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+	Herbert Xu <herbert@gondor.apana.org.au>,
+	Ian Rogers <irogers@google.com>, Jann Horn <jannh@google.com>,
+	Joel Fernandes <joelagnelf@nvidia.com>,
+	Jonathan Corbet <corbet@lwn.net>,
+	Josh Triplett <josh@joshtriplett.org>,
+	Justin Stitt <justinstitt@google.com>, Kees Cook <kees@kernel.org>,
+	Kentaro Takeda <takedakn@nttdata.co.jp>,
+	Lukas Bulwahn <lukas.bulwahn@gmail.com>,
+	Mark Rutland <mark.rutland@arm.com>,
+	Mathieu Desnoyers <mathieu.desnoyers@efficios.com>,
+	Miguel Ojeda <ojeda@kernel.org>,
+	Nathan Chancellor <nathan@kernel.org>,
+	Neeraj Upadhyay <neeraj.upadhyay@kernel.org>,
+	Nick Desaulniers <nick.desaulniers+lkml@gmail.com>,
+	Steven Rostedt <rostedt@goodmis.org>,
+	Tetsuo Handa <penguin-kernel@i-love.sakura.ne.jp>,
+	Thomas Gleixner <tglx@linutronix.de>, Thomas Graf <tgraf@suug.ch>,
+	Uladzislau Rezki <urezki@gmail.com>,
+	Waiman Long <longman@redhat.com>, kasan-dev@googlegroups.com,
+	linux-crypto@vger.kernel.org, linux-doc@vger.kernel.org,
+	linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org,
+	linux-mm@kvack.org, linux-security-module@vger.kernel.org,
+	linux-sparse@vger.kernel.org, llvm@lists.linux.dev,
+	rcu@vger.kernel.org
+Subject: Re: [PATCH v3 00/35] Compiler-Based Capability- and Locking-Analysis
+Message-ID: <aMx4-B_WAtX2aiKx@elver.google.com>
+References: <20250918140451.1289454-1-elver@google.com>
+ <CAHk-=wgd-Wcp0GpYaQnU7S9ci+FvFmaNw1gm75mzf0ZWdNLxvw@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAHk-=wgd-Wcp0GpYaQnU7S9ci+FvFmaNw1gm75mzf0ZWdNLxvw@mail.gmail.com>
+User-Agent: Mutt/2.2.13 (2024-03-09)
 
-On Tue, 16 Sep 2025 21:22:52 +0000
-Eliav Farber <farbere@amazon.com> wrote:
+On Thu, Sep 18, 2025 at 08:49AM -0700, Linus Torvalds wrote:
 
-> This series backports seven commits from v5.15.y that update minmax.h
-> and related code:
-> 
->  - ed6e37e30826 ("tracing: Define the is_signed_type() macro once")
->  - 998f03984e25 ("minmax: sanity check constant bounds when clamping")
->  - d470787b25e6 ("minmax: clamp more efficiently by avoiding extra
->    comparison")
->  - 1c2ee5bc9f11 ("minmax: fix header inclusions")
->  - d53b5d862acd ("minmax: allow min()/max()/clamp() if the arguments
->    have the same signedness.")
->  - 7ed91c5560df ("minmax: allow comparisons of 'int' against 'unsigned
->    char/short'")
->  - 22f7794ef5a3 ("minmax: relax check to allow comparison between
->    unsigned arguments and signed constants")
+> I'd suggest just doing a search-and-replace of 's/capability/context/'
+> and it would already make things a ton better. But maybe there are
+> better names for this still?
 
-I think you need to pick up the later changes (from Linus) as well.
-Without them nested min() and max() can generate very long lines from
-the pre-processor (tens of megabytes) that cause very slow and/or
-failing compilations on 32bit and other memory-limited systems.
+Fair points. "Context Analysis" makes sense, but it makes the thing
+(e.g. lock) used to establish that context a little awkward to refer to
+-- see half-baked attempt at reworking the documentation below.
 
-There are a few other changes needed at the same time.
-The current min() and max() can't be used in a few places because
-they aren't 'constant enough' with constant arguments.
+Maybe this:
 
-	David
+  Instance that must be acquired to enter context = "Context Guard"?
 
+We can then still call it "Context Analysis". And I need to be mindful
+of calling the objects themselves "Context Guard" throughout that
+search-and-replace. E.g. the macro to create a context-guard-enabled
+struct would be "context_guard_struct(spinlock) { ..".
 
-> 
-> The main motivation is commit d53b5d862acd, which removes the strict
-> type check in min()/max() when both arguments have the same signedness.
-> Without this, kernel 5.10 builds can emit warnings that become build
-> failures when -Werror is used.
-> 
-> Additionally, commit ed6e37e30826 from tracing is required as a
-> dependency; without it, compilation fails.
-> 
-> Andy Shevchenko (1):
->   minmax: fix header inclusions
-> 
-> Bart Van Assche (1):
->   tracing: Define the is_signed_type() macro once
-> 
-> David Laight (3):
->   minmax: allow min()/max()/clamp() if the arguments have the same
->     signedness.
->   minmax: allow comparisons of 'int' against 'unsigned char/short'
->   minmax: relax check to allow comparison between unsigned arguments and
->     signed constants
-> 
-> Jason A. Donenfeld (2):
->   minmax: sanity check constant bounds when clamping
->   minmax: clamp more efficiently by avoiding extra comparison
-> 
->  include/linux/compiler.h     |  6 +++
->  include/linux/minmax.h       | 89 ++++++++++++++++++++++++++----------
->  include/linux/overflow.h     |  1 -
->  include/linux/trace_events.h |  2 -
->  4 files changed, 70 insertions(+), 28 deletions(-)
-> 
+I also thought about "Guard Analysis", but that sounds wrong, too.
+Because we also have overloaded "guard(..)" (<linux/cleanup.h>).
 
+Preferences?
+
+[...]
+> And if not "context", maybe some other word? But really, absolutely
+> *not* "capability". Because that's just crazy talk.
+> 
+> Please? Because other than this naming issue, I think this really is a
+> good idea.
+
+Thanks,
+-- Marco
+
+------ >8 ------
+
+diff --git a/Documentation/dev-tools/capability-analysis.rst b/Documentation/dev-tools/capability-analysis.rst
+index 3456132261c6..b0c0961d6af5 100644
+--- a/Documentation/dev-tools/capability-analysis.rst
++++ b/Documentation/dev-tools/capability-analysis.rst
+@@ -1,80 +1,79 @@
+ .. SPDX-License-Identifier: GPL-2.0
+ .. Copyright (C) 2025, Google LLC.
+ 
+-.. _capability-analysis:
++.. _context-analysis:
+ 
+-Compiler-Based Capability Analysis
+-==================================
++Compiler-Based Context Analysis
++===============================
+ 
+-Capability analysis is a C language extension, which enables statically
+-checking that user-definable "capabilities" are acquired and released where
+-required. An obvious application is lock-safety checking for the kernel's
+-various synchronization primitives (each of which represents a "capability"),
+-and checking that locking rules are not violated.
++Context analysis is a C language extension, which enables statically checking
++that user-definable contexts are acquired and released where required. An
++obvious application is lock-safety checking for the kernel's various
++synchronization primitives (each of which represents a context if held), and
++checking that locking rules are not violated.
+ 
+-The Clang compiler currently supports the full set of capability analysis
++The Clang compiler currently supports the full set of context analysis
+ features. To enable for Clang, configure the kernel with::
+ 
+-    CONFIG_WARN_CAPABILITY_ANALYSIS=y
++    CONFIG_WARN_CONTEXT_ANALYSIS=y
+ 
+ The feature requires Clang 22 or later.
+ 
+ The analysis is *opt-in by default*, and requires declaring which modules and
+ subsystems should be analyzed in the respective `Makefile`::
+ 
+-    CAPABILITY_ANALYSIS_mymodule.o := y
++    CONTEXT_ANALYSIS_mymodule.o := y
+ 
+ Or for all translation units in the directory::
+ 
+-    CAPABILITY_ANALYSIS := y
++    CONTEXT_ANALYSIS := y
+ 
+ It is possible to enable the analysis tree-wide, however, which will result in
+ numerous false positive warnings currently and is *not* generally recommended::
+ 
+-    CONFIG_WARN_CAPABILITY_ANALYSIS_ALL=y
++    CONFIG_WARN_CONTEXT_ANALYSIS_ALL=y
+ 
+ Programming Model
+ -----------------
+ 
+-The below describes the programming model around using capability-enabled
+-types.
++The below describes the programming model around using context-enabled types.
+ 
+ .. note::
+-   Enabling capability analysis can be seen as enabling a dialect of Linux C with
+-   a Capability System. Some valid patterns involving complex control-flow are
++   Enabling context analysis can be seen as enabling a dialect of Linux C with
++   a Context System. Some valid patterns involving complex control-flow are
+    constrained (such as conditional acquisition and later conditional release
+-   in the same function, or returning pointers to capabilities from functions.
++   in the same function).
+ 
+-Capability analysis is a way to specify permissibility of operations to depend
+-on capabilities being held (or not held). Typically we are interested in
+-protecting data and code by requiring some capability to be held, for example a
+-specific lock. The analysis ensures that the caller cannot perform the
+-operation without holding the appropriate capability.
++Context analysis is a way to specify permissibility of operations to depend on
++contexts being held (or not held). Typically we are interested in protecting
++data and code in a critical section by requiring a specific context to be held,
++for example a specific lock. The analysis ensures that the caller cannot
++perform the operation without holding the appropriate context.
+ 
+-Capabilities are associated with named structs, along with functions that
+-operate on capability-enabled struct instances to acquire and release the
+-associated capability.
++Contexts are associated with named structs, along with functions that operate
++on context-enabled struct instances to acquire and release the associated
++context.
+ 
+-Capabilities can be held either exclusively or shared. This mechanism allows
+-assign more precise privileges when holding a capability, typically to
++Contexts can be held either exclusively or shared. This mechanism allows
++assigning more precise privileges when holding a context, typically to
+ distinguish where a thread may only read (shared) or also write (exclusive) to
+ guarded data.
+ 
+-The set of capabilities that are actually held by a given thread at a given
+-point in program execution is a run-time concept. The static analysis works by
+-calculating an approximation of that set, called the capability environment.
+-The capability environment is calculated for every program point, and describes
+-the set of capabilities that are statically known to be held, or not held, at
+-that particular point. This environment is a conservative approximation of the
+-full set of capabilities that will actually held by a thread at run-time.
++The set of contexts that are actually held by a given thread at a given point
++in program execution is a run-time concept. The static analysis works by
++calculating an approximation of that set, called the context environment.  The
++context environment is calculated for every program point, and describes the
++set of contexts that are statically known to be held, or not held, at that
++particular point. This environment is a conservative approximation of the full
++set of contexts that will actually held by a thread at run-time.
+ 
+ More details are also documented `here
+ <https://clang.llvm.org/docs/ThreadSafetyAnalysis.html>`_.
+ 
+ .. note::
+-   Clang's analysis explicitly does not infer capabilities acquired or released
++   Clang's analysis explicitly does not infer contexts acquired or released
+    by inline functions. It requires explicit annotations to (a) assert that
+-   it's not a bug if a capability is released or acquired, and (b) to retain
++   it's not a bug if a context is released or acquired, and (b) to retain
+    consistency between inline and non-inline function declarations.
+ 
+ Supported Kernel Primitives
+@@ -85,13 +84,13 @@ Currently the following synchronization primitives are supported:
+ `bit_spinlock`, RCU, SRCU (`srcu_struct`), `rw_semaphore`, `local_lock_t`,
+ `ww_mutex`.
+ 
+-For capabilities with an initialization function (e.g., `spin_lock_init()`),
+-calling this function on the capability instance before initializing any
+-guarded members or globals prevents the compiler from issuing warnings about
+-unguarded initialization.
++For contexts with an initialization function (e.g., `spin_lock_init()`),
++calling this function on the context instance before initializing any guarded
++members or globals prevents the compiler from issuing warnings about unguarded
++initialization.
+ 
+ Lockdep assertions, such as `lockdep_assert_held()`, inform the compiler's
+-capability analysis that the associated synchronization primitive is held after
++context analysis that the associated synchronization primitive is held after
+ the assertion. This avoids false positives in complex control-flow scenarios
+ and encourages the use of Lockdep where static analysis is limited. For
+ example, this is useful when a function doesn't *always* require a lock, making
+@@ -100,9 +99,9 @@ example, this is useful when a function doesn't *always* require a lock, making
+ Keywords
+ ~~~~~~~~
+ 
+-.. kernel-doc:: include/linux/compiler-capability-analysis.h
+-   :identifiers: struct_with_capability
+-                 token_capability token_capability_instance
++.. kernel-doc:: include/linux/compiler-context-analysis.h
++   :identifiers: struct_with_context
++                 token_context token_context_instance
+                  __guarded_by __pt_guarded_by
+                  __must_hold
+                  __must_not_hold
+@@ -117,13 +116,13 @@ Keywords
+                  __release
+                  __acquire_shared
+                  __release_shared
+-                 capability_unsafe
+-                 __capability_unsafe
+-                 disable_capability_analysis enable_capability_analysis
++                 context_unsafe
++                 __context_unsafe
++                 disable_context_analysis enable_context_analysis
+ 
+ .. note::
+-   The function attribute `__no_capability_analysis` is reserved for internal
+-   implementation of capability-enabled primitives, and should be avoided in
++   The function attribute `__no_context_analysis` is reserved for internal
++   implementation of context-enabled primitives, and should be avoided in
+    normal code.
+ 
+ Background
+@@ -140,9 +139,10 @@ Indeed, its foundations can be found in `capability systems
+ the permissibility of operations to depend on some capability being held (or
+ not held).
+ 
+-Because the feature is not just able to express capabilities related to
+-synchronization primitives, the naming chosen for the kernel departs from
+-Clang's initial "Thread Safety" nomenclature and refers to the feature as
+-"Capability Analysis" to avoid confusion. The implementation still makes
+-references to the older terminology in some places, such as `-Wthread-safety`
+-being the warning option that also still appears in diagnostic messages.
++Because the feature is not just able to express contexts related to
++synchronization primitives, and "capability" is already overloaded in the
++kernel, the naming chosen for the kernel departs from Clang's initial "Thread
++Safety" and "Capability" nomenclature and refers to the feature as "Context
++Analysis" to avoid confusion. The internal implementation still makes
++references to Clang's terminology, such as `-Wthread-safety` being the warning
++option that also still appears in diagnostic messages.
+diff --git a/include/linux/compiler-capability-analysis.h b/include/linux/compiler-capability-analysis.h
+index f8a1da67589c..7882684a8308 100644
+--- a/include/linux/compiler-capability-analysis.h
++++ b/include/linux/compiler-capability-analysis.h
+@@ -1,42 +1,43 @@
+ /* SPDX-License-Identifier: GPL-2.0 */
+ /*
+- * Macros and attributes for compiler-based static capability analysis.
++ * Macros and attributes for compiler-based static context analysis.
+  */
+ 
+-#ifndef _LINUX_COMPILER_CAPABILITY_ANALYSIS_H
+-#define _LINUX_COMPILER_CAPABILITY_ANALYSIS_H
++#ifndef _LINUX_COMPILER_CONTEXT_ANALYSIS_H
++#define _LINUX_COMPILER_CONTEXT_ANALYSIS_H
+ 
+-#if defined(WARN_CAPABILITY_ANALYSIS)
++#if defined(WARN_CONTEXT_ANALYSIS)
+ 
+ /*
+- * The below attributes are used to define new capability types. Internal only.
+- */
+-# define __cap_type(name)			__attribute__((capability(#name)))
+-# define __reentrant_cap			__attribute__((reentrant_capability))
+-# define __acquires_cap(...)			__attribute__((acquire_capability(__VA_ARGS__)))
+-# define __acquires_shared_cap(...)		__attribute__((acquire_shared_capability(__VA_ARGS__)))
+-# define __try_acquires_cap(ret, var)		__attribute__((try_acquire_capability(ret, var)))
+-# define __try_acquires_shared_cap(ret, var)	__attribute__((try_acquire_shared_capability(ret, var)))
+-# define __releases_cap(...)			__attribute__((release_capability(__VA_ARGS__)))
+-# define __releases_shared_cap(...)		__attribute__((release_shared_capability(__VA_ARGS__)))
+-# define __assumes_cap(...)			__attribute__((assert_capability(__VA_ARGS__)))
+-# define __assumes_shared_cap(...)		__attribute__((assert_shared_capability(__VA_ARGS__)))
+-# define __returns_cap(var)			__attribute__((lock_returned(var)))
++ * The below attributes are used to define new context (Clang: capability) types.
++ * Internal only.
++ */
++# define __ctx_type(name)			__attribute__((capability(#name)))
++# define __reentrant_ctx			__attribute__((reentrant_capability))
++# define __acquires_ctx(...)			__attribute__((acquire_capability(__VA_ARGS__)))
++# define __acquires_shared_ctx(...)		__attribute__((acquire_shared_capability(__VA_ARGS__)))
++# define __try_acquires_ctx(ret, var)		__attribute__((try_acquire_capability(ret, var)))
++# define __try_acquires_shared_ctx(ret, var)	__attribute__((try_acquire_shared_capability(ret, var)))
++# define __releases_ctx(...)			__attribute__((release_capability(__VA_ARGS__)))
++# define __releases_shared_ctx(...)		__attribute__((release_shared_capability(__VA_ARGS__)))
++# define __assumes_ctx(...)			__attribute__((assert_capability(__VA_ARGS__)))
++# define __assumes_shared_ctx(...)		__attribute__((assert_shared_capability(__VA_ARGS__)))
++# define __returns_ctx(var)			__attribute__((lock_returned(var)))
+ 
+ /*
+  * The below are used to annotate code being checked. Internal only.
+  */
+-# define __excludes_cap(...)		__attribute__((locks_excluded(__VA_ARGS__)))
+-# define __requires_cap(...)		__attribute__((requires_capability(__VA_ARGS__)))
+-# define __requires_shared_cap(...)	__attribute__((requires_shared_capability(__VA_ARGS__)))
++# define __excludes_ctx(...)		__attribute__((locks_excluded(__VA_ARGS__)))
++# define __requires_ctx(...)		__attribute__((requires_capability(__VA_ARGS__)))
++# define __requires_shared_ctx(...)	__attribute__((requires_shared_capability(__VA_ARGS__)))
+ 
+ /**
+  * __guarded_by - struct member and globals attribute, declares variable
+- *                protected by capability
++ *                protected by context
+  *
+  * Declares that the struct member or global variable must be guarded by the
+- * given capabilities. Read operations on the data require shared access,
+- * while write operations require exclusive access.
++ * given context. Read operations on the data require shared access, while write
++ * operations require exclusive access.
+  *
+  * .. code-block:: c
+  *
+@@ -49,11 +50,11 @@
+ 
+ /**
+  * __pt_guarded_by - struct member and globals attribute, declares pointed-to
+- *                   data is protected by capability
++ *                   data is protected by context
+  *
+  * Declares that the data pointed to by the struct member pointer or global
+- * pointer must be guarded by the given capabilities. Read operations on the
+- * data require shared access, while write operations require exclusive access.
++ * pointer must be guarded by the given contexts. Read operations on the data
++ * require shared access, while write operations require exclusive access.
+  *
+  * .. code-block:: c
+  *
+@@ -65,14 +66,14 @@
+ # define __pt_guarded_by(...)		__attribute__((pt_guarded_by(__VA_ARGS__)))
+ 
+ /**
+- * struct_with_capability() - declare or define a capability struct
++ * struct_with_context() - declare or define a context struct
+  * @name: struct name
+  *
+- * Helper to declare or define a struct type with capability of the same name.
++ * Helper to declare or define a struct type with context of the same name.
+  *
+  * .. code-block:: c
+  *
+- *	struct_with_capability(my_handle) {
++ *	struct_with_context(my_handle) {
+  *		int foo;
+  *		long bar;
+  *	};
+@@ -81,98 +82,98 @@
+  *		...
+  *	};
+  *	// ... declared elsewhere ...
+- *	struct_with_capability(some_state);
++ *	struct_with_context(some_state);
+  *
+  * Note: The implementation defines several helper functions that can acquire,
+- * release, and assert the capability.
+- */
+-# define struct_with_capability(name, ...)								\
+-	struct __cap_type(name) __VA_ARGS__ name;							\
+-	static __always_inline void __acquire_cap(const struct name *var)				\
+-		__attribute__((overloadable)) __no_capability_analysis __acquires_cap(var) { }		\
+-	static __always_inline void __acquire_shared_cap(const struct name *var)			\
+-		__attribute__((overloadable)) __no_capability_analysis __acquires_shared_cap(var) { }	\
+-	static __always_inline bool __try_acquire_cap(const struct name *var, bool ret)			\
+-		__attribute__((overloadable)) __no_capability_analysis __try_acquires_cap(1, var)	\
++ * release, and assert the context is held.
++ */
++# define struct_with_context(name, ...)								\
++	struct __ctx_type(name) __VA_ARGS__ name;							\
++	static __always_inline void __acquire_ctx(const struct name *var)				\
++		__attribute__((overloadable)) __no_context_analysis __acquires_ctx(var) { }		\
++	static __always_inline void __acquire_shared_ctx(const struct name *var)			\
++		__attribute__((overloadable)) __no_context_analysis __acquires_shared_ctx(var) { }	\
++	static __always_inline bool __try_acquire_ctx(const struct name *var, bool ret)			\
++		__attribute__((overloadable)) __no_context_analysis __try_acquires_ctx(1, var)	\
+ 	{ return ret; }											\
+-	static __always_inline bool __try_acquire_shared_cap(const struct name *var, bool ret)		\
+-		__attribute__((overloadable)) __no_capability_analysis __try_acquires_shared_cap(1, var) \
++	static __always_inline bool __try_acquire_shared_ctx(const struct name *var, bool ret)		\
++		__attribute__((overloadable)) __no_context_analysis __try_acquires_shared_ctx(1, var) \
+ 	{ return ret; }											\
+-	static __always_inline void __release_cap(const struct name *var)				\
+-		__attribute__((overloadable)) __no_capability_analysis __releases_cap(var) { }		\
+-	static __always_inline void __release_shared_cap(const struct name *var)			\
+-		__attribute__((overloadable)) __no_capability_analysis __releases_shared_cap(var) { }	\
+-	static __always_inline void __assume_cap(const struct name *var)				\
+-		__attribute__((overloadable)) __assumes_cap(var) { }					\
+-	static __always_inline void __assume_shared_cap(const struct name *var)				\
+-		__attribute__((overloadable)) __assumes_shared_cap(var) { }				\
++	static __always_inline void __release_ctx(const struct name *var)				\
++		__attribute__((overloadable)) __no_context_analysis __releases_ctx(var) { }		\
++	static __always_inline void __release_shared_ctx(const struct name *var)			\
++		__attribute__((overloadable)) __no_context_analysis __releases_shared_ctx(var) { }	\
++	static __always_inline void __assume_ctx(const struct name *var)				\
++		__attribute__((overloadable)) __assumes_ctx(var) { }					\
++	static __always_inline void __assume_shared_ctx(const struct name *var)				\
++		__attribute__((overloadable)) __assumes_shared_ctx(var) { }				\
+ 	struct name
+ 
+ /**
+- * disable_capability_analysis() - disables capability analysis
++ * disable_context_analysis() - disables context analysis
+  *
+- * Disables capability analysis. Must be paired with a later
+- * enable_capability_analysis().
++ * Disables context analysis. Must be paired with a later
++ * enable_context_analysis().
+  */
+-# define disable_capability_analysis()				\
++# define disable_context_analysis()				\
+ 	__diag_push();						\
+ 	__diag_ignore_all("-Wunknown-warning-option", "")	\
+ 	__diag_ignore_all("-Wthread-safety", "")		\
+ 	__diag_ignore_all("-Wthread-safety-pointer", "")
+ 
+ /**
+- * enable_capability_analysis() - re-enables capability analysis
++ * enable_context_analysis() - re-enables context analysis
+  *
+- * Re-enables capability analysis. Must be paired with a prior
+- * disable_capability_analysis().
++ * Re-enables context analysis. Must be paired with a prior
++ * disable_context_analysis().
+  */
+-# define enable_capability_analysis() __diag_pop()
++# define enable_context_analysis() __diag_pop()
+ 
+ /**
+- * __no_capability_analysis - function attribute, disables capability analysis
+- *
+- * Function attribute denoting that capability analysis is disabled for the
+- * whole function. Prefer use of `capability_unsafe()` where possible.
+- */
+-# define __no_capability_analysis	__attribute__((no_thread_safety_analysis))
+-
+-#else /* !WARN_CAPABILITY_ANALYSIS */
+-
+-# define __cap_type(name)
+-# define __reentrant_cap
+-# define __acquires_cap(...)
+-# define __acquires_shared_cap(...)
+-# define __try_acquires_cap(ret, var)
+-# define __try_acquires_shared_cap(ret, var)
+-# define __releases_cap(...)
+-# define __releases_shared_cap(...)
+-# define __assumes_cap(...)
+-# define __assumes_shared_cap(...)
+-# define __returns_cap(var)
++ * __no_context_analysis - function attribute, disables context analysis
++ *
++ * Function attribute denoting that context analysis is disabled for the
++ * whole function. Prefer use of `context_unsafe()` where possible.
++ */
++# define __no_context_analysis	__attribute__((no_thread_safety_analysis))
++
++#else /* !WARN_CONTEXT_ANALYSIS */
++
++# define __ctx_type(name)
++# define __reentrant_ctx
++# define __acquires_ctx(...)
++# define __acquires_shared_ctx(...)
++# define __try_acquires_ctx(ret, var)
++# define __try_acquires_shared_ctx(ret, var)
++# define __releases_ctx(...)
++# define __releases_shared_ctx(...)
++# define __assumes_ctx(...)
++# define __assumes_shared_ctx(...)
++# define __returns_ctx(var)
+ # define __guarded_by(...)
+ # define __pt_guarded_by(...)
+-# define __excludes_cap(...)
+-# define __requires_cap(...)
+-# define __requires_shared_cap(...)
+-# define __acquire_cap(var)			do { } while (0)
+-# define __acquire_shared_cap(var)		do { } while (0)
+-# define __try_acquire_cap(var, ret)		(ret)
+-# define __try_acquire_shared_cap(var, ret)	(ret)
+-# define __release_cap(var)			do { } while (0)
+-# define __release_shared_cap(var)		do { } while (0)
+-# define __assume_cap(var)			do { (void)(var); } while (0)
+-# define __assume_shared_cap(var)		do { (void)(var); } while (0)
+-# define struct_with_capability(name, ...)	struct __VA_ARGS__ name
+-# define disable_capability_analysis()
+-# define enable_capability_analysis()
+-# define __no_capability_analysis
+-
+-#endif /* WARN_CAPABILITY_ANALYSIS */
++# define __excludes_ctx(...)
++# define __requires_ctx(...)
++# define __requires_shared_ctx(...)
++# define __acquire_ctx(var)			do { } while (0)
++# define __acquire_shared_ctx(var)		do { } while (0)
++# define __try_acquire_ctx(var, ret)		(ret)
++# define __try_acquire_shared_ctx(var, ret)	(ret)
++# define __release_ctx(var)			do { } while (0)
++# define __release_shared_ctx(var)		do { } while (0)
++# define __assume_ctx(var)			do { (void)(var); } while (0)
++# define __assume_shared_ctx(var)		do { (void)(var); } while (0)
++# define struct_with_context(name, ...)	struct __VA_ARGS__ name
++# define disable_context_analysis()
++# define enable_context_analysis()
++# define __no_context_analysis
++
++#endif /* WARN_CONTEXT_ANALYSIS */
+ 
+ /**
+- * capability_unsafe() - disable capability checking for contained code
++ * context_unsafe() - disable context checking for contained code
+  *
+- * Disables capability checking for contained statements or expression.
++ * Disables context checking for contained statements or expression.
+  *
+  * .. code-block:: c
+  *
+@@ -186,30 +187,30 @@
+  *		// ...
+  *		// other code that is still checked ...
+  *		// ...
+- *		return capability_unsafe(d->counter);
++ *		return context_unsafe(d->counter);
+  *	}
+  */
+-#define capability_unsafe(...)		\
++#define context_unsafe(...)		\
+ ({					\
+-	disable_capability_analysis();	\
++	disable_context_analysis();	\
+ 	__VA_ARGS__;			\
+-	enable_capability_analysis()	\
++	enable_context_analysis()	\
+ })
+ 
+ /**
+- * __capability_unsafe() - function attribute, disable capability checking
++ * __context_unsafe() - function attribute, disable context checking
+  * @comment: comment explaining why opt-out is safe
+  *
+- * Function attribute denoting that capability analysis is disabled for the
++ * Function attribute denoting that context analysis is disabled for the
+  * whole function. Forces adding an inline comment as argument.
+  */
+-#define __capability_unsafe(comment) __no_capability_analysis
++#define __context_unsafe(comment) __no_context_analysis
+ 
+ /**
+- * capability_unsafe_alias() - helper to insert a capability "alias barrier"
+- * @p: pointer aliasing a capability or object containing capabilities
++ * context_unsafe_alias() - helper to insert a context "alias barrier"
++ * @p: pointer aliasing a context or object containing context pointers
+  *
+- * No-op function that acts as a "capability alias barrier", where the analysis
++ * No-op function that acts as a "context alias barrier", where the analysis
+  * rightfully detects that we're switching aliases, but the switch is considered
+  * safe but beyond the analysis reasoning abilities.
+  *
+@@ -219,61 +220,61 @@
+  * their value cannot be determined (e.g. when passing a non-const pointer to an
+  * alias as a function argument).
+  */
+-#define capability_unsafe_alias(p) _capability_unsafe_alias((void **)&(p))
+-static inline void _capability_unsafe_alias(void **p) { }
++#define context_unsafe_alias(p) _context_unsafe_alias((void **)&(p))
++static inline void _context_unsafe_alias(void **p) { }
+ 
+ /**
+- * token_capability() - declare an abstract global capability instance
+- * @name: token capability name
++ * token_context() - declare an abstract global context instance
++ * @name: token context name
+  *
+- * Helper that declares an abstract global capability instance @name that can be
+- * used as a token capability, but not backed by a real data structure (linker
+- * error if accidentally referenced). The type name is `__capability_@name`.
++ * Helper that declares an abstract global context instance @name that can be
++ * used as a token context, but not backed by a real data structure (linker
++ * error if accidentally referenced). The type name is `__context_@name`.
+  */
+-#define token_capability(name, ...)					\
+-	struct_with_capability(__capability_##name, ##__VA_ARGS__) {};	\
+-	extern const struct __capability_##name *name
++#define token_context(name, ...)					\
++	struct_with_context(__context_##name, ##__VA_ARGS__) {};	\
++	extern const struct __context_##name *name
+ 
+ /**
+- * token_capability_instance() - declare another instance of a global capability
+- * @cap: token capability previously declared with token_capability()
+- * @name: name of additional global capability instance
++ * token_context_instance() - declare another instance of a global context
++ * @ctx: token context previously declared with token_context()
++ * @name: name of additional global context instance
+  *
+  * Helper that declares an additional instance @name of the same token
+- * capability class @name. This is helpful where multiple related token
+- * capabilities are declared, as it also allows using the same underlying type
+- * (`__capability_@cap`) as function arguments.
++ * context class @name. This is helpful where multiple related token
++ * contexts are declared, as it also allows using the same underlying type
++ * (`__context_@ctx`) as function arguments.
+  */
+-#define token_capability_instance(cap, name)		\
+-	extern const struct __capability_##cap *name
++#define token_context_instance(ctx, name)		\
++	extern const struct __context_##ctx *name
+ 
+ /*
+- * Common keywords for static capability analysis.
++ * Common keywords for static context analysis.
+  */
+ 
+ /**
+- * __must_hold() - function attribute, caller must hold exclusive capability
++ * __must_hold() - function attribute, caller must hold exclusive context
+  *
+- * Function attribute declaring that the caller must hold the given capability
++ * Function attribute declaring that the caller must hold the given context
+  * instance(s) exclusively.
+  */
+-#define __must_hold(...)	__requires_cap(__VA_ARGS__)
++#define __must_hold(...)	__requires_ctx(__VA_ARGS__)
+ 
+ /**
+- * __must_not_hold() - function attribute, caller must not hold capability
++ * __must_not_hold() - function attribute, caller must not hold context
+  *
+  * Function attribute declaring that the caller must not hold the given
+- * capability instance(s).
++ * context instance(s).
+  */
+-#define __must_not_hold(...)	__excludes_cap(__VA_ARGS__)
++#define __must_not_hold(...)	__excludes_ctx(__VA_ARGS__)
+ 
+ /**
+- * __acquires() - function attribute, function acquires capability exclusively
++ * __acquires() - function attribute, function acquires context exclusively
+  *
+  * Function attribute declaring that the function acquires the given
+- * capability instance(s) exclusively, but does not release them.
++ * context instance(s) exclusively, but does not release them.
+  */
+-#define __acquires(...)		__acquires_cap(__VA_ARGS__)
++#define __acquires(...)		__acquires_ctx(__VA_ARGS__)
+ 
+ /*
+  * Clang's analysis does not care precisely about the value, only that it is
+@@ -281,75 +282,75 @@ static inline void _capability_unsafe_alias(void **p) { }
+  * misleading if we say that @ret is the value returned if acquired. Instead,
+  * provide symbolic variants which we translate.
+  */
+-#define __cond_acquires_impl_true(x, ...)     __try_acquires##__VA_ARGS__##_cap(1, x)
+-#define __cond_acquires_impl_false(x, ...)    __try_acquires##__VA_ARGS__##_cap(0, x)
+-#define __cond_acquires_impl_nonzero(x, ...)  __try_acquires##__VA_ARGS__##_cap(1, x)
+-#define __cond_acquires_impl_0(x, ...)        __try_acquires##__VA_ARGS__##_cap(0, x)
+-#define __cond_acquires_impl_nonnull(x, ...)  __try_acquires##__VA_ARGS__##_cap(1, x)
+-#define __cond_acquires_impl_NULL(x, ...)     __try_acquires##__VA_ARGS__##_cap(0, x)
++#define __cond_acquires_impl_true(x, ...)     __try_acquires##__VA_ARGS__##_ctx(1, x)
++#define __cond_acquires_impl_false(x, ...)    __try_acquires##__VA_ARGS__##_ctx(0, x)
++#define __cond_acquires_impl_nonzero(x, ...)  __try_acquires##__VA_ARGS__##_ctx(1, x)
++#define __cond_acquires_impl_0(x, ...)        __try_acquires##__VA_ARGS__##_ctx(0, x)
++#define __cond_acquires_impl_nonnull(x, ...)  __try_acquires##__VA_ARGS__##_ctx(1, x)
++#define __cond_acquires_impl_NULL(x, ...)     __try_acquires##__VA_ARGS__##_ctx(0, x)
+ 
+ /**
+  * __cond_acquires() - function attribute, function conditionally
+- *                     acquires a capability exclusively
+- * @ret: abstract value returned by function if capability acquired
+- * @x: capability instance pointer
++ *                     acquires a context exclusively
++ * @ret: abstract value returned by function if context acquired
++ * @x: context instance pointer
+  *
+  * Function attribute declaring that the function conditionally acquires the
+- * given capability instance @x exclusively, but does not release it. The
+- * function return value @ret denotes when the capability is acquired.
++ * given context instance @x exclusively, but does not release it. The
++ * function return value @ret denotes when the context is acquired.
+  *
+  * @ret may be one of: true, false, nonzero, 0, nonnull, NULL.
+  */
+ #define __cond_acquires(ret, x) __cond_acquires_impl_##ret(x)
+ 
+ /**
+- * __releases() - function attribute, function releases a capability exclusively
++ * __releases() - function attribute, function releases a context exclusively
+  *
+- * Function attribute declaring that the function releases the given capability
+- * instance(s) exclusively. The capability must be held on entry.
++ * Function attribute declaring that the function releases the given context
++ * instance(s) exclusively. The context must be held on entry.
+  */
+-#define __releases(...)		__releases_cap(__VA_ARGS__)
++#define __releases(...)		__releases_ctx(__VA_ARGS__)
+ 
+ /**
+- * __acquire() - function to acquire capability exclusively
+- * @x: capability instance pointer
++ * __acquire() - function to acquire context exclusively
++ * @x: context instance pointer
+  *
+- * No-op function that acquires the given capability instance @x exclusively.
++ * No-op function that acquires the given context instance @x exclusively.
+  */
+-#define __acquire(x)		__acquire_cap(x)
++#define __acquire(x)		__acquire_ctx(x)
+ 
+ /**
+- * __release() - function to release capability exclusively
+- * @x: capability instance pointer
++ * __release() - function to release context exclusively
++ * @x: context instance pointer
+  *
+- * No-op function that releases the given capability instance @x.
++ * No-op function that releases the given context instance @x.
+  */
+-#define __release(x)		__release_cap(x)
++#define __release(x)		__release_ctx(x)
+ 
+ /**
+- * __must_hold_shared() - function attribute, caller must hold shared capability
++ * __must_hold_shared() - function attribute, caller must hold shared context
+  *
+- * Function attribute declaring that the caller must hold the given capability
++ * Function attribute declaring that the caller must hold the given context
+  * instance(s) with shared access.
+  */
+-#define __must_hold_shared(...)	__requires_shared_cap(__VA_ARGS__)
++#define __must_hold_shared(...)	__requires_shared_ctx(__VA_ARGS__)
+ 
+ /**
+- * __acquires_shared() - function attribute, function acquires capability shared
++ * __acquires_shared() - function attribute, function acquires context shared
+  *
+  * Function attribute declaring that the function acquires the given
+- * capability instance(s) with shared access, but does not release them.
++ * context instance(s) with shared access, but does not release them.
+  */
+-#define __acquires_shared(...)	__acquires_shared_cap(__VA_ARGS__)
++#define __acquires_shared(...)	__acquires_shared_ctx(__VA_ARGS__)
+ 
+ /**
+  * __cond_acquires_shared() - function attribute, function conditionally
+- *                            acquires a capability shared
+- * @ret: abstract value returned by function if capability acquired
++ *                            acquires a context shared
++ * @ret: abstract value returned by function if context acquired
+  *
+  * Function attribute declaring that the function conditionally acquires the
+- * given capability instance @x with shared access, but does not release it. The
+- * function return value @ret denotes when the capability is acquired.
++ * given context instance @x with shared access, but does not release it. The
++ * function return value @ret denotes when the context is acquired.
+  *
+  * @ret may be one of: true, false, nonzero, 0, nonnull, NULL.
+  */
+@@ -357,33 +358,33 @@ static inline void _capability_unsafe_alias(void **p) { }
+ 
+ /**
+  * __releases_shared() - function attribute, function releases a
+- *                       capability shared
++ *                       context shared
+  *
+- * Function attribute declaring that the function releases the given capability
+- * instance(s) with shared access. The capability must be held on entry.
++ * Function attribute declaring that the function releases the given context
++ * instance(s) with shared access. The context must be held on entry.
+  */
+-#define __releases_shared(...)	__releases_shared_cap(__VA_ARGS__)
++#define __releases_shared(...)	__releases_shared_ctx(__VA_ARGS__)
+ 
+ /**
+- * __acquire_shared() - function to acquire capability shared
+- * @x: capability instance pointer
++ * __acquire_shared() - function to acquire context shared
++ * @x: context instance pointer
+  *
+- * No-op function that acquires the given capability instance @x with shared
++ * No-op function that acquires the given context instance @x with shared
+  * access.
+  */
+-#define __acquire_shared(x)	__acquire_shared_cap(x)
++#define __acquire_shared(x)	__acquire_shared_ctx(x)
+ 
+ /**
+- * __release_shared() - function to release capability shared
+- * @x: capability instance pointer
++ * __release_shared() - function to release context shared
++ * @x: context instance pointer
+  *
+- * No-op function that releases the given capability instance @x with shared
++ * No-op function that releases the given context instance @x with shared
+  * access.
+  */
+-#define __release_shared(x)	__release_shared_cap(x)
++#define __release_shared(x)	__release_shared_ctx(x)
+ 
+ /**
+- * __acquire_ret() - helper to acquire capability of return value
++ * __acquire_ret() - helper to acquire context of return value
+  * @call: call expression
+  * @ret_expr: acquire expression that uses __ret
+  */
+@@ -395,7 +396,7 @@ static inline void _capability_unsafe_alias(void **p) { }
+ 	})
+ 
+ /**
+- * __acquire_shared_ret() - helper to acquire capability shared of return value
++ * __acquire_shared_ret() - helper to acquire context shared of return value
+  * @call: call expression
+  * @ret_expr: acquire shared expression that uses __ret
+  */
+@@ -407,7 +408,7 @@ static inline void _capability_unsafe_alias(void **p) { }
+ 	})
+ 
+ /*
+- * Attributes to mark functions returning acquired capabilities. This is purely
++ * Attributes to mark functions returning acquired contexts. This is purely
+  * cosmetic to help readability, and should be used with the above macros as
+  * follows:
+  *
+@@ -417,7 +418,7 @@ static inline void _capability_unsafe_alias(void **p) { }
+  *   struct foo *_myfunc(int bar) __acquires_ret;
+  *   ...
+  */
+-#define __acquires_ret		__no_capability_analysis
+-#define __acquires_shared_ret	__no_capability_analysis
++#define __acquires_ret		__no_context_analysis
++#define __acquires_shared_ret	__no_context_analysis
+ 
+-#endif /* _LINUX_COMPILER_CAPABILITY_ANALYSIS_H */
++#endif /* _LINUX_COMPILER_CONTEXT_ANALYSIS_H */
