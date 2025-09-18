@@ -1,55 +1,55 @@
 Received: from mail-wr1-f74.google.com (mail-wr1-f74.google.com [209.85.221.74])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8C3BF314D3D
-	for <linux-sparse@vger.kernel.org>; Thu, 18 Sep 2025 14:06:25 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1B241315D42
+	for <linux-sparse@vger.kernel.org>; Thu, 18 Sep 2025 14:06:28 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.74
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758204388; cv=none; b=hZ+VOFbwx7LUZktZamwmUVgCtvwQCATQzkHu5kOxZ/HOxDyzX6rkBVHk7o7vdpSencFjWcmRZBTkjtR5DEXcjaXzq8XhljAgzU0PLpveKoTR1Dm4STf53UfG9YH5a27kZQz2hy4hl9mWCa9Bq7qaJGmoSXXmf4sawZebOmYYVMg=
+	t=1758204391; cv=none; b=X2XVl3EBEXDv+J50u+bv8Urubej3nE58nxjUCQ/7JLcKuVV8pFwtMp1kTwaWoBkP7+8k2fw8Q8QCWpCXjaGDhDZXGzDPIIB0EbB6Jba/ENSMOhd7iL0ZkIwsFKus9VxmJX5q3K3dT0MCPZKDDt5STy7+nWcTMlqkwnGSupx+tOY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1758204388; c=relaxed/simple;
-	bh=DOVYYkUooifd4WMC9FlK4YiWuUY4p8vtxZ7kRIKV6k8=;
+	s=arc-20240116; t=1758204391; c=relaxed/simple;
+	bh=yEzbFrSIlVK8MMgoiVU9ErjaZwwo0WE03sFxx8pRhqs=;
 	h=Date:In-Reply-To:Mime-Version:References:Message-ID:Subject:From:
-	 To:Cc:Content-Type; b=Gos7EcNH2zHnexfO31Yh3Qciz1yNgaIq3VWrHsbkVkkeqYIq7ESq0GdYxzS9pr+7TBZWwQvXaExyqv1tlPuVxY/HzgbZV+y86FLwqauSMtq0x25gdZ1heIy/H2N/QpfAeeDr6MgjDg8c1q5aSlysOUx1qNyVF55+AbPLnDu9s3E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--elver.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=c5dG77vF; arc=none smtp.client-ip=209.85.221.74
+	 To:Cc:Content-Type; b=iMKlHGe4sUPNJ5WcP6xVHHinoKk6pt+L+OMVSaj4/RbN0viUi7Cse6uOGoTjljGXtjpAJDr3d2gVApJSz1vRGtEbDMaqqEd6J7fTBYW1T+tJnOWQCCenTB2+SJikALzD5bKVFp3o+HmIRAqrvnYHyYlJjr5oAY0LY2J++fjfUTM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--elver.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=dXj22kv9; arc=none smtp.client-ip=209.85.221.74
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--elver.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="c5dG77vF"
-Received: by mail-wr1-f74.google.com with SMTP id ffacd0b85a97d-3eb72c3e669so654446f8f.3
-        for <linux-sparse@vger.kernel.org>; Thu, 18 Sep 2025 07:06:25 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="dXj22kv9"
+Received: by mail-wr1-f74.google.com with SMTP id ffacd0b85a97d-3ea1550f175so475187f8f.2
+        for <linux-sparse@vger.kernel.org>; Thu, 18 Sep 2025 07:06:28 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20230601; t=1758204384; x=1758809184; darn=vger.kernel.org;
+        d=google.com; s=20230601; t=1758204386; x=1758809186; darn=vger.kernel.org;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:from:to:cc:subject:date:message-id:reply-to;
-        bh=Oanwb4AvefPzztLhk08gBpEPn5bxbhzZnwvICntunHw=;
-        b=c5dG77vFNyxfvKw3cM6bjsTs6GWnqksB7+kwITSQeVcH0dat7rSp1xTDrWvvwdP76B
-         FWjr1gxEyZDzXgBUx/SJB77WQ3ZRcPj3jOlsXDMMfTuQFIrMr86BQOrP4PPSxc1VZiqK
-         3zkZjjZszHaIZf3bxF8+/Kz/Fynu92Ko38uWIWuNMFS5J3og2Yb2rt1OYhmlP1N1RbnA
-         XI7xhhPQfZSXPTFg/e3jXdzWXGj0nzfJBpir9TMcxl2hMD71dzszVVQSUUYk6vJ6Qetp
-         /A87ltwEISO1INQYwMv9FM9ZsCLd2WOCb+1QeNov9soOS9H9tY51w/dFsx2rsK4OGudy
-         yWgQ==
+        bh=3E29rPCnN3EjGw7BZaVdq2KLgeK/DgzeRknIagImVk4=;
+        b=dXj22kv9Wrn2FQZc8NbFXHC9wgvEmV7+wCzMipHOLYwHeuhluhqu0K9HBtHHJvxBUJ
+         y2Vkq2EaCdlj1KF/f/uZY2oz5IYMBxzG0YYVOW3N5Y1XxxkMzfvyWxGBI7lP+AbxfH+S
+         DXQOanSqGN7SOgbWag99nyAF2nvbUuJAdj1/cma4HK/Npeg9T6qDViaWWi3nkUHfiYwB
+         B51xIrB9UrEcrIY5YRv0cKFKQ5Uz2kRljwlIU1h22V0d7vuASXV/10gD1cbQ1un+jGXi
+         0AGfPOEvjbZK/UyMmxz30ZEwedHBMhbb1CxIirlR7pdjVnaq8/SoA+lGFlhl2r/VKpHq
+         TQxA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1758204384; x=1758809184;
+        d=1e100.net; s=20230601; t=1758204386; x=1758809186;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=Oanwb4AvefPzztLhk08gBpEPn5bxbhzZnwvICntunHw=;
-        b=CQF5A3bgoueTM0wjBeRenzq2Uad8X8Er0BWNtabCneMOm7iX1j7c8ZDMbI7/3k6l2j
-         6BUC5vXFRqTIQgToqoR19FbBAJ/u6ZuoUw6J3yFH8X8ZPuEdqc7M0/WN1kySEIEqV/y8
-         CHsorfq9ncVhI8vma+GCP97pMt7p5p8ndraPwx71y6gY1J3xPeneziA11leIROxDe5dO
-         CVvKCZv5P5gTP2ko2lWNhn2BVKqXqSR764iW+69Xtytn6gw5Mb6HcsjcYGjU502EkFqc
-         DisCsFCJm1NGq+TQa+OI9Ati/KchGI/8Z/WWWe7cy7lRQ2QC/h41CtEnKF1ZKQgP8pIC
-         i/WA==
-X-Forwarded-Encrypted: i=1; AJvYcCUxj7WT4Pg+wpatPx86y5vJAQYWtLIv4FH+MTMsRVZgZ7IpqS1D0AW5CtYh/8ouwvRwqpigyQkYAAsg5w0=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzxIDA36Z0sVfwHi0q+7HyPahtAqJ5oSRa81AwfncvIi0yD4c/U
-	zXYDSDYpqsqcXoQT/8An0C2UOuuhdRT29+cSZMmCWOOBaZacXwuCJl7ZlcIQSMPzgxs7QCFp/uM
-	8Ow==
-X-Google-Smtp-Source: AGHT+IFkViOrkTd7Qf740HpWB1Y+zHZAT/ov2XdutlPI/XGCPUkCb5+91SEAW6LMPzEdlyQcI8JNeQaNOQ==
-X-Received: from wrbcc13.prod.google.com ([2002:a5d:5c0d:0:b0:3ec:df7a:666])
- (user=elver job=prod-delivery.src-stubby-dispatcher) by 2002:a05:6000:438a:b0:3ec:db18:aa37
- with SMTP id ffacd0b85a97d-3ecdfa4b7camr5826204f8f.60.1758204383884; Thu, 18
- Sep 2025 07:06:23 -0700 (PDT)
-Date: Thu, 18 Sep 2025 15:59:32 +0200
+        bh=3E29rPCnN3EjGw7BZaVdq2KLgeK/DgzeRknIagImVk4=;
+        b=RwhKkygnLuaw/p2SPs68HTb5Y4LIEW9DPEy2jY8LpJdv4SKFW5WKT0xvjtdhR4yZjn
+         3qHYCU3DZwlwtvcDT2lS+bB2reP+RvFyR9Dij0x7hSIiw0t708xcqcvJKNzSHERW0xZj
+         Ezj8UTg369ZQOE1+wHkevtzzhQpD5wGHRJu/lpDsiQk1mMzF+xtfBvbgbq4DsIyeUvF/
+         ivBsZMcu4cKhs1l+IlYrkWoYeu4rM5biAxgMyjK23kuWqn54jootl66PVbMDR4wiiDPJ
+         Ey0bnBwe3MzdynFNh6IIs2bbbraG1FOnVDeRJaIQPC8MWaFw/iu0goCmzP3fc13Y9A81
+         8ZJQ==
+X-Forwarded-Encrypted: i=1; AJvYcCXjE+O2HH88L0iKxFeYf9izCjNMdBybzXFArcmXsRIhQYSxP3Jb8ZJmJyZeGL75wLECe5wQpELJHxdduso=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw6AZ3XtjF+X5goHgHH0rT7QFgwvu/rNjw6wP+bQlwBVDtHXT5B
+	N3GkiD3BJ/TRZqAsWGQ4gJquf6yVLvWTzS1tFci9GkojHBuZEddJzuqv2IzjHJr1LVMKJYQ8doT
+	IoA==
+X-Google-Smtp-Source: AGHT+IFHOcMXLGwqrVjcBRy1JE0YXyKuRo6WKOASUxR9vb7h90q+XczVWS1fXy1SoT97a7/Imh/y4s+FnQ==
+X-Received: from wmben15.prod.google.com ([2002:a05:600c:828f:b0:45c:b62f:ca0d])
+ (user=elver job=prod-delivery.src-stubby-dispatcher) by 2002:a05:6000:1887:b0:3e7:615a:17f6
+ with SMTP id ffacd0b85a97d-3ecdf9ec859mr5220873f8f.28.1758204386463; Thu, 18
+ Sep 2025 07:06:26 -0700 (PDT)
+Date: Thu, 18 Sep 2025 15:59:33 +0200
 In-Reply-To: <20250918140451.1289454-1-elver@google.com>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
@@ -59,8 +59,8 @@ List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 Mime-Version: 1.0
 References: <20250918140451.1289454-1-elver@google.com>
 X-Mailer: git-send-email 2.51.0.384.g4c02a37b29-goog
-Message-ID: <20250918140451.1289454-22-elver@google.com>
-Subject: [PATCH v3 21/35] debugfs: Make debugfs_cancellation a capability struct
+Message-ID: <20250918140451.1289454-23-elver@google.com>
+Subject: [PATCH v3 22/35] compiler-capability-analysis: Remove Sparse support
 From: Marco Elver <elver@google.com>
 To: elver@google.com, Peter Zijlstra <peterz@infradead.org>, 
 	Boqun Feng <boqun.feng@gmail.com>, Ingo Molnar <mingo@kernel.org>, Will Deacon <will@kernel.org>
@@ -87,50 +87,279 @@ Cc: "David S. Miller" <davem@davemloft.net>, Luc Van Oostenryck <luc.vanoostenry
 	llvm@lists.linux.dev, rcu@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-When compiling include/linux/debugfs.h with CAPABILITY_ANALYSIS enabled,
-we can see this error:
+Remove Sparse support as discussed at [1].
 
-./include/linux/debugfs.h:239:17: error: use of undeclared identifier 'cancellation'
-  239 | void __acquires(cancellation)
+The kernel codebase is still scattered with numerous places that try to
+appease Sparse's context tracking ("annotation for sparse", "fake out
+sparse", "work around sparse", etc.). Eventually, as more subsystems
+enable Clang's capability analysis, these places will show up and need
+adjustment or removal of the workarounds altogether.
 
-Move the __acquires(..) attribute after the declaration, so that the
-compiler can see the cancellation function argument, as well as making
-struct debugfs_cancellation a real capability to benefit from Clang's
-capability analysis.
-
+Link: https://lore.kernel.org/all/20250207083335.GW7145@noisy.programming.kicks-ass.net/ [1]
+Link: https://lore.kernel.org/all/Z6XTKTo_LMj9KmbY@elver.google.com/ [2]
+Cc: "Luc Van Oostenryck" <luc.vanoostenryck@gmail.com>
+Cc: Peter Zijlstra <peterz@infradead.org>
 Signed-off-by: Marco Elver <elver@google.com>
 ---
- include/linux/debugfs.h | 12 +++++-------
- 1 file changed, 5 insertions(+), 7 deletions(-)
+v2:
+* New patch.
+---
+ Documentation/dev-tools/sparse.rst           | 19 -----
+ include/linux/compiler-capability-analysis.h | 80 ++++++--------------
+ include/linux/rcupdate.h                     | 15 +---
+ 3 files changed, 25 insertions(+), 89 deletions(-)
 
-diff --git a/include/linux/debugfs.h b/include/linux/debugfs.h
-index 7cecda29447e..4ee838cf4678 100644
---- a/include/linux/debugfs.h
-+++ b/include/linux/debugfs.h
-@@ -239,18 +239,16 @@ ssize_t debugfs_read_file_str(struct file *file, char __user *user_buf,
-  * @cancel: callback to call
-  * @cancel_data: extra data for the callback to call
+diff --git a/Documentation/dev-tools/sparse.rst b/Documentation/dev-tools/sparse.rst
+index dc791c8d84d1..37b20170835d 100644
+--- a/Documentation/dev-tools/sparse.rst
++++ b/Documentation/dev-tools/sparse.rst
+@@ -53,25 +53,6 @@ sure that bitwise types don't get mixed up (little-endian vs big-endian
+ vs cpu-endian vs whatever), and there the constant "0" really _is_
+ special.
+ 
+-Using sparse for lock checking
+-------------------------------
+-
+-The following macros are undefined for gcc and defined during a sparse
+-run to use the "context" tracking feature of sparse, applied to
+-locking.  These annotations tell sparse when a lock is held, with
+-regard to the annotated function's entry and exit.
+-
+-__must_hold - The specified lock is held on function entry and exit.
+-
+-__acquires - The specified lock is held on function exit, but not entry.
+-
+-__releases - The specified lock is held on function entry, but not exit.
+-
+-If the function enters and exits without the lock held, acquiring and
+-releasing the lock inside the function in a balanced way, no
+-annotation is needed.  The three annotations above are for cases where
+-sparse would otherwise report a context imbalance.
+-
+ Getting sparse
+ --------------
+ 
+diff --git a/include/linux/compiler-capability-analysis.h b/include/linux/compiler-capability-analysis.h
+index ccd312dbbf06..6046fca44f17 100644
+--- a/include/linux/compiler-capability-analysis.h
++++ b/include/linux/compiler-capability-analysis.h
+@@ -248,57 +248,32 @@ static inline void _capability_unsafe_alias(void **p) { }
+ 	extern const struct __capability_##cap *name
+ 
+ /*
+- * Common keywords for static capability analysis. Both Clang's capability
+- * analysis and Sparse's context tracking are currently supported.
+- */
+-#ifdef __CHECKER__
+-
+-/* Sparse context/lock checking support. */
+-# define __must_hold(x)		__attribute__((context(x,1,1)))
+-# define __must_not_hold(x)
+-# define __acquires(x)		__attribute__((context(x,0,1)))
+-# define __cond_acquires(ret, x) __attribute__((context(x,0,-1)))
+-# define __releases(x)		__attribute__((context(x,1,0)))
+-# define __acquire(x)		__context__(x,1)
+-# define __release(x)		__context__(x,-1)
+-# define __cond_lock(x, c)	((c) ? ({ __acquire(x); 1; }) : 0)
+-/* For Sparse, there's no distinction between exclusive and shared locks. */
+-# define __must_hold_shared	__must_hold
+-# define __acquires_shared	__acquires
+-# define __cond_acquires_shared __cond_acquires
+-# define __releases_shared	__releases
+-# define __acquire_shared	__acquire
+-# define __release_shared	__release
+-# define __cond_lock_shared	__cond_acquire
+-
+-#else /* !__CHECKER__ */
++ * Common keywords for static capability analysis.
++ */
+ 
+ /**
+  * __must_hold() - function attribute, caller must hold exclusive capability
+- * @x: capability instance pointer
+  *
+  * Function attribute declaring that the caller must hold the given capability
+- * instance @x exclusively.
++ * instance(s) exclusively.
   */
--struct debugfs_cancellation {
-+struct_with_capability(debugfs_cancellation) {
- 	struct list_head list;
- 	void (*cancel)(struct dentry *, void *);
- 	void *cancel_data;
- };
+-# define __must_hold(x)		__requires_cap(x)
++#define __must_hold(...)	__requires_cap(__VA_ARGS__)
  
--void __acquires(cancellation)
--debugfs_enter_cancellation(struct file *file,
--			   struct debugfs_cancellation *cancellation);
--void __releases(cancellation)
--debugfs_leave_cancellation(struct file *file,
--			   struct debugfs_cancellation *cancellation);
-+void debugfs_enter_cancellation(struct file *file,
-+				struct debugfs_cancellation *cancellation) __acquires(cancellation);
-+void debugfs_leave_cancellation(struct file *file,
-+				struct debugfs_cancellation *cancellation) __releases(cancellation);
+ /**
+  * __must_not_hold() - function attribute, caller must not hold capability
+- * @x: capability instance pointer
+  *
+  * Function attribute declaring that the caller must not hold the given
+- * capability instance @x.
++ * capability instance(s).
+  */
+-# define __must_not_hold(x)	__excludes_cap(x)
++#define __must_not_hold(...)	__excludes_cap(__VA_ARGS__)
  
- #else
+ /**
+  * __acquires() - function attribute, function acquires capability exclusively
+- * @x: capability instance pointer
+  *
+  * Function attribute declaring that the function acquires the given
+- * capability instance @x exclusively, but does not release it.
++ * capability instance(s) exclusively, but does not release them.
+  */
+-# define __acquires(x)		__acquires_cap(x)
++#define __acquires(...)		__acquires_cap(__VA_ARGS__)
  
+ /*
+  * Clang's analysis does not care precisely about the value, only that it is
+@@ -325,16 +300,15 @@ static inline void _capability_unsafe_alias(void **p) { }
+  *
+  * @ret may be one of: true, false, nonzero, 0, nonnull, NULL.
+  */
+-# define __cond_acquires(ret, x) __cond_acquires_impl_##ret(x)
++#define __cond_acquires(ret, x) __cond_acquires_impl_##ret(x)
+ 
+ /**
+  * __releases() - function attribute, function releases a capability exclusively
+- * @x: capability instance pointer
+  *
+  * Function attribute declaring that the function releases the given capability
+- * instance @x exclusively. The capability must be held on entry.
++ * instance(s) exclusively. The capability must be held on entry.
+  */
+-# define __releases(x)		__releases_cap(x)
++#define __releases(...)		__releases_cap(__VA_ARGS__)
+ 
+ /**
+  * __acquire() - function to acquire capability exclusively
+@@ -342,7 +316,7 @@ static inline void _capability_unsafe_alias(void **p) { }
+  *
+  * No-op function that acquires the given capability instance @x exclusively.
+  */
+-# define __acquire(x)		__acquire_cap(x)
++#define __acquire(x)		__acquire_cap(x)
+ 
+ /**
+  * __release() - function to release capability exclusively
+@@ -350,7 +324,7 @@ static inline void _capability_unsafe_alias(void **p) { }
+  *
+  * No-op function that releases the given capability instance @x.
+  */
+-# define __release(x)		__release_cap(x)
++#define __release(x)		__release_cap(x)
+ 
+ /**
+  * __cond_lock() - function that conditionally acquires a capability
+@@ -369,31 +343,28 @@ static inline void _capability_unsafe_alias(void **p) { }
+  *
+  *	#define spin_trylock(l) __cond_lock(&lock, _spin_trylock(&lock))
+  */
+-# define __cond_lock(x, c)	__try_acquire_cap(x, c)
++#define __cond_lock(x, c)	__try_acquire_cap(x, c)
+ 
+ /**
+  * __must_hold_shared() - function attribute, caller must hold shared capability
+- * @x: capability instance pointer
+  *
+  * Function attribute declaring that the caller must hold the given capability
+- * instance @x with shared access.
++ * instance(s) with shared access.
+  */
+-# define __must_hold_shared(x)	__requires_shared_cap(x)
++#define __must_hold_shared(...)	__requires_shared_cap(__VA_ARGS__)
+ 
+ /**
+  * __acquires_shared() - function attribute, function acquires capability shared
+- * @x: capability instance pointer
+  *
+  * Function attribute declaring that the function acquires the given
+- * capability instance @x with shared access, but does not release it.
++ * capability instance(s) with shared access, but does not release them.
+  */
+-# define __acquires_shared(x)	__acquires_shared_cap(x)
++#define __acquires_shared(...)	__acquires_shared_cap(__VA_ARGS__)
+ 
+ /**
+  * __cond_acquires_shared() - function attribute, function conditionally
+  *                            acquires a capability shared
+  * @ret: abstract value returned by function if capability acquired
+- * @x: capability instance pointer
+  *
+  * Function attribute declaring that the function conditionally acquires the
+  * given capability instance @x with shared access, but does not release it. The
+@@ -401,17 +372,16 @@ static inline void _capability_unsafe_alias(void **p) { }
+  *
+  * @ret may be one of: true, false, nonzero, 0, nonnull, NULL.
+  */
+-# define __cond_acquires_shared(ret, x) __cond_acquires_impl_##ret(x, _shared)
++#define __cond_acquires_shared(ret, x) __cond_acquires_impl_##ret(x, _shared)
+ 
+ /**
+  * __releases_shared() - function attribute, function releases a
+  *                       capability shared
+- * @x: capability instance pointer
+  *
+  * Function attribute declaring that the function releases the given capability
+- * instance @x with shared access. The capability must be held on entry.
++ * instance(s) with shared access. The capability must be held on entry.
+  */
+-# define __releases_shared(x)	__releases_shared_cap(x)
++#define __releases_shared(...)	__releases_shared_cap(__VA_ARGS__)
+ 
+ /**
+  * __acquire_shared() - function to acquire capability shared
+@@ -420,7 +390,7 @@ static inline void _capability_unsafe_alias(void **p) { }
+  * No-op function that acquires the given capability instance @x with shared
+  * access.
+  */
+-# define __acquire_shared(x)	__acquire_shared_cap(x)
++#define __acquire_shared(x)	__acquire_shared_cap(x)
+ 
+ /**
+  * __release_shared() - function to release capability shared
+@@ -429,7 +399,7 @@ static inline void _capability_unsafe_alias(void **p) { }
+  * No-op function that releases the given capability instance @x with shared
+  * access.
+  */
+-# define __release_shared(x)	__release_shared_cap(x)
++#define __release_shared(x)	__release_shared_cap(x)
+ 
+ /**
+  * __cond_lock_shared() - function that conditionally acquires a capability
+@@ -443,9 +413,7 @@ static inline void _capability_unsafe_alias(void **p) { }
+  * access, if the boolean expression @c is true. The result of @c is the return
+  * value, to be able to create a capability-enabled interface.
+  */
+-# define __cond_lock_shared(x, c) __try_acquire_shared_cap(x, c)
+-
+-#endif /* __CHECKER__ */
++#define __cond_lock_shared(x, c) __try_acquire_shared_cap(x, c)
+ 
+ /**
+  * __acquire_ret() - helper to acquire capability of return value
+diff --git a/include/linux/rcupdate.h b/include/linux/rcupdate.h
+index 8eeece72492c..aec28e98d3f2 100644
+--- a/include/linux/rcupdate.h
++++ b/include/linux/rcupdate.h
+@@ -1177,20 +1177,7 @@ rcu_head_after_call_rcu(struct rcu_head *rhp, rcu_callback_t f)
+ extern int rcu_expedited;
+ extern int rcu_normal;
+ 
+-DEFINE_LOCK_GUARD_0(rcu,
+-	do {
+-		rcu_read_lock();
+-		/*
+-		 * sparse doesn't call the cleanup function,
+-		 * so just release immediately and don't track
+-		 * the context. We don't need to anyway, since
+-		 * the whole point of the guard is to not need
+-		 * the explicit unlock.
+-		 */
+-		__release(RCU);
+-	} while (0),
+-	rcu_read_unlock())
+-
++DEFINE_LOCK_GUARD_0(rcu, rcu_read_lock(), rcu_read_unlock())
+ DECLARE_LOCK_GUARD_0_ATTRS(rcu, __acquires_shared(RCU), __releases_shared(RCU))
+ 
+ #endif /* __LINUX_RCUPDATE_H */
 -- 
 2.51.0.384.g4c02a37b29-goog
 
