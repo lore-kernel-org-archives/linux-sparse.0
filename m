@@ -1,301 +1,136 @@
-Received: from mail-wm1-f41.google.com (mail-wm1-f41.google.com [209.85.128.41])
+Received: from mail-pf1-f172.google.com (mail-pf1-f172.google.com [209.85.210.172])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 653002D0602
-	for <linux-sparse@vger.kernel.org>; Sat, 20 Sep 2025 10:21:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.41
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0D20926E712
+	for <linux-sparse@vger.kernel.org>; Sat, 20 Sep 2025 10:24:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758363690; cv=none; b=s2r6klynLT6h5uv0JENRLK8NaIBTR8Gy4z1NCVrzsg9g86VbT7B69yvm8ZvJl5pG1dx+BXXkrzo5QRWsrPHKO51+B3ft847V+tXfsNx5ajSWLp8vG0YIPCaPSoCx8pRw6jOuUg6RmUchkZnaAb+OQFpKZ2dr0UaL7mpuI2PE44Q=
+	t=1758363843; cv=none; b=BWaRYj6+O02LOfBTQFd7bSyY/D0j2efUDieD1EHCUk4F9pSUgDbatix8x7X+wHQdlvkmtixrw2SD3MvflkfpVqqRLYeA5drRrze/BczlCSkIvny4jiDrbddxYxi8dK93UGdDOKWolfhCsCZqO5PFEiIAnHoWTPR7m0TY6SWnQGk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1758363690; c=relaxed/simple;
-	bh=NeUWLUvwC6kW9VyfKYx42FFXe0IA1wZCOhU/BXYAKwI=;
-	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=eXdYkhOf3YmGH4qBFgAR/Twy2tnF+CzcxujJgIlIVDpxqRaWCWfDUntnCNZZBl+pGTwwigol+OnPfrCAaJvodjCCFVUc8t9Cfy5VcC8MJoP28tO5wqnk1j4DVIeh46Nc5Js3cQKgZMiKHojmHXpwa8EQzdC3JcsyfGrbDH2mYQs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=R/7euhNL; arc=none smtp.client-ip=209.85.128.41
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1758363843; c=relaxed/simple;
+	bh=8iXqxhSdAkakZE+dXKkGUnoGkkyheEh1y2QTTcyyR7s=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=qD7G2dOheN9U4Ac9Ne+sQOOziTQzAk80H5J55RPSKfNYAVDrlJEyY3+uWZQtBm1knZMZmEcnzP4kjeYt02vcHsh7/G+fO0jD8IDJToKQXH1kb2G8vmtGu3Osl/iWCBSey4uo+J+/3Y4CuUmptqxnHY6U5j7LjKfBpVkub6MK1LI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=2gQBCBgx; arc=none smtp.client-ip=209.85.210.172
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="R/7euhNL"
-Received: by mail-wm1-f41.google.com with SMTP id 5b1f17b1804b1-45cb6428c46so26826865e9.1
-        for <linux-sparse@vger.kernel.org>; Sat, 20 Sep 2025 03:21:27 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="2gQBCBgx"
+Received: by mail-pf1-f172.google.com with SMTP id d2e1a72fcca58-77f169d8153so888911b3a.3
+        for <linux-sparse@vger.kernel.org>; Sat, 20 Sep 2025 03:24:01 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1758363686; x=1758968486; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:subject:cc:to:from:date:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=P0vYXtUQVOuP2mhoWd4ropfz+61/nK8dVG+VKmZf9qg=;
-        b=R/7euhNLFeNlzmaUZ+Phoi0Q88Um1/yPfSkGC3G2sFF8md/oqJcr43+2FV+9UmZ2Dk
-         SUnKvAzbGiMrGaYgJR97ThDsbv3pKQfcEILZgylruuHbwAgK1ibJB3U9tn1aPxbYXcK1
-         MyRhovHH6tj9EMTzJqrblnvCmVfWpPYmKtlRwrM4k2sJZEX5nejonCqSjRQvEZ+qH5zA
-         DZ8wgDnOm8GaSljL3BUhgkod1l54KOPFjRhr/NVlywP8mhfKqtfasB/gPB/yUR4l9gOU
-         cdSyKg0V831oaRBDwypFkfc9dJHAFm8Nx1QoZlRSq09uBR4nwN02T4sdmyv+CMFSoURH
-         KYog==
+        d=google.com; s=20230601; t=1758363841; x=1758968641; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=+hZhQHzO6iaBCv+wcIWwJCdyKEWcJ4Nfwc3KoJ0ZPEA=;
+        b=2gQBCBgxMSwu5AB2o+jkFTBAcijwtXwzg/RdQCHcsKaXBDvcjJBEtjbb59L9NQTMqW
+         +4KIoKH6AO8wRCb7goV1WcVnX2N2bcart2Omvg/Kqm5KFBOobRJPJ8NNA6IQL7vL7etK
+         BYgjhcThGprquHWXLLxvVznTq7aGbIgT+UYS4wYtPiTtDM9ZW4SvF4keMPfUj/rDgRR6
+         G+rtl7LYgu6D0JAiBtafGsEhSvUpGD9b0htdsLGQC9f5yY8ovG7vfPsPq6bUdBfh4tNY
+         Y9xn2nze+Ia56cqt94zGvidFt/2kHe0e1AZJfrEWx+hqBpvT41kMu6y121sexUc3sJl0
+         JBTQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1758363686; x=1758968486;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:subject:cc:to:from:date:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=P0vYXtUQVOuP2mhoWd4ropfz+61/nK8dVG+VKmZf9qg=;
-        b=gkqjhK6758hbCS07ZU6jP1gvyklp2tgfGZAjgpwm8GRdGjVVwm6eDGUIlnJKSsbUkv
-         Cf8RnzYOfHFOsQt9sngPfO5/eMqt/sWhRdUoMDF3Dr6s7wrKyhKzBqHWnUb3UqHPfQKk
-         hQ6gP3XmFvoOdpKppSlxlxHBrBPV1Gi7Xl3JDMRvn0SeTNo1v0QxSMDzr5VcRSg40UIb
-         B1zM+IUnXKB1p42cHyHbP9sIVaKYZ1G1H2OUmnLav9LG4G9uLljM3eDMoscRWAxw+Imv
-         Sve52Z66m0o49pg2oXpUj9BkFBWffCdp1g2fGrStvpGx0bLp8lJfx+nPQ/s4XbhtfetZ
-         YA/Q==
-X-Forwarded-Encrypted: i=1; AJvYcCWFPdoo6UrUTkbhtecISS6xYee+0z48tA01Cvb9BNyY7QQSrKuiOmmLgwfITH+DqEmJSrHO0iHpo62nEp4=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yz51p/ZY7rXAF7C7QFNieHjkF0/KRGRV00dNHtI9k19KOiSKcfh
-	zWDYOY4IylTDRQQtwvEbkdmKM+ZdQDjokUIsoD0zjVmCChOV3+ZCXlwU
-X-Gm-Gg: ASbGncsrUlr74w3q2VmoY94weolEHy9M6cqqmHALYNms7XO6A5JLWLXmsBZ0OTPgB1A
-	7gdNegksGaLg5B4V8b94l//1mjIjLhtvZclITbk9EgHwS0tJBt6bkNfGxQps8bJb+sGvFAjPFdJ
-	zPfcGBCh3QIvWIUgkHWKnmi0MyLRuJkmt8Tj1W/XXOOi7z3RrEhEW/No17Xa1+f9XuJzzR05a6Q
-	XJXziNqnxglW3RO1WF15ovnQzMGRpqYN74JgbjdcYIUx/i8bwBZw82ZxwVzOGjxo4Q+i0z09iPo
-	LHsw+aZb7xbaJB3LOpSH8ET7bv3sPtII8aRxNjyJp9g2q7y8c6ZzSO5r0BajI9CYT2aiGYSI7C+
-	lQDnH8uy+bRde+b7A3q4OSQFUMaMQieEWrkzw4nTOIjkkBnywwBbEarLQ4gt7
-X-Google-Smtp-Source: AGHT+IFiz+7GSgFF/mIUUp0ndfipkNQ39jr+2XK+PXUAveDTslyL1Wu67txaLfdop4/qCEdAg/m1vQ==
-X-Received: by 2002:a05:600c:c8f:b0:45f:2919:5e6c with SMTP id 5b1f17b1804b1-467e6f37d8dmr76782405e9.16.1758363685327;
-        Sat, 20 Sep 2025 03:21:25 -0700 (PDT)
-Received: from pumpkin (82-69-66-36.dsl.in-addr.zen.co.uk. [82.69.66.36])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-3f0e28c83d6sm5624389f8f.56.2025.09.20.03.21.23
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 20 Sep 2025 03:21:25 -0700 (PDT)
-Date: Sat, 20 Sep 2025 11:21:22 +0100
-From: David Laight <david.laight.linux@gmail.com>
-To: Christian =?UTF-8?B?S8O2bmln?= <christian.koenig@amd.com>
-Cc: linux@armlinux.org.uk, jdike@addtoit.com,
- anton.ivanov@cambridgegreys.com, dave.hansen@linux.intel.com,
- peterz@infradead.org, tglx@linutronix.de, x86@kernel.org, hpa@zytor.com,
- tony.luck@intel.com, qiuxu.zhuo@intel.com, mchehab@kernel.org,
- james.morse@arm.com, rric@kernel.org, harry.wentland@amd.com,
- sunpeng.li@amd.com, alexander.deucher@amd.com, airlied@linux.ie,
- daniel@ffwll.ch, evan.quan@amd.com, james.qian.wang@arm.com,
- liviu.dudau@arm.com, mihail.atanassov@arm.com, brian.starkey@arm.com,
- maarten.lankhorst@linux.intel.com, mripard@kernel.org, tzimmermann@suse.de,
- robdclark@gmail.com, sean@poorly.run, dmitry.torokhov@gmail.com,
- agk@redhat.com, snitzer@redhat.com, dm-devel@redhat.com, rajur@chelsio.com,
- davem@davemloft.net, kuba@kernel.org, peppe.cavallaro@st.com,
- alexandre.torgue@st.com, joabreu@synopsys.com, mcoquelin.stm32@gmail.com,
- malattia@linux.it, hdegoede@redhat.com, mgross@linux.intel.com,
- intel-linux-scu@intel.com, artur.paszkiewicz@intel.com, jejb@linux.ibm.com,
- martin.petersen@oracle.com, sakari.ailus@linux.intel.com,
- gregkh@linuxfoundation.org, dushistov@mail.ru, luc.vanoostenryck@gmail.com,
- rostedt@goodmis.org, pmladek@suse.com, sergey.senozhatsky@gmail.com,
- andriy.shevchenko@linux.intel.com, linux@rasmusvillemoes.dk,
- akpm@linux-foundation.org, kuznet@ms2.inr.ac.ru, yoshfuji@linux-ipv6.org,
- pablo@netfilter.org, kadlec@netfilter.org, jmaloy@redhat.com,
- ying.xue@windriver.com, willy@infradead.org, sashal@kernel.org,
- ruanjinjie@huawei.com, David.Laight@ACULAB.COM, herve.codina@bootlin.com,
- Jason@zx2c4.com, bvanassche@acm.org, keescook@chromium.org,
- linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
- linux-um@lists.infradead.org, linux-edac@vger.kernel.org,
- amd-gfx@lists.freedesktop.org, dri-devel@lists.freedesktop.org,
- linux-arm-msm@vger.kernel.org, freedreno@lists.freedesktop.org,
- linux-hwmon@vger.kernel.org, linux-input@vger.kernel.org,
- linux-media@vger.kernel.org, netdev@vger.kernel.org,
- linux-stm32@st-md-mailman.stormreply.com,
- platform-driver-x86@vger.kernel.org, linux-scsi@vger.kernel.org,
- linux-staging@lists.linux.dev, linux-btrfs@vger.kernel.org,
- linux-ext4@vger.kernel.org, linux-sparse@vger.kernel.org,
- linux-mm@kvack.org, netfilter-devel@vger.kernel.org,
- coreteam@netfilter.org, tipc-discussion@lists.sourceforge.net,
- stable@vger.kernel.org, jonnyc@amazon.com
-Subject: Re: [PATCH 00/27 5.10.y] Backport minmax.h updates from v6.17-rc6
-Message-ID: <20250920111904.6d9ecb17@pumpkin>
-In-Reply-To: <184ce83f-0063-43a0-a1c8-da23c5d03cf7@amd.com>
-References: <20250919101727.16152-1-farbere@amazon.com>
-	<184ce83f-0063-43a0-a1c8-da23c5d03cf7@amd.com>
-X-Mailer: Claws Mail 4.1.1 (GTK 3.24.38; arm-unknown-linux-gnueabihf)
+        d=1e100.net; s=20230601; t=1758363841; x=1758968641;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=+hZhQHzO6iaBCv+wcIWwJCdyKEWcJ4Nfwc3KoJ0ZPEA=;
+        b=B3QKdPlHR0mQNF7Sb60nfOuIFuRnS9pPJ2kUqjHGNkVI/7HWrQ4/R9opvJSpto8PfN
+         ojMk3vjmrDAGs6nJyOo9XC1TX/jF9Tb0Bze6pHQhn+jSEBoFL1OC/Sslc/6zsY4L6ky5
+         /xQVyGtC/LHpmWrRfYmp1I/Lzc14KInEsyNXSL36FlweOa50QyPRR2JbkkGCkYbp65H2
+         MFQmUeuNCrzclCr/JFtMfcgPHhGFIUN5BUk6cGuw65waKfkGUlft8hB873gk2DH+cuHb
+         +4bBs+AZlfX9v1ayUFItIt++v4q9O5uqhUX6nWWnh52GHQdYbjcyZ/BsGgIioKqkBJ+5
+         M/PA==
+X-Forwarded-Encrypted: i=1; AJvYcCWz16x3l7Yv9ZxzRQ/LsBpldPYCbbg+2EHozHuL/UduZDYUp9+YMLYeSf0XRtNc4WOpXRmYAlEaBosay7s=@vger.kernel.org
+X-Gm-Message-State: AOJu0YywG2ln9PQqUAE0/o5NqpzMJMYnX4jBfhxQvZKyO64oB5e4/EQg
+	OFDjObzxkwI2Votw4TPWttw0mWon0ICf6pXWFWiW7Wa318uF8ZtBampmdIzuR7b+O4lxtQNQ2QO
+	k7DrnhgpZMqwuXindg008nwQlBLs4v+NhGRfWji8l
+X-Gm-Gg: ASbGncuMJucFoIfF3uUU1pvf1GgbsJGGDGj1L128ZCMdaQj1kd3UAPXDjYAjd7Iy1I7
+	tsO8GWFjzGNA8pydXY0T1JXwV1UYwLfV/bzHMuRF7cqzRdvZnAUjNh+5zEakgnaFaQGjIaFxVs+
+	aMjE4NleNTCX/mgd+xDZfnXverte28fSkwTIiS1dcvZQ62OA8EPUHnVJwKV4kT7ISi+WTtr67kS
+	bMsNfsPJbB6UXl8FXZiCnA7KId5u9BbKRoykg==
+X-Google-Smtp-Source: AGHT+IF1hPc3B6dX8ioPYAwTkyAHDxIYYc2DoRTSnEgCHR4nACV75/Lf01kjKhlKCzTUMHiS0p59fc36fJvtYjO83jE=
+X-Received: by 2002:a05:6a20:914d:b0:27b:dcba:a8f3 with SMTP id
+ adf61e73a8af0-2925f76be25mr8434118637.15.1758363841077; Sat, 20 Sep 2025
+ 03:24:01 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+References: <20250918140451.1289454-1-elver@google.com> <20250918141511.GA30263@lst.de>
+ <20250918174555.GA3366400@ax162> <20250919140803.GA23745@lst.de>
+In-Reply-To: <20250919140803.GA23745@lst.de>
+From: Marco Elver <elver@google.com>
+Date: Sat, 20 Sep 2025 12:23:24 +0200
+X-Gm-Features: AS18NWAyC50-QQYD_wTUETPBlkphWLV8M7F-miEs8DZ-lOTnj5WEfB5uYr0Ax6s
+Message-ID: <CANpmjNO2b_3Q56kFLN3fAwxj0=pQo0K4CjwMJ9_gHj4c3bVVsg@mail.gmail.com>
+Subject: Re: [PATCH v3 00/35] Compiler-Based Capability- and Locking-Analysis
+To: Christoph Hellwig <hch@lst.de>
+Cc: Nathan Chancellor <nathan@kernel.org>, Peter Zijlstra <peterz@infradead.org>, 
+	Boqun Feng <boqun.feng@gmail.com>, Ingo Molnar <mingo@kernel.org>, Will Deacon <will@kernel.org>, 
+	"David S. Miller" <davem@davemloft.net>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, 
+	"Paul E. McKenney" <paulmck@kernel.org>, Alexander Potapenko <glider@google.com>, Arnd Bergmann <arnd@arndb.de>, 
+	Bart Van Assche <bvanassche@acm.org>, Bill Wendling <morbo@google.com>, 
+	Dmitry Vyukov <dvyukov@google.com>, Eric Dumazet <edumazet@google.com>, 
+	Frederic Weisbecker <frederic@kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, 
+	Herbert Xu <herbert@gondor.apana.org.au>, Ian Rogers <irogers@google.com>, 
+	Jann Horn <jannh@google.com>, Joel Fernandes <joelagnelf@nvidia.com>, 
+	Jonathan Corbet <corbet@lwn.net>, Josh Triplett <josh@joshtriplett.org>, 
+	Justin Stitt <justinstitt@google.com>, Kees Cook <kees@kernel.org>, 
+	Kentaro Takeda <takedakn@nttdata.co.jp>, Lukas Bulwahn <lukas.bulwahn@gmail.com>, 
+	Mark Rutland <mark.rutland@arm.com>, Mathieu Desnoyers <mathieu.desnoyers@efficios.com>, 
+	Miguel Ojeda <ojeda@kernel.org>, Neeraj Upadhyay <neeraj.upadhyay@kernel.org>, 
+	Nick Desaulniers <nick.desaulniers+lkml@gmail.com>, Steven Rostedt <rostedt@goodmis.org>, 
+	Tetsuo Handa <penguin-kernel@i-love.sakura.ne.jp>, Thomas Gleixner <tglx@linutronix.de>, 
+	Thomas Graf <tgraf@suug.ch>, Uladzislau Rezki <urezki@gmail.com>, Waiman Long <longman@redhat.com>, 
+	kasan-dev@googlegroups.com, linux-crypto@vger.kernel.org, 
+	linux-doc@vger.kernel.org, linux-kbuild@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, linux-mm@kvack.org, 
+	linux-security-module@vger.kernel.org, linux-sparse@vger.kernel.org, 
+	llvm@lists.linux.dev, rcu@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-On Fri, 19 Sep 2025 14:11:37 +0200
-Christian K=C3=B6nig <christian.koenig@amd.com> wrote:
+On Fri, 19 Sept 2025 at 16:08, Christoph Hellwig <hch@lst.de> wrote:
+>
+> On Thu, Sep 18, 2025 at 10:45:55AM -0700, Nathan Chancellor wrote:
+> > On Thu, Sep 18, 2025 at 04:15:11PM +0200, Christoph Hellwig wrote:
+> > > On Thu, Sep 18, 2025 at 03:59:11PM +0200, Marco Elver wrote:
+> > > > A Clang version that supports `-Wthread-safety-pointer` and the new
+> > > > alias-analysis of capability pointers is required (from this version
+> > > > onwards):
+> > > >
+> > > >   https://github.com/llvm/llvm-project/commit/b4c98fcbe1504841203e610c351a3227f36c92a4 [3]
+> > >
+> > > There's no chance to make say x86 pre-built binaries for that available?
+> >
+> > I can use my existing kernel.org LLVM [1] build infrastructure to
+> > generate prebuilt x86 binaries. Just give me a bit to build and upload
+> > them. You may not be the only developer or maintainer who may want to
+> > play with this.
+>
+> That did work, thanks.
+>
+> I started to play around with that.  For the nvme code adding the
+> annotations was very simply, and I also started adding trivial
+> __guarded_by which instantly found issues.
+>
+> For XFS it was a lot more work and I still see tons of compiler
+> warnings, which I'm not entirely sure how to address.  Right now I
+> see three major classes:
+>
+> 1) locks held over loop iterations like:
+>
+> fs/xfs/xfs_extent_busy.c:573:26: warning: expecting spinlock 'xfs_group_hold(busyp->group)..xg_busy_extents->eb_lock' to be held at start of each loop [-Wthread-safety-analysis]
+>   573 |                 struct xfs_group        *xg = xfs_group_hold(busyp->group);
+>       |                                               ^
+> fs/xfs/xfs_extent_busy.c:577:3: note: spinlock acquired here
+>   577 |                 spin_lock(&eb->eb_lock);
+>       |                 ^
+>
+> This is perfectly find code and needs some annotations, but I can't find
+> any good example.
 
-> On 19.09.25 12:17, Eliav Farber wrote:
-> > This series includes a total of 27 patches, to align minmax.h of
-> > v5.15.y with v6.17-rc6.
-> >=20
-> > The set consists of 24 commits that directly update minmax.h:
-> > 1) 92d23c6e9415 ("overflow, tracing: Define the is_signed_type() macro
-> >    once")
-> > 2) 5efcecd9a3b1 ("minmax: sanity check constant bounds when clamping")
-> > 3) 2122e2a4efc2 ("minmax: clamp more efficiently by avoiding extra
-> >    comparison")
-> > 4) f9bff0e31881 ("minmax: add in_range() macro")
-> > 5) c952c748c7a9 ("minmax: Introduce {min,max}_array()")
-> > 6) 5e57418a2031 ("minmax: deduplicate __unconst_integer_typeof()")
-> > 7) f6e9d38f8eb0 ("minmax: fix header inclusions")
-> > 8) d03eba99f5bf ("minmax: allow min()/max()/clamp() if the arguments
-> >    have the same signedness.")
-> > 9) f4b84b2ff851 ("minmax: fix indentation of __cmp_once() and
-> >    __clamp_once()")
-> > 10) 4ead534fba42 ("minmax: allow comparisons of 'int' against 'unsigned
-> >     char/short'")
-> > 11) 867046cc7027 ("minmax: relax check to allow comparison between
-> >     unsigned arguments and signed constants")
-> > 12) 3a7e02c040b1 ("minmax: avoid overly complicated constant
-> >     expressions in VM code")
-> > 14) 017fa3e89187 ("minmax: simplify and clarify min_t()/max_t()
-> >     implementation")
-> > 15) 1a251f52cfdc ("minmax: make generic MIN() and MAX() macros
-> >     available everywhere")
-> > 18) dc1c8034e31b ("minmax: simplify min()/max()/clamp()
-> >     implementation")
-> > 19) 22f546873149 ("minmax: improve macro expansion and type
-> >     checking")
-> > 20) 21b136cc63d2 ("minmax: fix up min3() and max3() too")
-> > 21) 71ee9b16251e ("minmax.h: add whitespace around operators and after
-> >     commas")
-> > 22) 10666e992048 ("minmax.h: update some comments")
-> > 23) b280bb27a9f7 ("minmax.h: reduce the #define expansion of min(),
-> >     max() and clamp()")
-> > 24) a5743f32baec ("minmax.h: use BUILD_BUG_ON_MSG() for the lo < hi
-> >     test in clamp()")
-> > 25) c3939872ee4a ("minmax.h: move all the clamp() definitions after the
-> >     min/max() ones")
-> > 26) 495bba17cdf9 ("minmax.h: simplify the variants of clamp()")
-> > 27) 2b97aaf74ed5 ("minmax.h: remove some #defines that are only
-> >     expanded once")
-> >=20
-> > 2 prerequisite commits that adjust users of MIN and MAX macros (to
-> > prevent compilation issues):
-> > 13) 4477b39c32fd ("minmax: add a few more MIN_T/MAX_T users")
-> > 17) cb04e8b1d2f2 ("minmax: don't use max() in situations that want a C
-> >     constant expression")
-> >=20
-> > 1 additional commit introduced to resolve a build failures during the
-> > backport:
-> > 16) lib: zstd: drop local MIN/MAX macros in favor of generic ones
-> >=20
-> > The primary motivation is to bring in commit (8).
-> > In mainline, this change allows min()/max()/clamp() to accept mixed
-> > argument types when both share the same signedness.
-> > Backported patches to v5.10.y that use such forms trigger compiler
-> > warnings, which in turn cause build failures when -Werror is enabled.
-> >=20
-> > Originaly I aligned 5.10.y to 5.15.y, but David Laight commented that I
-> > need to pick up the later changes (from Linus) as well.
-> >=20
-> > Andy Shevchenko (2):
-> >   minmax: deduplicate __unconst_integer_typeof()
-> >   minmax: fix header inclusions
-> >=20
-> > Bart Van Assche (1):
-> >   overflow, tracing: Define the is_signed_type() macro once
-> >=20
-> > David Laight (11):
-> >   minmax: allow min()/max()/clamp() if the arguments have the same
-> >     signedness.
-> >   minmax: fix indentation of __cmp_once() and __clamp_once()
-> >   minmax: allow comparisons of 'int' against 'unsigned char/short'
-> >   minmax: relax check to allow comparison between unsigned arguments and
-> >     signed constants
-> >   minmax.h: add whitespace around operators and after commas
-> >   minmax.h: update some comments
-> >   minmax.h: reduce the #define expansion of min(), max() and clamp()
-> >   minmax.h: use BUILD_BUG_ON_MSG() for the lo < hi test in clamp()
-> >   minmax.h: move all the clamp() definitions after the min/max() ones
-> >   minmax.h: simplify the variants of clamp()
-> >   minmax.h: remove some #defines that are only expanded once
-> >=20
-> > Eliav Farber (1):
-> >   lib: zstd: drop local MIN/MAX macros in favor of generic ones
-> >=20
-> > Herve Codina (1):
-> >   minmax: Introduce {min,max}_array()
-> >=20
-> > Jason A. Donenfeld (2):
-> >   minmax: sanity check constant bounds when clamping
-> >   minmax: clamp more efficiently by avoiding extra comparison
-> >=20
-> > Linus Torvalds (8):
-> >   minmax: avoid overly complicated constant expressions in VM code
-> >   minmax: add a few more MIN_T/MAX_T users
-> >   minmax: simplify and clarify min_t()/max_t() implementation
-> >   minmax: make generic MIN() and MAX() macros available everywhere
-> >   minmax: don't use max() in situations that want a C constant
-> >     expression
-> >   minmax: simplify min()/max()/clamp() implementation
-> >   minmax: improve macro expansion and type checking
-> >   minmax: fix up min3() and max3() too
-> >=20
-> > Matthew Wilcox (Oracle) (1):
-> >   minmax: add in_range() macro
-> >=20
-> >  arch/arm/mm/pageattr.c                        |   6 +-
-> >  arch/um/drivers/mconsole_user.c               |   2 +
-> >  arch/x86/mm/pgtable.c                         |   2 +- =20
->=20
-> >  drivers/edac/sb_edac.c                        |   4 +-
-> >  drivers/edac/skx_common.h                     |   1 -
-> >  .../drm/amd/display/modules/hdcp/hdcp_ddc.c   |   2 +
-> >  .../drm/amd/pm/powerplay/hwmgr/ppevvmath.h    |  14 +-
-> >  .../drm/arm/display/include/malidp_utils.h    |   2 +-
-> >  .../display/komeda/komeda_pipeline_state.c    |  24 +-
-> >  drivers/gpu/drm/drm_color_mgmt.c              |   2 +-
-> >  drivers/gpu/drm/msm/adreno/a6xx_gmu.c         |   6 -
-> >  drivers/gpu/drm/radeon/evergreen_cs.c         |   2 +
-> >  drivers/hwmon/adt7475.c                       |  24 +-
-> >  drivers/input/touchscreen/cyttsp4_core.c      |   2 +-
-> >  drivers/md/dm-integrity.c                     |   2 +-
-> >  drivers/media/dvb-frontends/stv0367_priv.h    |   3 +
-> >  .../net/ethernet/chelsio/cxgb3/cxgb3_main.c   |  18 +-
-> >  .../net/ethernet/stmicro/stmmac/stmmac_main.c |   2 +-
-> >  drivers/net/fjes/fjes_main.c                  |   4 +-
-> >  drivers/nfc/pn544/i2c.c                       |   2 -
-> >  drivers/platform/x86/sony-laptop.c            |   1 -
-> >  drivers/scsi/isci/init.c                      |   6 +- =20
->=20
-> I do see the value to backport the infrastructure, but why are driver spe=
-cific changes backported as well?
-
-They will be about removing local definitions of MIN() and MAX() freeing
-them up for simple implementations (usable as constant initialisers) and th=
-en
-using them in places where the compound statements in min() and max() can't
-be used.
-
-Linus did all those changes - so he didn't have to wait for the maintainers
-to apply the changes (etc).
-
-	David
-=20
->=20
-> I mean the changes are most likely correct but also not valuable in anywa=
-y as bug fix.
->=20
-> Regards,
-> Christian.
->=20
-> >  .../pci/hive_isp_css_include/math_support.h   |   5 -
-> >  fs/btrfs/misc.h                               |   2 -
-> >  fs/btrfs/tree-checker.c                       |   2 +-
-> >  fs/ext2/balloc.c                              |   2 -
-> >  fs/ext4/ext4.h                                |   2 -
-> >  fs/ufs/util.h                                 |   6 -
-> >  include/linux/compiler.h                      |  15 +
-> >  include/linux/minmax.h                        | 267 ++++++++++++++----
-> >  include/linux/overflow.h                      |   1 -
-> >  include/linux/trace_events.h                  |   2 -
-> >  kernel/trace/preemptirq_delay_test.c          |   2 -
-> >  lib/btree.c                                   |   1 -
-> >  lib/decompress_unlzma.c                       |   2 +
-> >  lib/logic_pio.c                               |   3 -
-> >  lib/vsprintf.c                                |   2 +-
-> >  lib/zstd/zstd_internal.h                      |   2 -
-> >  mm/zsmalloc.c                                 |   1 -
-> >  net/ipv4/proc.c                               |   2 +-
-> >  net/ipv6/proc.c                               |   2 +-
-> >  net/netfilter/nf_nat_core.c                   |   6 +-
-> >  net/tipc/core.h                               |   2 +-
-> >  net/tipc/link.c                               |  10 +-
-> >  44 files changed, 306 insertions(+), 164 deletions(-)
-> >  =20
->=20
->=20
-
+This is an interesting one, and might be a bug in the alias analysis I
+recently implemented in Clang. I'll try to figure out a fix.
