@@ -1,81 +1,136 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yb1-f169.google.com (mail-yb1-f169.google.com [209.85.219.169])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 617651AAA1B;
-	Sun, 21 Sep 2025 17:30:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0FAE7296BA2
+	for <linux-sparse@vger.kernel.org>; Sun, 21 Sep 2025 20:24:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.169
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758475820; cv=none; b=TT47Xnl0IOlm2jUctC1Nt7snT6M9EMCfLOH+n0nZQOafx80Izzq4d5j4ZHmvrDNqVZaFIaRGHXKC1mPUBhlNaPW9s5sEFeZykMVYKKXnOS9B7XxIuI27LjixOwKEsBz0hK5kun+uQI2pDYNzHqwlAC854E+iF8PHhICrqDbHd/U=
+	t=1758486267; cv=none; b=kUjHwVlJUYVTQiteifziXCkWPN2qpVzNG63v8gt+YBrVDVNP5jcpqlFemkoECKvbcX5VhUKkmwwKCP86gKSqIE9l8zbvJxCWODhPi33yQlScHR3E9mj5Inq9f+hH3OA28hBKjdmH+lzXDFK8qkFZbYJc5SHethFjm19hY/kxHfc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1758475820; c=relaxed/simple;
-	bh=gCSeR+8zNyI86Ou3aAV5m265kk19xZHGyGCTeo0FqZ4=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=dzBIStXsBn1mYBD+JaxJOAK+NjCbphNHGKQxihTkqDY0cvwLv5tFmfTzAW/EuZ9euBMmhITKHvfFvgyuNKOWh+Nz8Wekjq/2C8iB7jzGxM/7wIDlYV7Z2xYsJNewhk6Ao3ZfO/O5eigtcu16j9hDRGPVIrPZBwi5uEGYd0A1M80=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b=TQhOWMv7; arc=none smtp.client-ip=10.30.226.201
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b="TQhOWMv7"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7FB97C4CEE7;
-	Sun, 21 Sep 2025 17:30:19 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-	s=korg; t=1758475820;
-	bh=gCSeR+8zNyI86Ou3aAV5m265kk19xZHGyGCTeo0FqZ4=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=TQhOWMv7yP1lrvep97m5vFfdqSqeGL00ZM3hZk/tC4fiatV4ThjOoOh9nW/JYpAHs
-	 q6SSL9oG0J0wvdEK0M2tK7nIoG+pzwprKM+u7zXcfRNXl7lk8Hx/JkBf/qPbhRbCDE
-	 E160hpPxV4ruN/G7AcHLivAVjMWh7Tfurk/V+RRI=
-Date: Sun, 21 Sep 2025 19:30:17 +0200
-From: Greg KH <gregkh@linuxfoundation.org>
-To: "Farber, Eliav" <farbere@amazon.com>
-Cc: "luc.vanoostenryck@gmail.com" <luc.vanoostenryck@gmail.com>,
-	"rostedt@goodmis.org" <rostedt@goodmis.org>,
-	"mingo@redhat.com" <mingo@redhat.com>,
-	"akpm@linux-foundation.org" <akpm@linux-foundation.org>,
-	"sj@kernel.org" <sj@kernel.org>,
-	"David.Laight@aculab.com" <David.Laight@aculab.com>,
-	"Jason@zx2c4.com" <Jason@zx2c4.com>,
-	"andriy.shevchenko@linux.intel.com" <andriy.shevchenko@linux.intel.com>,
-	"bvanassche@acm.org" <bvanassche@acm.org>,
-	"keescook@chromium.org" <keescook@chromium.org>,
-	"linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>,
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-	"Chocron, Jonathan" <jonnyc@amazon.com>,
-	"stable@vger.kernel.org" <stable@vger.kernel.org>,
-	Rasmus Villemoes <linux@rasmusvillemoes.dk>
-Subject: Re: [PATCH 1/7 5.10.y] tracing: Define the is_signed_type() macro
- once
-Message-ID: <2025092123-arming-tannery-c17e@gregkh>
-References: <20250916212259.48517-1-farbere@amazon.com>
- <20250916212259.48517-2-farbere@amazon.com>
- <2025091717-snowflake-subtract-40f7@gregkh>
- <91da8ce3e4fb4a8991876a3ed130a873@amazon.com>
+	s=arc-20240116; t=1758486267; c=relaxed/simple;
+	bh=GAoP87MzEykNzgoaa7AXVz2ilQV468zk6o0cZalDD44=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=tCLtfPWqCXyYD2+oP74eOQuThJg4HeCC86PMmVMY1aKEX0MIhafcsvP5ZTWVCBD/EIh+4pG15dLGjv6nsMmzejAkf9amASOiCNGcQgk+sfyT3z+TNxBSHrugHhkx5iuiRR4C2usf3A/OOCitWg1iVHPJGs3nQ1AZHd6OySorwj0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=chrisli.org; spf=fail smtp.mailfrom=chrisli.org; arc=none smtp.client-ip=209.85.219.169
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=chrisli.org
+Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=chrisli.org
+Received: by mail-yb1-f169.google.com with SMTP id 3f1490d57ef6-ea5c1e394a8so2620246276.1
+        for <linux-sparse@vger.kernel.org>; Sun, 21 Sep 2025 13:24:25 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1758486265; x=1759091065;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=RvV988ie/Onhy/WaSdkT69BC2DYFdZv1ZHxu3DDrlFk=;
+        b=U5i8XKIOBWQf3e8AO6PllKQ9TOakHdi7BYnJbH5tbwM+wdH6RJaEt9L2R7xLBP2BFe
+         Tsh/Yev8ymzpKT+pew7h2qjGya+FTM1wej8nw4Eun0ktqEds3G198nqFW3KvU6CdzXvV
+         5UsiBrto8QkU2Cn+qxzGxSLb1KBXFMN7dUzxY+EYZRhstEUNVIrqfOI9JdblIAY/60qt
+         scSGqu0hsIdnlAa18aAfyzWJ5rJpMaNYWdf9X3K1wFazkIVln0ITAh+TkkWOnqFz990l
+         Wv0QvLKA8e5nxsPMi0pw0b1BceFeudm0wdsLJ0QJNtmLXrFIKrNal7X5rx081RJVvwe7
+         YXgw==
+X-Gm-Message-State: AOJu0YykZipleBccfuzpmO67HbTJki1ef2Q15iqyPlnjpIkQF4IdBhQf
+	9QfQ8C3xXkX8U8uKx7MjiJlOmxvwneKeGyvUiPP2GrZTR+/as1TQVush7FzHFRuk8uZ0d6fsb0O
+	WpSgAxzz8FMEhnx+Bixv5YxV0/Do1Jqna4HuI5KUtzw==
+X-Gm-Gg: ASbGncsaUWXP+UzIxdsLeL+po13RwNgJC9eUCZcK+mziPFODsW86HPjurFeoHFh5/tv
+	ijtkZlJ23YF+YM4yXrNCL/+uyH/v16sp6MsraJfBKn5b9jlH1X4/SJm2AJeb/ySmaqz7Bd71O6x
+	xGwkT0Y8zBTM7nuE2mtBXfy4l0/4EFuSuAsmhbAjUzMjhz7FtGPYsYGokQPnqrB/+oWH+MHtRJF
+	xRWfQ==
+X-Google-Smtp-Source: AGHT+IEcQh7T7pANc8oUowIFuxsbwZOgWOWdFKNUJTrjTzIRzVl/k+G53JjFPL+ekjzfe2sjsx9zF4y7gk7GJxm2aNo=
+X-Received: by 2002:a05:690c:3745:b0:733:2646:cc32 with SMTP id
+ 00721157ae682-73d3ce7a4b9mr77915367b3.32.1758486264772; Sun, 21 Sep 2025
+ 13:24:24 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <91da8ce3e4fb4a8991876a3ed130a873@amazon.com>
+References: <CACePvbXDO1ZybDu3RaFhED9D-9gC6LTMpWrxoh5xD+ZO5SLdzA@mail.gmail.com>
+ <CAHk-=whCP50Hru1efNTNj23-gMXcbXUEPzt09ivib5JDL5ycVw@mail.gmail.com>
+In-Reply-To: <CAHk-=whCP50Hru1efNTNj23-gMXcbXUEPzt09ivib5JDL5ycVw@mail.gmail.com>
+From: Chris Li <sparse@chrisli.org>
+Date: Sun, 21 Sep 2025 13:24:13 -0700
+X-Gm-Features: AS18NWC_KfqSZUErFF2LsZOI2wnTb7n8YWYM8AerJ8umpiuFd7-TFV8RNpsy9nA
+Message-ID: <CACePvbU=fAf6nNih5r-epJwU8qpiJ4TmkU6yQg8O1hrJKznDRA@mail.gmail.com>
+Subject: Re: Sparse maintainership
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: linux-sparse@vger.kernel.org, 
+	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, changyuan.lv@gmail.com
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Wed, Sep 17, 2025 at 10:37:31AM +0000, Farber, Eliav wrote:
-> > On Tue, Sep 16, 2025 at 09:22:53PM +0000, Eliav Farber wrote:
-> > > From: Bart Van Assche <bvanassche@acm.org>
-> > >
-> > > commit 92d23c6e94157739b997cacce151586a0d07bb8a upstream.
+On Thu, Sep 18, 2025 at 11:28=E2=80=AFAM Linus Torvalds
+<torvalds@linux-foundation.org> wrote:
+>
+> On Thu, 18 Sept 2025 at 08:46, Chris Li <sparse@chrisli.org> wrote:
 > >
-> > This is only in 6.1, and not other trees, why is it needed here?
-> 
-> It exists also in 5.15:
-> https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/commit/include/linux/overflow.h?h=v5.15.193&id=ed6e37e30826b12572636c6bbfe6319233690c90
+> > I would like to get some clarification on the mailing list:
+> > Is the sparse project still maintained? I really don't want to step on
+> > anybody's toe.
+> >
+> > If not, does anyone mind if I slowly resume some maintainer duty at a
+> > very very slow pace?
+>
+> I'd love to have sparse maintained again, I think it's been
+> effectively dead for the last two years or so.
+>
+> I don't think I've seen a commit since February 2024, so I don't think
+> there are any feet to step on.
 
-What?  Ugh, duplicate commit ids.  What a mess :(
+People keep asking if I=E2=80=99m back, and I haven=E2=80=99t really had an=
+ answer.
+But now, yeah, I=E2=80=99m thinking I=E2=80=99m back.
 
-Fair enough, I can take this, and I want to, but as this really causes a
-problem with our scripts, perhaps use the git id that is references in
-the other kernel versions as well so that things don't look totally
-wrong?
+I just took a look at the sparse repo history since I left. I am very
+happy to see Luc did a great job adding a lot of code to sparse.
 
-thanks,
+A learning of mine is that I need to gain the ability to trust other
+people's code more, especially from people that I know less about. If
+I do it again now, I would just do a simple merge from Luc instead. I
+was fiddling with every patch I took, trying to find a better
+alternative, if possible at all. Looking back at all the patches Luc
+added, it is simply not possible for me to spend that much time on
+each patch. The result speaks for itself, the thing I was worried
+about the most did not happen at all in sparse anyway. I should have
+done a simple merge instead. That is learning and growing on my side.
 
-greg k-h
+I want to wholeheartedly thank Luc for taking great care of the sparse
+project while I was gone. Before I left, I wasn't motivated to have a
+full time job. I was spending more that 50% of my time on sparse and I
+am still not able to keep up with Luc's patch series. My leave of
+absence in sparse allowed me to engage in some other great adventure
+which requires my full dedication. Something I wasn't considering
+previously due to the time I spend on sparse. I really have a great
+blast, and thank you Luc, for making that possible. I hope there is a
+day in the future when Luc comes back to the sparse project, I will be
+happy to pull from him, with less fiddling.
+
+Now I am fully employed, with more family duty and cool hobbies, which
+include some kernel MM side hustle as well. I will not have the time
+to  be the main developer behind sparse. I will take a higher level
+manager role for sparse maintenance, delegate more, take patches and
+pitching ideas. It will take me a while to catch up with the current
+sparse code base and start to apply patches again, please be patient.
+
+I have one observation with the sparse project is that the original
+goal of alternative C frontend has been fulfilled by clang. As for
+checking, there are many alternatives, e.g. syzbot is stealing the
+spotlight. LLVM/clang is the preferred choice for many to do new
+compiler experimental hacks. There is just a much bigger community to
+find people known to modify the llvm to do different things. The usage
+for sparse as a linux kernel specific checker is very niche, a little
+bit too niche.
+
+I want to take this opportunity to pivot sparse to something more
+relevant to mainstream usage. I want to see better integration of
+llvm, through llvm make sparse more of a complete compiler set. I want
+to add different flavors in the process. If we are just doing the llvm
+backend, why not use llvm instead. I have some daydreaming ideas to
+answer the question why we should respect the opportunity of sparse
+rather than using llvm instead. I will share more details when my
+daydreaming idea gets more concrete.
+
+I received some private emails from different people encouraging me to
+come back as well, thank you all for your support.
+
+Chris
