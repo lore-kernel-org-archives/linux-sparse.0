@@ -1,123 +1,119 @@
-Received: from mail-yb1-f178.google.com (mail-yb1-f178.google.com [209.85.219.178])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 333202F0687
-	for <linux-sparse@vger.kernel.org>; Mon, 22 Sep 2025 12:10:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.178
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BB17134BA52
+	for <linux-sparse@vger.kernel.org>; Mon, 22 Sep 2025 13:00:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758543056; cv=none; b=SR5oPZqgFfCAfcNOUdbZREX5IjmN2R86h/A/ChqUk9RN5/bPnp5IA5Qla1NPnsxOjxwZv3aRjKqnuVKHKCv1jO/lNrc5lj2E/PaI39ERB3T5xTxoIrA8jWdANwUoUx/TnzFtGuKvyuIwvuU/vWb4A9SMYA0a3q6a2YBJier2TIU=
+	t=1758546035; cv=none; b=CI2qAikea8ksME8qY1R6CqrT/WprEtYHNaIjcnNm3Ziy4tq9N+nI4CPKFd6po13vdHaWpQJ1mIJhf7h4Bq/FkLtzYsfj//Ba94ViiyRTGjz9E9KyPMsSDHYwc3WE4dPETvxUWUvpAeCCUnFJXLai95eW4hbZGIfxdoMyXKVHGFY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1758543056; c=relaxed/simple;
-	bh=gB+SHkjWfedbzYpDMVBiKULC5VtGnLhBBS9nDA7fAts=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Q3ZtUDdfegZfpzu0kP3ad5E8TfReJ4nFx1dLCTHrDR4v0BlxaksvZ/B/8fKqn+p5/1a0B/OF5yYe5JjB4c7QeQyCgRBD5DlcK/xupSIxfnmlcEv9aQz8tTTVdGirxhe2Xbq0upmq/BkyrRUYJQeAE6V9qxGW0xdS2VepdjrhVJM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=chrisli.org; spf=pass smtp.mailfrom=chrisli.org; arc=none smtp.client-ip=209.85.219.178
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=chrisli.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=chrisli.org
-Received: by mail-yb1-f178.google.com with SMTP id 3f1490d57ef6-e96c48e7101so3457633276.2
-        for <linux-sparse@vger.kernel.org>; Mon, 22 Sep 2025 05:10:54 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1758543054; x=1759147854;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=Upd9A/TyVYzX336KA4+3asnCpUMKeK3k/cdViZQCDUE=;
-        b=AqmBc4IyNvzvj8r0WIDlxLgo1uuxEyreB25jpAOvNfD4OegG/Fz+cs2zu0f3X71Alu
-         i2MsFBIJfItNrc2EA67sSb/n72IQNS7kA2Uq09kCyUdjcl1Iyr0muok4xvCxJrpv73fE
-         dtxGHC37Xi3fbE1mmnvp4QfxALIWGxM6Rad40vlItZjGlFBq1yRisG0Be1Afcmvktu/N
-         ubfEMWs+V5z0e8dYFrgvYSqV1lyVskUj6n6dIt6ZKomu/fV3qfmON/dTgWSMZPqFCtnI
-         Xq9yYPs9oYrZdD4u/qnTjbrkCxBFR3Qb7PuL3pBOj6I00ipjHEmq+4fJ9KYG64Ug+Ikj
-         m/fw==
-X-Forwarded-Encrypted: i=1; AJvYcCVmGJJpWCHQNsAouNsMHApq9d51jSWCwfe3acjhP/jGBGem9K4S2k/2WeF3TqDPhbjkjhrMRixOOiD2Cvw=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yy0e4K9ofyIiq7SQL50ZXpO3TXZ6+UFx3btkCWApq7m9lhdHds/
-	jut2Cmkkq98gzXg+egpWfR1mkdqrqNhtl9yhrpEQHZTFCwAHMeXtEKckwR9zDhMOskMFSZLZ/34
-	VQSyFCDqwUlQxDXrIqE1T30S3/il/F9c3FED2lW48m93dHzOOVOXDllsAfTZW
-X-Gm-Gg: ASbGncvw/ygCDNcDoiBj0mjHwjOixRxVLSs0Vi5TdmDp+Lkg6TI+guhKjuUvRhvsgK1
-	4NsVkMA/yQcHQolk6CCwjHuC5pUXTaEx31now/PmYRMynpb67LVuEBSQjWnXnrUoZOv18iBtDcy
-	CkFW0Onbxq1kqWKVk4I1QoB+gMinEV97mwuJcFbrMf6P+IUQyiI0KNq4tRj8qC7c2bdBnIlkuUS
-	RF99g==
-X-Google-Smtp-Source: AGHT+IHEWmCC/4oti7ZKQT2k0qQGWynt163iqw87WFF2iZ358uYnWE5BNRQaM7lL8q6CN50JVCpui6n/iNexacLEwSs=
-X-Received: by 2002:a05:690c:3347:b0:736:355c:7a0c with SMTP id
- 00721157ae682-73d3a52ac24mr114001897b3.35.1758543054193; Mon, 22 Sep 2025
- 05:10:54 -0700 (PDT)
+	s=arc-20240116; t=1758546035; c=relaxed/simple;
+	bh=+t164Erj3TW7OlCHUYY2OjCpagXPscW9MxivtccFvpE=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=YtKPjUVohRR7PYjX6rlpJnoEmZxtiXG0z0BZ2kde9IoJz9q0NDp3t71/OYo/MbLJ5V0B/FW2/9J/rtjjQi27n6aGiBL9Xj3rKol5j57JmXzjvcM4LDbtC2gk8iH7nx5KMDRNh1XSJFmQztDgLe5vC6HNQF0qRiHN523CpA7/mY0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ECb0HpIA; arc=none smtp.client-ip=10.30.226.201
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ECb0HpIA"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 758DBC4CEF0;
+	Mon, 22 Sep 2025 13:00:34 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1758546035;
+	bh=+t164Erj3TW7OlCHUYY2OjCpagXPscW9MxivtccFvpE=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=ECb0HpIAHJpgqKzOpME4PlBRBaoYyl5e1Rt+8r54crlHJ1IQVBOTUs7nI+jPOOAkG
+	 /7RtClsffCZcU+50IQpOttpr2E7KxVbjS/powmWqsvcUKyVfv3oVklh2mpxrEU/IXq
+	 GFKhTP1UfIqHTD3FdQJR7PPjkC3Ix5wh8XFYEY3IHzViRdOb4wWhtJuqcu9f0ZQnJ+
+	 DbaGHKvu+S8VH99mqTTmS12K3iD9GJBXt8N2M/x9PpLTPBlBX2okudYMKu2fp4V+Bh
+	 9tiGFCeXdshocEUX6L8JHphq3vccmc+DXH3u6VSGf9jhDu+860jPrrzGeyy0BiXp5x
+	 RsbM4ZNdlLuQA==
+Message-ID: <9d263950-f44c-42eb-b22c-a5849399f036@kernel.org>
+Date: Mon, 22 Sep 2025 22:00:32 +0900
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250921061337.3047616-1-mailhol@kernel.org> <CAHk-=wh2G3LxBZe-8MhNL7g+KS3BHR0z-vKFNaEeV=XQmyEwcQ@mail.gmail.com>
-In-Reply-To: <CAHk-=wh2G3LxBZe-8MhNL7g+KS3BHR0z-vKFNaEeV=XQmyEwcQ@mail.gmail.com>
-From: Chris Li <sparse@chrisli.org>
-Date: Mon, 22 Sep 2025 05:10:43 -0700
-X-Gm-Features: AS18NWC2zvpNrVExoXkINAwZZOL9-adjoV6fDZLvw_K1P6iegaV4oQI6iVBGCps
-Message-ID: <CACePvbVYFNANx8pi9v85FHMGU3rtN4zOmnqSe-Et=s8ngh0Ltw@mail.gmail.com>
-Subject: Re: [PATCH] Warn about "unsigned value that used to be signed against zero"
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Vincent Mailhol <mailhol@kernel.org>, linux-sparse@vger.kernel.org, 
-	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Steven Rostedt <rostedt@goodmis.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] Warn about "unsigned value that used to be signed against
+ zero"
+To: Chris Li <sparse@chrisli.org>
+Cc: linux-sparse@vger.kernel.org,
+ Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
+ Linus Torvalds <torvalds@linux-foundation.org>,
+ Steven Rostedt <rostedt@goodmis.org>
+References: <20250921061337.3047616-1-mailhol@kernel.org>
+ <CACePvbXRkT7wtc2nUttMVXWw7C5r_zLewj1fWkW=9pjAxagLkg@mail.gmail.com>
+Content-Language: en-US
+From: Vincent Mailhol <mailhol@kernel.org>
+Autocrypt: addr=mailhol@kernel.org; keydata=
+ xjMEZluomRYJKwYBBAHaRw8BAQdAf+/PnQvy9LCWNSJLbhc+AOUsR2cNVonvxhDk/KcW7FvN
+ JFZpbmNlbnQgTWFpbGhvbCA8bWFpbGhvbEBrZXJuZWwub3JnPsKZBBMWCgBBFiEE7Y9wBXTm
+ fyDldOjiq1/riG27mcIFAmdfB/kCGwMFCQp/CJcFCwkIBwICIgIGFQoJCAsCBBYCAwECHgcC
+ F4AACgkQq1/riG27mcKBHgEAygbvORJOfMHGlq5lQhZkDnaUXbpZhxirxkAHwTypHr4A/joI
+ 2wLjgTCm5I2Z3zB8hqJu+OeFPXZFWGTuk0e2wT4JzjgEZx4y8xIKKwYBBAGXVQEFAQEHQJrb
+ YZzu0JG5w8gxE6EtQe6LmxKMqP6EyR33sA+BR9pLAwEIB8J+BBgWCgAmFiEE7Y9wBXTmfyDl
+ dOjiq1/riG27mcIFAmceMvMCGwwFCQPCZwAACgkQq1/riG27mcJU7QEA+LmpFhfQ1aij/L8V
+ zsZwr/S44HCzcz5+jkxnVVQ5LZ4BANOCpYEY+CYrld5XZvM8h2EntNnzxHHuhjfDOQ3MAkEK
+In-Reply-To: <CACePvbXRkT7wtc2nUttMVXWw7C5r_zLewj1fWkW=9pjAxagLkg@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Sun, Sep 21, 2025 at 8:16=E2=80=AFAM Linus Torvalds
-<torvalds@linux-foundation.org> wrote:
->
-> On Sat, 20 Sept 2025 at 23:13, Vincent Mailhol <mailhol@kernel.org> wrote=
-:
-> >
-> > Add a check in sparse to warn if a value which used to be signed gets
-> > assigned to an unsigned and then gets compared against zero, either
-> > val < 0 or val >=3D 0.
->
-> Ack. I had forgotten about this patch, but I used it for a little bit
-> in my private testing, and it seemed to work fairly well.
->
-> It had some false positives too, but the ones I looked at generally
-> made _sense_ to me.
+On 22/09/2025 at 21:02, Chris Li wrote:
 
-I think the false positive is kind of unavoidable there. Detecting
-such a case can be equivalent to the turing halting problem, which is
-impossible to have a perfect rule or algrothium.
+(...)
 
->
-> They weren't always trivial to figure out, though (nor were the
-> non-false positives, for that matter). Because sometimes the signed
-> source was fairly far away from the unsigned use that it complained
-> about.
->
-> That's why I had added that
->
->         info(def->pos, "signed value source");
+> Can you please add a few validation checks for  the positive and
+> negative case? You  can add it under the validation directory. With
+> validation I can quickly catch the behavior change in the future.
 
-Do you want such a line in the final patch as well? Seems worth it.
+No problem!
 
-> part of the patch: it still didn't always make it entirely obvious,
-> but it helped a lot when the value came in from a mix of macros and
-> inline functions, and it was hard to see what the source of the issue
-> was.
->
-> Even with that information, it wasn't necessarily easy, but it was eas_ie=
-r_.
->
-> But I only used that patch for a couple of days and only looked at a
-> fairly small handful of cases overall.
->
-> I felt it was *enormously* much better than the insane and completely
-> "-Wtype-limits" warning was, because that one warns for code that
-> cannot sanely be improved (ie the "fix" for that warning is typically
-> to remove a sane test that might be required in a macro in other
-> contexts or to just disallow some sane types).
->
-> Put another way: it looked fine in my testing, and it matched my "gut
-> feel" for how things should work.
->
-> But I didn't use it enough to really know for sure and then I forgot
-> about it all.
->
-> If Vincent has been using it for months successfully, I think that's a
-> good sign that it wasn't _just_ my gut feeling.
+Would something like that be OK?
 
-Yes, I applied in my local git repo smoothly. Just waiting for the
-test case now.
+diff --git a/validation/used-to-be-signed.c b/validation/used-to-be-signed.c
+new file mode 100644
+index 00000000..75c0ca38
+--- /dev/null
++++ b/validation/used-to-be-signed.c
+@@ -0,0 +1,25 @@
++void error(void);
++int check(void);
++
++static void foo(unsigned int val)
++{
++	unsigned int ret;
++
++	/* Positive test case */
++	ret = check();
++	if (ret < 0)
++		error();
++
++	/* Negative test case */
++	if (val < 0 || val > 42)
++		error();
++}
++
++/*
++ * check-name: used-to-be-signed
++ *
++ * check-error-start
++used-to-be-signed.c:10:19: warning: unsigned value that used to be signed
+checked against zero?
++used-to-be-signed.c:9:20: signed value source
++ * check-error-end
++ */
 
-Chris
+Output:
+
+  $ ./test-suite used-to-be-signed.c
+    TEST    used-to-be-signed (used-to-be-signed.c)
+  OK: out of 1 tests, 1 passed, 0 failed
+
+
+Also, do you want the test in a separate patch or should I squash with previous
+patch?
+
+
+Yours sincerely,
+Vincent Mailhol
