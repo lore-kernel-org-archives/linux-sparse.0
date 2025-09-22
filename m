@@ -1,197 +1,180 @@
-Received: from mail-wm1-f43.google.com (mail-wm1-f43.google.com [209.85.128.43])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from fra-out-008.esa.eu-central-1.outbound.mail-perimeter.amazon.com (fra-out-008.esa.eu-central-1.outbound.mail-perimeter.amazon.com [35.158.23.94])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 504AC28BAAB
-	for <linux-sparse@vger.kernel.org>; Mon, 22 Sep 2025 09:33:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.43
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 70E8A296BA2;
+	Mon, 22 Sep 2025 10:33:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=35.158.23.94
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758533616; cv=none; b=d/eLZAinyfaAwGY04VE86dLNej8fHsRDl8ozxDhD7qoHTTtI/eGPiXEozROFXFt8O3CYu96RYJFslCPRbKoHGMuk7t/Z0GNi1TihL74NcRe4NAky3DvJUzgsa4YPJqBhjd2YuTE554JeqSoI7+bvr6KfFDEUEE4W87ygJEQwR84=
+	t=1758537200; cv=none; b=WcNmYeeiBf2QH4klzwLPh/Z0Zf6W3RvVI43XGYhGdlqRCf3pzPa94FeF65//3B/2kzKBbx9IKX68w9i1nEV5gpZJC4DqOz4TwcGWJ9z3bcqzl03Q8a9t2hQ+vkE3+3Ro8jMGy2+VsATrLPH4CuY66Ez6/6XvK8sQXt1qYoQ4Yq0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1758533616; c=relaxed/simple;
-	bh=uR7IyOLN2X3biDgABs/idhTRrUaMmnWVYyN/UzgtCKU=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=UwhH4m6wZIgrP44WhhdRJ9bVjnipkeU4QmKfFerwwLI2xWHcdmV1iLu4GKsw9QxL8mgceHV4tpOuoZpR9O8qxvCpg79BvvxdjSJ5c7y61c8FSFw9gg41dBjuGX4lcBrSlmPUifclmaB3AwoqnuztxP0smPMknBz6qEuQjixULnY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=rtqRVKgw; arc=none smtp.client-ip=209.85.128.43
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=google.com
+	s=arc-20240116; t=1758537200; c=relaxed/simple;
+	bh=PixZFZmWcKwq1euE7Zl54sLIl2MpNNci4XMpny8p56I=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version:Content-Type; b=Dbll3C/6sB+F8s9awBYBVHf1wumV620DbPw0qNjZ6QAqgrFYkVD3wWUGdGtEkkCMRUtzy4JJDHEeSFX4KJfSRpzpV55ZxA9Z8WJKKEcYX+fiScuruph2mOkqylAE3zvf2oPatYgoOCiNbw2SHyCkVlW08Hsm/A4jJxr1F3RG/UU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=amazon.com; spf=pass smtp.mailfrom=amazon.com; dkim=pass (2048-bit key) header.d=amazon.com header.i=@amazon.com header.b=HZ8j1fpf; arc=none smtp.client-ip=35.158.23.94
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=amazon.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=amazon.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="rtqRVKgw"
-Received: by mail-wm1-f43.google.com with SMTP id 5b1f17b1804b1-45f2c9799a3so30937395e9.0
-        for <linux-sparse@vger.kernel.org>; Mon, 22 Sep 2025 02:33:34 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=amazon.com header.i=@amazon.com header.b="HZ8j1fpf"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20230601; t=1758533613; x=1759138413; darn=vger.kernel.org;
-        h=user-agent:in-reply-to:content-disposition:mime-version:references
-         :message-id:subject:cc:to:from:date:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=89qPC2dMk40SQhoKG37yGCiQt/NY420sGfty0Meng0w=;
-        b=rtqRVKgwXVLDUPMcssfmWmAiw96i6zfxA/t2vqhdNA5YUqKeezt2pPCKNqVyuYTQE4
-         gVXMk/0hOTwX4zwKdwi3p146YZma2gcgaSCBW29dZqy7v7TEgm2EGs84QxoYNsAn1znb
-         slwzGELxqwII971SnlHT1bDj6nwjAKtx20WV+dXWzoBKLw4zi9u0z8u4f7HVH9w+TcqV
-         fk7//ZiYPMZISgktY4gCh/huytX2ZwLjvMMgStS6ETfULKiiydWXMY4YMns37F16PFVb
-         6hWHTbG4lZj71aB+/CtXTslBsPyT7fXYYYekfTbAhGw5cudJI4ZwVFn3PDSnYXowHJ5p
-         kIXg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1758533613; x=1759138413;
-        h=user-agent:in-reply-to:content-disposition:mime-version:references
-         :message-id:subject:cc:to:from:date:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=89qPC2dMk40SQhoKG37yGCiQt/NY420sGfty0Meng0w=;
-        b=MRcCekHdwXqbFjHCJvwa7Gn21GpyJxcd2onS6BD239mbKbu2KxpzF/H8D1DA7KdlGD
-         kQf8cTE7CtBnzCjVERriw8qV9nTh6OCt8yIEovt63lReGevUozNdNofspDaZ41FfVQUD
-         HKVmPIunlfvOt9Sqh9HDy7vVEhwhghZ1mnmY/dsVOV3UfgVBnbA8kyHuaSgiD+1SxVKV
-         ac7DX2YARtbjwj1Af2TMddYyaBSgZBF3wXG5OnVDnWlNLNREm3hSB1XyKW3n7sj/tsee
-         mrplUoNaT/81wyXhoQ36OqiC80b0nwz1wmFFVbtlCfnpidRwo8TcBaAJWm21c9KvD8x7
-         ZL2A==
-X-Forwarded-Encrypted: i=1; AJvYcCW1JgtyO7wAB0kwMY0+f54j8waxvToRttVf28DyGY1C5HZTKuxLHquzEVTHhElrR01el7d/eSopEEUGAAA=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yz6sK2IQZtqQ8SxUvkeH8cssZpsc6IIVHGtZPUyNIVAKTRsZfBF
-	AR7WZqcwNtRWkCS9+2rvkeDR6mAZDMCVQD7M67RJ+X+K5iih5yOZohYnLA5ZMAMTug==
-X-Gm-Gg: ASbGncuHYUo7KfoMj9+YzZfogNOlWgPBRz1D7tXcAj6Lj+qh58HoSrcc0PY61hOSpZz
-	09zpxZczyDcXOHYr3eVawHG2mKlRSMPL4aX1o1U6imFBqcuEYHCQGUhBWVXxG3vdXEXDp7BT5X6
-	x+JgcoLsaZgh/3nkPdum0TSCK9T8ofKubxNjCl3BfqSxZlTrG8FZgM/g6eeyQA+U+nqLJl+UWdz
-	KMnngA/WjGh1wnMHUh86b9Schuuh639Kigl7qoq5iyk/B/FWKWLdlKHBXHHYdmBRrvmmJ5MV9ya
-	fN8nW5mgI9AiUvLVpvLVPlYjgu1RL42vsiUNKknAl1yIw/ycD4usnXjkFkGa21dIVF9Q3ZVto2A
-	ckGkrY+HYVj2DrWGVQ4oWarRUwJStCr+6wIRO2Ht+ZxWLVVaV9aiHBiyL9mo=
-X-Google-Smtp-Source: AGHT+IEkoU9ognY1IS2/WNXTQHBehT3iG6jr+rUMfSA5BLARxzu2twytBIMtwJpeHRGrTnG81Cn1IQ==
-X-Received: by 2002:a05:600c:46c6:b0:45b:804a:a65e with SMTP id 5b1f17b1804b1-467ebbbff33mr123610355e9.28.1758533612329;
-        Mon, 22 Sep 2025 02:33:32 -0700 (PDT)
-Received: from elver.google.com ([2a00:79e0:2834:9:8fed:21ad:ce77:2e15])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-46d1f3e1b03sm39713145e9.23.2025.09.22.02.33.29
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 22 Sep 2025 02:33:31 -0700 (PDT)
-Date: Mon, 22 Sep 2025 11:33:23 +0200
-From: Marco Elver <elver@google.com>
-To: Christoph Hellwig <hch@lst.de>
-Cc: Nathan Chancellor <nathan@kernel.org>,
-	Peter Zijlstra <peterz@infradead.org>,
-	Boqun Feng <boqun.feng@gmail.com>, Ingo Molnar <mingo@kernel.org>,
-	Will Deacon <will@kernel.org>,
-	"David S. Miller" <davem@davemloft.net>,
-	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
-	"Paul E. McKenney" <paulmck@kernel.org>,
-	Alexander Potapenko <glider@google.com>,
-	Arnd Bergmann <arnd@arndb.de>, Bart Van Assche <bvanassche@acm.org>,
-	Bill Wendling <morbo@google.com>,
-	Dmitry Vyukov <dvyukov@google.com>,
-	Eric Dumazet <edumazet@google.com>,
-	Frederic Weisbecker <frederic@kernel.org>,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	Herbert Xu <herbert@gondor.apana.org.au>,
-	Ian Rogers <irogers@google.com>, Jann Horn <jannh@google.com>,
-	Joel Fernandes <joelagnelf@nvidia.com>,
-	Jonathan Corbet <corbet@lwn.net>,
-	Josh Triplett <josh@joshtriplett.org>,
-	Justin Stitt <justinstitt@google.com>, Kees Cook <kees@kernel.org>,
-	Kentaro Takeda <takedakn@nttdata.co.jp>,
-	Lukas Bulwahn <lukas.bulwahn@gmail.com>,
-	Mark Rutland <mark.rutland@arm.com>,
-	Mathieu Desnoyers <mathieu.desnoyers@efficios.com>,
-	Miguel Ojeda <ojeda@kernel.org>,
-	Neeraj Upadhyay <neeraj.upadhyay@kernel.org>,
-	Nick Desaulniers <nick.desaulniers+lkml@gmail.com>,
-	Steven Rostedt <rostedt@goodmis.org>,
-	Tetsuo Handa <penguin-kernel@i-love.sakura.ne.jp>,
-	Thomas Gleixner <tglx@linutronix.de>, Thomas Graf <tgraf@suug.ch>,
-	Uladzislau Rezki <urezki@gmail.com>,
-	Waiman Long <longman@redhat.com>, kasan-dev@googlegroups.com,
-	linux-crypto@vger.kernel.org, linux-doc@vger.kernel.org,
-	linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-mm@kvack.org, linux-security-module@vger.kernel.org,
-	linux-sparse@vger.kernel.org, llvm@lists.linux.dev,
-	rcu@vger.kernel.org
-Subject: Re: [PATCH v3 00/35] Compiler-Based Capability- and Locking-Analysis
-Message-ID: <aNEX46WJh2IWhVUc@elver.google.com>
-References: <20250918140451.1289454-1-elver@google.com>
- <20250918141511.GA30263@lst.de>
- <20250918174555.GA3366400@ax162>
- <20250919140803.GA23745@lst.de>
- <20250919140954.GA24160@lst.de>
+  d=amazon.com; i=@amazon.com; q=dns/txt; s=amazoncorp2;
+  t=1758537198; x=1790073198;
+  h=from:to:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=zVSnvTXkXiuh+OW/uVNUL4x1ADt15TY9E6leiyfAL50=;
+  b=HZ8j1fpfp/NtePMdMaW0FcYOCEYlQQp0vb3mDknGOZpJnZIPkI5bE+TV
+   fRzVPNGgZ2WU2PgI9wUgC136V/fTJTxHh4EOuRhKg3CJzo7t7FV1nIPZO
+   F6hVzIw41izSt/kSYjXqBxBzX5wRRf9MIzOzM+j/QWSbwWS12XeiT4CYe
+   Og0hpgkknNDbR6ZsmvhBz5/uovypzqA/wwGS6y3+JjW/7M/twEREgeuip
+   +f3oN6Y/kPEBCPVCLDTSBHdosI1RdpKd9QnWw+x2o+CFSJargqxrCTsKv
+   2JRLXxSOGxEr2xvROnRI14veGIhsUpdHbL00gDjgdi4xS1qFLW3BVazNS
+   g==;
+X-CSE-ConnectionGUID: SA7Bpc9VQgG1HmOijFiFuw==
+X-CSE-MsgGUID: 7eapTz9/SuG/x2ufntC2mg==
+X-IronPort-AV: E=Sophos;i="6.18,284,1751241600"; 
+   d="scan'208";a="2478632"
+Received: from ip-10-6-6-97.eu-central-1.compute.internal (HELO smtpout.naws.eu-central-1.prod.farcaster.email.amazon.dev) ([10.6.6.97])
+  by internal-fra-out-008.esa.eu-central-1.outbound.mail-perimeter.amazon.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 22 Sep 2025 10:33:14 +0000
+Received: from EX19MTAEUA002.ant.amazon.com [54.240.197.232:4640]
+ by smtpin.naws.eu-central-1.prod.farcaster.email.amazon.dev [10.0.10.226:2525] with esmtp (Farcaster)
+ id c0c65c16-13cf-4fa2-a5a8-1f23642ff95a; Mon, 22 Sep 2025 10:33:14 +0000 (UTC)
+X-Farcaster-Flow-ID: c0c65c16-13cf-4fa2-a5a8-1f23642ff95a
+Received: from EX19D018EUA004.ant.amazon.com (10.252.50.85) by
+ EX19MTAEUA002.ant.amazon.com (10.252.50.126) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA) id 15.2.2562.20;
+ Mon, 22 Sep 2025 10:33:13 +0000
+Received: from dev-dsk-farbere-1a-46ecabed.eu-west-1.amazon.com
+ (172.19.116.181) by EX19D018EUA004.ant.amazon.com (10.252.50.85) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA) id 15.2.2562.20; Mon, 22 Sep 2025
+ 10:32:49 +0000
+From: Eliav Farber <farbere@amazon.com>
+To: <richard@nod.at>, <anton.ivanov@cambridgegreys.com>,
+	<johannes@sipsolutions.net>, <dave.hansen@linux.intel.com>,
+	<luto@kernel.org>, <peterz@infradead.org>, <tglx@linutronix.de>,
+	<mingo@redhat.com>, <bp@alien8.de>, <x86@kernel.org>, <hpa@zytor.com>,
+	<tony.luck@intel.com>, <qiuxu.zhuo@intel.com>, <james.morse@arm.com>,
+	<mchehab@kernel.org>, <rric@kernel.org>, <harry.wentland@amd.com>,
+	<sunpeng.li@amd.com>, <Rodrigo.Siqueira@amd.com>,
+	<alexander.deucher@amd.com>, <christian.koenig@amd.com>,
+	<Xinhui.Pan@amd.com>, <airlied@gmail.com>, <daniel@ffwll.ch>,
+	<evan.quan@amd.com>, <maarten.lankhorst@linux.intel.com>,
+	<mripard@kernel.org>, <tzimmermann@suse.de>, <jdelvare@suse.com>,
+	<linux@roeck-us.net>, <linus.walleij@linaro.org>,
+	<dmitry.torokhov@gmail.com>, <wens@csie.org>, <jernej.skrabec@gmail.com>,
+	<samuel@sholland.org>, <agk@redhat.com>, <snitzer@kernel.org>,
+	<dm-devel@lists.linux.dev>, <mailhol.vincent@wanadoo.fr>,
+	<wg@grandegger.com>, <mkl@pengutronix.de>, <davem@davemloft.net>,
+	<edumazet@google.com>, <kuba@kernel.org>, <pabeni@redhat.com>,
+	<alexandre.torgue@foss.st.com>, <joabreu@synopsys.com>,
+	<mcoquelin.stm32@gmail.com>, <krzysztof.kozlowski@linaro.org>,
+	<malattia@linux.it>, <hdegoede@redhat.com>, <ilpo.jarvinen@linux.intel.com>,
+	<markgross@kernel.org>, <artur.paszkiewicz@intel.com>, <jejb@linux.ibm.com>,
+	<martin.petersen@oracle.com>, <sakari.ailus@linux.intel.com>,
+	<gregkh@linuxfoundation.org>, <clm@fb.com>, <josef@toxicpanda.com>,
+	<dsterba@suse.com>, <luc.vanoostenryck@gmail.com>, <rostedt@goodmis.org>,
+	<mhiramat@kernel.org>, <pmladek@suse.com>,
+	<andriy.shevchenko@linux.intel.com>, <linux@rasmusvillemoes.dk>,
+	<senozhatsky@chromium.org>, <minchan@kernel.org>,
+	<akpm@linux-foundation.org>, <dsahern@kernel.org>, <shuah@kernel.org>,
+	<keescook@chromium.org>, <wad@chromium.org>, <farbere@amazon.com>,
+	<David.Laight@ACULAB.COM>, <arnd@kernel.org>, <linux-um@lists.infradead.org>,
+	<linux-kernel@vger.kernel.org>, <linux-edac@vger.kernel.org>,
+	<amd-gfx@lists.freedesktop.org>, <dri-devel@lists.freedesktop.org>,
+	<linux-hwmon@vger.kernel.org>, <linux-input@vger.kernel.org>,
+	<linux-arm-kernel@lists.infradead.org>, <linux-sunxi@lists.linux.dev>,
+	<linux-media@vger.kernel.org>, <linux-can@vger.kernel.org>,
+	<netdev@vger.kernel.org>, <linux-stm32@st-md-mailman.stormreply.com>,
+	<platform-driver-x86@vger.kernel.org>, <linux-scsi@vger.kernel.org>,
+	<linux-staging@lists.linux.dev>, <linux-btrfs@vger.kernel.org>,
+	<linux-sparse@vger.kernel.org>, <linux-trace-kernel@vger.kernel.org>,
+	<linux-mm@kvack.org>, <linux-kselftest@vger.kernel.org>,
+	<bpf@vger.kernel.org>, <stable@vger.kernel.org>
+Subject: [PATCH 00/15 v6.6.y] Backport minmax.h updates from v6.17-rc7
+Date: Mon, 22 Sep 2025 10:32:26 +0000
+Message-ID: <20250922103241.16213-1-farbere@amazon.com>
+X-Mailer: git-send-email 2.47.3
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250919140954.GA24160@lst.de>
-User-Agent: Mutt/2.2.13 (2024-03-09)
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: EX19D039UWB002.ant.amazon.com (10.13.138.79) To
+ EX19D018EUA004.ant.amazon.com (10.252.50.85)
 
-On Fri, Sep 19, 2025 at 04:09PM +0200, Christoph Hellwig wrote:
-> On Fri, Sep 19, 2025 at 04:08:03PM +0200, Christoph Hellwig wrote:
-> > I started to play around with that.  For the nvme code adding the
-> > annotations was very simply, and I also started adding trivial
-> > __guarded_by which instantly found issues.
-> > 
-> > For XFS it was a lot more work and I still see tons of compiler
-> > warnings, which I'm not entirely sure how to address.  Right now I
-> > see three major classes:
-> 
-> And in case anyone cares, here are my patches for that:
-> 
-> https://git.infradead.org/?p=users/hch/misc.git;a=shortlog;h=refs/heads/cap-analysis
-> 
-> git://git.infradead.org/users/hch/misc.git cap-analysis
+This series backports 15 patches to update minmax.h in the 6.6.y branch,
+aligning it with v6.17-rc7.
 
-I gave this a try, and with the below patch and the Clang fix [1],
-fs/xfs compiles cleanly. I think the fundamental limitation are the
-conditional locking wrappers. I suspect it's possible to do better than
-disabling the analysis here, by overapproximating the lock set taken
-(like you did elsewhere), so that at least the callers are checked, but
-when I tried it showed lots of callers need annotating as well, so I
-gave up at that point. Still, it might be better than no checking at
-all.
+The ultimate goal is to synchronize all longterm branches so that they
+include the full set of minmax.h changes.
 
-[1] https://github.com/llvm/llvm-project/pull/159921
+The key motivation is to bring in commit d03eba99f5bf ("minmax: allow
+min()/max()/clamp() if the arguments have the same signedness"), which
+is missing in older kernels.
 
-Thanks,
- -- Marco
+In mainline, this change enables min()/max()/clamp() to accept mixed
+argument types, provided both have the same signedness. Without it,
+backported patches that use these forms may trigger compiler warnings,
+which escalate to build failures when -Werror is enabled.
 
+David Laight (7):
+  minmax.h: add whitespace around operators and after commas
+  minmax.h: update some comments
+  minmax.h: reduce the #define expansion of min(), max() and clamp()
+  minmax.h: use BUILD_BUG_ON_MSG() for the lo < hi test in clamp()
+  minmax.h: move all the clamp() definitions after the min/max() ones
+  minmax.h: simplify the variants of clamp()
+  minmax.h: remove some #defines that are only expanded once
 
-diff --git a/fs/xfs/xfs_inode.c b/fs/xfs/xfs_inode.c
-index 9c39251961a3..f371a08e5d44 100644
---- a/fs/xfs/xfs_inode.c
-+++ b/fs/xfs/xfs_inode.c
-@@ -140,6 +140,7 @@ void
- xfs_ilock(
- 	xfs_inode_t		*ip,
- 	uint			lock_flags)
-+	__capability_unsafe(/* conditional locking */)
- {
- 	trace_xfs_ilock(ip, lock_flags, _RET_IP_);
- 
-@@ -183,6 +184,7 @@ int
- xfs_ilock_nowait(
- 	xfs_inode_t		*ip,
- 	uint			lock_flags)
-+	__capability_unsafe(/* conditional locking */)
- {
- 	trace_xfs_ilock_nowait(ip, lock_flags, _RET_IP_);
- 
-@@ -243,6 +245,7 @@ void
- xfs_iunlock(
- 	xfs_inode_t		*ip,
- 	uint			lock_flags)
-+	__capability_unsafe(/* conditional locking */)
- {
- 	xfs_lock_flags_assert(lock_flags);
- 
-@@ -272,6 +275,7 @@ void
- xfs_ilock_demote(
- 	xfs_inode_t		*ip,
- 	uint			lock_flags)
-+	__capability_unsafe(/* conditional locking */)
- {
- 	ASSERT(lock_flags & (XFS_IOLOCK_EXCL|XFS_MMAPLOCK_EXCL|XFS_ILOCK_EXCL));
- 	ASSERT((lock_flags &
-diff --git a/fs/xfs/xfs_log.c b/fs/xfs/xfs_log.c
-index d9ac9521c203..9c4ec3aa8bf9 100644
---- a/fs/xfs/xfs_log.c
-+++ b/fs/xfs/xfs_log.c
-@@ -472,6 +472,7 @@ xfs_log_reserve(
- static void
- xlog_state_shutdown_callbacks(
- 	struct xlog		*log)
-+	__must_hold(&log->l_icloglock)
- {
- 	struct xlog_in_core	*iclog;
- 	LIST_HEAD(cb_list);
+Linus Torvalds (8):
+  minmax: avoid overly complicated constant expressions in VM code
+  minmax: simplify and clarify min_t()/max_t() implementation
+  minmax: add a few more MIN_T/MAX_T users
+  minmax: make generic MIN() and MAX() macros available everywhere
+  minmax: simplify min()/max()/clamp() implementation
+  minmax: don't use max() in situations that want a C constant
+    expression
+  minmax: improve macro expansion and type checking
+  minmax: fix up min3() and max3() too
+
+ arch/um/drivers/mconsole_user.c               |   2 +
+ arch/x86/mm/pgtable.c                         |   2 +-
+ drivers/edac/sb_edac.c                        |   4 +-
+ drivers/edac/skx_common.h                     |   1 -
+ .../drm/amd/display/modules/hdcp/hdcp_ddc.c   |   2 +
+ .../drm/amd/pm/powerplay/hwmgr/ppevvmath.h    |  14 +-
+ drivers/gpu/drm/amd/pm/swsmu/smu_cmn.c        |   2 +-
+ drivers/gpu/drm/drm_color_mgmt.c              |   2 +-
+ drivers/gpu/drm/radeon/evergreen_cs.c         |   2 +
+ drivers/hwmon/adt7475.c                       |  24 +-
+ drivers/input/touchscreen/cyttsp4_core.c      |   2 +-
+ drivers/irqchip/irq-sun6i-r.c                 |   2 +-
+ drivers/md/dm-integrity.c                     |   6 +-
+ drivers/media/dvb-frontends/stv0367_priv.h    |   3 +
+ .../net/can/usb/etas_es58x/es58x_devlink.c    |   2 +-
+ .../net/ethernet/stmicro/stmmac/stmmac_main.c |   2 +-
+ drivers/net/fjes/fjes_main.c                  |   4 +-
+ drivers/nfc/pn544/i2c.c                       |   2 -
+ drivers/platform/x86/sony-laptop.c            |   1 -
+ drivers/scsi/isci/init.c                      |   6 +-
+ .../pci/hive_isp_css_include/math_support.h   |   5 -
+ fs/btrfs/tree-checker.c                       |   2 +-
+ include/linux/compiler.h                      |   9 +
+ include/linux/minmax.h                        | 228 +++++++++++-------
+ include/linux/pageblock-flags.h               |   2 +-
+ kernel/trace/preemptirq_delay_test.c          |   2 -
+ lib/btree.c                                   |   1 -
+ lib/decompress_unlzma.c                       |   2 +
+ lib/vsprintf.c                                |   2 +-
+ mm/zsmalloc.c                                 |   2 -
+ net/ipv4/proc.c                               |   2 +-
+ net/ipv6/proc.c                               |   2 +-
+ tools/testing/selftests/mm/mremap_test.c      |   2 +
+ tools/testing/selftests/seccomp/seccomp_bpf.c |   2 +
+ 34 files changed, 202 insertions(+), 146 deletions(-)
+
+-- 
+2.47.3
+
