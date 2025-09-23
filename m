@@ -1,34 +1,43 @@
-Received: from verein.lst.de (verein.lst.de [213.95.11.211])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 571623128CC;
-	Mon, 22 Sep 2025 17:12:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6BA731A238C;
+	Tue, 23 Sep 2025 19:49:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758561153; cv=none; b=GWVPHH7VpwIc2YiAhlVwZOwXWas47UKl87CJYrbFeuaOXXGe0diwsruwprZ1wGimyz55hI/aZwXTisPIZ9E4sVJnMlclWYPJmJh7PYJZ3A4/R783SK3UKea7vBEKDyjEVGoXEQd0e/PyRWyutKdSpxl9BjfrPVps+jGddAp1Oh8=
+	t=1758656968; cv=none; b=uuKYpqOPB+gMwo7j50EgroWVs2YAhiEwbHSFUREg3e32oT2t0BrkpjUMv6E/fBz3qjP9e6eNOsQVtz0wEphoPz/tTQRUa4Zp+ke/na1xBj6dZnFEXmhhr+82+F1IM6Y4xJL+MgbuASJDjXoszLRG7147UTC9psKI8boph2bAFJo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1758561153; c=relaxed/simple;
-	bh=8oIaUjkf1ZLoWcfViyJ+ASS1wRwmeYlliRHc+XNJKBU=;
+	s=arc-20240116; t=1758656968; c=relaxed/simple;
+	bh=7gv2WzZ+nMC2bdsHIbBsKOEQPNt5h99Cw1wDY0M9npo=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=BXa6gg4eHn8PBiaT9Far/1n6x9CEVirjcmqbOon8aQ5OWUiW6ySDlG2/dQh8rY3EbvQIF+sRfWM5pqWqfXJoEpYnVlxTziQPg+KI5aqWAvpm9UAaMAqAskJ3EJL1Msdz+slXwgBW3kovj+xGiiEA5c/aQYO9avgcUfQj2WKPxPM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lst.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
-Received: by verein.lst.de (Postfix, from userid 2407)
-	id 6B6BB227AAF; Mon, 22 Sep 2025 19:12:27 +0200 (CEST)
-Date: Mon, 22 Sep 2025 19:12:27 +0200
-From: Christoph Hellwig <hch@lst.de>
-To: Bart Van Assche <bvanassche@acm.org>
-Cc: Christoph Hellwig <hch@lst.de>, Nathan Chancellor <nathan@kernel.org>,
-	Marco Elver <elver@google.com>,
-	Peter Zijlstra <peterz@infradead.org>,
+	 Content-Type:Content-Disposition:In-Reply-To; b=WEmNC3iy9+3bX40MeouekeAX3QwOEgeb9KdjiK0A5906Uq+MV+r94y9K6Y0LXEA8q9DH3eiEax9HAxXye3Qt1E3xv9XkCAr3EhvD+yea707Y6NVigqw0aD5FQpV8TTQ36qKLxsOZrNa0KfBiyWkWQUttCIjNYSJ0YA5MHHaRuv0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=PvIaGTqH; arc=none smtp.client-ip=10.30.226.201
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="PvIaGTqH"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2C0DAC4CEF5;
+	Tue, 23 Sep 2025 19:49:17 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1758656966;
+	bh=7gv2WzZ+nMC2bdsHIbBsKOEQPNt5h99Cw1wDY0M9npo=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=PvIaGTqHdNU7Q1p9iQCyi7SI8rzgs+Fd2F62Wvt4e7U9M5ZbQ8qxnT0LiSPe4PKVR
+	 gehyR0Rm0ghRXneZ4tzjafcgpCRITUKyHFvb6JN4O9cuxWgjIBHK2hM2MF5Y/HqnMX
+	 n3nuIsdb1r2D9GFRjzSab+/uI7K6xmpOdsNRSsCVySBQ9n2ybIX4gsztX3PGvijcvT
+	 Sp/fUhAnCreO1LjGnNn/IXq6su5QDyv6TUFvnwV57AFOt5ZY8qGMFKUOL3RBXFtVX+
+	 bbjgLfFkLzJt+rxjoewVtxndm0w4xC2WwbySLCvFHwFbb5zcONvgE0SDuPCi7+lbEf
+	 evcKd6295D9ag==
+Date: Tue, 23 Sep 2025 12:49:15 -0700
+From: Nathan Chancellor <nathan@kernel.org>
+To: Marco Elver <elver@google.com>
+Cc: Christoph Hellwig <hch@lst.de>, Peter Zijlstra <peterz@infradead.org>,
 	Boqun Feng <boqun.feng@gmail.com>, Ingo Molnar <mingo@kernel.org>,
 	Will Deacon <will@kernel.org>,
 	"David S. Miller" <davem@davemloft.net>,
 	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
 	"Paul E. McKenney" <paulmck@kernel.org>,
 	Alexander Potapenko <glider@google.com>,
-	Arnd Bergmann <arnd@arndb.de>, Bill Wendling <morbo@google.com>,
+	Arnd Bergmann <arnd@arndb.de>, Bart Van Assche <bvanassche@acm.org>,
+	Bill Wendling <morbo@google.com>,
 	Dmitry Vyukov <dvyukov@google.com>,
 	Eric Dumazet <edumazet@google.com>,
 	Frederic Weisbecker <frederic@kernel.org>,
@@ -56,10 +65,14 @@ Cc: Christoph Hellwig <hch@lst.de>, Nathan Chancellor <nathan@kernel.org>,
 	linux-mm@kvack.org, linux-security-module@vger.kernel.org,
 	linux-sparse@vger.kernel.org, llvm@lists.linux.dev,
 	rcu@vger.kernel.org
-Subject: Re: [PATCH v3 00/35] Compiler-Based Capability- and
- Locking-Analysis
-Message-ID: <20250922171227.GB12668@lst.de>
-References: <20250918140451.1289454-1-elver@google.com> <20250918141511.GA30263@lst.de> <20250918174555.GA3366400@ax162> <20250919140803.GA23745@lst.de> <a75f7b70-2b72-4bb0-a940-52835f290502@acm.org>
+Subject: Re: [PATCH v3 00/35] Compiler-Based Capability- and Locking-Analysis
+Message-ID: <20250923194915.GA2127565@ax162>
+References: <20250918140451.1289454-1-elver@google.com>
+ <20250918141511.GA30263@lst.de>
+ <20250918174555.GA3366400@ax162>
+ <20250919140803.GA23745@lst.de>
+ <20250919140954.GA24160@lst.de>
+ <aNEX46WJh2IWhVUc@elver.google.com>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
@@ -68,14 +81,14 @@ List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <a75f7b70-2b72-4bb0-a940-52835f290502@acm.org>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+In-Reply-To: <aNEX46WJh2IWhVUc@elver.google.com>
 
-On Fri, Sep 19, 2025 at 10:20:37AM -0700, Bart Van Assche wrote:
-> locking annotations to kernel code. I ended up annotating multiple XFS
-> functions with NO_THREAD_SAFETY_ANALYSIS. Maybe the locking patterns in
-> XFS are too complex for compile-time analysis?
+On Mon, Sep 22, 2025 at 11:33:23AM +0200, Marco Elver wrote:
+> [1] https://github.com/llvm/llvm-project/pull/159921
 
-If our locking patterns are too complex for analysis, either the code or
-the analysis has problems that need addressing.  Potentially both.
+Now that this is merged, I have pushed an updated snapshot for x86_64:
 
+https://mirrors.edge.kernel.org/pub/tools/llvm/files/prerelease/llvm-22.0.0-ca2e8fc928ad103f46ca9f827e147c43db3a5c47-20250923-185804-x86_64.tar.xz
+
+Cheers,
+Nathan
