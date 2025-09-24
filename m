@@ -1,33 +1,33 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 68595DF49
-	for <linux-sparse@vger.kernel.org>; Wed, 24 Sep 2025 08:54:29 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9E4682D6409
+	for <linux-sparse@vger.kernel.org>; Wed, 24 Sep 2025 09:27:58 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758704069; cv=none; b=nnsuXUqarZII6PQ5BKjAIkFNOrQb53K8O3vuOYtGb3MATC694fOkakGu526PvV0uzFV5yn0PY72V8hz0R/7eRuXUIickqf6p4290ywflXfYkPGPpvzr/ROOzzA/pX2prUrJmK/snR0Ha1u7WOFzSbCT37wqJE5AobEE52of1WpM=
+	t=1758706078; cv=none; b=V+KxoDlg5pTnhUIR74tZfu3Y+RyuW3jyX3IJ+iDINED0tfvZGsmw75o1iWl+KxKozDTOdnlKcYw9Yc7Ru3qAcg4fyEcq5POk9jLGv8xuI2AzAYtosT4sM42dyXr6v7t0sEM56xLw18vvO8a5pWC5beV/up9o00WJG/tqGZXAB1w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1758704069; c=relaxed/simple;
-	bh=M9G/FWIZsOSx37GWXWspG7ETCOQTKfn74LvHf78e544=;
+	s=arc-20240116; t=1758706078; c=relaxed/simple;
+	bh=utsrchJpGurUtpT4n5jP4NcUFmxYGduWdjy9GtmUQYg=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=Y5iZqR/pQw+0lSnWtLNA1idqyJyLniZMY73CXHoU9xhwf6JdxMTpxjZBSLdfzqWuCCPuKAq6luPiUt2VVj1Iz8vjjJmcny0Uu9tdmNGFyFSjn5aQSotg48A5IzcBex0I0rOfEvOMKCzEh8Z3H4nNtRor87sxEToJ8wkOJ6LArmk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=HVa5OEXN; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:Content-Type; b=gyGRtgnA+nlRUQuTZGcn1+pZmQDGJv8tkUf+KLeO0k0z2p7eEPaDh/oTqcQ/o0k9Y5pqY1yYfgdL250jnigV+hChQN6A5KHnAvivTZu4IskqUQ09Ws4W78Qz03IPM6g5kCDopg+weA5oNLZAH4qGZEKmHvfe9QgLJ4cGbp6f1fY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=pD0TfttA; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="HVa5OEXN"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 309F8C4CEE7;
-	Wed, 24 Sep 2025 08:54:28 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="pD0TfttA"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6A48AC19424;
+	Wed, 24 Sep 2025 09:27:57 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1758704069;
-	bh=M9G/FWIZsOSx37GWXWspG7ETCOQTKfn74LvHf78e544=;
+	s=k20201202; t=1758706078;
+	bh=utsrchJpGurUtpT4n5jP4NcUFmxYGduWdjy9GtmUQYg=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=HVa5OEXNFkXnoDd/RjgMNBdMle9D5Zw6ztO0/gntpS5OORf5X9Y62zqiLmyyMSwU8
-	 zNZAEF4qQQcltBpANBS/lFPEWzMEbiUbRKgJ8aCgO6UcsUW0XXMcuOLzYaDCaimL7N
-	 B9HdAcg9lA9kTEBOBNRj28FB26gv5zspTFndPbgSqP/fHWncWZ0WIbivTxFYa7F093
-	 WWbPWezNdKdZMbhlak7QzsFhI4P0lwr8K0krbNA6jSKGklAHy6QIS64I0XM/Dg9NPo
-	 OuDYdgypoDx/ecEpjQR9xG4Sd56bcTwx4XU0RNpqSQht55Oe3grs4TAKZQK6XEe9BZ
-	 88H4tgPrkrYqg==
-Message-ID: <de44070e-e71e-4935-bd59-894b6833dbc5@kernel.org>
-Date: Wed, 24 Sep 2025 17:54:26 +0900
+	b=pD0TfttAMgzHBu3dWwpsS5sB/qZYpp30Q+Ajx5vI/Pjum7ozJHhFux/f3ugC+UWCI
+	 0DQ/8pO6/jwXX+z3UMf29uefMw0kG7DS+uNhElQVng0CpaLKcbEHuFvNk0EOtXWKdl
+	 ExEsHigqtjyjbtlfIfsn0Flm4S1YO9Q0ty6+MezdM70v6ifAu1bJayORHYMvafS1Qz
+	 Quc8scazUild2kDU4JpktINbfGo+8FpQzKtVoGZ3YyTDYL9+fhM8Fl65h9nR6TVmMO
+	 hMXLion8ec5jDknWTUD9vUr4yYs0jZdA/V4Tc9B/w/LDwJNInIVtYsNztjCyYxveHN
+	 f82jtvssCVlkQ==
+Message-ID: <78229b37-a816-4128-b0be-ca73d9c05da7@kernel.org>
+Date: Wed, 24 Sep 2025 18:27:56 +0900
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
@@ -35,18 +35,15 @@ List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] Warn about "unsigned value that used to be signed against
- zero"
-To: Chris Li <sparse@chrisli.org>,
- Linus Torvalds <torvalds@linux-foundation.org>
+Subject: Re: [PATCH] vadidation: add used-to-be-signed unit tests
+To: Chris Li <sparse@chrisli.org>
 Cc: linux-sparse@vger.kernel.org,
  Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
+ Linus Torvalds <torvalds@linux-foundation.org>,
  Steven Rostedt <rostedt@goodmis.org>
-References: <20250921061337.3047616-1-mailhol@kernel.org>
- <CAHk-=wh2G3LxBZe-8MhNL7g+KS3BHR0z-vKFNaEeV=XQmyEwcQ@mail.gmail.com>
- <CACePvbVYFNANx8pi9v85FHMGU3rtN4zOmnqSe-Et=s8ngh0Ltw@mail.gmail.com>
- <CAHk-=wgnre70y_EFdwMbxLcd3zzihFqFrDEVed7+P7cpUU74WA@mail.gmail.com>
- <CACePvbUKV2rkYLeoQO9bWCon2qFkmKWGuh_NqvTccn=XZz7usw@mail.gmail.com>
+References: <CACePvbWQVBNQAAreW-Mzkp8ircGtV+K=gNk39HmUC0TNDOBCwQ@mail.gmail.com>
+ <20250922155415.3289196-1-mailhol@kernel.org>
+ <CACePvbXaHKH5Vp+j53pk6494pgDEABQpZ_gOo9_nmCZ4gjxUHw@mail.gmail.com>
 Content-Language: en-US
 From: Vincent Mailhol <mailhol@kernel.org>
 Autocrypt: addr=mailhol@kernel.org; keydata=
@@ -58,38 +55,39 @@ Autocrypt: addr=mailhol@kernel.org; keydata=
  YZzu0JG5w8gxE6EtQe6LmxKMqP6EyR33sA+BR9pLAwEIB8J+BBgWCgAmFiEE7Y9wBXTmfyDl
  dOjiq1/riG27mcIFAmceMvMCGwwFCQPCZwAACgkQq1/riG27mcJU7QEA+LmpFhfQ1aij/L8V
  zsZwr/S44HCzcz5+jkxnVVQ5LZ4BANOCpYEY+CYrld5XZvM8h2EntNnzxHHuhjfDOQ3MAkEK
-In-Reply-To: <CACePvbUKV2rkYLeoQO9bWCon2qFkmKWGuh_NqvTccn=XZz7usw@mail.gmail.com>
+In-Reply-To: <CACePvbXaHKH5Vp+j53pk6494pgDEABQpZ_gOo9_nmCZ4gjxUHw@mail.gmail.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-On 24/09/2025 at 16:07, Chris Li wrote:
-> On Mon, Sep 22, 2025 at 9:17 AM Linus Torvalds
-> <torvalds@linux-foundation.org> wrote:
+On 24/09/2025 at 16:03, Chris Li wrote:
+> On Mon, Sep 22, 2025 at 8:54 AM Vincent Mailhol <mailhol@kernel.org> wrote:
 >>
->> On Mon, 22 Sept 2025 at 05:10, Chris Li <sparse@chrisli.org> wrote:
->>>
->>> On Sun, Sep 21, 2025 at 8:16 AM Linus Torvalds
->>> <torvalds@linux-foundation.org> wrote:
->>>>
->>>> That's why I had added that
->>>>
->>>>         info(def->pos, "signed value source");
->>>
->>> Do you want such a line in the final patch as well? Seems worth it.
->>
->> Oh, absolutely. Some of the cases it reported were really hard to
->> understand without it.
->>
->> If it ends up being noisy, there could possibly be some heuristic like
->> "if the source is very close to the use that triggers it, don't bother
->> talking about it", but that would be a later tweak.
+>> Add unit tests for the new used-to-be-signed check as introduced in [1]:
 > 
-> Vincent, can you add the above info() line suggested by Linus as
-> incremental or full patches?
+> Applied and pushed on sparse-dev repo. Can you please take a look if I
+> am doing it correctly on the sparse-dev?
 
-I think that there is a small confusion here. That line is already in the patch
-inside simplify_unsigned_zero_compare(). I think that Linus was just explaining
-why he added it in the original patch.
+I just checked out sparse-dev. I re-run the tests and everything looks fine!
+
+> Linus has one more debug print line, can you add it for me and submit
+> an incremental patch? It should be just a one liner. I will squash it
+> with your change. I can ping you on the other email as well.
+
+I replied in the other thread. That one line is already in the final patch ;)
+
+> I intend to use sparse-dev as the unstable sparse developer repo. It
+> will always be based on sparse repo but the commit in sparse-dev can
+> be rewinded. Patches will sit in the sparse-dev for about a week then
+> move into sparse repo. The sparse repo is a stable repo, it will not
+> rewind.
+> 
+> BTW, the recommended base to submit the sparse patches is the stable
+> sparse repo unless you depend on some bleeding edge feature only on
+> sparse-dev repo. Pull request please base on the sparse repo not the
+> unstable sparse-dev repo.
+Ack. At the moment, I am not planning to do more sparse development, this patch
+will likely be a one shot. But I will keep this in mind if I either decide to do
+another contribution.
 
 
 Yours sincerely,
