@@ -1,95 +1,79 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yb1-f181.google.com (mail-yb1-f181.google.com [209.85.219.181])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9E4682D6409
-	for <linux-sparse@vger.kernel.org>; Wed, 24 Sep 2025 09:27:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DAD03283FEA
+	for <linux-sparse@vger.kernel.org>; Wed, 24 Sep 2025 17:44:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.181
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758706078; cv=none; b=V+KxoDlg5pTnhUIR74tZfu3Y+RyuW3jyX3IJ+iDINED0tfvZGsmw75o1iWl+KxKozDTOdnlKcYw9Yc7Ru3qAcg4fyEcq5POk9jLGv8xuI2AzAYtosT4sM42dyXr6v7t0sEM56xLw18vvO8a5pWC5beV/up9o00WJG/tqGZXAB1w=
+	t=1758735889; cv=none; b=idoGPQejjOU9XtB85fOR0g1IFSGLDL11Kvm4frGX71KfsU5feWK//h8295VhenHbv0/sxWQ4mCbnwRdDetofO1oGUsN0PR5RCm3zQf7YDvTM0M8YsPj7OfkEQLQhgoGnn8OWpHUXBzfhvT3PsDs4RXdgoKJ7w8OQ5G/NCQmONIg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1758706078; c=relaxed/simple;
-	bh=utsrchJpGurUtpT4n5jP4NcUFmxYGduWdjy9GtmUQYg=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=gyGRtgnA+nlRUQuTZGcn1+pZmQDGJv8tkUf+KLeO0k0z2p7eEPaDh/oTqcQ/o0k9Y5pqY1yYfgdL250jnigV+hChQN6A5KHnAvivTZu4IskqUQ09Ws4W78Qz03IPM6g5kCDopg+weA5oNLZAH4qGZEKmHvfe9QgLJ4cGbp6f1fY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=pD0TfttA; arc=none smtp.client-ip=10.30.226.201
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="pD0TfttA"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6A48AC19424;
-	Wed, 24 Sep 2025 09:27:57 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1758706078;
-	bh=utsrchJpGurUtpT4n5jP4NcUFmxYGduWdjy9GtmUQYg=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=pD0TfttAMgzHBu3dWwpsS5sB/qZYpp30Q+Ajx5vI/Pjum7ozJHhFux/f3ugC+UWCI
-	 0DQ/8pO6/jwXX+z3UMf29uefMw0kG7DS+uNhElQVng0CpaLKcbEHuFvNk0EOtXWKdl
-	 ExEsHigqtjyjbtlfIfsn0Flm4S1YO9Q0ty6+MezdM70v6ifAu1bJayORHYMvafS1Qz
-	 Quc8scazUild2kDU4JpktINbfGo+8FpQzKtVoGZ3YyTDYL9+fhM8Fl65h9nR6TVmMO
-	 hMXLion8ec5jDknWTUD9vUr4yYs0jZdA/V4Tc9B/w/LDwJNInIVtYsNztjCyYxveHN
-	 f82jtvssCVlkQ==
-Message-ID: <78229b37-a816-4128-b0be-ca73d9c05da7@kernel.org>
-Date: Wed, 24 Sep 2025 18:27:56 +0900
+	s=arc-20240116; t=1758735889; c=relaxed/simple;
+	bh=D4Ya3+itFal4L85Mk0yPynskH8Iivm+SbB2aLq2/F1w=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=MDWK6CHU/ftqSAppyjsHDTbrLs3Q1LonGpMGdrCUGPFBE+afwELYagM4LeqB656LY//B20LfJ+7FTvVnXBaGg4Fmns+BXZUetvaQDJZJSfDIrIaq/4QREDK2gOzA8FChXJoPoTkD5hHRFhtV15oyznMJehBrQuuMh/8R00XGgw0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=chrisli.org; spf=pass smtp.mailfrom=chrisli.org; arc=none smtp.client-ip=209.85.219.181
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=chrisli.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=chrisli.org
+Received: by mail-yb1-f181.google.com with SMTP id 3f1490d57ef6-e96e1c82b01so88950276.1
+        for <linux-sparse@vger.kernel.org>; Wed, 24 Sep 2025 10:44:47 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1758735887; x=1759340687;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=D4Ya3+itFal4L85Mk0yPynskH8Iivm+SbB2aLq2/F1w=;
+        b=fkp/HjnUbnx8/5WLyg7BmzGws4G1H/JaIw64RZjSu7egKCKRRCUMUQWDgLR10G8III
+         bep8EwsA5pwAMDOz2q72MFqdJ1MoZCk8Gceg1Z4PiOBzuFgUvbOnq96D27xIbM1kWa8L
+         cQdCweJSCUNR1H3M7YoEp31EJu67NwMok6d73vmfDnmhxvLjDh/kv6R3ziYj92D49z5N
+         FnDNyGZSsJpB+Afu7nKq8dMkvoABJFmF5A8H3Qs3LDLNQ4YrvSTRgI4o5FtYfi1hnXju
+         b9AqlWEzHz/5XI1UkpTEfsvVMjMMDDaKIIlqjAJNh4LMbu0APIVdBqrQt71wcyI8bs6p
+         Lg1w==
+X-Forwarded-Encrypted: i=1; AJvYcCXutlVpD6SEe6gwwXzpHjoxJmfuNg2h8m2UwXZoKCSuTf0g/mPA0j0ctxPonjSv0d5ssHTJ0nI3IwgEN3Y=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwLMB6dziEt+JSycW+c62lQtR/Kt4DyWLGqoT6v89kkaIQ5A57v
+	ZhyWAKMWwpkmL0f2j8idjubprz9OmeEKWWzcAHx4zRRl7CNmNH8wsr1Z5i+VTteo7qiu3gpHHe5
+	hMfwjovJmaETNc0WChvnF+OaQcmakr+Q/YWU52ALilDRuzit3AoT6Tj8=
+X-Gm-Gg: ASbGncuCH8l43NPwiuqO7YS66SsjVrw4x62YkkX8wgYdBpAjn1soQjDvkstXu2JdPwY
+	mvQTv//dSFUmB09CQj6t64deOrq8peUDRbYjkEZkfaAeByoZ9fRD/NhRayNtDKCvrYo6uvbIKbQ
+	9CbfJKxLFwmbqiY0wKIq26manH4xqywAPGQeBeu611kO4YcPuNaAA5MjunvXdY5FvgwfxNt1+//
+	zfE1q98lH5BnjTuz410d3nTiQ5iI7cvnY0ovA==
+X-Google-Smtp-Source: AGHT+IG16UqrHQtSne01YysiFRYe8Zz1ZOvZwYjUGAKluzLBKeasB7SrgDW7UN+MdXOE3sGlQ1iX6TN3hB554ug3xrs=
+X-Received: by 2002:a05:6902:4088:b0:ea3:cafc:3e0 with SMTP id
+ 3f1490d57ef6-eb37fc9b9b4mr744312276.29.1758735886665; Wed, 24 Sep 2025
+ 10:44:46 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] vadidation: add used-to-be-signed unit tests
-To: Chris Li <sparse@chrisli.org>
-Cc: linux-sparse@vger.kernel.org,
- Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
- Linus Torvalds <torvalds@linux-foundation.org>,
- Steven Rostedt <rostedt@goodmis.org>
-References: <CACePvbWQVBNQAAreW-Mzkp8ircGtV+K=gNk39HmUC0TNDOBCwQ@mail.gmail.com>
- <20250922155415.3289196-1-mailhol@kernel.org>
- <CACePvbXaHKH5Vp+j53pk6494pgDEABQpZ_gOo9_nmCZ4gjxUHw@mail.gmail.com>
-Content-Language: en-US
-From: Vincent Mailhol <mailhol@kernel.org>
-Autocrypt: addr=mailhol@kernel.org; keydata=
- xjMEZluomRYJKwYBBAHaRw8BAQdAf+/PnQvy9LCWNSJLbhc+AOUsR2cNVonvxhDk/KcW7FvN
- JFZpbmNlbnQgTWFpbGhvbCA8bWFpbGhvbEBrZXJuZWwub3JnPsKZBBMWCgBBFiEE7Y9wBXTm
- fyDldOjiq1/riG27mcIFAmdfB/kCGwMFCQp/CJcFCwkIBwICIgIGFQoJCAsCBBYCAwECHgcC
- F4AACgkQq1/riG27mcKBHgEAygbvORJOfMHGlq5lQhZkDnaUXbpZhxirxkAHwTypHr4A/joI
- 2wLjgTCm5I2Z3zB8hqJu+OeFPXZFWGTuk0e2wT4JzjgEZx4y8xIKKwYBBAGXVQEFAQEHQJrb
- YZzu0JG5w8gxE6EtQe6LmxKMqP6EyR33sA+BR9pLAwEIB8J+BBgWCgAmFiEE7Y9wBXTmfyDl
- dOjiq1/riG27mcIFAmceMvMCGwwFCQPCZwAACgkQq1/riG27mcJU7QEA+LmpFhfQ1aij/L8V
- zsZwr/S44HCzcz5+jkxnVVQ5LZ4BANOCpYEY+CYrld5XZvM8h2EntNnzxHHuhjfDOQ3MAkEK
-In-Reply-To: <CACePvbXaHKH5Vp+j53pk6494pgDEABQpZ_gOo9_nmCZ4gjxUHw@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+References: <20250921061337.3047616-1-mailhol@kernel.org> <CAHk-=wh2G3LxBZe-8MhNL7g+KS3BHR0z-vKFNaEeV=XQmyEwcQ@mail.gmail.com>
+ <CACePvbVYFNANx8pi9v85FHMGU3rtN4zOmnqSe-Et=s8ngh0Ltw@mail.gmail.com>
+ <CAHk-=wgnre70y_EFdwMbxLcd3zzihFqFrDEVed7+P7cpUU74WA@mail.gmail.com>
+ <CACePvbUKV2rkYLeoQO9bWCon2qFkmKWGuh_NqvTccn=XZz7usw@mail.gmail.com> <de44070e-e71e-4935-bd59-894b6833dbc5@kernel.org>
+In-Reply-To: <de44070e-e71e-4935-bd59-894b6833dbc5@kernel.org>
+From: Chris Li <sparse@chrisli.org>
+Date: Wed, 24 Sep 2025 10:44:35 -0700
+X-Gm-Features: AS18NWBbGnMp0rs2HVrwyCxjHqUtYOhhtGsE5souyWUfdNouIaSez8QdT2_ZfHM
+Message-ID: <CACePvbWW0amyEDsNUhsViRwDGpzPNNXX+rQ3PC2527Uj7PJi8A@mail.gmail.com>
+Subject: Re: [PATCH] Warn about "unsigned value that used to be signed against zero"
+To: Vincent Mailhol <mailhol@kernel.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, linux-sparse@vger.kernel.org, 
+	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Steven Rostedt <rostedt@goodmis.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On 24/09/2025 at 16:03, Chris Li wrote:
-> On Mon, Sep 22, 2025 at 8:54 AM Vincent Mailhol <mailhol@kernel.org> wrote:
->>
->> Add unit tests for the new used-to-be-signed check as introduced in [1]:
-> 
-> Applied and pushed on sparse-dev repo. Can you please take a look if I
-> am doing it correctly on the sparse-dev?
+On Wed, Sep 24, 2025 at 1:54=E2=80=AFAM Vincent Mailhol <mailhol@kernel.org=
+> wrote:
+>
+>
+> I think that there is a small confusion here. That line is already in the=
+ patch
+> inside simplify_unsigned_zero_compare(). I think that Linus was just expl=
+aining
+> why he added it in the original patch.
 
-I just checked out sparse-dev. I re-run the tests and everything looks fine!
+Ah, sorry for my confusion and thanks for the clarification.
 
-> Linus has one more debug print line, can you add it for me and submit
-> an incremental patch? It should be just a one liner. I will squash it
-> with your change. I can ping you on the other email as well.
+It is all good then.
 
-I replied in the other thread. That one line is already in the final patch ;)
-
-> I intend to use sparse-dev as the unstable sparse developer repo. It
-> will always be based on sparse repo but the commit in sparse-dev can
-> be rewinded. Patches will sit in the sparse-dev for about a week then
-> move into sparse repo. The sparse repo is a stable repo, it will not
-> rewind.
-> 
-> BTW, the recommended base to submit the sparse patches is the stable
-> sparse repo unless you depend on some bleeding edge feature only on
-> sparse-dev repo. Pull request please base on the sparse repo not the
-> unstable sparse-dev repo.
-Ack. At the moment, I am not planning to do more sparse development, this patch
-will likely be a one shot. But I will keep this in mind if I either decide to do
-another contribution.
-
-
-Yours sincerely,
-Vincent Mailhol
-
+Chris
