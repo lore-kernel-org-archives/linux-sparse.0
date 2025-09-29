@@ -1,95 +1,100 @@
-Received: from mail-yx1-f43.google.com (mail-yx1-f43.google.com [74.125.224.43])
+Received: from mail-pj1-f48.google.com (mail-pj1-f48.google.com [209.85.216.48])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 904E51E492D
-	for <linux-sparse@vger.kernel.org>; Sun, 28 Sep 2025 04:45:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.43
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 824A52F879
+	for <linux-sparse@vger.kernel.org>; Mon, 29 Sep 2025 00:57:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1759034730; cv=none; b=FmoCauLXmHoGV/s1zU9eXeW2OSaUZUr2qe8gZUVB8kdhafHgqr2pTlVhD1x2K6sfR/a3qLFD1OiT4hs4hh3t4+26LodX64NFY4P/3qM7mogE3cRylyZvcomKGWQDDsOIUG3stbD2tf2lkeVJ1TkyNrXCVBw7e9mpLLuaQOls6RA=
+	t=1759107455; cv=none; b=PyYHq7ctklFtHXKBA4i3e5C8uP5r+ZY1TFrJ12wkwneykcr0LUTL9++ftmwPywbbqz0yUI7MEhE2YFltfB3ImiKX2jt33HLo1Rbt/BjEKpRQAoVqc2t7h9Niwtp8ZHtRjR2NMh/S1yJO5CjNNCMRVq9cn+gdzfcozhEha54LNTQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1759034730; c=relaxed/simple;
-	bh=og7nVdmdx2KWScj5qQxDqxcXWUNKfyAeGc9l+znixAc=;
-	h=MIME-Version:From:Date:Message-ID:Subject:To:Cc:Content-Type; b=GWGaFdoUX8UPG86YPOKAXL9m7FVYdeYWeAPWn9ucJ9LlM9xXBpBQIBxeXNPUiFhYR0PYCaTAuMQ8fqp1gryPSjEkRrAmOaInaw5fhlzhtqx9KCz7BceY56a6hJR4lLtr8Q1HsEeAji1KyqxN+4clK8oYxkuUWLpyqwCNJu7Oeeo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=chrisli.org; spf=pass smtp.mailfrom=chrisli.org; arc=none smtp.client-ip=74.125.224.43
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=chrisli.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=chrisli.org
-Received: by mail-yx1-f43.google.com with SMTP id 956f58d0204a3-62bbc95b4dfso3142219d50.2
-        for <linux-sparse@vger.kernel.org>; Sat, 27 Sep 2025 21:45:28 -0700 (PDT)
+	s=arc-20240116; t=1759107455; c=relaxed/simple;
+	bh=/65gQOy0CJmaPmaU8JLyRaEMVMBS3PWpkz64O2OKDyY=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=bK5l/KhC4FbRIb9dOYjQVrxwRQ/fmUcmAWljIBb94+XFOzoOpmahzUwG2q/UV7axv24eFpeF/b6iP2bbM3RG7AcD4eActQ1oEjOFbEPv2c5IdL9eW7/LYBp4LxnOjapjMksIhtNdy8k922gylNEfATcT5ueXrQnwuf9SJrhczM0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=cPlex5fq; arc=none smtp.client-ip=209.85.216.48
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="cPlex5fq"
+Received: by mail-pj1-f48.google.com with SMTP id 98e67ed59e1d1-3381f041d7fso964648a91.0
+        for <linux-sparse@vger.kernel.org>; Sun, 28 Sep 2025 17:57:31 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1759107451; x=1759712251; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=0pmc2Lc82M3eFhlN4GJeI08sWXBtOBhSoENeY7vxLZ8=;
+        b=cPlex5fqahDa7H9orwAr+yQFsattwk+RnfDp+P/7uAJsE55rvk9gUYD5nPLAS28eTr
+         43FfHNqr9Zpe1L5BP/wDddtyB0eWNJ3WZnJnSStkno42UkuV5N+8ILO0vDzH/Wj2829T
+         0PYCXQ/LqmIgZ7eLXWBmFrWq2hAeowJ2OTaAV7zvqfFpSwNe3a7js814F2NZYPIyScoi
+         JVGYjxNH2I+uUj3ApdqqyqQ4OebvPbiMPkiHLj/XrScIbmHnhpYZN/30JLQAG9tTpqIt
+         C7suYDA68hlFp9xRkt3OEVN3nCx7aYgkk0b/em6KMfBv78c1wL0cgVPg6gOopXgArX7F
+         veXw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1759034727; x=1759639527;
-        h=cc:to:subject:message-id:date:from:mime-version:x-gm-message-state
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=og7nVdmdx2KWScj5qQxDqxcXWUNKfyAeGc9l+znixAc=;
-        b=PycELSKfXry43eUFckjNwDnzsp3SQYKht++hmzO6kWjht6MX1fMbWaSmHWEkkyyngS
-         VGZkyQHBG4xj5Q6LZUFr0fMUls6DkgF015pCHTxK9lpKmqkjveUCOj76Fo+4TvZwcIa6
-         mP4V5eUgNW/Vd8sZGMLjRPau7pEdWJ9KMsZpmn2qJX7VffOQbjk3gPAaCryKmqLbFqIv
-         j3J8dbixz5aso37a+ACDVqg5f7L5XUMG59Ik1CFkSGYOWnsPt1DelyCFMAsrHFNbFdUv
-         4kY5SqpA7X0UWOk0Ow4wNFUULBeTOd4e3bHOV8h4MYwUVUm/zdcFnGXxBTwRHWi81E2B
-         k1sQ==
-X-Gm-Message-State: AOJu0YyQxW8V6tjEoyGkCGXj6tNCQTv5PDcCI6K6Q3dP7777ogrpdb2O
-	ZO0MI6aFdnARGgHufoj4sC+CwyiV1DL4nsWWwiV1tL3dY90zpKesCvboP9IsgHyey0d3kU7bfO1
-	gIqo70rt5D+DqKREFsWdfo9T6d9S5mOcJ5MpARe9pZ/DYWuCZtwYDH2skyw==
-X-Gm-Gg: ASbGncscYuECZFg7/87aGQv/+vRoDsO6LC8yw1WcSm7W7t1+pCjM2nK4J3gFk/nu0Qv
-	AAZY6FTIYuQ1xRb7tzdBJ6SUVbSJHSENXkQKMjxsSSGpuSIs+Y745rFVVoYVzEcHoD9/xuDIznc
-	ZFjPz7jr1tR/wJUmDZaqmLrinoYRlDGuJzpzF6UfswvN0gIktzwuKAzmEfHzJahXVCj+eaolkji
-	0Ye7H7z1vrICA2l
-X-Google-Smtp-Source: AGHT+IH9R/Q+BB0tQHYmC9iCIfzoVuPLfR1tzvhkUz7a1Hmnmu89UhHDEGI8OSoCMwj3Be6X5GsZJrMN6JI+NQdrbbg=
-X-Received: by 2002:a05:690e:5c7:b0:635:4ed0:571b with SMTP id
- 956f58d0204a3-6361a838d87mr11575478d50.53.1759034727243; Sat, 27 Sep 2025
- 21:45:27 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1759107451; x=1759712251;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=0pmc2Lc82M3eFhlN4GJeI08sWXBtOBhSoENeY7vxLZ8=;
+        b=Eg3ON5IL6CyUdkKkTJCTHyvPAecGGKG0+x34YutWiAC67IrLKvADsYgLncOQZaNH9S
+         461Yapht736lbi31k8EIrbQoJdno2e/YYxsCafcNOcje7QlS0I0OPRw1krmYk6diyAV3
+         j4vxb958yMTYYFYsSFYcUaXE7X8W0nOnIGqKfM57eu/H9tLl3q63OoBL/jsiNBGTMY39
+         aMxYk8G1K6N5fOrNlyfvc459mwGTmP2HF4MEB1DMUnvi9valVCHou2YO/Y3yydU7xl4z
+         Zb74xjAjYJRPrZ6I8A3d15Yt1BdFzQqWmQOfUmypZCko0gvDOn12Mx3kHP98eU0DqFVH
+         oKjA==
+X-Gm-Message-State: AOJu0YweeI85r9bLZYXUHUhTw/kp2M9qqWxGa7QDvJPnBiPx4ssN0JCF
+	ftnZxq5aPlovLzjTZh6URK1OLFlxS1fdwHLJ7GiMJ7mQxxTaOFajzzC/RlaldkdEYMo=
+X-Gm-Gg: ASbGncslUD5W2qgKVSlL6FiAXEEnJaqsUsAx11yjgqN8uVFc6O1C/voJv9BhLWjQSC7
+	9z1yMwnSVUWXaSEI9H34RzYGLSkkb5o2mQ6yepj6SRnE9xyZjSoiEd7Rbvk9cvZnTjxkZ6e+Vg0
+	Li1Bg3OMix694A6IRI0KfnNLphH5b4k1M3TBWiCmH6D7SZbCv/gdx3SMp/QuwlwmmWUQhLC6WgI
+	tHDedZRCKQKTMa92I7fV6H48m68/3vZ1OSAKWfvmy0NIydL1Lnqk+4mQkN5PpM/LukNhjXNdxOZ
+	Mhg7NMvDBEux7eY+d8ywaKwiymlV0Vd6x2YP/7Hm4KUw5Lwtc7yBmkFBdceSoAnjY2dCK4CI/O7
+	4DGSIEgcZk7zFMgoSZTlu0dEcTqMv7IBguIU1bfhioQdEzxDBzywDYqI4pUwNVElP8XmonBPzur
+	9pyIQoTpNn357CEdXBqgDzVbtOrjA=
+X-Google-Smtp-Source: AGHT+IFRtV49rO8Tgwd4l8PJGrBX1gu0aSLA+yt6xTUy1PhpfjUFCni0tzwZeTI6QjX59bgszXbjDA==
+X-Received: by 2002:a17:90b:4ac2:b0:32d:e027:9b26 with SMTP id 98e67ed59e1d1-334564bcf13mr14148778a91.13.1759107450974;
+        Sun, 28 Sep 2025 17:57:30 -0700 (PDT)
+Received: from localhost.localdomain (c-24-130-67-127.hsd1.ca.comcast.net. [24.130.67.127])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-78102b23634sm9684268b3a.66.2025.09.28.17.57.29
+        (version=TLS1_3 cipher=TLS_CHACHA20_POLY1305_SHA256 bits=256/256);
+        Sun, 28 Sep 2025 17:57:30 -0700 (PDT)
+From: Changyuan Lyu <changyuan.lv@gmail.com>
+To: sparse@chrisli.org
+Cc: linux-sparse@vger.kernel.org,
+	Changyuan Lyu <changyuan.lv@gmail.com>
+Subject: [PATCH] doc: update the instructions for mailing list subscription
+Date: Sun, 28 Sep 2025 17:57:27 -0700
+Message-ID: <20250929005727.18121-1-changyuan.lv@gmail.com>
+X-Mailer: git-send-email 2.50.1
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-From: Chris Li <sparse@chrisli.org>
-Date: Sat, 27 Sep 2025 21:45:16 -0700
-X-Gm-Features: AS18NWBNcpGAVbOUKerfGbBDaqgCVnvP0KAhdL0Ip0JEEcJ0wMdOHvMciH0jnKc
-Message-ID: <CACePvbUajv=xC0J4eKdVoskRvKQDwxrM4v17+6t1M42xsbQ-gg@mail.gmail.com>
-Subject: Sparse merge window is open
-To: linux-sparse@vger.kernel.org
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, changyuan.lv@gmail.com
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 
-Hi everyone,
+Majordomo commands are deprecated as per
+https://subspace.kernel.org/vger.kernel.org.html#what-happened-to-majordomo.
 
-After a long break from sparse the project. I have fully returned back
-to resume the maintainer role on sparse. I want to thank Luc for
-taking great care of the project while I am gone. Looking forward to
-the pull request from him again.
+Signed-off-by: Changyuan Lyu <changyuan.lv@gmail.com>
+---
+ Documentation/index.rst | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-I am going through the mailing list for old patches that can be
-applied to sparse but I haven't found much yet.
+diff --git a/Documentation/index.rst b/Documentation/index.rst
+index e29a5643..4c810787 100644
+--- a/Documentation/index.rst
++++ b/Documentation/index.rst
+@@ -56,8 +56,8 @@ You do not have to be subscribed to the list to send a message there.
+ Previous discussions and bug reports are available on the list
+ archives at https://marc.info/?l=linux-sparse.
+ 
+-To subscribe to the list, send an email with
+-``subscribe linux-sparse`` in the body to ``majordomo@vger.kernel.org``.
++To subscribe to the list, send an email to ``linux-sparse+subscribe@vger.kernel.org``,
++check `Subspace <https://subspace.kernel.org/subscribing.html>`_ for details.
+ 
+ Bugs can also be reported and tracked via the `Linux kernel's bugzilla for sparse
+ <https://bugzilla.kernel.org/enter_bug.cgi?component=Sparse&product=Tools>`_.
+-- 
+2.50.1 (Apple Git-155)
 
-If you have patches that can be applied to sparse, now is a good time
-to re-submit them. I want to cut a release after this round of merge
-window.
-
-Regarding the sparse vs sparse-dev repo. Here is how I intend to use
-these two repo:
-1) sparse repo. This is the stable repo, the git history will not
-rewind. If something bad happens to the old commit, a revert commit
-will be added to remove the problematic commit.
-2) sparse-dev repo. This repo is always using sparse stable repo as
-base. However the change newer than the sparse stable repo is not
-guaranteed to be stable. I might rewind and re-apply a newer version
-of the patches. Consider it as a staging repo. I will merge (fast
-forward) from the sparse-dev to sparse at about weekly or bi-weekly
-bases. Testing please use the sparse-dev repo for the cutting edge
-changes.
-
-If you want to submit patches to sparse, recommend using the stable
-sparse repo as the base. Only use sparse-dev as base if there are very
-bleeding edge patches that only exist on sparse-dev.
-
-Pull request please use the sparse repo as well.
-
-Another issue I want to collect some feedback is that, the kernel has
-remove the sparse context checker:
-https://lore.kernel.org/linux-sparse/20250918140451.1289454-23-elver@google.com/
-
-Does any once feel strongly removing the lock context code in sparse
-itself because the main usage case is now gone?
-
-Chris
