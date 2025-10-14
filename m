@@ -1,99 +1,94 @@
-Received: from galois.linutronix.de (Galois.linutronix.de [193.142.43.55])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f42.google.com (mail-wm1-f42.google.com [209.85.128.42])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 535AB220F2A;
-	Mon, 13 Oct 2025 09:12:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=193.142.43.55
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B4BDF212572
+	for <linux-sparse@vger.kernel.org>; Tue, 14 Oct 2025 07:39:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.42
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1760346735; cv=none; b=ShPDL+r9g+yQGtM/unaTehdjyn1NBzYJU+07gbmkOTMosVJ1WKmqzFB6PG32HQeU0/DAXVaKgLn1BLXh02/Y41VxT7OE4EH8USpgY2IS5d3+GbfIdFu1Z7zhfiGd3bGTRKPPNxlfU1r/cQCFOOjyRIrFtat2uq7TkkjRJfLmGAo=
+	t=1760427551; cv=none; b=p8jShVnY1ImheajWQSBMgfy65srYwDP5Y5SsD1VKypkEzd2690gnQOWulQTM2BswkJt4RndqbT7kqSoO9tm0OvKraH5/hlDpn6ve0Imwa8qXQs9aKDOtLeDGjE13ITR6qpFFGGOT++GMeGvA6qkdW9ckpD8D/NeMRconrQFZhNk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1760346735; c=relaxed/simple;
-	bh=M8W+Wb/k76OFOUM9UgBamnEToea682kSXMrBJ0ukbFw=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=NyEIcLA6scVUcJRSAsPkjqo+Z71rVPw0AXLNW1km1/ri5k4N8NuqJiaygTuePSgKUlyxi5xI18scoq87JAX6tB0lHvuYPiMYHwN+TQBrYOnFWxrc2puAkNf5kiY9bURmm1XOq9Q3UecMetRJqWV5JBchlplkeq3ifMG+WfZvqTo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linutronix.de; spf=pass smtp.mailfrom=linutronix.de; dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b=nuDvZ2Ty; dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b=t8Ov/3r0; arc=none smtp.client-ip=193.142.43.55
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linutronix.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linutronix.de
+	s=arc-20240116; t=1760427551; c=relaxed/simple;
+	bh=Ld+pgq8lK1bSy6k5x9WjVuw0wKJS1W2kLijY2IVY1AQ=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=tm+9CnNXkiEeyPAky1sc8Wj9PxI4LOfpBHtVQ+icUTbeRBsAERwJ+uG7Pc8TB7/7qa/bL3UPwfiHrQA5D0A4mtkwMoVhxdaPdeP9/1Mia1vDnlRzstQphZa19GJV+RKfSsXUvkqpv/ij2IfIVVkI9kEIBQTrs98Q9ifJVUmYO4E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=y2AFEFOI; arc=none smtp.client-ip=209.85.128.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="nuDvZ2Ty";
-	dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="t8Ov/3r0"
-From: =?utf-8?q?Thomas_Wei=C3=9Fschuh?= <thomas.weissschuh@linutronix.de>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linutronix.de;
-	s=2020; t=1760346729;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding;
-	bh=ZK4MecEgmGNpR7Ho9yBfqoHrQQsss9GFbmPkcKt7iNQ=;
-	b=nuDvZ2TyCNnYAcZtz9wg4tgUhbFl8w0FIf1jjac9laG65TMfw5W/2/1hihWigSwU+gcVit
-	ABmzr1CRmy4+nhYIiwlfUnHPwbZJZK9GdMttJ8Y1SjPKZQlrSktgpoqLNbBL1AOKeFGzSB
-	hn8Xq8aiL3kpP9t26/OOSbtgQlscf8f/+cX8EymW2DyQPexOH1FRq0ffkqSjmkvtJvbUhT
-	JJw9eKMXDiNfrpruza1V02SJ8c18ZX9rJm4XDOC+DpSfOKPJPY+f5e+JupYXkAgf0NQ9Jh
-	VKbzJxCr0iTdxT1v0sL5+u7/a09Dz+2P1EUL8kYPZ9ZPtWvqrOxpj0lcXxVybQ==
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=linutronix.de;
-	s=2020e; t=1760346729;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding;
-	bh=ZK4MecEgmGNpR7Ho9yBfqoHrQQsss9GFbmPkcKt7iNQ=;
-	b=t8Ov/3r0E4Qgs26/n+znn8CLkr+N9h0d7WEftC4lZjgZtItnwm3EEQ0nwSyGixO/H9wWJi
-	8m/jheDAHrnlpUDg==
-Date: Mon, 13 Oct 2025 11:12:02 +0200
-Subject: [PATCH] compiler: remove ARCH_SEL()
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="y2AFEFOI"
+Received: by mail-wm1-f42.google.com with SMTP id 5b1f17b1804b1-46e2e6a708fso29832775e9.0
+        for <linux-sparse@vger.kernel.org>; Tue, 14 Oct 2025 00:39:09 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1760427548; x=1761032348; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=InUgEugYD7X+Bwui6uuPDTdStKnV66TZBV3pv+azoJk=;
+        b=y2AFEFOI0blaLzg3CvjYXBxOUunwyXUTxNQCehRq3IvnQ3YnQG5Pknk9GtZspusv87
+         1VLqqo/xKEDznBUg+HSPj+RmUHl+COrr7Q+oPfEpV6sWor2q2PE0KdKqZlDlVf5J2lWb
+         qWVu2ow74dBKrFP/wF7wRdhGS29sUQHLCMFzGbmyX21mjqjeJb46wowEreYLKzudVkKv
+         /ixsA67KnN2ls8irrDyGAqaAwmrGXaDsQ9MKEhbSfkojZoytdlMH37gtYcoLB5dCUhZo
+         tAWz4P2mwUiJvuBexW82sp4/Tz9p04HOh0/iesOd0teslGZgnAPkdyfP8BdjcFScNJMi
+         /8gw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1760427548; x=1761032348;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=InUgEugYD7X+Bwui6uuPDTdStKnV66TZBV3pv+azoJk=;
+        b=PbSEovd42EBjdW782pd9odxQwWj+0qLMjPbAHRw2B5G2NtQGWtwXhAk5k1MCYkNNQb
+         vl5WdrD5sYiplqcsNuKLImjWeoaUNIqq40eptGShCI349a7aD7HKWr1Ghjlaiyp3w2as
+         7IK4GiHmWgcbT94JuejkJd/l9he6A9j51YN9RLQol19jVG8p5IC8VlyPA3EX4luI2geR
+         8dCcs8HJcufVQDic2HWKLS3G8hweENWDaPThjfQRHItFN/V1NOeAOrzbMR3OY2jdLF66
+         nFKj5zUuUoPDg7s0fT8g+PBuy414QVpNWBCVTgQ8rq6Whjj4KzZ7MnTK89x7aPpmLLkc
+         +kYQ==
+X-Forwarded-Encrypted: i=1; AJvYcCVPnf3lCYZZrzCks8ay8u9ZrD749Vqaxb34MvytJlr2JrCv/MkBMo/MFimX1kv5QdsCvUw/t2kGDkLHIQo=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw3kakbmaimbywrMwA9qHAL99+VcYSw/LUk+2xnDhv9tN2OVjKV
+	CfhleIzQf4QQeHJtzo24hP7lM3oBZDLwflsrvaaPMaevG0ZltV7IbjYsFcJLEHrRcWg=
+X-Gm-Gg: ASbGncvwKMCLWqQRJaDiA2218XoUI8uR5R4tEmVztBxFsWpsyTGzKG1Km5PRlQFQpM/
+	0QnWGkB2yfTDy87O2GukSfYzg8+wPM0g+wyK7COy3CryNyDw89G89gV3S2zd/0Kb6ckCleuqA+T
+	YG/oXvY9vjj/rsufRCOnHtd6PvOZ9nfPorxGbjjAN9F/thYmNgcW9Yxr2U4VGkbc1OVZJKsL0GV
+	/c14E0VuaR4bQMxwhm6Efuanv288MFkvjzJsv0eV1w1Me8Y23KqPnZ2OiHF63tVsvqZCWva8oUp
+	3wicQIY006zzg52bPia8FeCNvUoQkaN37hfzw2Hsws82RCfyFpJf/1IOOGe/xoZVjP4M6o3FKeY
+	RIAno5eIPWQnPfajYc4BW7RFG91es2FigRrc1jD0a+ZnWdw+JHwn/NsjH+4P7yw==
+X-Google-Smtp-Source: AGHT+IH0WnL/z4Q9t6vYT9gMXeiLVnMC5/njbjvHlxoLaTL5J6kLGyTz5/h2/DGje/5eUoRZWTT3sQ==
+X-Received: by 2002:a05:600c:1395:b0:46e:37fc:def0 with SMTP id 5b1f17b1804b1-46fa9a9efaamr159825925e9.9.1760427547722;
+        Tue, 14 Oct 2025 00:39:07 -0700 (PDT)
+Received: from localhost ([196.207.164.177])
+        by smtp.gmail.com with UTF8SMTPSA id 5b1f17b1804b1-46fb489af92sm243104035e9.17.2025.10.14.00.39.06
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 14 Oct 2025 00:39:07 -0700 (PDT)
+Date: Tue, 14 Oct 2025 10:39:03 +0300
+From: Dan Carpenter <dan.carpenter@linaro.org>
+To: Amit Dhingra <mechanicalamit@gmail.com>
+Cc: Chris Li <cli@chrisli.org>, linux-sparse@vger.kernel.org
+Subject: Re: [PATCH smatch] smdb.py : Clarify <function> comes before <type>
+ in info option
+Message-ID: <aO3-FxBcjuwxe6bQ@stanley.mountain>
+References: <CAO=gReG3L4S90RZDTg+kx8M7jH7dG-AHKEnKJaq0OJLRfYQxug@mail.gmail.com>
+ <CACePvbUdWi0eGR79KFurZwEx-wEKGQJ-+gdse4hVNu-FMWVgvQ@mail.gmail.com>
+ <CAO=gReFB+iUq1ZBdwWsZfqtEGosmmmcraze7gC=T=ZERDT8tNA@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
-Message-Id: <20251013-arch-sel-v1-1-7eef9b22ceb0@linutronix.de>
-X-B4-Tracking: v=1; b=H4sIAGHC7GgC/6tWKk4tykwtVrJSqFYqSi3LLM7MzwNyDHUUlJIzE
- vPSU3UzU4B8JSMDI1NDAwNL3cSi5Azd4tQc3SQLw+S0NEtzUwPTVCWg8oKi1LTMCrBR0bG1tQB
- T/eppWgAAAA==
-X-Change-ID: 20251009-arch-sel-b81cff97505e
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, 
- Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org, 
- =?utf-8?q?Thomas_Wei=C3=9Fschuh?= <thomas.weissschuh@linutronix.de>
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1760346727; l=1015;
- i=thomas.weissschuh@linutronix.de; s=20240209; h=from:subject:message-id;
- bh=M8W+Wb/k76OFOUM9UgBamnEToea682kSXMrBJ0ukbFw=;
- b=zOJlK3rirUFX63eCm18Ar6v8uhBK4Wifw8cnPKiGLy4eiT0y6vwXdEQ/Uy8CYOaYNAmiHLgbI
- frRZCQCqZ3gCxOIfkiQypBTZtkAlXR9IGuRq0CtMKOqzQ14EFJfAOog
-X-Developer-Key: i=thomas.weissschuh@linutronix.de; a=ed25519;
- pk=pfvxvpFUDJV2h2nY0FidLUml22uGLSjByFbM6aqQQws=
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAO=gReFB+iUq1ZBdwWsZfqtEGosmmmcraze7gC=T=ZERDT8tNA@mail.gmail.com>
 
-It's last user was removed in commit 8ea815399c3f ("compiler: remove
-__ADDRESSABLE_ASM{_STR,}() again").
+On Fri, Oct 10, 2025 at 03:19:39AM -0700, Amit Dhingra wrote:
+> On Thu, Oct 09, 2025 at 10:33:06PM -0700, Chris Li wrote:
+> > This patch is for Dan to apply on smatch, right?
+> >
+> Yes, this is for Smatch.
+> My apologies if the list is the incorrect place to send smatch patches.
+> 
 
-Signed-off-by: Thomas Weißschuh <thomas.weissschuh@linutronix.de>
----
- include/linux/compiler.h | 6 ------
- 1 file changed, 6 deletions(-)
+The Smatch mailing list is smatch@vger.kernel.org, but I'm on this list
+as well so I can take it this time.  Applied.  Thanks.
 
-diff --git a/include/linux/compiler.h b/include/linux/compiler.h
-index 5b45ea7dff3e50160afc37d22f61b9d2146e15d4..a9a2f8aae821311da253bf065c49b7c69aa3af17 100644
---- a/include/linux/compiler.h
-+++ b/include/linux/compiler.h
-@@ -269,12 +269,6 @@ static inline void *offset_to_ptr(const int *off)
- 
- #endif /* __ASSEMBLY__ */
- 
--#ifdef CONFIG_64BIT
--#define ARCH_SEL(a,b) a
--#else
--#define ARCH_SEL(a,b) b
--#endif
--
- /*
-  * Force the compiler to emit 'sym' as a symbol, so that we can reference
-  * it from inline assembler. Necessary in case 'sym' could be inlined
+regards,
+dan carpenter
 
----
-base-commit: 3a8660878839faadb4f1a6dd72c3179c1df56787
-change-id: 20251009-arch-sel-b81cff97505e
-
-Best regards,
--- 
-Thomas Weißschuh <thomas.weissschuh@linutronix.de>
 
