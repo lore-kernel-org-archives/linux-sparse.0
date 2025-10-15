@@ -1,132 +1,115 @@
-Received: from mail-wr1-f54.google.com (mail-wr1-f54.google.com [209.85.221.54])
+Received: from mail-ej1-f45.google.com (mail-ej1-f45.google.com [209.85.218.45])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D647A32A3D9
-	for <linux-sparse@vger.kernel.org>; Wed, 15 Oct 2025 13:08:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.54
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 15E6D2D7DDE
+	for <linux-sparse@vger.kernel.org>; Wed, 15 Oct 2025 15:14:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.45
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1760533707; cv=none; b=g6U8KbEhR7fGYUU+Z7CM23Y6w/1AbGw2VeUABrRampWYcbfG2yPgc9EKewBBUWjO/rWTHg9Y5+OSqx+/mmGj/lJtn+3XLSTaBFKihgI3eUMvfRvkSCgrmgJWQy+pzXViZ3/whD6e/tiC5Q0sLhEq95q9lP0o/710bSuI4Pkp/f8=
+	t=1760541254; cv=none; b=MeRC1nnD7zgeHJHC7eKuPHfZ7gVJUifvuSWOkLHvR6cRVAOU/WoqMLKwSFAYK/o23y505nNOKQpZFUfqVLsEp7rG9mq++fMAoLgl+nW9/T16pufm5nU/GKWl12SY0zZOyhftK1eCv2couUG/evTd58t11Ci7/4RGEWZsFOpNUZ4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1760533707; c=relaxed/simple;
-	bh=uJZCcSO4ZzIFTetml8qQBG5qetwn1iUwyc+ULXXLg4g=;
-	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
-	 Content-Disposition; b=IUhURAiSQZL2Jc5AmOz/gfku51uH9LIPhvSMLCa6UxHNkVmacWki3GqGIWyfOKKvTrVsSdCl7U33JoV+PoMSwEZPISC5Ia7VfHGMOyEXMpWTJxqyHvB5bsvyj62hRRPk+hYzGdaCTPaWQHQ5nA3LXParx5pwcCDY1cBhRUo11J0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=ksdC20rh; arc=none smtp.client-ip=209.85.221.54
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1760541254; c=relaxed/simple;
+	bh=vIIalLX2jBXQDzgelXcqDB6pZDhnjKni+zOmpg1Apt0=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=OkzaqhSc8PHZoM7RA6zvJ2numu7PSVS2H1igMUz4SZBjzdP8BCz5H/w2gjGiBs66ke62zpZyXaO0Uv29ynp+pIKsaDGKqMkbCT9o5gHL9GWrQcxoOiwUgn6STlvTvZDWWykvsRSLadNQ4SzrzAHd6W59xEW+uv8NTVut7lD+4p8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org; spf=pass smtp.mailfrom=linuxfoundation.org; dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b=RegBc7LT; arc=none smtp.client-ip=209.85.218.45
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linuxfoundation.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ksdC20rh"
-Received: by mail-wr1-f54.google.com with SMTP id ffacd0b85a97d-4257aafab98so5457411f8f.3
-        for <linux-sparse@vger.kernel.org>; Wed, 15 Oct 2025 06:08:25 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="RegBc7LT"
+Received: by mail-ej1-f45.google.com with SMTP id a640c23a62f3a-b3b3a6f4dd4so1226218166b.0
+        for <linux-sparse@vger.kernel.org>; Wed, 15 Oct 2025 08:14:11 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1760533704; x=1761138504; darn=vger.kernel.org;
-        h=content-disposition:mime-version:message-id:subject:cc:to:from:date
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=3XFi3xy/0iOfTR/VXPqCk1gz0693H4eWmw+YtRPk9qE=;
-        b=ksdC20rhN/C97CvHh8y8o4eNisWpwxfHlZnLhhictv42aM8KZsFszOyoSgLzioFO13
-         1YTkhmLJmWZy2AgPZ/DHyJ57iH1nVhrmhtMRtwTarZaCUYHhP3xihXM01vY97AKznZCd
-         2GS5KqO6Yst3uHM1Xm9hIg0waVMVCycOg523YaXnaY0G3PfcoCoJtU97GTSpDNcCluYW
-         B0UekkxKhR5856Z+yGLXMvraIuljlRq7YEeGocSop7jjs7+9l0S5jtX/L3kROkG7Jn9Z
-         j3PJg08LM9OTU/xBGVtc9pezNyoUxDsSyXY6iYY9FcNFCr38uEUYZAeexL1w79XjE01d
-         T1jA==
+        d=linux-foundation.org; s=google; t=1760541250; x=1761146050; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=PznC/nuL3306rXw8EmSWxaCJn0QKZKxL1qK91E1ce2s=;
+        b=RegBc7LTxyjTHoDLltWjJ+ghnSk85VlL6Pu7CKf3ej8jTrJ5CxU239YnMZxNDlV/Yh
+         mK42a5Kq09LsFIweD7vDvgOtj0D89PRn42rAIawo4OdnU3wiQ/zNQXuWVQ2bnM+0DYF+
+         uauK7SXtAV5F1pLS948w7JfqqcHEvYMzUghr4=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1760533704; x=1761138504;
-        h=content-disposition:mime-version:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=3XFi3xy/0iOfTR/VXPqCk1gz0693H4eWmw+YtRPk9qE=;
-        b=HQVnR1btwRYHWN3fTF+W49Yqqe2I9jILTx846I6cEv67PK5syNrtL7BuVlxoV8T0DG
-         qqu8g3UU4m/oB3Itx8C+5VzLc8iBid/aiFSLmAG9O5NTntTlkDnYAr5xR49cbdYhnAA1
-         R+z2WPluK39bUeISNAd2F3+jQGtY8m3cDuTEdWClAFS6GfKzUdi3gRRduWHWoGcbd0aK
-         cS21JBZ1A4ITb/IG1M+B36bxbq5vlmF97bFZchAR08Ha48j5VvuDSfYEYJVbR53zUouU
-         c4Oy4tGD74AFQFyyWXgZAPrLM3bC3U611qKxwxTgZfwZCI9FR06vo3ve3edJw77RUBMd
-         Vj4g==
-X-Gm-Message-State: AOJu0Ywcvf5QltDMDwGFGbniAizFNHvy/4RK7J7TWw3lF3NgnKujIzGS
-	roWtKsRkaKbSsHL47DuUaBehSJPbpLTnEgorXUsYU57qRNiEeF745eF03sEARUZ4IZxS9mADm48
-	x79GK
-X-Gm-Gg: ASbGncsxy1iWimI4o94jFCfvRO+6Xo86nI6LYkyoSZyuRdKnxpINlPrRc2dmyb7k9S7
-	ahZGpUiCMossqd11dhYZ66mBR7/EN2KpYjdlVGO3gWxsU0RFl9w5lQKCOq4L8GNe2/8r5mz6oYn
-	YaPRsJ63T6I3X5Gc0HQaq6SeilRlXtlrRMsvL+1eagnUG0ihl8rhCM402G/X7H164Kv6uW0d8Ne
-	oMR3HRISfz86et6n8sQ45faO5ySSBf/x++2o+FaBEaz6bp1m55HQS0aFsK8/OI34BfMjxxowHRP
-	ZPwXeit4E9WSBnPbAqntvFGlRmqcRlK15rUBQRbH1hvaMLT5qDEyemHDfUDIUfq2lir1TPV9Hrl
-	gjJOTW5aIAtRIekvqsKX/vhwKJk7tpOI5Z3bV50ZkhvBOsNCv1zrsX6ab31vyYg==
-X-Google-Smtp-Source: AGHT+IGzGDs128iRILNF7tjFOkKXU2kAw43z5Qu4RGqw2jof5rsqx+R5C8XPjobp3RGKj17HHMY9kw==
-X-Received: by 2002:a05:6000:1445:b0:3f1:ee44:8c00 with SMTP id ffacd0b85a97d-42666ab9597mr19380548f8f.10.1760533697069;
-        Wed, 15 Oct 2025 06:08:17 -0700 (PDT)
-Received: from localhost ([196.207.164.177])
-        by smtp.gmail.com with UTF8SMTPSA id ffacd0b85a97d-426ce589a21sm29787321f8f.23.2025.10.15.06.08.16
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 15 Oct 2025 06:08:16 -0700 (PDT)
-Date: Wed, 15 Oct 2025 16:08:13 +0300
-From: Dan Carpenter <dan.carpenter@linaro.org>
-To: linux-sparse@vger.kernel.org
-Cc: Ricardo Ribalda <ribalda@chromium.org>, Kees Cook <kees@kernel.org>,
-	linux-media@vger.kernel.org
-Subject: [PATCH] builtin: implement __builtin_strlen() for constants
-Message-ID: <aO-cvXncl7dbnP_J@stanley.mountain>
+        d=1e100.net; s=20230601; t=1760541250; x=1761146050;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=PznC/nuL3306rXw8EmSWxaCJn0QKZKxL1qK91E1ce2s=;
+        b=Ee6mi/eZN6GqICOGRJAKKUHiahxysgagELh+Vr9ESnu+8MGygtrlS62hzPUA34+AXX
+         JO2351f8uryhAPi08KVSFjMSN6KsH7yh3JzZ2fzdxC9g0wGF6fuVulY9z1/N4L/1yBlN
+         XN/mGLc11o4GBLBne3XE9cg6xd301duZccGU+A01E+MTdB0VPpDpUlYbReRPE0g3iggv
+         9BjC4JlT1I0TJbt7WFrK0jX33Mhn7etSw+HBM8fjUSLqJRii2jNC32eIfk61D/2OHIsd
+         VTktHWvQ7u9+Tg4Mr8uNE2eiQIn6Cg9PHZYFNeP8HUG5JypGEVqnsFJg396HAOlDqFMv
+         QPlA==
+X-Gm-Message-State: AOJu0YwBq5IMw9mju3UnONPQ6wKbGcDKw4NlPLMO+KGI7NQF3MxsTdki
+	WSNHWLSsnGNnojIEOb/PxEHjxqZ5NchXSi0biQTfIkZezqwUXIEzYwXE6bI5pEamAhwX3YG2d1w
+	swG7YV4Y=
+X-Gm-Gg: ASbGncsULqKoq5NNsXlBBU99MKDAaagvacZ65AvyN7CZ3Zfaj3N2RdLiuq9QZcSEsxt
+	jAgVpMCWizqAPdbg9bhygeYZclR6bnKo1El9NnfuFIZvP96jDc2UVccvp29/guhT2Ta5zx2V2uw
+	rF2jrj1kWq82s/MZAR2hTYdG/b6niGmBDtbD+3oGYtViKPi18sxj+TuuEj4Cs5uGmVWgaytseR2
+	ru2kqMqbydKFjDW9LUG/++EL4Cy4fsR5cDbq2R/C7hC4sxI/P4xKK9CsS+duzHLe55SD2n/ahRb
+	gnNvSgpjGmCSVdX2H9hb2FJqfxCG5VlZ/KuWTlt6p8URT/reV6W8Wf3CHc8+INyja/as5qWvQTU
+	hWw+NFVISLtqANtYvW0ihDLnc6sGiHluWp5ZxYsmLnm8XzzzrcMirKyvAlB22IiqjNdR23EG8p0
+	cN9uhepeah0NOqWY/kGg37UgAleQ==
+X-Google-Smtp-Source: AGHT+IHLc8h2TAdOCAVoM1nytdExGpYZS77DJW6qYSbfOP2n9twhM2t2Y5sAAXllzS9/Pxwe1CKdNA==
+X-Received: by 2002:a17:907:934a:b0:b48:730:dbb3 with SMTP id a640c23a62f3a-b50ac1cc3eemr3184988366b.32.1760541250088;
+        Wed, 15 Oct 2025 08:14:10 -0700 (PDT)
+Received: from mail-ed1-f42.google.com (mail-ed1-f42.google.com. [209.85.208.42])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-b5cb9b5f552sm250684666b.20.2025.10.15.08.14.07
+        for <linux-sparse@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 15 Oct 2025 08:14:08 -0700 (PDT)
+Received: by mail-ed1-f42.google.com with SMTP id 4fb4d7f45d1cf-61feb87fe26so10662050a12.1
+        for <linux-sparse@vger.kernel.org>; Wed, 15 Oct 2025 08:14:07 -0700 (PDT)
+X-Received: by 2002:a05:6402:84d:b0:618:528b:7f9b with SMTP id
+ 4fb4d7f45d1cf-639d5c514a7mr24205812a12.31.1760541247570; Wed, 15 Oct 2025
+ 08:14:07 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-X-Mailer: git-send-email haha only kidding
+References: <aO-cvXncl7dbnP_J@stanley.mountain>
+In-Reply-To: <aO-cvXncl7dbnP_J@stanley.mountain>
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Date: Wed, 15 Oct 2025 08:13:51 -0700
+X-Gmail-Original-Message-ID: <CAHk-=wgKcf_dP0_7yTqL+JKc03mhFgqFHkN7jXLUrOy=WjWZUA@mail.gmail.com>
+X-Gm-Features: AS18NWDdPlEEBZ1MVYFnkl3KJ8oytP--YOd7-XiMvlSP6Blf7tJGYJvbcV6IMuA
+Message-ID: <CAHk-=wgKcf_dP0_7yTqL+JKc03mhFgqFHkN7jXLUrOy=WjWZUA@mail.gmail.com>
+Subject: Re: [PATCH] builtin: implement __builtin_strlen() for constants
+To: Dan Carpenter <dan.carpenter@linaro.org>
+Cc: linux-sparse@vger.kernel.org, Ricardo Ribalda <ribalda@chromium.org>, 
+	Kees Cook <kees@kernel.org>, linux-media@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-People are adding compile time asserts to check whether strings are
-the expected length.  In GCC and Clang strlen("foo") is expanded at
-compile time so this works, but in Sparse it triggers a "bad constant
-expression" warning.  Implement expand_strlen() to handle string
-literals.
+On Wed, 15 Oct 2025 at 06:09, Dan Carpenter <dan.carpenter@linaro.org> wrote:
+>
+> People are adding compile time asserts to check whether strings are
+> the expected length.  In GCC and Clang strlen("foo") is expanded at
+> compile time so this works, but in Sparse it triggers a "bad constant
+> expression" warning.  Implement expand_strlen() to handle string
+> literals.
 
-Signed-off-by: Dan Carpenter <dan.carpenter@linaro.org>
-Link: https://lore.kernel.org/all/CANiDSCsBAq3Yx4ybarUb_1NkQ-bvfXvWqb-DfqXatkiYJFZWiQ@mail.gmail.com/
----
- builtin.c | 24 +++++++++++++++++++++++-
- 1 file changed, 23 insertions(+), 1 deletion(-)
+Ack.
 
-diff --git a/builtin.c b/builtin.c
-index 3a29c3aec8a6..9e8fa5964b37 100644
---- a/builtin.c
-+++ b/builtin.c
-@@ -596,6 +596,28 @@ static struct symbol_op object_size_op = {
- 	.expand = expand_object_size,
- };
- 
-+static int expand_strlen(struct expression *expr, int cost)
-+{
-+	struct expression *arg = first_expression(expr->args);
-+
-+	if (!arg)
-+		return UNSAFE;
-+	if (arg->type == EXPR_SYMBOL)
-+		arg = arg->symbol->initializer;
-+	if (!arg || arg->type != EXPR_STRING || !arg->string->length)
-+		return UNSAFE;
-+
-+	expr->flags |= CEF_SET_ICE;
-+	expr->type = EXPR_VALUE;
-+	expr->value = arg->string->length - 1;
-+	expr->taint = 0;
-+	return 0;
-+}
-+
-+static struct symbol_op strlen_op = {
-+	.expand = expand_strlen,
-+};
-+
- /*
-  * Builtin functions
-  */
-@@ -775,7 +797,7 @@ static const struct builtin_fn builtins_common[] = {
- 	{ "__builtin_strcpy", &string_ctype, 0, { &string_ctype, &const_string_ctype }},
- 	{ "__builtin_strcspn", size_t_ctype, 0, { &const_string_ctype, &const_string_ctype }},
- 	{ "__builtin_strdup", &string_ctype, 0, { &const_string_ctype }},
--	{ "__builtin_strlen", size_t_ctype, 0, { &const_string_ctype }},
-+	{ "__builtin_strlen", size_t_ctype, 0, { &const_string_ctype }, .op = &strlen_op},
- 	{ "__builtin_strncasecmp", &int_ctype, 0, { &const_string_ctype, &const_string_ctype, size_t_ctype }},
- 	{ "__builtin_strncat", &string_ctype, 0, { &string_ctype, &const_string_ctype, size_t_ctype }},
- 	{ "__builtin_strncmp", &int_ctype, 0, { &const_string_ctype, &const_string_ctype, size_t_ctype }},
--- 
-2.51.0
+Except it's not quite right.
 
+Try this:
+
+    int i(void)
+    {
+        return __builtin_strlen("hello\0hi");
+    }
+
+and you'll see that it returns 8, even though the correct string length is 5.
+
+So you should add a
+
+    #include <string.h>
+
+at the top, and do something like
+
+-       expr->value = arg->string->length - 1;
++       expr->value = strlen(arg->string->data);
+
+in there instead, because constant strings can have embedded NUL characters.
+
+           Linus
