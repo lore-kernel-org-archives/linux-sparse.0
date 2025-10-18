@@ -1,154 +1,110 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f49.google.com (mail-wm1-f49.google.com [209.85.128.49])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 616DD26B0A9;
-	Fri, 17 Oct 2025 16:09:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4DB6C227563
+	for <linux-sparse@vger.kernel.org>; Sat, 18 Oct 2025 09:35:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.49
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1760717391; cv=none; b=qREF5xZYfz8j4tTdwHuxw+ZYqRQqN55rRX3y6OgPoYTZgs0hzvEcE6nq0yyUG+iDC24kUbfUs2Ia5BaxpplYzpi8qPIwBN4ZfU6L+ylVXc4BC+9yPQ3xRO4oXaBDYJVH0pTKa78mxyLZnYHpt1LwJuYCg8Dj1bgYz3vF8k+KuHg=
+	t=1760780122; cv=none; b=ViOcM+fKB7DywUIy40yFFqh1FTm46yj21dbPEEGdfYhg17TEKGRab31Q5mIpGHNUA6Tgm45GmmkW5/lEg6vAymeQntprUVq8H24FJ1zo1ucg7/Otg2rpbVVW5Ls0CPOOGgwRX2wowmoNZI6unKnygHRaJkI/X2/BeOF62hF/bqA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1760717391; c=relaxed/simple;
-	bh=BOrYC+tXjLjRqJyXcD4crvrBNK2lkUpKkjfEmyc87bI=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=iWy895WajwE+h8mx6Pi2PYix+/PvfztRajECItZdikbvNHHv5lhxGisse8tPX4JO0xzFRLKewC9ErT44yMIAJY6utZePsszk7mX8ag/vyKI5fjBwAIjLZZ0djNPioX/lMqLB9MPuNZuqA7eF0yZakSVaCNBXaDxWk6Q/EwtNQFw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=YtSviiKK; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1760780122; c=relaxed/simple;
+	bh=znvtahQqXgq3MTKhE5NgcFNfAJpY4NVppHeUrKUCbWg=;
+	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
+	 Content-Disposition; b=GDi3sHOMmOvTD+dWgdfqyGq6sLsJWNqZmXYJZQjom1gsXms/PEspXczqemXKNLBdFpodNjAOvK9inYD7yDdpn8mEiu8cAG8NKH/j01KkNOusyFQ4SC+3YZdDiXiyWuW1ks/M0o/e0mc8RWr9Kf56eg0+js5iM+wvACiglbUdg0s=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=eNCmbXfc; arc=none smtp.client-ip=209.85.128.49
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="YtSviiKK"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id EBE17C4CEE7;
-	Fri, 17 Oct 2025 16:09:27 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1760717391;
-	bh=BOrYC+tXjLjRqJyXcD4crvrBNK2lkUpKkjfEmyc87bI=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=YtSviiKK7XhOypmn1B0JMTFJNg+aK9xkicr5kleBJoGLQsIHX6oRtRnPJgXbXWtLH
-	 cVrvwZYIhcft0nkxK/ZQBpXxxHeWHw5/VEilYnGTD4lEZyzXP8wqDKjbklEc7PQZxX
-	 jrw7mNWuagcjs3SnKes4mzFKMKH2tiSDMTY+zRgHS/b+KVlZKnLK4gb6spqja1+1F5
-	 LtRKkkOtABvH8jmUIF+maywb5ma9DVPFdB4So5FQ7XdD3Y3FN97CNzQWMZICjSRgyi
-	 XbXdYmBkEWUiq556ItdRa+tvmxGUk+V9ozsqtDgWFGhyHQtvMVM573eif+FMsCQ1J7
-	 ilRe5q/VN9eDQ==
-Date: Fri, 17 Oct 2025 17:09:24 +0100
-From: Nathan Chancellor <nathan@kernel.org>
-To: Greg KH <gregkh@linuxfoundation.org>
-Cc: Eliav Farber <farbere@amazon.com>, stable@vger.kernel.org,
-	linux@armlinux.org.uk, jdike@addtoit.com, richard@nod.at,
-	anton.ivanov@cambridgegreys.com, dave.hansen@linux.intel.com,
-	luto@kernel.org, peterz@infradead.org, tglx@linutronix.de,
-	mingo@redhat.com, bp@alien8.de, x86@kernel.org, hpa@zytor.com,
-	tony.luck@intel.com, qiuxu.zhuo@intel.com, mchehab@kernel.org,
-	james.morse@arm.com, rric@kernel.org, harry.wentland@amd.com,
-	sunpeng.li@amd.com, alexander.deucher@amd.com,
-	christian.koenig@amd.com, airlied@linux.ie, daniel@ffwll.ch,
-	evan.quan@amd.com, james.qian.wang@arm.com, liviu.dudau@arm.com,
-	mihail.atanassov@arm.com, brian.starkey@arm.com,
-	maarten.lankhorst@linux.intel.com, mripard@kernel.org,
-	tzimmermann@suse.de, robdclark@gmail.com, sean@poorly.run,
-	jdelvare@suse.com, linux@roeck-us.net, fery@cypress.com,
-	dmitry.torokhov@gmail.com, agk@redhat.com, snitzer@redhat.com,
-	dm-devel@redhat.com, rajur@chelsio.com, davem@davemloft.net,
-	kuba@kernel.org, peppe.cavallaro@st.com, alexandre.torgue@st.com,
-	joabreu@synopsys.com, mcoquelin.stm32@gmail.com, malattia@linux.it,
-	hdegoede@redhat.com, mgross@linux.intel.com,
-	intel-linux-scu@intel.com, artur.paszkiewicz@intel.com,
-	jejb@linux.ibm.com, martin.petersen@oracle.com,
-	sakari.ailus@linux.intel.com, clm@fb.com, josef@toxicpanda.com,
-	dsterba@suse.com, xiang@kernel.org, chao@kernel.org, jack@suse.com,
-	tytso@mit.edu, adilger.kernel@dilger.ca, dushistov@mail.ru,
-	luc.vanoostenryck@gmail.com, rostedt@goodmis.org, pmladek@suse.com,
-	sergey.senozhatsky@gmail.com, andriy.shevchenko@linux.intel.com,
-	linux@rasmusvillemoes.dk, minchan@kernel.org, ngupta@vflare.org,
-	akpm@linux-foundation.org, kuznet@ms2.inr.ac.ru,
-	yoshfuji@linux-ipv6.org, pablo@netfilter.org, kadlec@netfilter.org,
-	fw@strlen.de, jmaloy@redhat.com, ying.xue@windriver.com,
-	willy@infradead.org, sashal@kernel.org, ruanjinjie@huawei.com,
-	David.Laight@aculab.com, herve.codina@bootlin.com, Jason@zx2c4.com,
-	keescook@chromium.org, kbusch@kernel.org, bvanassche@acm.org,
-	ndesaulniers@google.com, linux-arm-kernel@lists.infradead.org,
-	linux-kernel@vger.kernel.org, linux-um@lists.infradead.org,
-	linux-edac@vger.kernel.org, amd-gfx@lists.freedesktop.org,
-	dri-devel@lists.freedesktop.org, linux-arm-msm@vger.kernel.org,
-	freedreno@lists.freedesktop.org, linux-hwmon@vger.kernel.org,
-	linux-input@vger.kernel.org, linux-media@vger.kernel.org,
-	netdev@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com,
-	platform-driver-x86@vger.kernel.org, linux-scsi@vger.kernel.org,
-	linux-staging@lists.linux.dev, linux-btrfs@vger.kernel.org,
-	linux-erofs@lists.ozlabs.org, linux-ext4@vger.kernel.org,
-	linux-sparse@vger.kernel.org, linux-mm@kvack.org,
-	netfilter-devel@vger.kernel.org, coreteam@netfilter.org,
-	tipc-discussion@lists.sourceforge.net
-Subject: Re: [PATCH v2 00/27 5.10.y] Backport minmax.h updates from v6.17-rc7
-Message-ID: <20251017160924.GA2728735@ax162>
-References: <20251017090519.46992-1-farbere@amazon.com>
- <2025101704-rumble-chatroom-60b5@gregkh>
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="eNCmbXfc"
+Received: by mail-wm1-f49.google.com with SMTP id 5b1f17b1804b1-47117f92e32so14196475e9.1
+        for <linux-sparse@vger.kernel.org>; Sat, 18 Oct 2025 02:35:19 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1760780118; x=1761384918; darn=vger.kernel.org;
+        h=content-disposition:mime-version:message-id:subject:cc:to:from:date
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=pV4u5UAYrzW+M8wBbriTJAOKzAb394DmWPRSYoZdVSg=;
+        b=eNCmbXfcc4VbRLvlnAmW0NFXqZKu8JlPVCkKwGexOMd2NCHl5R78aEbi9cq3P2M/RI
+         31K8oFXhbZpHhT1tsNoe3SqxBiZugZCUlhHHYsCBUXEfJGQqodhKamS7l7I7Rhqs+BIq
+         98ttbhknWh77mEKUu9wAkMXadLdSk8+11ltWreSUZWy429JcocBMkryuhuNzQEpP/JRb
+         ihC+fY5LxVX3yuznAR6cnVVG2idP8R1LUHWlJW/W/XfPaunMUDJlfuw6C8JboRr4zJIV
+         tb+Lu/8F6OGXACBQgjhYNKWBig3Nm3/06VSR2+TtXcUn5nF92+14wkkmmapGVcmIgQA8
+         Z0MA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1760780118; x=1761384918;
+        h=content-disposition:mime-version:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=pV4u5UAYrzW+M8wBbriTJAOKzAb394DmWPRSYoZdVSg=;
+        b=mYkvdrkMyux0Zl7IOM2ogmvMKXCaO/GVPyTkmxlfqfvrUrGcnbJTkWy1KuUpb5TiP3
+         F3JW/JgJq8+Sgub7EXfEc18Nl/todjV8+6i4O65iuq4BiWMuVG1RMU3k3xeGnoydn6l0
+         f85HkhPO3fiN2dSivTgZkidNvM18To9C6xbVLFEVX27r5F5PZThjIqRTLNrQbfVkTVPK
+         QHk4ge7HeofFL6KZKimFhE6QlycL37AR+D2QiiKCHOYMfniiRLhMJK7d3VRumF4b6qBh
+         e/7f8UPkXFEriiMopbsN8kWVn9/qPbZfNLO+PLZRkO7dFlm55ZJ7VARoYbC8hrYHIPyx
+         G2oA==
+X-Gm-Message-State: AOJu0Ywt7gI1GiIv6B9cWubnVy9mk8r+lEBTDMxodvpK+NVfdvARylEz
+	ivNBSdmb+5L39rafeNCcL1iMMubmE0DUEyQeCrlfqGgfpgFNGmcB4xXqjZmzSSgKBnQfHGWnOZi
+	hadww
+X-Gm-Gg: ASbGncuAVipgo2RzARcDrp2IrhCvdipT1EYw24CtHAKOlcAsXQhoSN03zcXfSfcrJYS
+	uIdw/egZpeqaNlrpittmMYhTtRd67gTe8qoekzoJcX3a1o+vd3ZKc4jdecs/Qht+z9VCgwxYJ4b
+	MXmUUYMEpePVBdOR1uB3H+GV/GrHXx0e/KDHSQMeAKdYkUmm/lTcm3iboBVfHag+1Fa+JyVX9JN
+	NtHlvsmQ8CL3dBrF1slb0xCQh6kzqL77QaFCfH3YP5IKl++ioM6/Urdbvtf7D8HxF3WT9Cwz8ae
+	igukhBdWjmlnJB5F8bf69TH4LnL3fAcVjvO9tFWsvUZwxL2IE0DdAa3nMZmZKRPoNNIyjHeU7S/
+	10nv6aKerhStisy7X0p2OUq7xHIsP6B/sQC59HPR6iW8KbmdkB80YfmgeRYY0cJT5r6Xdwtn3WC
+	bhF55WcQ==
+X-Google-Smtp-Source: AGHT+IF60t/mm8zQjTMWh3sV0Z5Lyd0HPN6n3Q3/JEyUvog0C14Pjczi3w58F92xTYPE0a4QZdjLIA==
+X-Received: by 2002:a05:600c:870b:b0:46e:3709:d88a with SMTP id 5b1f17b1804b1-4711791cb7amr55023245e9.33.1760780117845;
+        Sat, 18 Oct 2025 02:35:17 -0700 (PDT)
+Received: from localhost ([196.207.164.177])
+        by smtp.gmail.com with UTF8SMTPSA id ffacd0b85a97d-427f00b985esm4097116f8f.34.2025.10.18.02.35.16
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 18 Oct 2025 02:35:17 -0700 (PDT)
+Date: Sat, 18 Oct 2025 12:35:13 +0300
+From: Dan Carpenter <dan.carpenter@linaro.org>
+To: Uros Bizjak <ubizjak@gmail.com>
+Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
+Subject: [PATCH] symbol: preserve address space qualifiers with typeof()
+Message-ID: <aPNfUShPJ3zaAeYp@stanley.mountain>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <2025101704-rumble-chatroom-60b5@gregkh>
+X-Mailer: git-send-email haha only kidding
 
-On Fri, Oct 17, 2025 at 05:03:02PM +0200, Greg KH wrote:
-> On Fri, Oct 17, 2025 at 09:04:52AM +0000, Eliav Farber wrote:
-> > This series backports 27 patches to update minmax.h in the 5.10.y
-> > branch, aligning it with v6.17-rc7.
-> > 
-> > The ultimate goal is to synchronize all long-term branches so that they
-> > include the full set of minmax.h changes.
-> > 
-> > - 6.12.y has already been backported; the changes are included in
-> >   v6.12.49.
-> > - 6.6.y has already been backported; the changes are included in
-> >   v6.6.109.
-> > - 6.1.y has already been backported; the changes are currently in the
-> >   6.1-stable tree.
-> > - 5.15.y has already been backported; the changes are currently in the
-> >   5.15-stable tree.
-> 
-> With this series applied, on an arm64 server, building 'allmodconfig', I
-> get the following build error.
-> 
-> Oddly I don't see it on my x86 server, perhaps due to different compiler
-> versions?
-> 
-> Any ideas?
-> 
-> thanks,
-> 
-> greg k-h
-> 
-> ------------------------
-> 
-> In function ‘rt2800_txpower_to_dev’,
->     inlined from ‘rt2800_config_channel’ at ../drivers/net/wireless/ralink/rt2x00/rt2800lib.c:4022:25:
-> ./../include/linux/compiler_types.h:309:45: error: call to ‘__compiletime_assert_1168’ declared with attribute error: clamp() low limit -7 greater than high limit 15
->   309 |         _compiletime_assert(condition, msg, __compiletime_assert_, __COUNTER__)
->       |                                             ^
-> ./../include/linux/compiler_types.h:290:25: note: in definition of macro ‘__compiletime_assert’
->   290 |                         prefix ## suffix();                             \
->       |                         ^~~~~~
-> ./../include/linux/compiler_types.h:309:9: note: in expansion of macro ‘_compiletime_assert’
->   309 |         _compiletime_assert(condition, msg, __compiletime_assert_, __COUNTER__)
->       |         ^~~~~~~~~~~~~~~~~~~
-> ../include/linux/build_bug.h:39:37: note: in expansion of macro ‘compiletime_assert’
->    39 | #define BUILD_BUG_ON_MSG(cond, msg) compiletime_assert(!(cond), msg)
->       |                                     ^~~~~~~~~~~~~~~~~~
-> ../include/linux/minmax.h:188:9: note: in expansion of macro ‘BUILD_BUG_ON_MSG’
->   188 |         BUILD_BUG_ON_MSG(statically_true(ulo > uhi),                            \
->       |         ^~~~~~~~~~~~~~~~
-> ../include/linux/minmax.h:195:9: note: in expansion of macro ‘__clamp_once’
->   195 |         __clamp_once(type, val, lo, hi, __UNIQUE_ID(v_), __UNIQUE_ID(l_), __UNIQUE_ID(h_))
->       |         ^~~~~~~~~~~~
-> ../include/linux/minmax.h:218:36: note: in expansion of macro ‘__careful_clamp’
->   218 | #define clamp_t(type, val, lo, hi) __careful_clamp(type, val, lo, hi)
->       |                                    ^~~~~~~~~~~~~~~
-> ../drivers/net/wireless/ralink/rt2x00/rt2800lib.c:3980:24: note: in expansion of macro ‘clamp_t’
->  3980 |                 return clamp_t(char, txpower, MIN_A_TXPOWER, MAX_A_TXPOWER);
->       |                        ^~~~~~~
+When we're parsing typeof(var) we then preserve the address space
+qualifiers as well.  Otherwise it leads to warnings like this:
 
-Missing commit 3bc753c06dd0 ("kbuild: treat char as always unsigned")?
+"warning: cast removes address space '__seg_gs' of expression"
 
-Cheers,
-Nathan
+Reported-by: Uros Bizjak <ubizjak@gmail.com>
+Signed-off-by: Dan Carpenter <dan.carpenter@linaro.org>
+---
+ symbol.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/symbol.c b/symbol.c
+index 6a39e5487c17..301a6ed225d2 100644
+--- a/symbol.c
++++ b/symbol.c
+@@ -552,6 +552,7 @@ static struct symbol *examine_pointer_type(struct symbol *sym)
+ static struct symbol *examine_typeof_helper(struct symbol *sym, bool qual)
+ {
+ 	struct symbol *base = evaluate_expression(sym->initializer);
++	struct ident *as = base->ctype.as;
+ 	unsigned long mod = 0;
+ 
+ 	if (!base)
+@@ -567,6 +568,8 @@ static struct symbol *examine_typeof_helper(struct symbol *sym, bool qual)
+ 	sym->type = SYM_NODE;
+ 	sym->ctype.modifiers = mod;
+ 	sym->ctype.base_type = base;
++	if (qual)
++		sym->ctype.as = as;
+ 	return examine_node_type(sym);
+ }
+ 
+-- 
+2.51.0
+
