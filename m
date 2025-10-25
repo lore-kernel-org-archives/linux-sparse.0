@@ -1,129 +1,121 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-il1-f170.google.com (mail-il1-f170.google.com [209.85.166.170])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A98F1330B2F
-	for <linux-sparse@vger.kernel.org>; Thu, 23 Oct 2025 14:51:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E2C7025D540
+	for <linux-sparse@vger.kernel.org>; Sat, 25 Oct 2025 21:15:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.166.170
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1761231076; cv=none; b=p0gP/I3Bt+KoEVg6LCNUi0pOFZJ7LHDSa6kfGQ2GnlR5oJIFTvZw2uTGg1yqJRUUI3xAUpRyoAbv6wg4aDqF9T6s7whkDJUkTnTE36RfYC+DzZEr5uv5YGcPOmA9R0Nm8wtIvD9ol3hul6gOepWRHLbvrdbLqNce5Iejg3EmxOE=
+	t=1761426933; cv=none; b=nnn07KuCVS8nWf0MYHLtozq4h1GAUjiXkAS8QvR5MRQd+AIwsjUOuzre4Vi3FzclqjuvaTMROh70CAgeVpFZZLv+Bqz/ZjaqU84kw4055UakGUQxtBxzddfGURy6XLULbnjLcOLZYOcCn6CxAvn4GJ+2oVpZp1A7BHLuIjefO+o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1761231076; c=relaxed/simple;
-	bh=nTCm0E0DZEOw4bT7skogqqCxkYln9uhSiEPtufpsYKY=;
-	h=Message-ID:Date:MIME-Version:From:To:Cc:Subject:Content-Type; b=bH++Qb8iXuD/45BBWDtxNwOzcu4eLXethfhrdSaatejoWWSQQ50OcVP7Kr1hR0AOWrpcWN8E2zVEhEf2C33gEkcl1sWPzW3s5p9dZCoh3jBe1KO02j75zIGTz7jmLFWHCt/dQi310X18PTY9+37/Y6TWM9RgVzLeh72lEOhsTys=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=L/1zdoR0; arc=none smtp.client-ip=205.220.180.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+	s=arc-20240116; t=1761426933; c=relaxed/simple;
+	bh=YIt5W8cIb0X1EX7D3mZzrt6mSsJVraQkyhoeystXHgE=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=Ow1t6ZwTznFaLl/vpgkcNlzVW52z8JXJA0MBdTf0aLXlqTwy1T8DyQaQgChp6n3Py534ii/Coi+jObbjKupBTYJVS7J5GjZRHKu21b3GEQ1KwxNTg2w/y0Si6G5FgHdrQuAU4lj2v32rB42I6rEJuCitiLq47iRXI0C883Qx2H0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=FHf41iPr; arc=none smtp.client-ip=209.85.166.170
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="L/1zdoR0"
-Received: from pps.filterd (m0279871.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 59NE1EwI031877
-	for <linux-sparse@vger.kernel.org>; Thu, 23 Oct 2025 14:51:13 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:content-type:date:from:message-id
-	:mime-version:subject:to; s=qcppdkim1; bh=nTCm0E0DZEOw4bT7skogqq
-	CxkYln9uhSiEPtufpsYKY=; b=L/1zdoR0nzKChbSOBfI11NXGJYfTYc2yVUaXun
-	UsqK4nhA2hk/su05B+O/CtUt+IuKCHaw0Fs11zqaTJp0VZQEKDWCI3NRhf+MWrO6
-	4U7oDpUCJmRX2SNTSeX3WaJyqN6RL867/HtBomi5k+q12KIkB65R//Emg83uoQbw
-	cAJHYWB0thVKBzdUg86d2aEiYoRF7o5d86s6/PTeTHLlToaEkFyFzSaAIU4abcm5
-	D8dN+00UkFLW+is2J2HUr1Ols+MEBe0J9xRHlT+VGEtLrQNHNnb4ahbFIblOhcQJ
-	v7eNhRktlpIrA3FHNXVWyfIhJ4EeJlnutls1i1giLkSQ+YOQ==
-Received: from mail-pf1-f199.google.com (mail-pf1-f199.google.com [209.85.210.199])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 49v2ge8sh8-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT)
-	for <linux-sparse@vger.kernel.org>; Thu, 23 Oct 2025 14:51:13 +0000 (GMT)
-Received: by mail-pf1-f199.google.com with SMTP id d2e1a72fcca58-78108268ea3so1932753b3a.1
-        for <linux-sparse@vger.kernel.org>; Thu, 23 Oct 2025 07:51:13 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="FHf41iPr"
+Received: by mail-il1-f170.google.com with SMTP id e9e14a558f8ab-430d06546d3so29993425ab.3
+        for <linux-sparse@vger.kernel.org>; Sat, 25 Oct 2025 14:15:31 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1761426931; x=1762031731; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=CpxIzQxCEUpK6n9kIBd2SvULfRdnkrX6Efe1lyf+a18=;
+        b=FHf41iPrg5LKnyMiwuj5mIa5bdgnHvLosSlI74TcMXBRBBWQyiD0Yp5YgpNGIyKgFV
+         7+GEyFUgn9g994s1tn9eWUyjvVLox9dIbKsNlQmVbGq/kD3r0jLY1aFLeXtG4GYpepHt
+         NIKESvOFIUGvD1DgFi91D+Y+SWkyDdDxdpZt1U/Zb4N6hI1Up0kUPresSnlf5bA3+cD4
+         pkG2UTMjD9TY10vrR/zqtM39CLDkxCjD5XUqA6r++4+OkP5WDvyeXXYPpUVACqRcWV59
+         KsfNxnQ8MGN/HEunNArofB3KhlYuMwyYt8G1emz4Gbn+/8NkGtOEF9kZFy6DTejI+Dkl
+         Pqaw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1761231072; x=1761835872;
-        h=content-transfer-encoding:subject:cc:to:content-language:from
-         :user-agent:mime-version:date:message-id:x-gm-message-state:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=nTCm0E0DZEOw4bT7skogqqCxkYln9uhSiEPtufpsYKY=;
-        b=sXq4h2wk6yWsHpnSG9LgIlxZzyRTSgeFEOFfL1sO3gw4rNvZN6Gjm60R9GOYFwIAbs
-         dvAg9UHmXZapnoo5M/SejaYYpRMWi+eD7ntBrexSyRrm7bvxOMzL+CoKY68+eJbCK9GW
-         WnNv4uNUkkyD0+ENJegfgxgLmEex1KG+DDqxrJWviUAonOjJRgv3ADHknbEahB4eZOO8
-         Ps5D0SzlNhKGgMvvufeJAhryzriHagjxyalcZo5gRqr7HTJs3Alu9ug3a51wyElOS4Tw
-         k3Ua7M4vNn2K7JR8vO76/Q1s7YCKIL1bBda5sos0A3/fB9vS1eEjdoIEwA9V/0r7QIPm
-         wo9A==
-X-Gm-Message-State: AOJu0YzC46pXB1jJeDB70Hax5R7XawGzZhiAqgjj9IV3ZTTUmvUkr29A
-	znTBVRgUOKU6vLtg2vQt8QY2rUCLIgo0xGtrj8rHks7oHQpEvBx04duhW/0+moNUdxFT4BvmMoA
-	cJ8oz2LEM38Lv9yM9Bc+/KKKKt6SmHj5f1irY2lo1e38Fx+j8EWUlK6DJc1m0YVib9r3/fHK4ya
-	Y=
-X-Gm-Gg: ASbGncvLrRqaGb/YPQ6XrDWqatsOEWra/TIpp0BN2LdM1U4BIV48rxw5i2mQarFqLrc
-	BF+mKru/URxTa5MeEJg+MhGfquGPJbBA/sEAH5KT+c3NMlKX2h8ACMi5wUz7bx0+JEbJGqYnJkt
-	QblOPoUfYgleLTGa2ze9QOCMoL3wibwHwOXBBAeBGZVSA68MKMeo69Eru6PHo4YJtyLG6fCljpp
-	7CEF5+6nfD5cy85U9z0cm+VTvxtuOvxmBYOZl4FsMkhTm/aTaIAGCrWl0m1XyZZRuXtUulcOxBQ
-	M/WWZprRpNKS5jZo+Bf2ppFmAnDjMcz6X0yALNiT4IRxr87Gz/ZRuZnReiW8i6YCii6/CbDRmvn
-	8nw4bIeWu8SNUyAMb2WICx3nJp9fU4qcUfKDk9kxzdB/Wmqc7N8PFG5ri5No=
-X-Received: by 2002:a05:6300:6141:b0:334:98bd:4520 with SMTP id adf61e73a8af0-33b68abc66bmr7983560637.12.1761231071984;
-        Thu, 23 Oct 2025 07:51:11 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEjYteMI/fKDfe3PsFg3JdwCyweVgkVyz6Gs/nneMcRLDPxCcWHB0xwF9Tfecaj6oyZtJxGTQ==
-X-Received: by 2002:a05:6300:6141:b0:334:98bd:4520 with SMTP id adf61e73a8af0-33b68abc66bmr7983519637.12.1761231071435;
-        Thu, 23 Oct 2025 07:51:11 -0700 (PDT)
-Received: from [10.227.110.203] (i-global254.qualcomm.com. [199.106.103.254])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-b6cf4c05165sm2299203a12.13.2025.10.23.07.51.10
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 23 Oct 2025 07:51:11 -0700 (PDT)
-Message-ID: <54b7bc6c-8e30-4924-b700-bcb87b79be5a@oss.qualcomm.com>
-Date: Thu, 23 Oct 2025 07:51:10 -0700
+        d=1e100.net; s=20230601; t=1761426931; x=1762031731;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=CpxIzQxCEUpK6n9kIBd2SvULfRdnkrX6Efe1lyf+a18=;
+        b=QuCv4Ka/7tLmJ0vBRRyp3x6UDkMWK5vRPODwyeIF07USnZpuKaCiwQsXBBXCC8ypmO
+         To4ZAWRn4nnwYArcRNqioH+8Z8e8DQsMI+jRtc27GPuwP2vc7EtTB7fT4flAJjVZ6xIm
+         KQrwU1acJomef6uDUB6lN5mR5R/Bg0GuSRZapszrq4z7xEsWXSM2W10djkkCob4i1bu2
+         /CSsE+P2iJN8kuY+mm8xdPqT5peGW0G5ni+eCWLMn5BuHs74qDZsOOU+15kN1uxyunNv
+         FeUE2jfrSbTyUhV/vUrmxql+ihB9ZSqHH8sUpNSnvp+LZsgDUJKjSu+zT/0zj/5lo1qq
+         hlVg==
+X-Forwarded-Encrypted: i=1; AJvYcCUugjfPLCC+VQ0uBv9mtjjiOlhQwhJqdThiMPHIKLUhHXB52k6IfsAGDzh1EWcVSWlWZzVKiFkQ4Fp2aus=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yyx/f/T9PCqDWTY27/1uTchRlbCXLmQpoxo/0Z2RJMoYR/I5OI7
+	c4sgKwP04Z9YewVEBICCZ0sQzzBHUs8uKB+UzNliVNj71/JjAC+R1Etj
+X-Gm-Gg: ASbGncvFEUhUswi+cjb/469bvjgURKD24zATZXDei4KcBlnuM7uEdaqNLCiGSkHhe11
+	4t5KSnTnR3ZkoiIaArdvxuSBYK5dLamCXSTZ2zd2FbKYJyIP9GAHaS6pWRz88eWk0bbeMzjI9D3
+	3vWmPY0+PNYhORxGvzj8xfAqLX43uwDqr5ElfZBhDTvzX0N5zuno8j7Ly44E6GOktDjarJ1sqXf
+	rCR5EMWPAy19HCk6/Az9FHPjjZfBXaLJ7L9ukZ2BgwE6xAkX+SNNiLa7vQhelN7JJbl8IHJoHye
+	ZDwKeZTeqiJHcNHxgmcBkcwhb5bbWWnbTknrrgotFpEper6w5u6ZvxGD53XP0YXydt3nh1mASfD
+	hcGNn/QXJy5RmTqFg3z6X0kkdLrnzcBbq669FVjdLX6jN+V6c1bJmtsHfT4kAKO1wg3m/L7kiWi
+	Fie/oWQqhiu4yxQApnAZSG3KUgPbKSNo3maPxrfdV1jdA/hQW/+91bP16CNF+hRrF5ynM=
+X-Google-Smtp-Source: AGHT+IGIgS/o8KzcDeeeXUvLcXQ6ivS8Iy0YVOQt9yZ4YnWY3OYklfF/++t7JjAGGT94Zdx/3hrF2w==
+X-Received: by 2002:a92:c263:0:b0:42e:2c30:285b with SMTP id e9e14a558f8ab-431dc1e2690mr114635585ab.20.1761426930905;
+        Sat, 25 Oct 2025 14:15:30 -0700 (PDT)
+Received: from godzilla.raven-morpho.ts.net (c-98-38-17-99.hsd1.co.comcast.net. [98.38.17.99])
+        by smtp.googlemail.com with ESMTPSA id 8926c6da1cb9f-5aea7ce584bsm1212138173.27.2025.10.25.14.15.29
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 25 Oct 2025 14:15:30 -0700 (PDT)
+From: Jim Cromie <jim.cromie@gmail.com>
+To: linux-kernel@vger.kernel.org
+Cc: akpm@linuxfoundation.org,
+	Jim Cromie <jim.cromie@gmail.com>,
+	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
+	linux-sparse@vger.kernel.org (open list:SPARSE CHECKER)
+Subject: [PATCH 3/3] compiler.h: add __chkp_no_side_effects() empty hint/assertion macro
+Date: Sat, 25 Oct 2025 15:15:18 -0600
+Message-ID: <20251025211519.1616439-4-jim.cromie@gmail.com>
+X-Mailer: git-send-email 2.51.0
+In-Reply-To: <20251025211519.1616439-1-jim.cromie@gmail.com>
+References: <20251025211519.1616439-1-jim.cromie@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-From: Jeff Johnson <jeff.johnson@oss.qualcomm.com>
-Content-Language: en-US
-To: linux-sparse@vger.kernel.org
-Cc: linux-kernel <linux-kernel@vger.kernel.org>
-Subject: Will sparse ever work correctly with guard?
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUxMDE4MDAyMCBTYWx0ZWRfX7OjYAOaNVjZN
- b4z45MY3XaS030+0cORmmkkxI9CU5ebROy2SBd1lOevCnTENg57ONsDjoTytbCnFAqYSTOZd4bQ
- /YBhgyFyj7/lGBTkSR6tW0uhKQdsxJ3JgSdRNgnuVJCEXSEDG8sXLF1msnte2PIf/RL/CU3lxid
- VfdQk2CcY87RfuHvjS364Ohal1gjDPDIKJrF67ADqQUfFxH+dQePAaJtlEyJhBAOvGSbdcbRPPW
- qP89iFBhUMvZNwl1LZ/c75c9clwamtohvoH1KDLJhMaxA+sdXqDM7nm96X5BAbth31GZd75S0fj
- gUE5VJ5XMThcfzqDbH25Ki0vaU1uIhI57762VE6H02mT87E8vGMa6u4ZpsfrwlX3RHP9A0g2BhM
- zK3o2bdvE0Z6QXBEFdLsJslr3MKWaw==
-X-Authority-Analysis: v=2.4 cv=KqFAGGWN c=1 sm=1 tr=0 ts=68fa40e1 cx=c_pps
- a=WW5sKcV1LcKqjgzy2JUPuA==:117 a=JYp8KDb2vCoCEuGobkYCKw==:17
- a=IkcTkHD0fZMA:10 a=x6icFKpwvdMA:10 a=VkNPw1HP01LnGYTKEx00:22
- a=VwQbUJbxAAAA:8 a=1XWaLZrsAAAA:8 a=pGLkceISAAAA:8 a=3lU2tRPfHO6n-GZdqYUA:9
- a=QEXdDO2ut3YA:10 a=OpyuDcXvxspvyRM73sMx:22
-X-Proofpoint-GUID: qgL-B-ghIVianv79vUWQxAb4g61cN84t
-X-Proofpoint-ORIG-GUID: qgL-B-ghIVianv79vUWQxAb4g61cN84t
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.9,FMLib:17.12.80.40
- definitions=2025-10-23_01,2025-10-22_01,2025-03-28_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- bulkscore=0 clxscore=1011 phishscore=0 malwarescore=0 impostorscore=0
- lowpriorityscore=0 adultscore=0 priorityscore=1501 spamscore=0 suspectscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.19.0-2510020000 definitions=main-2510180020
+Content-Transfer-Encoding: 8bit
 
-In code I maintain there are places where we are now trying to use guard to
-cleanup locks. But 'make W=1 C=1' is complaining:
+cpp has no intrinsic protection against macro arg side-effects, so to
+compensate, checkpatch is paranoid:
 
-warning: context imbalance in '<function>' - wrong count at exit
+  CHECK: Macro argument reuse '_var' - possible side-effects?
 
-And lore shows this is not a new complaint:
-[PATCH v2] parse: handle __cleanup__ attribute
-https://lore.kernel.org/all/Zag2fYsyJDtDR7a6@google.com/
+Allow an author to suppress these warnings on _var by adding
+'__chkp_no_side_effects(_var)' to the body of macros which trigger
+that warning.  This may reduce blowouts in CI pipelines.
 
-For some reason scoped_guard doesn't have this issue:
-Re: [PATCH v1 3/3] cgroup: add lock guard support for others
-https://lore.kernel.org/all/722C5824-0381-4E43-B8AE-AE8503CFF51E@gmail.com/
+Signed-off-by: Jim Cromie <jim.cromie@gmail.com>
+---
+ include/linux/compiler.h | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
 
-But using scoped_guard then requires an additional level of indentation in the
-code.
+diff --git a/include/linux/compiler.h b/include/linux/compiler.h
+index 64ff73c533e5..96f6bfbd4088 100644
+--- a/include/linux/compiler.h
++++ b/include/linux/compiler.h
+@@ -379,6 +379,18 @@ static inline void *offset_to_ptr(const int *off)
+  */
+ #define prevent_tail_call_optimization()	mb()
+ 
++/*
++ * tell checkpatch --strict that you know the named args (a subset of
++ * the containing macro's args) are safe for multiple expansions.
++ *
++ * Prefer ({ typeof ..}) or do{}while(0) when they work.  They would
++ * not work on module_param_named(name, value, type, perm), or on a
++ * locally useful "for_simplicity()" macro.
++ *
++ * NB: use at top of macro body, omit trailing semicolon.
++ */
++#define __chkp_no_side_effects(...)  /* checkpatch "annotation" helper */
++
+ #include <asm/rwonce.h>
+ 
+ #endif /* __LINUX_COMPILER_H */
+-- 
+2.51.0
 
-So I'm wondering if there is any chance that sparse will be able to handle
-guard in the same manner as scoped_guard?
-
-The code I maintain currently has no sparse issues, so if this cannot be fixed
-then I'll have to decide whether to use scoped_guard (and indent the body of
-those functions) or just keep the traditional "goto cleanup" code.
-
-/jeff
