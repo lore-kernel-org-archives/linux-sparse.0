@@ -1,103 +1,118 @@
-Received: from mail-ej1-f47.google.com (mail-ej1-f47.google.com [209.85.218.47])
+Received: from mail-wr1-f45.google.com (mail-wr1-f45.google.com [209.85.221.45])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 579FAEACE
-	for <linux-sparse@vger.kernel.org>; Sun, 26 Oct 2025 00:10:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.47
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 678F61F4C8E
+	for <linux-sparse@vger.kernel.org>; Tue, 28 Oct 2025 13:06:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.45
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1761437420; cv=none; b=qHQX2Az9cFMxr673/hJafzjCV3zn1Qc206YqzvzXtV2CBvjQ8Y8VML6/OJQwQPE7zYZvbOndipBV04Uv4dZq9TSFKL58dD6+rmZvBJuZKGQhpd7JEhos/D7qneo7DhZUn7X7VE8WrMUu5/Z/NL2biy4iiM8eCjS14xdQgOCo/sA=
+	t=1761656767; cv=none; b=c9mMaKCZz9OySkRuPWegiyPSZSlmOUsLtqKP7dYkHSk8PtQV39nkzqO+vzjDUWjnPsITMyrroQLNDZN8+nhgcKYqv0oOw9jxCIZu4LTSi+g4qEfAy6ek/i2wg1uGTU16WeY273TNp+q16id3aXcGniv67BCUOZGRXpmXAgjIX+g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1761437420; c=relaxed/simple;
-	bh=3L2Cn0VQ9BSiyQpq+zxAO3fbOHbU9xIDiRXeuCnK2Vk=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=DSdIqUSYrgWp74xrhSFzUu1Y6jreBaoN+0zYk/NJLzajrpE2/MaEoncSmn3rpWXUUaeqm4oWzCFBW1conb87TLOUpzhxcRkr93a/C1D4hD7ZescJpNlwLDP0jTFxSMBafUVKRCyqrSJ5YjJAfjWiMmRKZmxb8mElTEan6rqK8hU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org; spf=pass smtp.mailfrom=linuxfoundation.org; dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b=FrHoRY/3; arc=none smtp.client-ip=209.85.218.47
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linuxfoundation.org
+	s=arc-20240116; t=1761656767; c=relaxed/simple;
+	bh=pIYe+DRRSe9p3Rc2Xnth6sCFfDDjHkwbG2H0cnXAvaU=;
+	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
+	 Content-Disposition; b=axq1KXN6dnDvKUTxW7k4peQU/Ocs94CnFS8lJB2bZlNc4xcH3S4YezeZPdF1wE+rJAokDwS0IlOZmMAn4/z7A63GrSrOO6Iamc0+ls/76qpB/253hAT7Zlb44V+qM3GUSIwPV+e6karieWYd+lZOVO0kVxKIN33V0xwS0ucjw4o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=YPfJPyUx; arc=none smtp.client-ip=209.85.221.45
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="FrHoRY/3"
-Received: by mail-ej1-f47.google.com with SMTP id a640c23a62f3a-b4736e043f9so644245166b.0
-        for <linux-sparse@vger.kernel.org>; Sat, 25 Oct 2025 17:10:18 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="YPfJPyUx"
+Received: by mail-wr1-f45.google.com with SMTP id ffacd0b85a97d-3ecdf2b1751so4132576f8f.0
+        for <linux-sparse@vger.kernel.org>; Tue, 28 Oct 2025 06:06:05 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linux-foundation.org; s=google; t=1761437416; x=1762042216; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=KHT88HQYbjysn9AJ2rZNaLUIGndxQt+sWOeqUNyjpSk=;
-        b=FrHoRY/3AkT/G2dohthlXNuEQ59OF5V8L+r6rBlAAcOG+fwjOoCXftf5a09nhcezWY
-         E3VT/nmOm5FOd5+HDrRULhxACce4zfIREFI49dTSxY8OHtnkSVjXUaw2L0f2KY4A6PZo
-         aFIpJPABqrH0hZ/bjdIS4rADBSGtlnALhvmNk=
+        d=linaro.org; s=google; t=1761656763; x=1762261563; darn=vger.kernel.org;
+        h=content-disposition:mime-version:message-id:subject:cc:to:from:date
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=/PcpfQ+wYChhPhMa5A96WtVYws88AgVqFTGAAhbmkNM=;
+        b=YPfJPyUxiXVvpfN/plObFsCxu8Xolwp9vDCL74w0PXvitcTD/XtqX4vO5ZFdcGYP34
+         zQF0ulzCZUqQP5gz2+G3dyLSWYbvv2SVldjuSzmcER5tLr0WXFMn+PYMqNjeBqWtpp5e
+         O2p+pOu/MQr3CNYer7FeDcqexuu7Y8ZozUOPe6I1B0mIxPAcXGcN3WKL21bhKzGFODw/
+         rBCaysvRBLEoi6XsiDSibsPISk+Dx4WmRpMut0zCo8nRtSkYQirOCdH5E6BZvsrNQdww
+         2m70Q7G49sE5++wKxBR1v319GOp0DH7MfraVke6K8/UpcdCmKLbFfe2X+vf6p0A39YLY
+         rvUA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1761437416; x=1762042216;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=KHT88HQYbjysn9AJ2rZNaLUIGndxQt+sWOeqUNyjpSk=;
-        b=xH16iIrz8h2qACC49s/3yYHBM4CW+mc1MxKPOMvcGBevuqcjpiqzH5OgLWBv9KKO0b
-         Ov+iILhaCLNBi/fF6OEOZtX4bBdH0SC1yyy1aEoaMkXoknaIdnADX1GJ4qQhBI8faS7e
-         wCCjy7lkcOimPtyKA2UfepJy/kzppJ68LwviAkEJCdJ43P6kl1yrMSiyOefS+03UQeP0
-         ilgFBfM9rEg/lGk0EewGCzjGn1tb2ByoNEuPcut9PsI/gjLGT25qc++T3YkQo+/pzqzf
-         N5JeDRjL4+IMjeS06b4GFum+pmU1eCk2fBed11ksiaAObSuGPuDNUHehi8cLkhIspb2y
-         sx7A==
-X-Forwarded-Encrypted: i=1; AJvYcCXtX2IkmthOUWxvjoiG8NpwAgmBFNOoVSsxFMzV8HWfaPero9pLUNP6IvJs/fOjw0eohWtfhkP17Ksm4Qo=@vger.kernel.org
-X-Gm-Message-State: AOJu0Ywsy7auQ4DzOAwNKgLyxVvf6lJIO9Wlv91LU48eWtBzeV6aP5O7
-	oAFCV024veKyEzkZLFpDuPRpLily/LioCLiHfe8G5t1sFqSWWs8Fn01nxHCGXdgQ4yXdwfoZAvv
-	F8geagw4=
-X-Gm-Gg: ASbGncuxiQ5kUoTGdXV+kMxX7KmXDGPXYvcyfQd+yGKzZHqU77AkBbhIZ/sqmaxU6RI
-	hUduZQ6AKStIj/r6OXJkg6cBzc5zy6p7r3TmewNjoc7WT+t7A7/C/vuheSdbBbHA7vv1RNZXfaj
-	YC9Ri83cw3jOYoWmPF86qJHy/GejBc+WOrL5IxH68U2jB3DjH3pRfdQ8TwX2QEgpaii5AAqGM2i
-	09fILzuI8om/sTyTcDiMPp/RlcOtCmUiGVW312YsrVWB6/2CxXfA7KhkTTrvlR+dqsEEhj8Bs4g
-	NIcLVabY7hbbqQDjG9c4vg/IjhMhFs5HTtGz1MvSJ2zHHvEDw34IfYems38H0UXLzemhMdxbIzv
-	LpPQ6kdznPhgaDhGdMSeUJDDJlBYC6FJ2+SiGLTy+zOeE9QCT+P+cvYoReRFtOjlC6LdZQVHWuN
-	3CbveuRoBon+sF9sp3fynwZy0BHJdVkJ/U7TbueunA8lR/e0E71g113aUYvvt+
-X-Google-Smtp-Source: AGHT+IFlWa1MD44//3N9Hds4otaFAISalubR6WNVZoIkQ211lFDhnFoCYbuueUiTQJWzSY5aQvfCVg==
-X-Received: by 2002:a17:907:6d0f:b0:b0c:b51b:81f6 with SMTP id a640c23a62f3a-b647423c403mr3995225966b.43.1761437416369;
-        Sat, 25 Oct 2025 17:10:16 -0700 (PDT)
-Received: from mail-ed1-f46.google.com (mail-ed1-f46.google.com. [209.85.208.46])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-b6d853c549fsm321597266b.37.2025.10.25.17.10.15
-        for <linux-sparse@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sat, 25 Oct 2025 17:10:15 -0700 (PDT)
-Received: by mail-ed1-f46.google.com with SMTP id 4fb4d7f45d1cf-63e076e24f2so7085365a12.3
-        for <linux-sparse@vger.kernel.org>; Sat, 25 Oct 2025 17:10:15 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AJvYcCUpBs07muXbWw/1u3JtM4IBmI/nC+yQdnKv5QfDJh65uJg54RLoY2rEZFTGB+uSrOyn89JZbUhVcV4Qd4k=@vger.kernel.org
-X-Received: by 2002:a05:6402:a188:b0:626:8e29:8d42 with SMTP id
- 4fb4d7f45d1cf-63c1f6d9471mr20649012a12.37.1761437415485; Sat, 25 Oct 2025
- 17:10:15 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1761656763; x=1762261563;
+        h=content-disposition:mime-version:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=/PcpfQ+wYChhPhMa5A96WtVYws88AgVqFTGAAhbmkNM=;
+        b=DldeK4XNbGEfD1EtpWafCi8sRbAsGZ/c7paPCKv/V4rcuti4NXZmqO84ZqZtH4KBg3
+         +RgmoET0/m+vmCT0EdjE/AKc6cQzG7lFdOKVPfU5ykY9SqbSkNIYGN788JdCntj9LLbp
+         5f1jNYPxv7LmI1c0j54fRy0yrt9bNmOwNnDZ2t6cpsDHlyAfbeU8SkFSlh7t556Yq4Dh
+         UJtV85dEjTIK8q9NmooqxTVrjdf+zDABNXrSS6AgWyI4dgeHwo3e/YMWhD9rHdzkkNWV
+         mt2DUDduXlvAVW+dDEqlUcXe5r6pcfU+2oloWPj1fZ3Xqy57C11W+hHv7tqyrWDPZJJL
+         E4LA==
+X-Gm-Message-State: AOJu0YyHXRLrNb8hbiR1/jczWmPos7nNso69D0XVghZQEWHRV/VRCGxc
+	iDyiz6oTnscLUZdzh6Yuzf1JS5xDbCFbcvQL8E4C9ZTcJVv42RKZXjuchfcDP34l5GU=
+X-Gm-Gg: ASbGncvxGjacIcQcYBXg6f1S2WoZqDHpGy9dgopT6WeA+taWaiKcAReHkpUGN3jdr1S
+	zEz7Z2m89d9IzDXNUVxRdaGk6nynYNES8WVvJKG8+OJ74r2t8L5yRDj1hQmGzovFisZbSeIOtMc
+	++W4sT2OlRxUWJZafIfBqhZbFCrX9SVpIkuKlun5RYnau8AzWYbPWUycGFM/Y+8Daj/Wc9IhQ2r
+	JfnECsPTOx9hC0QHT7cEY7urMJjEeVtlOaF18JhjXgB2yBnDN2lkECYrtQbzL9IiahMh/Dw4mWj
+	j/feMMvdtCIcit8CVQhaZJrams25FFFnVc31QaTO0bua0eFU6LIpWcnkSfR5aTI1YOuEWi1xWXM
+	V1qqkbt501GE7bkVBCczYpMT34uau4c0QYWAmi3UsIfMpZRz3ub6lqgvGVo2RGSWZBabBcgZ7Yd
+	XVqYve41zWOjJChr/Z
+X-Google-Smtp-Source: AGHT+IFKgfLRbyuCQgcxt9mw/J60JsjKf8Fc9oHaIa6hk49SRfVpCJ1F2C+KMMCJHOzCvgIf2fXexw==
+X-Received: by 2002:a05:6000:220b:b0:3ff:d5c5:6b01 with SMTP id ffacd0b85a97d-429a7e59e35mr2874598f8f.19.1761656763212;
+        Tue, 28 Oct 2025 06:06:03 -0700 (PDT)
+Received: from localhost ([196.207.164.177])
+        by smtp.gmail.com with UTF8SMTPSA id ffacd0b85a97d-429952d514asm20381502f8f.23.2025.10.28.06.06.02
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 28 Oct 2025 06:06:02 -0700 (PDT)
+Date: Tue, 28 Oct 2025 16:05:59 +0300
+From: Dan Carpenter <dan.carpenter@linaro.org>
+To: Uros Bizjak <ubizjak@gmail.com>, Chris Li <sparse@chrisli.org>
+Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
+Subject: [PATCH v2] symbol: preserve address space qualifiers with typeof()
+Message-ID: <aQC_tw-8gLpf00yH@stanley.mountain>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20251025211519.1616439-1-jim.cromie@gmail.com> <20251025211519.1616439-4-jim.cromie@gmail.com>
-In-Reply-To: <20251025211519.1616439-4-jim.cromie@gmail.com>
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Date: Sat, 25 Oct 2025 17:09:59 -0700
-X-Gmail-Original-Message-ID: <CAHk-=wiwpTUr8keTinnPU8kTN9dpYgDtwM4wONRF_j=1gvo3MQ@mail.gmail.com>
-X-Gm-Features: AWmQ_bkB-wuhFoSsfx1tBl8BEy4xJ2x_b512DolaOIzwuqOsKKnndLl-pSrsTks
-Message-ID: <CAHk-=wiwpTUr8keTinnPU8kTN9dpYgDtwM4wONRF_j=1gvo3MQ@mail.gmail.com>
-Subject: Re: [PATCH 3/3] compiler.h: add __chkp_no_side_effects() empty
- hint/assertion macro
-To: Jim Cromie <jim.cromie@gmail.com>
-Cc: linux-kernel@vger.kernel.org, akpm@linuxfoundation.org, 
-	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, 
-	"open list:SPARSE CHECKER" <linux-sparse@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+X-Mailer: git-send-email haha only kidding
 
-On Sat, 25 Oct 2025 at 14:15, Jim Cromie <jim.cromie@gmail.com> wrote:
->
-> Allow an author to suppress these warnings on _var by adding
-> '__chkp_no_side_effects(_var)' to the body of macros which trigger
-> that warning.  This may reduce blowouts in CI pipelines.
+When we're parsing typeof(var) we then preserve the address space
+qualifiers as well.  Otherwise it leads to warnings like this:
 
-How about just not doing that checkpatch thing at all if it causes problems?
+"warning: cast removes address space '__seg_gs' of expression"
 
-Seriously, I think checkpatch often causes more problems than it
-fixes. If it then causes us to write even uglier macros - and it's not
-like our macros are pretty in general - it really is just causing
-pain.
+Reported-by: Uros Bizjak <ubizjak@gmail.com>
+Signed-off-by: Dan Carpenter <dan.carpenter@linaro.org>
+---
+v2: Fix a NULL dereference because "base" can be NULL.  Sorry for not
+running the validation/ tests...  :(
 
-I think we should cut down checkpatch to things that are obvious and
-real issues. Not things that then cause people to make code worse.
+ symbol.c | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
 
-                 Linus
+diff --git a/symbol.c b/symbol.c
+index 7060acb666d9..a42289226650 100644
+--- a/symbol.c
++++ b/symbol.c
+@@ -544,9 +544,12 @@ static struct symbol *examine_pointer_type(struct symbol *sym)
+ static struct symbol *examine_typeof_helper(struct symbol *sym, bool qual)
+ {
+ 	struct symbol *base = evaluate_expression(sym->initializer);
++	struct ident *as = NULL;
+ 	unsigned long mod = 0;
+ 
+-	if (!base)
++	if (base)
++		as = base->ctype.as;
++	else
+ 		base = &bad_ctype;
+ 	if (base->type == SYM_NODE) {
+ 		mod |= base->ctype.modifiers & MOD_TYPEOF;
+@@ -559,6 +562,8 @@ static struct symbol *examine_typeof_helper(struct symbol *sym, bool qual)
+ 	sym->type = SYM_NODE;
+ 	sym->ctype.modifiers = mod;
+ 	sym->ctype.base_type = base;
++	if (qual)
++		sym->ctype.as = as;
+ 	return examine_node_type(sym);
+ }
+ 
+-- 
+2.51.0
+
