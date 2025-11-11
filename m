@@ -1,79 +1,142 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.10])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DF93823535E
-	for <linux-sparse@vger.kernel.org>; Tue, 28 Oct 2025 14:27:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.10
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6396B32825C;
+	Tue, 11 Nov 2025 13:14:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1761661679; cv=none; b=ILaGN1WpuKCRdb4/0L4+pcGHLl8eSkU/Mv3xo4yWM1rv+9Tde0xEZHr5N4qeZVyflJWIblSDO+riOBhRSTgPWfh92SP1Jdz9VBgbVPz1/N7naA/uJApMvRMIIjuBmY16uw1e6VZXCCzVzIETpuDnLXTZw5Lok1qKjvogow3s7kk=
+	t=1762866847; cv=none; b=PMgS7RIKFRhMM3szI8we3ZP60R7GFJEcSg0vSHj1FW43Dpyan1m4ET7n3kpIh4Q+kystp1C1atTi9nllGxFL2aRwLH3ulBYJUrCEThSV8wt+UGnkmHVi8bPxYZJQq4jBucZLP/eeLpxRjENth3QUYbj4vXv7EIHwbz4qzI7Ahoo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1761661679; c=relaxed/simple;
-	bh=ZPdWymDxDKLpuG+bdnKFlGkWCrWPpLp7gTFSJ28qHlc=;
-	h=Date:From:To:Subject:Message-ID:MIME-Version:Content-Type; b=qTWuzKH8fPT8rBEw8k51dXC8Wzkz8NRi8SqtBP3x8iy7yvCDl2OeC9vjjrK84KRmZ7Z4rPx/yWPlKE12kqxa6zitTTjc586cSDHMzzihdtW2li2jOSKgTvSTosswljDdynEDrkYGPAgh8uxlmGRq38t04rDXAoGKd+lcfAuMt3Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=pass smtp.mailfrom=linux.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=BzMigk13; arc=none smtp.client-ip=198.175.65.10
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.intel.com
+	s=arc-20240116; t=1762866847; c=relaxed/simple;
+	bh=lOPcvJvsBokQlbrkZq0019mQ3NXhOv5Cd9rNI69A+t8=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=F/KxpH2x3YSKjs17cYfBsK5/WOIgebkEMV7A50wwFXF/vrWqktYxqIROpMr62qaXArUJ+75PpEWcg8uekLuGdMTkhqrxHBjPSou7qlTNpEucmoEbKoHRQPh7l1hc8EMc0hsPGysw30fBEtnwDKUriJF5jVYI/BZKkcMQwJ6f/LY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=UeczfTSX; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="BzMigk13"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1761661678; x=1793197678;
-  h=date:from:to:subject:message-id:mime-version;
-  bh=ZPdWymDxDKLpuG+bdnKFlGkWCrWPpLp7gTFSJ28qHlc=;
-  b=BzMigk13L1evGFHHvaa3B4Uo8csKRus2JTMnn2VbhGhZzpXVJPAGAfmg
-   YuYEvdXIrinv7S4KhUqw0HgsQTXkdTcUc0bp6kfdsQBxY/wU4PST6p5T2
-   StGHFnflciXA16Pk9iDyk9WuNpN4+PcC7ApbmTINrxmrCsVKmWXvMnN7w
-   RNqKiD3W4Bl6wxuZk8yRfjXRrPBMO2Jzxkb2t+5qLD+6OFgVmcHOJvawu
-   vVB8HOz0MbfXBDXJW+fo5/mnqNyqCyOfxZalHReiou5XijdJMOQYouwXF
-   g+67O3xMUMt4tnjQFZRi/TN1vD2gP62NqjqTzy2RqcPa8to0eq3GIvwSX
-   g==;
-X-CSE-ConnectionGUID: ElKgUmuWQBCqDBR8dvfp1g==
-X-CSE-MsgGUID: jkeo2cxkTF6J2DcWm2ohfA==
-X-IronPort-AV: E=McAfee;i="6800,10657,11586"; a="81184293"
-X-IronPort-AV: E=Sophos;i="6.19,261,1754982000"; 
-   d="scan'208";a="81184293"
-Received: from orviesa001.jf.intel.com ([10.64.159.141])
-  by orvoesa102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 28 Oct 2025 07:27:58 -0700
-X-CSE-ConnectionGUID: adXhdiIqRvKbhu75fxAzkw==
-X-CSE-MsgGUID: 1d7oqPtPQoaXOJ/qrWq/SA==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.19,261,1754982000"; 
-   d="scan'208";a="222570910"
-Received: from belyakov-mobl.ccr.corp.intel.com (HELO ubuntu) ([10.94.251.235])
-  by smtpauth.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 28 Oct 2025 07:27:57 -0700
-Date: Tue, 28 Oct 2025 15:26:18 +0100 (CET)
-From: Guennadi Liakhovetski <guennadi.liakhovetski@linux.intel.com>
-To: linux-sparse@vger.kernel.org
-Subject: [bug] false positive "invalid initializer"
-Message-ID: <6dc61f89-b00c-3013-ef1c-9566f18e1592@linux.intel.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="UeczfTSX"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8E11FC116B1;
+	Tue, 11 Nov 2025 13:14:06 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1762866846;
+	bh=lOPcvJvsBokQlbrkZq0019mQ3NXhOv5Cd9rNI69A+t8=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=UeczfTSXMaWKnvtU2J+REgCmggMw0575oBUUaVAl8kCS6OANmvae9EAI5OTxgz+UK
+	 ipY24Y5KHd6uewJHOYC6uS4Y0KEMxCiYjJIcBNwOeZN+5K0ttQlzCyfgqeYivTb12t
+	 0Ukcy9oQ5iIgGzzY8tnuXpXa7UUdip7cwpeKEVjgKCqslQEwNiSZaNDZXztrS4DFYA
+	 pNkpio9hi796rpZpj65248e4/kyGiK4u3FNIT11Nt4crRh+hQik+loezEPtCcW/OOz
+	 YRyyNrZ7wd+mEq4SvQP5+tGBurJPngegleECdiSZsoFPaY/RkjzX9Z0fpYkU9Jmccu
+	 InOjZhRCap/2g==
+Date: Tue, 11 Nov 2025 14:14:04 +0100
+From: Daniel Gomez <da.gomez@kernel.org>
+To: Kees Cook <kees@kernel.org>, Ricardo Ribalda <ribalda@chromium.org>
+Cc: Dan Carpenter <dan.carpenter@linaro.org>, linux-media@vger.kernel.org, 
+	Patchwork Integration <patchwork@media-ci.org>, linux-modules@vger.kernel.org, linux-sparse@vger.kernel.org
+Subject: Re: [v2,0/3] module: Add compile-time check for embedded NUL
+ characters
+Message-ID: <ivqpin3idio22q3ccqvkvvz66yezcd7c7b2q3hgqzdp2xxhf26@w6wsmifvsev5>
+References: <20251010030348.it.784-kees@kernel.org>
+ <68ed624c.050a0220.3ba739.64ea@mx.google.com>
+ <D1CBCBE2-3A54-410A-B15C-F1C621F9F56B@kernel.org>
+ <CANiDSCu6xZAuSF5_M-4BMRc52hbSh_1QfDQqaeGR4iD5fdQjQg@mail.gmail.com>
+ <202510141344.E0ABCD2C7@keescook>
+ <CANiDSCsBAq3Yx4ybarUb_1NkQ-bvfXvWqb-DfqXatkiYJFZWiQ@mail.gmail.com>
+ <202510201127.D97BCF2@keescook>
+ <CANiDSCtbrM4Fg_p56EdV09ts_j8HnMCc1hGH31-BZvv03Z0DjQ@mail.gmail.com>
+ <202510201146.F12EA92@keescook>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; format=flowed; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <202510201146.F12EA92@keescook>
 
-Hi
+On Mon, Oct 20, 2025 at 11:51:05AM -0700, Kees Cook wrote:
+> On Mon, Oct 20, 2025 at 08:35:53PM +0200, Ricardo Ribalda wrote:
+> > Hi Kees
+> > 
+> > On Mon, 20 Oct 2025 at 20:29, Kees Cook <kees@kernel.org> wrote:
+> > >
+> > > On Wed, Oct 15, 2025 at 09:33:40AM +0200, Ricardo Ribalda wrote:
+> > > > Hi Dan
+> > > >
+> > > > On Tue, 14 Oct 2025 at 22:45, Kees Cook <kees@kernel.org> wrote:
+> > > > >
+> > > > > On Tue, Oct 14, 2025 at 08:24:00AM +0200, Ricardo Ribalda wrote:
+> > > > > > Hi Kees
+> > > > > >
+> > > > > > Thanks for the report.
+> > > > > >
+> > > > > >
+> > > > > > On Tue, 14 Oct 2025 at 07:41, Kees Cook <kees@kernel.org> wrote:
+> > > > > > >
+> > > > > > >
+> > > > > > >
+> > > > > > > On October 13, 2025 1:34:20 PM PDT, Patchwork Integration <patchwork@media-ci.org> wrote:
+> > > > > > > >Dear Kees Cook:
+> > > > > > > >
+> > > > > > > >Thanks for your patches! Unfortunately the Media CI robot detected some
+> > > > > > > >issues:
+> > > > > > > >
+> > > > > > > ># Test static:test-smatch
+> > > > > > > >
+> > > > > > > >drivers/media/usb/usbtv/usbtv-core.c:157:1: error: bad constant expression
+> > > > > > >
+> > > > > > > Where can I find what this test actually does?
+> > > > > > >
+> > > > > > > >For more details, check the full report at:
+> > > > > > > >https://linux-media.pages.freedesktop.org/-/users/patchwork/-/jobs/85913402/artifacts/report.htm .
+> > > > > > >
+> > > > > > > This webserver appears to be misconfigured to send compressed output without the right headers? I can't actually view this URL.
+> > > > > >
+> > > > > > I will follow-up with fdo maintainers to figure out what happened.
+> > > > > > there. On the meantime you can use these url that seems to work:
+> > > > > > https://linux-media.pages.freedesktop.org/-/users/patchwork/-/jobs/85913402/artifacts/report.txt
+> > > > > > https://gitlab.freedesktop.org/linux-media/users/patchwork/-/jobs/85913398
+> > > > > >
+> > > > > > Basically sparse/smatch do not seem to understand the constant.
+> > > > >
+> > > > > Yeah, I managed to find the actual scripts that are run for the
+> > > > > static-sparse/smatch tests. It looks like those tools aren't correctly
+> > > > > handling string literals for __builtin_strlen(), which is a constant for
+> > > > > constant arguments.
+> > > > >
+> > > > > So, that's a C parsing bug in those tools (GCC and Clang are fine).
+> > > >
+> > > > Could you take a look at this patch:
+> > > > https://patchwork.linuxtv.org/project/linux-media/patch/20251010030610.3032147-3-kees@kernel.org/
+> > > >
+> > > > Seems that sparse/smatch are not very happy about __builtin_strlen()
+> > > >
+> > > > Could you fix support for __builtin_strlen() in your tool?
+> > > >
+> > > > Once Kees lands his patch it will break all the CIs using
+> > > > sparse/smatch, including media-ci.
+> > > >
+> > > > Eg:
+> > > >
+> > > > drivers/media/pci/zoran/zr36060.c:33:1: error: bad constant expression
+> > > > drivers/media/usb/pvrusb2/pvrusb2-dvb.c:19:1: error: bad constant expression
+> > > > drivers/media/usb/pvrusb2/pvrusb2-dvb.c:19:1: error: bad constant expression
+> > >
+> > > We've waited a decade to get the embedded-NUL check into the modinfo
+> > > macros, so I'm happy to wait until we can get the CI tooling updated.
+> > 
+> > For media-ci. It will probably be after 6.19rc1
+> > 
+> > Basically, when
+> > https://lore.kernel.org/linux-sparse/CACePvbVG2KrGQq4cNKV=wbO5h=jp3M0RO1SdfX8kV4OukjPG8A@mail.gmail.com/T/#t
+> > lands in media-committers.
+> 
+> That's external to Linux, though; it's a patch for sparse and smatch. How
+> often does the CI rebuild sparse and smatch?
+> 
+> > How did you plan to land this series? via which tree?
+> 
+> I assume it would go either via the modules tree or the hardening tree.
+> (Again, no rush.)
 
-Using this example
-
-void foo(void)
-{
- 	char c[] = "say";
- 	__auto_type x = c;
- 	const __typeof__(x) y = x;
-
- 	(void)y;
-}
-
-results in
-
-$ sparse -v -nostdinc -o ../l.o -c ../l.c
-../l.c:4:25: error: invalid initializer
-../l.c:5:33: error: invalid initializer
-
-which appears to be a bug to me. Any fix suggestions would be appreciated.
-
-Thanks
-Guennadi
+FYI, the patch is applied to modules-next, so I was planning to send it
+for v6.19-rc1.
