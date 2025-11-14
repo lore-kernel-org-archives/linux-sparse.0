@@ -1,117 +1,72 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7B31C2C0275;
-	Fri, 14 Nov 2025 04:38:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C0207275864;
+	Fri, 14 Nov 2025 05:52:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763095105; cv=none; b=HpmPAILEXF+6Lae49yjGKu7VUWHpQcHZcUiA0MVYgV+KXgvcEsR+g8vo1uoqe/KKL6V466RRgWNPZ2byBtmL9QSkQ0lbwQ7+iAEwSEv2wlm2ZbT8hSiCwrnCv6SqbOX76nY9IOiVbkFygHaZ95+J3I76jwq0Bgk/sdiBH6nb8tA=
+	t=1763099578; cv=none; b=ml0SVG3ODqgZTCW/CpVNLdV/eE0Z8u+zZmiDjO8jlwnJh8CCtkOCL9D6fG1/xJm5bYVK8q/YCpU5wrE226BgXsxbcfYdwDgps9yRrekfjW8LNMKYEV8TbC8IlwTCjy4eI76XbZW81auuwYFv4w1f92gfdk81BfHhmWJAgdQq/xo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763095105; c=relaxed/simple;
-	bh=nHpuwrB2PqWoFYl7cIf1QtHauh5mGZ3uTev/Ldhcw+Q=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=U0NOv7Lx79UjNcUKNdWJSx6o4q2lesY9vYqPhlNnA5p5ZTPds6YFwzUM6aDpnyRrf5d98ErUSRe5PhOgfMFuofEPNKWRovGnS0RlgqkMT4KYOpxUx/Rc7N/WqEPFf8MYo7pFmhPWsUqiJoSzYsrVB8i5QHYBWirg+9/sd8LIdnY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=D3U+OeK9; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1763099578; c=relaxed/simple;
+	bh=0LkBK2Xvnt2ZuZ/2D/xuME3Qx9teLzVBPhVnFYQ2fyk=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Ii/p+muzkxduN8Hrd+ngy/mrD5pj5gAro1h1GN/Y+BOUra488fLsrzOOOP54ZNTpAtQmAW8CylB0+yI8aQrrVo6Ub5IfAahzmWNE8JjgmIoYUCDlBsqmJplrvti9C89e2XOxIgB8ZccYcUV3v+4mn7NVGlBIm0ghGHFOLiR/ays=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=q/7VIjHK; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="D3U+OeK9"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9D54CC4AF09;
-	Fri, 14 Nov 2025 04:38:15 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1763095105;
-	bh=nHpuwrB2PqWoFYl7cIf1QtHauh5mGZ3uTev/Ldhcw+Q=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=D3U+OeK9GhqfWF0+J2jd+muy8AARO4qDhP50T8K6+Ixjl7OYP08hLGOSjvEgNxOBJ
-	 S2GLkZXFLi/O9NjK1ipo/SNFyF/x2q+MTldVC8dPMtD+AzPiMHugVxJM95DcCbrvhf
-	 w+P4TONQUjEMO29loLzdZvpX463OkL/mVZC1yaEqf8ktr2zjE4sZ+5mY+avsykTA+K
-	 YA5I/rS3IC+TdNYYZ7Ei3wdD0P6JsEmLKcGpkSPlRUNbHgBaj0L7XpDuh3mccUNosD
-	 JdIkdst85rXaaJZP3s8sX9A0Gu6//cXcUYjCevnXiDhCSLjMa0X/U4YWXnNUEkL3Gn
-	 Gdnc8kbREu9lw==
-Date: Thu, 13 Nov 2025 21:38:12 -0700
-From: Nathan Chancellor <nathan@kernel.org>
-To: Marco Elver <elver@google.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>,
-	Peter Zijlstra <peterz@infradead.org>,
-	Boqun Feng <boqun.feng@gmail.com>, Ingo Molnar <mingo@kernel.org>,
-	Will Deacon <will@kernel.org>,
-	"David S. Miller" <davem@davemloft.net>,
-	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
-	"Paul E. McKenney" <paulmck@kernel.org>,
-	Alexander Potapenko <glider@google.com>,
-	Arnd Bergmann <arnd@arndb.de>, Bart Van Assche <bvanassche@acm.org>,
-	Bill Wendling <morbo@google.com>, Christoph Hellwig <hch@lst.de>,
-	Dmitry Vyukov <dvyukov@google.com>,
-	Eric Dumazet <edumazet@google.com>,
-	Frederic Weisbecker <frederic@kernel.org>,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	Herbert Xu <herbert@gondor.apana.org.au>,
-	Ian Rogers <irogers@google.com>, Jann Horn <jannh@google.com>,
-	Joel Fernandes <joelagnelf@nvidia.com>,
-	Jonathan Corbet <corbet@lwn.net>,
-	Josh Triplett <josh@joshtriplett.org>,
-	Justin Stitt <justinstitt@google.com>, Kees Cook <kees@kernel.org>,
-	Kentaro Takeda <takedakn@nttdata.co.jp>,
-	Lukas Bulwahn <lukas.bulwahn@gmail.com>,
-	Mark Rutland <mark.rutland@arm.com>,
-	Mathieu Desnoyers <mathieu.desnoyers@efficios.com>,
-	Miguel Ojeda <ojeda@kernel.org>,
-	Neeraj Upadhyay <neeraj.upadhyay@kernel.org>,
-	Nick Desaulniers <nick.desaulniers+lkml@gmail.com>,
-	Steven Rostedt <rostedt@goodmis.org>,
-	Tetsuo Handa <penguin-kernel@i-love.sakura.ne.jp>,
-	Thomas Gleixner <tglx@linutronix.de>, Thomas Graf <tgraf@suug.ch>,
-	Uladzislau Rezki <urezki@gmail.com>,
-	Waiman Long <longman@redhat.com>, kasan-dev@googlegroups.com,
-	linux-crypto@vger.kernel.org, linux-doc@vger.kernel.org,
-	linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-mm@kvack.org, linux-security-module@vger.kernel.org,
-	linux-sparse@vger.kernel.org, llvm@lists.linux.dev,
-	rcu@vger.kernel.org
-Subject: Re: [PATCH v3 00/35] Compiler-Based Capability- and Locking-Analysis
-Message-ID: <20251114043812.GC2566209@ax162>
-References: <20250918140451.1289454-1-elver@google.com>
- <CAHk-=wgd-Wcp0GpYaQnU7S9ci+FvFmaNw1gm75mzf0ZWdNLxvw@mail.gmail.com>
- <aMx4-B_WAtX2aiKx@elver.google.com>
- <CAHk-=wgQO7c0zc8_VwaVSzG3fEVFFcjWzVBKM4jYjv8UiD2dkg@mail.gmail.com>
- <aM0eAk12fWsr9ZnV@elver.google.com>
- <CANpmjNNoKiFEW2VfGM7rdak7O8__U3S+Esub9yM=9Tq=02d_ag@mail.gmail.com>
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="q/7VIjHK"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
+	MIME-Version:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
+	Content-ID:Content-Description:In-Reply-To:References;
+	bh=CL39ZOuMW3CgdvA0XIMB8sUuMWXDAcy6tVxpDRMlLoQ=; b=q/7VIjHK38Rd5IXW7qNcwE0r0I
+	V1uc7UUnrBjIUvc8/E2lOY+HWFncbKVzHCyWdBfh53qcbFVpc6sFBBxh29IPOS2w6OQ49zfDASyh3
+	YhU0I6XHTkkeTJU/DLpEfUwQSoZOQfMa3pZZ0A3WvxcL4EKz0fudkPqtRGFiIsg/B9NpmQGT15aG8
+	LCSWQreAZwpSx2JIaj5B1VI3KY34Hqi0UVfNALRXnn6dxEp7Zci7kgH4lkCx5x6NGa2QTt5yhFSpa
+	2V9+lRMrSgf4PiXnBCn785BunuSL7C78YuAeaoWj1Om65+CwByaElfoFndLx8NJy2Vh+tHmQxOSVZ
+	13u2SIHw==;
+Received: from 2a02-8389-2341-5b80-d601-7564-c2e0-491c.cable.dynamic.v6.surfer.at ([2a02:8389:2341:5b80:d601:7564:c2e0:491c] helo=localhost)
+	by bombadil.infradead.org with esmtpsa (Exim 4.98.2 #2 (Red Hat Linux))
+	id 1vJmju-0000000Bc1t-1CsY;
+	Fri, 14 Nov 2025 05:52:54 +0000
+From: Christoph Hellwig <hch@lst.de>
+To: Carlos Maiolino <cem@kernel.org>,
+	Andrew Morton <akpm@linux-foundation.org>
+Cc: "Luc Van Oostenryck" <luc.vanoostenryck@gmail.com>,
+	Chris Li <sparse@chrisli.org>,
+	linux-sparse@vger.kernel.org,
+	linux-xfs@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: make xfs sparse-warning free
+Date: Fri, 14 Nov 2025 06:52:22 +0100
+Message-ID: <20251114055249.1517520-1-hch@lst.de>
+X-Mailer: git-send-email 2.47.3
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CANpmjNNoKiFEW2VfGM7rdak7O8__U3S+Esub9yM=9Tq=02d_ag@mail.gmail.com>
+Content-Transfer-Encoding: 8bit
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-On Thu, Nov 13, 2025 at 03:30:08PM +0100, Marco Elver wrote:
-> On Fri, 19 Sept 2025 at 11:10, Marco Elver <elver@google.com> wrote:
-> [..]
-> > I went with "context guard" to refer to the objects themselves, as that
-> > doesn't look too odd. It does match the concept of "guard" in
-> > <linux/cleanup.h>.
-> >
-> > See second attempt below.
-> [..]
-> 
-> I finally got around baking this into a renamed series, that now calls
-> it "Context Analysis" - here's a preview:
-> https://git.kernel.org/pub/scm/linux/kernel/git/melver/linux.git/log/?h=ctx-analysis/dev
-> 
-> As for when we should give this v4 another try: I'm 50/50 on sending
-> this now vs. waiting for final Clang 22 to be released (~March 2026).
-> 
-> Preferences?
+Hi all,
 
-For the record, I can continue to upload clang snapshots for testing and
-validating this plus the sooner this hits a tree that goes into -next,
-the sooner the ClangBuiltLinux infrastructure can start testing it. I
-assume there will not need to be many compiler side fixes but if
-__counted_by has shown us anything, it is that getting this stuff
-deployed and into the hands of people who want to use it is the only
-real way to find corner cases to address. No strong objection from me if
-you want to wait for clang-22 to actually be released though for more
-access.
+this series isn't really a series, but a collection of two very different
+patches toward the result of having no sparse warnings for fs/xfs/.
 
-Cheers,
-Nathan
+Patch 1 adds a cond_lock annotation to the lockref code.  This also fixes
+warnings (but resurfaces new ones) in erofs and gfs2.
+
+Patch 2 moves some XFS code around to help the lock context tracking. 
+I actually think this improves the code, so I think this should go into
+the XFS tree.
+
+Patch 3 duplicates some XFS code to work around the lock context tracking,
+but I think it is pretty silly.  Maybe it's a good example to help improve
+this code in sparse?  It would not be horrible to apply given how little
+code it duplicates, but a fix in sparse would be much nicer.
+
+The kernel MAINTAINERS still list Luc as sparse maintainer, but sparse
+itself lists Chris again.  Do we need to update the kernel MAINTAINERS
+file, or are those separate roles?
