@@ -1,55 +1,55 @@
-Received: from mail-wm1-f74.google.com (mail-wm1-f74.google.com [209.85.128.74])
+Received: from mail-wm1-f73.google.com (mail-wm1-f73.google.com [209.85.128.73])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A9A993587C6
-	for <linux-sparse@vger.kernel.org>; Thu, 20 Nov 2025 15:12:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.74
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C960235A937
+	for <linux-sparse@vger.kernel.org>; Thu, 20 Nov 2025 15:12:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.73
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763651551; cv=none; b=nfI6AWsHVMXRII2P6LCzQgmiNdy0m/z4E84vlXbFWUQ8Cb2RwCBI1AfaU+yfWLfNc9oCp0KzgiD4rqvdvh0rX7nlJpiwInk8zus8JlO6xRSscZkVfG/Jb/uaUczZn7BGeIVmfBc6Lb51oHJZzIJZOZrhZ6ga1iXEVPW/gQ2BNPc=
+	t=1763651555; cv=none; b=oJFUlDTCxcpzEaFsExLUJ/tXHoAgKvWlT2VXCTxu+khT9vl6UCiTIwgQdotJ/YU7KuD0dBq6iGNfZ/gfrMxz6BrorbC1puZEA0t7HVjrdovccPXBgr57U9IjwAGwO5Rob0XTZkKbDQeRDvfQyOnFRFf5bwvG2B5XCsuRgmm+UQ8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763651551; c=relaxed/simple;
-	bh=299aEgVyh8cb3uGYJTDEia/pmgIgjxszqEqI00oVwHI=;
+	s=arc-20240116; t=1763651555; c=relaxed/simple;
+	bh=kxFRVTFhBpdkAJPPAvjA33uY3sxge16MbJ+cvADLyIM=;
 	h=Date:In-Reply-To:Mime-Version:References:Message-ID:Subject:From:
-	 To:Cc:Content-Type; b=rp6CL1ZRx/LHM4yEijWre8NZZwzPTgynkiaCJlDG/wDHOYYN6kmM/yyzoAuN3vKRaLIiaCjA3swJ6Yo9WDRCdScXc+ZcfQY7UMG+Lrt4Ts+f2E1XSfdG8aHzjTmUWVOUo0HyGR+XBBo7XpInpdPffJwlQtNauL4u9R/4blwhNP0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--elver.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=nkJmmaKQ; arc=none smtp.client-ip=209.85.128.74
+	 To:Cc:Content-Type; b=C8m5NeXSw7Ruor3jpFw44IsSKREtiHTB9TiC7zwEQy2Gr9edsLfgEsFI3DIUxMd4hBV1Jke82A+2oxewohbXpMSiwqckKjjCtTUWxyEMOIyMzyHmMwiFn0l7eqZYEw+TCNPaLGSEGzwfonrjF9y4uPt88q9aKK4OE+6r8MjBTEI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--elver.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=xPJNNQtS; arc=none smtp.client-ip=209.85.128.73
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--elver.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="nkJmmaKQ"
-Received: by mail-wm1-f74.google.com with SMTP id 5b1f17b1804b1-4775fcf67d8so10440515e9.0
-        for <linux-sparse@vger.kernel.org>; Thu, 20 Nov 2025 07:12:19 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="xPJNNQtS"
+Received: by mail-wm1-f73.google.com with SMTP id 5b1f17b1804b1-4779b3749a8so8942765e9.1
+        for <linux-sparse@vger.kernel.org>; Thu, 20 Nov 2025 07:12:20 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20230601; t=1763651534; x=1764256334; darn=vger.kernel.org;
+        d=google.com; s=20230601; t=1763651538; x=1764256338; darn=vger.kernel.org;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:from:to:cc:subject:date:message-id:reply-to;
-        bh=TcdgfkZVjo+28iDEn5YG970J38eiF4zhn7KHxHB91wc=;
-        b=nkJmmaKQ+7AZgFa+72/ZaZfUmK15dydJUuH7J4z/mOHyfasVObzP9nWvtLyhdd04U3
-         0w9feE0ulee9tADGgeuB0RSYVJQXqZz56Zx5MipCNrTYtt9g1/Op0pUPXyKsmbIOIFNq
-         5H8mNBr/FqZwpq2RzzUKinm45XQK4EcWdnOJGH5q9Zwifv/lv6bjkRok0YZGfIWPzhQH
-         CB35aUOqlmY21n3ztWtDF8+cMlKNw6tBVQmX02/zDd6tzD2WwC4dJVZsI+TTR0Dg6J/Q
-         dYMd9xXNYXJR9+130/tEIlU7sb6D49Hr4yXHHqlGkARizYwKPRTLiwQtJICmUd+FS9pO
-         RGHQ==
+        bh=hosCU2YAM4wmLhG6gCEf4XqbMRgXsIjIUxIgZVPv95A=;
+        b=xPJNNQtSgTtD6mSJ1HnWZK2MgqtmqhSG0geiu4JKIJo4391Ch6ZbVs+yz5FMVM/22a
+         XF1WYB2Oi16th54HAb6AxLkuDCdOwrfz/KlPgUC8BQcOpay60O5N8D7BQfiR47fyBm1V
+         TWIkazFyxkA/y7IIZdiDLwa5+zp2Z+DAeR+FtI0DM3P/d7ADUxsHm0K2IkI1lprs8DPA
+         Gzvui5zOlh08MUyEFk4wL3Y7PEmh/i1slKyUcPAV8hfMAD5TXpCklQORh21QtQi9vCQl
+         9oBiVtJjtATPjDSASTzab6HVhK/oVVRZD4aKFHSMcl7lWQLxk1CmiPbVASYYfVIg/nA3
+         Uqlw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1763651534; x=1764256334;
+        d=1e100.net; s=20230601; t=1763651538; x=1764256338;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=TcdgfkZVjo+28iDEn5YG970J38eiF4zhn7KHxHB91wc=;
-        b=eaEOeMCTIf1okOONXqFo4IjYqDMFOqZ3PRJTfRcRZPfoZ1sLkmE6Ye7m2Q2LpVl1z8
-         qdZ5JaHakfc6Z3hJYcZE2a1QAi+CyYlxw4c5RZQbZhrFlKzoIYpZsGRbr6Bb3Cdfn4Ig
-         9AfD4+E0niJHCoEEOxH/T/u/fXR9oNWL3y4O3esZTwSgTIVQQqQPk93tcF09yJaKRK99
-         r6a7uirpvCqVDOubk5boFg2EUoVd9c392QMqteJrj3I0iU7Fx+d8wwGRk1wZM6W1/4En
-         wrPJcjqXjUfOqNqPkrP37T8Dkfdcz8K5dJWOeOTdKV/8wt7g55su0OocfINncizNHAbm
-         glJg==
-X-Forwarded-Encrypted: i=1; AJvYcCXfxX5lIUgt1sYWCt9MTR33Kg/TWbHheQFz1MD/1WamLIV2EKahaBkxsJ5GgNJLZFs6MmH8Dd9gA3+Pv3s=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxAa66UmdDFZG188DE6jcxzjwCbCDREN7ZPvxaTEEmJiGWFfXXl
-	p7YdZarNfPAxE3c+ihBNyyFYJgAZMwioL1Pn2ZfqXNuvGj8CLvffdtgMT5NH/k6DMHWmwiUbTVM
-	EWA==
-X-Google-Smtp-Source: AGHT+IFdnThzYknUV1vCt7ZEvlRWYwztCHPUAp0IneVSOXI7YNi6Z3vbTkQU4anukpx8hznRZV3KEJvRzQ==
-X-Received: from wmco18.prod.google.com ([2002:a05:600c:a312:b0:477:d21:4a92])
- (user=elver job=prod-delivery.src-stubby-dispatcher) by 2002:a05:600c:450f:b0:477:557b:6917
- with SMTP id 5b1f17b1804b1-477b8a98d9dmr32529805e9.18.1763651533655; Thu, 20
- Nov 2025 07:12:13 -0800 (PST)
-Date: Thu, 20 Nov 2025 16:09:35 +0100
+        bh=hosCU2YAM4wmLhG6gCEf4XqbMRgXsIjIUxIgZVPv95A=;
+        b=fWJS1zNx1+6M/h8jUPvzDnCEPfSzO8OiScGKN6xdrBFsHQ3RFjFcktpZWtRQ+BA7TA
+         GJM2I8A20RYBJsxdgGIUxTGT7OGddldEyD9xNirqlflO3Gd/SEKRm7yDip6JMKMzWhyJ
+         xXEZZCQU5c4Dw0TyRftvZ6//0uaOEAo/93hYZEtJljJlJokipTSb9QVxjcuGx6IT6wTQ
+         VLJASvuV5IwXrXYa0skvwsFL0ekmn+CtyKH5eDAQI1JaH8uFJLc6L0/ySKpM8MWvSiLH
+         pOyCqDRTWHTvjHpD7mESEYRMX2OCFUqcSPZQQiaZWZmYkiFewAROmXN16bMMk8PShDrR
+         azRg==
+X-Forwarded-Encrypted: i=1; AJvYcCV193jfRlNo1d6gHwyqJrnAPUzNetqYW4Ix6vu8Clo3xQGMYvPSLl8wVG9DpQQ8+uKGbzEXubKKcEcTcZY=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yz5fo7nC3b2nNja0WIC9V8e62EFP+mvk+toi8KvLIdECI82Elqr
+	sqm5Rou7eE6Gekhw8bxDQDdBmsh5BN+tz0rMPenZhEDjNi8fu4MZjAvb2fGtOq/SyVh9xchgLIt
+	2Ug==
+X-Google-Smtp-Source: AGHT+IGqdP+1ULXZ13/bvPdwqw8yuJ8l0jo0RTsoVAwzy0DYBXw9hGmu0iT83h/ma3EfKmKjOC5LfRBvFQ==
+X-Received: from wraj7.prod.google.com ([2002:a5d:4527:0:b0:42b:2aa2:e459])
+ (user=elver job=prod-delivery.src-stubby-dispatcher) by 2002:a05:6000:2505:b0:42b:3ed2:c08b
+ with SMTP id ffacd0b85a97d-42cbb2b1a6emr2638286f8f.51.1763651537400; Thu, 20
+ Nov 2025 07:12:17 -0800 (PST)
+Date: Thu, 20 Nov 2025 16:09:36 +0100
 In-Reply-To: <20251120151033.3840508-7-elver@google.com>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
@@ -59,8 +59,8 @@ List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 Mime-Version: 1.0
 References: <20251120145835.3833031-2-elver@google.com> <20251120151033.3840508-7-elver@google.com>
 X-Mailer: git-send-email 2.52.0.rc1.455.g30608eb744-goog
-Message-ID: <20251120151033.3840508-11-elver@google.com>
-Subject: [PATCH v4 10/35] locking/mutex: Support Clang's context analysis
+Message-ID: <20251120151033.3840508-12-elver@google.com>
+Subject: [PATCH v4 11/35] locking/seqlock: Support Clang's context analysis
 From: Marco Elver <elver@google.com>
 To: elver@google.com, Peter Zijlstra <peterz@infradead.org>, 
 	Boqun Feng <boqun.feng@gmail.com>, Ingo Molnar <mingo@kernel.org>, Will Deacon <will@kernel.org>
@@ -87,218 +87,303 @@ Cc: "David S. Miller" <davem@davemloft.net>, Luc Van Oostenryck <luc.vanoostenry
 	linux-wireless@vger.kernel.org, llvm@lists.linux.dev, rcu@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-Add support for Clang's context analysis for mutex.
+Add support for Clang's context analysis for seqlock_t.
 
 Signed-off-by: Marco Elver <elver@google.com>
 ---
-v4:
-* Rename capability -> context analysis.
-
 v3:
-* Switch to DECLARE_LOCK_GUARD_1_ATTRS() (suggested by Peter)
 * __assert -> __assume rename
 ---
  Documentation/dev-tools/context-analysis.rst |  2 +-
- include/linux/mutex.h                        | 35 ++++++-----
- include/linux/mutex_types.h                  |  4 +-
- lib/test_context-analysis.c                  | 64 ++++++++++++++++++++
- 4 files changed, 87 insertions(+), 18 deletions(-)
+ include/linux/seqlock.h                      | 24 +++++++++++
+ include/linux/seqlock_types.h                |  5 ++-
+ lib/test_context-analysis.c                  | 43 ++++++++++++++++++++
+ 4 files changed, 71 insertions(+), 3 deletions(-)
 
 diff --git a/Documentation/dev-tools/context-analysis.rst b/Documentation/dev-tools/context-analysis.rst
-index 50b57a1228ea..1f5d7c758219 100644
+index 1f5d7c758219..598962f6cb40 100644
 --- a/Documentation/dev-tools/context-analysis.rst
 +++ b/Documentation/dev-tools/context-analysis.rst
 @@ -80,7 +80,7 @@ Supported Kernel Primitives
  ~~~~~~~~~~~~~~~~~~~~~~~~~~~
  
  Currently the following synchronization primitives are supported:
--`raw_spinlock_t`, `spinlock_t`, `rwlock_t`.
-+`raw_spinlock_t`, `spinlock_t`, `rwlock_t`, `mutex`.
+-`raw_spinlock_t`, `spinlock_t`, `rwlock_t`, `mutex`.
++`raw_spinlock_t`, `spinlock_t`, `rwlock_t`, `mutex`, `seqlock_t`.
  
  For context guards with an initialization function (e.g., `spin_lock_init()`),
  calling this function before initializing any guarded members or globals
-diff --git a/include/linux/mutex.h b/include/linux/mutex.h
-index 847b81ca6436..be91f991a846 100644
---- a/include/linux/mutex.h
-+++ b/include/linux/mutex.h
-@@ -62,6 +62,7 @@ do {									\
- 	static struct lock_class_key __key;				\
- 									\
- 	__mutex_init((mutex), #mutex, &__key);				\
-+	__assume_ctx_guard(mutex);					\
- } while (0)
+diff --git a/include/linux/seqlock.h b/include/linux/seqlock.h
+index 5ce48eab7a2a..c79210d369ef 100644
+--- a/include/linux/seqlock.h
++++ b/include/linux/seqlock.h
+@@ -816,6 +816,7 @@ static __always_inline void write_seqcount_latch_end(seqcount_latch_t *s)
+ 	do {								\
+ 		spin_lock_init(&(sl)->lock);				\
+ 		seqcount_spinlock_init(&(sl)->seqcount, &(sl)->lock);	\
++		__assume_ctx_guard(sl);					\
+ 	} while (0)
  
  /**
-@@ -157,13 +158,13 @@ static inline int __must_check __devm_mutex_init(struct device *dev, struct mute
-  * Also see Documentation/locking/mutex-design.rst.
+@@ -832,6 +833,7 @@ static __always_inline void write_seqcount_latch_end(seqcount_latch_t *s)
+  * Return: count, to be passed to read_seqretry()
   */
- #ifdef CONFIG_DEBUG_LOCK_ALLOC
--extern void mutex_lock_nested(struct mutex *lock, unsigned int subclass);
-+extern void mutex_lock_nested(struct mutex *lock, unsigned int subclass) __acquires(lock);
- extern void _mutex_lock_nest_lock(struct mutex *lock, struct lockdep_map *nest_lock);
- extern int __must_check mutex_lock_interruptible_nested(struct mutex *lock,
--					unsigned int subclass);
-+					unsigned int subclass) __cond_acquires(0, lock);
- extern int __must_check _mutex_lock_killable(struct mutex *lock,
--		unsigned int subclass, struct lockdep_map *nest_lock);
--extern void mutex_lock_io_nested(struct mutex *lock, unsigned int subclass);
-+		unsigned int subclass, struct lockdep_map *nest_lock) __cond_acquires(0, lock);
-+extern void mutex_lock_io_nested(struct mutex *lock, unsigned int subclass) __acquires(lock);
- 
- #define mutex_lock(lock) mutex_lock_nested(lock, 0)
- #define mutex_lock_interruptible(lock) mutex_lock_interruptible_nested(lock, 0)
-@@ -186,10 +187,10 @@ do {									\
- 	_mutex_lock_killable(lock, subclass, NULL)
- 
- #else
--extern void mutex_lock(struct mutex *lock);
--extern int __must_check mutex_lock_interruptible(struct mutex *lock);
--extern int __must_check mutex_lock_killable(struct mutex *lock);
--extern void mutex_lock_io(struct mutex *lock);
-+extern void mutex_lock(struct mutex *lock) __acquires(lock);
-+extern int __must_check mutex_lock_interruptible(struct mutex *lock) __cond_acquires(0, lock);
-+extern int __must_check mutex_lock_killable(struct mutex *lock) __cond_acquires(0, lock);
-+extern void mutex_lock_io(struct mutex *lock) __acquires(lock);
- 
- # define mutex_lock_nested(lock, subclass) mutex_lock(lock)
- # define mutex_lock_interruptible_nested(lock, subclass) mutex_lock_interruptible(lock)
-@@ -207,7 +208,7 @@ extern void mutex_lock_io(struct mutex *lock);
+ static inline unsigned read_seqbegin(const seqlock_t *sl)
++	__acquires_shared(sl) __no_context_analysis
+ {
+ 	return read_seqcount_begin(&sl->seqcount);
+ }
+@@ -848,6 +850,7 @@ static inline unsigned read_seqbegin(const seqlock_t *sl)
+  * Return: true if a read section retry is required, else false
   */
- 
- #ifdef CONFIG_DEBUG_LOCK_ALLOC
--extern int _mutex_trylock_nest_lock(struct mutex *lock, struct lockdep_map *nest_lock);
-+extern int _mutex_trylock_nest_lock(struct mutex *lock, struct lockdep_map *nest_lock) __cond_acquires(true, lock);
- 
- #define mutex_trylock_nest_lock(lock, nest_lock)		\
- (								\
-@@ -217,17 +218,21 @@ extern int _mutex_trylock_nest_lock(struct mutex *lock, struct lockdep_map *nest
- 
- #define mutex_trylock(lock) _mutex_trylock_nest_lock(lock, NULL)
- #else
--extern int mutex_trylock(struct mutex *lock);
-+extern int mutex_trylock(struct mutex *lock) __cond_acquires(true, lock);
- #define mutex_trylock_nest_lock(lock, nest_lock) mutex_trylock(lock)
- #endif
- 
--extern void mutex_unlock(struct mutex *lock);
-+extern void mutex_unlock(struct mutex *lock) __releases(lock);
- 
--extern int atomic_dec_and_mutex_lock(atomic_t *cnt, struct mutex *lock);
-+extern int atomic_dec_and_mutex_lock(atomic_t *cnt, struct mutex *lock) __cond_acquires(true, lock);
- 
--DEFINE_GUARD(mutex, struct mutex *, mutex_lock(_T), mutex_unlock(_T))
--DEFINE_GUARD_COND(mutex, _try, mutex_trylock(_T))
--DEFINE_GUARD_COND(mutex, _intr, mutex_lock_interruptible(_T), _RET == 0)
-+DEFINE_LOCK_GUARD_1(mutex, struct mutex, mutex_lock(_T->lock), mutex_unlock(_T->lock))
-+DEFINE_LOCK_GUARD_1_COND(mutex, _try, mutex_trylock(_T->lock))
-+DEFINE_LOCK_GUARD_1_COND(mutex, _intr, mutex_lock_interruptible(_T->lock), _RET == 0)
-+
-+DECLARE_LOCK_GUARD_1_ATTRS(mutex, __assumes_ctx_guard(_T), /* */)
-+DECLARE_LOCK_GUARD_1_ATTRS(mutex_try, __assumes_ctx_guard(_T), /* */)
-+DECLARE_LOCK_GUARD_1_ATTRS(mutex_intr, __assumes_ctx_guard(_T), /* */)
- 
- extern unsigned long mutex_get_owner(struct mutex *lock);
- 
-diff --git a/include/linux/mutex_types.h b/include/linux/mutex_types.h
-index fdf7f515fde8..3a5efaa2da2d 100644
---- a/include/linux/mutex_types.h
-+++ b/include/linux/mutex_types.h
-@@ -38,7 +38,7 @@
-  * - detects multi-task circular deadlocks and prints out all affected
-  *   locks and tasks (and only those tasks)
+ static inline unsigned read_seqretry(const seqlock_t *sl, unsigned start)
++	__releases_shared(sl) __no_context_analysis
+ {
+ 	return read_seqcount_retry(&sl->seqcount, start);
+ }
+@@ -872,6 +875,7 @@ static inline unsigned read_seqretry(const seqlock_t *sl, unsigned start)
+  * _irqsave or _bh variants of this function instead.
   */
--struct mutex {
-+context_guard_struct(mutex) {
- 	atomic_long_t		owner;
- 	raw_spinlock_t		wait_lock;
- #ifdef CONFIG_MUTEX_SPIN_ON_OWNER
-@@ -59,7 +59,7 @@ struct mutex {
+ static inline void write_seqlock(seqlock_t *sl)
++	__acquires(sl) __no_context_analysis
+ {
+ 	spin_lock(&sl->lock);
+ 	do_write_seqcount_begin(&sl->seqcount.seqcount);
+@@ -885,6 +889,7 @@ static inline void write_seqlock(seqlock_t *sl)
+  * critical section of given seqlock_t.
   */
- #include <linux/rtmutex.h>
+ static inline void write_sequnlock(seqlock_t *sl)
++	__releases(sl) __no_context_analysis
+ {
+ 	do_write_seqcount_end(&sl->seqcount.seqcount);
+ 	spin_unlock(&sl->lock);
+@@ -898,6 +903,7 @@ static inline void write_sequnlock(seqlock_t *sl)
+  * other write side sections, can be invoked from softirq contexts.
+  */
+ static inline void write_seqlock_bh(seqlock_t *sl)
++	__acquires(sl) __no_context_analysis
+ {
+ 	spin_lock_bh(&sl->lock);
+ 	do_write_seqcount_begin(&sl->seqcount.seqcount);
+@@ -912,6 +918,7 @@ static inline void write_seqlock_bh(seqlock_t *sl)
+  * write_seqlock_bh().
+  */
+ static inline void write_sequnlock_bh(seqlock_t *sl)
++	__releases(sl) __no_context_analysis
+ {
+ 	do_write_seqcount_end(&sl->seqcount.seqcount);
+ 	spin_unlock_bh(&sl->lock);
+@@ -925,6 +932,7 @@ static inline void write_sequnlock_bh(seqlock_t *sl)
+  * other write sections, can be invoked from hardirq contexts.
+  */
+ static inline void write_seqlock_irq(seqlock_t *sl)
++	__acquires(sl) __no_context_analysis
+ {
+ 	spin_lock_irq(&sl->lock);
+ 	do_write_seqcount_begin(&sl->seqcount.seqcount);
+@@ -938,12 +946,14 @@ static inline void write_seqlock_irq(seqlock_t *sl)
+  * seqlock_t write side section opened with write_seqlock_irq().
+  */
+ static inline void write_sequnlock_irq(seqlock_t *sl)
++	__releases(sl) __no_context_analysis
+ {
+ 	do_write_seqcount_end(&sl->seqcount.seqcount);
+ 	spin_unlock_irq(&sl->lock);
+ }
  
--struct mutex {
-+context_guard_struct(mutex) {
- 	struct rt_mutex_base	rtmutex;
- #ifdef CONFIG_DEBUG_LOCK_ALLOC
- 	struct lockdep_map	dep_map;
+ static inline unsigned long __write_seqlock_irqsave(seqlock_t *sl)
++	__acquires(sl) __no_context_analysis
+ {
+ 	unsigned long flags;
+ 
+@@ -976,6 +986,7 @@ static inline unsigned long __write_seqlock_irqsave(seqlock_t *sl)
+  */
+ static inline void
+ write_sequnlock_irqrestore(seqlock_t *sl, unsigned long flags)
++	__releases(sl) __no_context_analysis
+ {
+ 	do_write_seqcount_end(&sl->seqcount.seqcount);
+ 	spin_unlock_irqrestore(&sl->lock, flags);
+@@ -998,6 +1009,7 @@ write_sequnlock_irqrestore(seqlock_t *sl, unsigned long flags)
+  * The opened read section must be closed with read_sequnlock_excl().
+  */
+ static inline void read_seqlock_excl(seqlock_t *sl)
++	__acquires_shared(sl) __no_context_analysis
+ {
+ 	spin_lock(&sl->lock);
+ }
+@@ -1007,6 +1019,7 @@ static inline void read_seqlock_excl(seqlock_t *sl)
+  * @sl: Pointer to seqlock_t
+  */
+ static inline void read_sequnlock_excl(seqlock_t *sl)
++	__releases_shared(sl) __no_context_analysis
+ {
+ 	spin_unlock(&sl->lock);
+ }
+@@ -1021,6 +1034,7 @@ static inline void read_sequnlock_excl(seqlock_t *sl)
+  * from softirq contexts.
+  */
+ static inline void read_seqlock_excl_bh(seqlock_t *sl)
++	__acquires_shared(sl) __no_context_analysis
+ {
+ 	spin_lock_bh(&sl->lock);
+ }
+@@ -1031,6 +1045,7 @@ static inline void read_seqlock_excl_bh(seqlock_t *sl)
+  * @sl: Pointer to seqlock_t
+  */
+ static inline void read_sequnlock_excl_bh(seqlock_t *sl)
++	__releases_shared(sl) __no_context_analysis
+ {
+ 	spin_unlock_bh(&sl->lock);
+ }
+@@ -1045,6 +1060,7 @@ static inline void read_sequnlock_excl_bh(seqlock_t *sl)
+  * hardirq context.
+  */
+ static inline void read_seqlock_excl_irq(seqlock_t *sl)
++	__acquires_shared(sl) __no_context_analysis
+ {
+ 	spin_lock_irq(&sl->lock);
+ }
+@@ -1055,11 +1071,13 @@ static inline void read_seqlock_excl_irq(seqlock_t *sl)
+  * @sl: Pointer to seqlock_t
+  */
+ static inline void read_sequnlock_excl_irq(seqlock_t *sl)
++	__releases_shared(sl) __no_context_analysis
+ {
+ 	spin_unlock_irq(&sl->lock);
+ }
+ 
+ static inline unsigned long __read_seqlock_excl_irqsave(seqlock_t *sl)
++	__acquires_shared(sl) __no_context_analysis
+ {
+ 	unsigned long flags;
+ 
+@@ -1089,6 +1107,7 @@ static inline unsigned long __read_seqlock_excl_irqsave(seqlock_t *sl)
+  */
+ static inline void
+ read_sequnlock_excl_irqrestore(seqlock_t *sl, unsigned long flags)
++	__releases_shared(sl) __no_context_analysis
+ {
+ 	spin_unlock_irqrestore(&sl->lock, flags);
+ }
+@@ -1125,6 +1144,7 @@ read_sequnlock_excl_irqrestore(seqlock_t *sl, unsigned long flags)
+  * parameter of the next read_seqbegin_or_lock() iteration.
+  */
+ static inline void read_seqbegin_or_lock(seqlock_t *lock, int *seq)
++	__acquires_shared(lock) __no_context_analysis
+ {
+ 	if (!(*seq & 1))	/* Even */
+ 		*seq = read_seqbegin(lock);
+@@ -1140,6 +1160,7 @@ static inline void read_seqbegin_or_lock(seqlock_t *lock, int *seq)
+  * Return: true if a read section retry is required, false otherwise
+  */
+ static inline int need_seqretry(seqlock_t *lock, int seq)
++	__releases_shared(lock) __no_context_analysis
+ {
+ 	return !(seq & 1) && read_seqretry(lock, seq);
+ }
+@@ -1153,6 +1174,7 @@ static inline int need_seqretry(seqlock_t *lock, int seq)
+  * with read_seqbegin_or_lock() and validated by need_seqretry().
+  */
+ static inline void done_seqretry(seqlock_t *lock, int seq)
++	__no_context_analysis
+ {
+ 	if (seq & 1)
+ 		read_sequnlock_excl(lock);
+@@ -1180,6 +1202,7 @@ static inline void done_seqretry(seqlock_t *lock, int seq)
+  */
+ static inline unsigned long
+ read_seqbegin_or_lock_irqsave(seqlock_t *lock, int *seq)
++	__acquires_shared(lock) __no_context_analysis
+ {
+ 	unsigned long flags = 0;
+ 
+@@ -1205,6 +1228,7 @@ read_seqbegin_or_lock_irqsave(seqlock_t *lock, int *seq)
+  */
+ static inline void
+ done_seqretry_irqrestore(seqlock_t *lock, int seq, unsigned long flags)
++	__no_context_analysis
+ {
+ 	if (seq & 1)
+ 		read_sequnlock_excl_irqrestore(lock, flags);
+diff --git a/include/linux/seqlock_types.h b/include/linux/seqlock_types.h
+index dfdf43e3fa3d..7b195368e654 100644
+--- a/include/linux/seqlock_types.h
++++ b/include/linux/seqlock_types.h
+@@ -81,13 +81,14 @@ SEQCOUNT_LOCKNAME(mutex,        struct mutex,    true,     mutex)
+  *    - Comments on top of seqcount_t
+  *    - Documentation/locking/seqlock.rst
+  */
+-typedef struct {
++context_guard_struct(seqlock) {
+ 	/*
+ 	 * Make sure that readers don't starve writers on PREEMPT_RT: use
+ 	 * seqcount_spinlock_t instead of seqcount_t. Check __SEQ_LOCK().
+ 	 */
+ 	seqcount_spinlock_t seqcount;
+ 	spinlock_t lock;
+-} seqlock_t;
++};
++typedef struct seqlock seqlock_t;
+ 
+ #endif /* __LINUX_SEQLOCK_TYPES_H */
 diff --git a/lib/test_context-analysis.c b/lib/test_context-analysis.c
-index 273fa9d34657..2b28d20c5f51 100644
+index 2b28d20c5f51..59c6642c582e 100644
 --- a/lib/test_context-analysis.c
 +++ b/lib/test_context-analysis.c
-@@ -5,6 +5,7 @@
-  */
+@@ -6,6 +6,7 @@
  
  #include <linux/build_bug.h>
-+#include <linux/mutex.h>
+ #include <linux/mutex.h>
++#include <linux/seqlock.h>
  #include <linux/spinlock.h>
  
  /*
-@@ -144,3 +145,66 @@ TEST_SPINLOCK_COMMON(read_lock,
- 		     read_unlock,
- 		     read_trylock,
- 		     TEST_OP_RO);
+@@ -208,3 +209,45 @@ static void __used test_mutex_cond_guard(struct test_mutex_data *d)
+ 		d->counter++;
+ 	}
+ }
 +
-+struct test_mutex_data {
-+	struct mutex mtx;
-+	int counter __guarded_by(&mtx);
++struct test_seqlock_data {
++	seqlock_t sl;
++	int counter __guarded_by(&sl);
 +};
 +
-+static void __used test_mutex_init(struct test_mutex_data *d)
++static void __used test_seqlock_init(struct test_seqlock_data *d)
 +{
-+	mutex_init(&d->mtx);
++	seqlock_init(&d->sl);
 +	d->counter = 0;
 +}
 +
-+static void __used test_mutex_lock(struct test_mutex_data *d)
++static void __used test_seqlock_reader(struct test_seqlock_data *d)
 +{
-+	mutex_lock(&d->mtx);
-+	d->counter++;
-+	mutex_unlock(&d->mtx);
-+	mutex_lock_io(&d->mtx);
-+	d->counter++;
-+	mutex_unlock(&d->mtx);
++	unsigned int seq;
++
++	do {
++		seq = read_seqbegin(&d->sl);
++		(void)d->counter;
++	} while (read_seqretry(&d->sl, seq));
 +}
 +
-+static void __used test_mutex_trylock(struct test_mutex_data *d, atomic_t *a)
++static void __used test_seqlock_writer(struct test_seqlock_data *d)
 +{
-+	if (!mutex_lock_interruptible(&d->mtx)) {
-+		d->counter++;
-+		mutex_unlock(&d->mtx);
-+	}
-+	if (!mutex_lock_killable(&d->mtx)) {
-+		d->counter++;
-+		mutex_unlock(&d->mtx);
-+	}
-+	if (mutex_trylock(&d->mtx)) {
-+		d->counter++;
-+		mutex_unlock(&d->mtx);
-+	}
-+	if (atomic_dec_and_mutex_lock(a, &d->mtx)) {
-+		d->counter++;
-+		mutex_unlock(&d->mtx);
-+	}
-+}
++	unsigned long flags;
 +
-+static void __used test_mutex_assert(struct test_mutex_data *d)
-+{
-+	lockdep_assert_held(&d->mtx);
++	write_seqlock(&d->sl);
 +	d->counter++;
-+}
++	write_sequnlock(&d->sl);
 +
-+static void __used test_mutex_guard(struct test_mutex_data *d)
-+{
-+	guard(mutex)(&d->mtx);
++	write_seqlock_irq(&d->sl);
 +	d->counter++;
-+}
++	write_sequnlock_irq(&d->sl);
 +
-+static void __used test_mutex_cond_guard(struct test_mutex_data *d)
-+{
-+	scoped_cond_guard(mutex_try, return, &d->mtx) {
-+		d->counter++;
-+	}
-+	scoped_cond_guard(mutex_intr, return, &d->mtx) {
-+		d->counter++;
-+	}
++	write_seqlock_bh(&d->sl);
++	d->counter++;
++	write_sequnlock_bh(&d->sl);
++
++	write_seqlock_irqsave(&d->sl, flags);
++	d->counter++;
++	write_sequnlock_irqrestore(&d->sl, flags);
 +}
 -- 
 2.52.0.rc1.455.g30608eb744-goog
