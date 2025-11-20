@@ -1,55 +1,55 @@
-Received: from mail-wr1-f73.google.com (mail-wr1-f73.google.com [209.85.221.73])
+Received: from mail-wm1-f73.google.com (mail-wm1-f73.google.com [209.85.128.73])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 103F93590B9
-	for <linux-sparse@vger.kernel.org>; Thu, 20 Nov 2025 15:12:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.73
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D12FC35A15C
+	for <linux-sparse@vger.kernel.org>; Thu, 20 Nov 2025 15:12:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.73
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763651526; cv=none; b=ukXpunSNFWDLBtSYgI76fEOQgjfK0oMOOGKEXvgIzg+gsi02d5BjDde3UEL00v4eu/9UUfOn08AC9d7DeseqY3aWWH9G2ZmxT0TJUEuZW4Rw9GcCginOlGNCb2ayc3ssVP9T8FXVBAMFHo6tYIgUi+wepU6ZwDPIs/2RMHlbdNE=
+	t=1763651540; cv=none; b=Lojp1oJo8lI7jeH+6l41A38oT1NH4/Pul9gpiCyfiwjKfzoXXBcjEHpfwqbztTaJJHb7tSlt/vIRG5RPKak6D3r9M/zfLe7anpUpPb5rSulkAT6wxLtBlgCE93LKaF3moeK3kjqL6FngoHmX5aA/i5wj+e3Yp1w9cbmbNq20NsA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763651526; c=relaxed/simple;
-	bh=EwfXd6yRg4bFKtUUrXe0W+ENNOKQmqy6Ot7CBhxbXoQ=;
+	s=arc-20240116; t=1763651540; c=relaxed/simple;
+	bh=iTCExOn5I2g0QyRdTPZbzOcX9eognAB5x4hvp3AUKYU=;
 	h=Date:In-Reply-To:Mime-Version:References:Message-ID:Subject:From:
-	 To:Cc:Content-Type; b=A4j+TQCXEQXpPpuR4DemfmSEoHnKfJkB9R4OCvyMdEd/ZtGb6BPb7pEwywaicHmFo/U0BUof67steZoDZuG/qN23PfBhAkD/JT0mawFdxTalaD2FHZqC2FDvKxsOO0fTO6oMsUOn3lxvyWs69oUguL5QSOwiVq07/yV5EJhylto=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--elver.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=xsfFmKc8; arc=none smtp.client-ip=209.85.221.73
+	 To:Cc:Content-Type; b=q8TSIgaZwbHFExvFUX6HBf43rx1wNh1fAX556Xpu86+mo5jthmhCiaQ39u811prgSJFPu0to90ju10QzYanaM80BCmOdHH83cmO9zB96cyuPyx8eU39vkWEitu1ZhXNgv5vq54Tt3GEDcLbi5JRLcwSe1Gj80RHkiYPNMpZqQ1E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--elver.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=WGW7Ahyv; arc=none smtp.client-ip=209.85.128.73
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--elver.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="xsfFmKc8"
-Received: by mail-wr1-f73.google.com with SMTP id ffacd0b85a97d-42b3339cab7so681037f8f.0
-        for <linux-sparse@vger.kernel.org>; Thu, 20 Nov 2025 07:12:01 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="WGW7Ahyv"
+Received: by mail-wm1-f73.google.com with SMTP id 5b1f17b1804b1-477563a0c75so5566465e9.1
+        for <linux-sparse@vger.kernel.org>; Thu, 20 Nov 2025 07:12:14 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20230601; t=1763651517; x=1764256317; darn=vger.kernel.org;
+        d=google.com; s=20230601; t=1763651529; x=1764256329; darn=vger.kernel.org;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:from:to:cc:subject:date:message-id:reply-to;
-        bh=sW5aRQBUT1YS/p7X2M8vu94/jdaGEDQWZc189ONsN2k=;
-        b=xsfFmKc8YQqE7ZmQkLgJKnqmKOU/uA87c6/ON0okVKo2MBLULEPO2/NPOCcjl+IDBc
-         JaBGvwlVkOZigGvfWcy0qxYz7k29aod+CZ4S71gKcSLnL1gKpBN2IAGKVrQ4zDPaz3SM
-         64Cj1jEhOc3VbKpN2vIGxsup63VTlWJshpiDDPu+goFDb7dW1/eivI89N1BLCn0eBVjy
-         pAiSGh1blGwNhBfoNISXlS64PUZ1XR2YyC+MfoKbXGum6EpVh3pkoTLq1mVW+0ttxhXl
-         d88uyRuAkZdKYgVmg6AHeJKGKGwcXH35YM2nNfVr1k8v23/0XRFm6L2NqvsZ6FmG9nyE
-         9Qvg==
+        bh=2auqzFTNru84Mc/h4FPy5CTt8CBssizo13Uye4GopmU=;
+        b=WGW7AhyvGqOrcaNsbyecF1H3dBnupsjZnHEWYcE9mzuS3msFmtbQWMAL1bliz+S/R/
+         De9W2qsRsnlqnytVwZsDRCn51jewWFSKJ7zKa4txakeu0vmkJpm94cznWbnrhhSjdJJu
+         xJ0Ti3SLsfVFHBbUhMRHR/Y3p3QhGwp0xzjtrUBYVzYxvEQEY0wpcDYAzf9W4TT1loqn
+         aGdL3RF5XU3H49pAu/clEZICaMkoif5YjVPZA43oOuYJfCmjCNHMkYL8y8siqkmEMCot
+         I242W8a+1rGTX2PYDOxP/q+Q9NjZA1CS1qNiaFim6idsQccUGvdv1ohaQZLf75bhG2x/
+         7kTQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1763651517; x=1764256317;
+        d=1e100.net; s=20230601; t=1763651529; x=1764256329;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=sW5aRQBUT1YS/p7X2M8vu94/jdaGEDQWZc189ONsN2k=;
-        b=YplOiencR9nfSWecBTxkab7DJe/wWnAV+5imhwpXAd8Uvah+/Xy/eOcs5DotlX0uMM
-         FNRCaxi5+fJUdtxUlpnCvQY1izE6bl52Qlq6owfoBwSeGKuTC7xCmlW6AsFC44dQjqQ2
-         04ZyiGZvnuCxNYtRiB6JO2dQUKlwhaFVwnSxAMaFLoxStGO6ZxOX+0jh21lzYFsTsA/x
-         98K1iIYA+7pekS4FEK+x5XzB6JuCmtsKjSvz0NP5U1t/JUmkcgfmg+tpbvd+RbRixZu8
-         juH840B8ii0KgbQ+wuyA3H5ceaUAtfQWe+KP+vDgXVSUiq/uK5M9sGY7TGu92YMdGa6W
-         ctWQ==
-X-Forwarded-Encrypted: i=1; AJvYcCWNQRAdD5QrF1BePcOO1bKXXAMpiiNTjRg9k273/+DLvlM2sAYrhFS05fkjtbD2qiChZtLpjQHAZ51wtpA=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx4p2gYUayv8erUjxVPF6K5KlXaIqsW2IDXTjal9kLQGfQdilfn
-	hEVzMWQHdbTZa37WGJhdKf7QoRG068TCCrsPB3m7nh1141YkjNgDOd9bNjkjim6SDZaJSb7zzZA
-	2ZQ==
-X-Google-Smtp-Source: AGHT+IER1f7gc9WQ7LnpbrPIA/y0BLZGbO4bUsdn+Ne1pOxE592x9Yu2PvTpMRh0Noc8+8JrQHGkxnvByA==
-X-Received: from wrsz10.prod.google.com ([2002:a5d:4c8a:0:b0:42b:3a01:7808])
- (user=elver job=prod-delivery.src-stubby-dispatcher) by 2002:adf:f290:0:b0:42b:3e0a:64b7
- with SMTP id ffacd0b85a97d-42cb9a560c2mr2413997f8f.53.1763651508025; Thu, 20
- Nov 2025 07:11:48 -0800 (PST)
-Date: Thu, 20 Nov 2025 16:09:32 +0100
+        bh=2auqzFTNru84Mc/h4FPy5CTt8CBssizo13Uye4GopmU=;
+        b=tzF3pJRBjpAfyNe49CHlMwTi71Xea9/Q0p6EXeq1verm7VbG+0IQ+PKnSn2b0Nyszd
+         vcpdApVhYbhFQUGaWx3cX6tG5y2ErMworw6vHsFpKKICJLf2fBsVmSfs6X5Gw8BCMecR
+         5eJFzAMapdrd1CnaTRzBFfQo+ma7pBuembiHTVow+5DuSvUUyyxH3lOhLnxywmdpPapl
+         60VPWl4U7IXCqiKEp9Bm+GeZUsx7jnFaDCdqVmi2KSldGRaV+dBxV325XrUBlulZo7b+
+         yovIOi1uBLJGp45gwMRYfhu6UnnDYEkoYtWBZR5Letd5+exZb9TW8jinVYrBIlxSEVnu
+         pHtw==
+X-Forwarded-Encrypted: i=1; AJvYcCVSN4vyDNpzlI84vzGMVOWCUR2LtqMn1jdb9S2wXVP1743DvHPEZ2MWUqaiVDnMZr9N4VdifPPIhKij9uA=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxI9al76jyq1isD4zzhT/Xvw0MKNpIarqXfxBuUSXeYDspB1iad
+	S6ppvco0BaQrWW12TN4wn809mmd9lAGQB3Q/Wq+pC5Fp46jo7mr/KBjDUbeULZYf3mVVheOPs5o
+	CyQ==
+X-Google-Smtp-Source: AGHT+IGNF877xZIMkrqSG9e8HXfdE4iPehoBLINvx7tcm99gYUdknonGEyIpqxIrFW9MWM+3ZSJklS+Bgg==
+X-Received: from wmoy21.prod.google.com ([2002:a05:600c:17d5:b0:477:a7d1:fd12])
+ (user=elver job=prod-delivery.src-stubby-dispatcher) by 2002:a05:600c:1f0f:b0:46e:53cb:9e7f
+ with SMTP id 5b1f17b1804b1-477b8a8bd4fmr35618325e9.18.1763651529324; Thu, 20
+ Nov 2025 07:12:09 -0800 (PST)
+Date: Thu, 20 Nov 2025 16:09:34 +0100
 In-Reply-To: <20251120151033.3840508-7-elver@google.com>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
@@ -59,8 +59,9 @@ List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 Mime-Version: 1.0
 References: <20251120145835.3833031-2-elver@google.com> <20251120151033.3840508-7-elver@google.com>
 X-Mailer: git-send-email 2.52.0.rc1.455.g30608eb744-goog
-Message-ID: <20251120151033.3840508-8-elver@google.com>
-Subject: [PATCH v4 07/35] lockdep: Annotate lockdep assertions for context analysis
+Message-ID: <20251120151033.3840508-10-elver@google.com>
+Subject: [PATCH v4 09/35] compiler-context-analysis: Change __cond_acquires to
+ take return value
 From: Marco Elver <elver@google.com>
 To: elver@google.com, Peter Zijlstra <peterz@infradead.org>, 
 	Boqun Feng <boqun.feng@gmail.com>, Ingo Molnar <mingo@kernel.org>, Will Deacon <will@kernel.org>
@@ -87,63 +88,209 @@ Cc: "David S. Miller" <davem@davemloft.net>, Luc Van Oostenryck <luc.vanoostenry
 	linux-wireless@vger.kernel.org, llvm@lists.linux.dev, rcu@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-Clang's context analysis can be made aware of functions that assert that
-locks are held.
+While Sparse is oblivious to the return value of conditional acquire
+functions, Clang's context analysis needs to know the return value
+which indicates successful acquisition.
 
-Presence of these annotations causes the analysis to assume the context
-guard is held after calls to the annotated function, and avoid false
-positives with complex control-flow; for example, where not all
-control-flow paths in a function require a held lock, and therefore
-marking the function with __must_hold(..) is inappropriate.
+Add the additional argument, and convert existing uses.
+
+Notably, Clang's interpretation of the value merely relates to the use
+in a later conditional branch, i.e. 1 ==> context guard acquired in
+branch taken if condition non-zero, and 0 ==> context guard acquired in
+branch taken if condition is zero. Given the precise value does not
+matter, introduce symbolic variants to use instead of either 0 or 1,
+which should be more intuitive.
+
+No functional change intended.
 
 Signed-off-by: Marco Elver <elver@google.com>
 ---
 v4:
 * Rename capability -> context analysis.
 
-v3:
-* __assert -> __assume rename
+v2:
+* Use symbolic values for __cond_acquires() and __cond_acquires_shared()
+  (suggested by Bart).
 ---
- include/linux/lockdep.h | 12 ++++++------
- 1 file changed, 6 insertions(+), 6 deletions(-)
+ fs/dlm/lock.c                             |  2 +-
+ include/linux/compiler-context-analysis.h | 31 +++++++++++++++++++----
+ include/linux/refcount.h                  |  6 ++---
+ include/linux/spinlock.h                  |  6 ++---
+ include/linux/spinlock_api_smp.h          |  8 +++---
+ net/ipv4/tcp_sigpool.c                    |  2 +-
+ 6 files changed, 38 insertions(+), 17 deletions(-)
 
-diff --git a/include/linux/lockdep.h b/include/linux/lockdep.h
-index 67964dc4db95..2c99a6823161 100644
---- a/include/linux/lockdep.h
-+++ b/include/linux/lockdep.h
-@@ -282,16 +282,16 @@ extern void lock_unpin_lock(struct lockdep_map *lock, struct pin_cookie);
- 	do { WARN_ON_ONCE(debug_locks && !(cond)); } while (0)
+diff --git a/fs/dlm/lock.c b/fs/dlm/lock.c
+index be938fdf17d9..0ce04be0d3de 100644
+--- a/fs/dlm/lock.c
++++ b/fs/dlm/lock.c
+@@ -343,7 +343,7 @@ void dlm_hold_rsb(struct dlm_rsb *r)
+ /* TODO move this to lib/refcount.c */
+ static __must_check bool
+ dlm_refcount_dec_and_write_lock_bh(refcount_t *r, rwlock_t *lock)
+-__cond_acquires(lock)
++      __cond_acquires(true, lock)
+ {
+ 	if (refcount_dec_not_one(r))
+ 		return false;
+diff --git a/include/linux/compiler-context-analysis.h b/include/linux/compiler-context-analysis.h
+index 8c75e1d0034a..935e59089d75 100644
+--- a/include/linux/compiler-context-analysis.h
++++ b/include/linux/compiler-context-analysis.h
+@@ -259,7 +259,7 @@ static inline void _context_unsafe_alias(void **p) { }
+ # define __must_hold(x)		__attribute__((context(x,1,1)))
+ # define __must_not_hold(x)
+ # define __acquires(x)		__attribute__((context(x,0,1)))
+-# define __cond_acquires(x)	__attribute__((context(x,0,-1)))
++# define __cond_acquires(ret, x) __attribute__((context(x,0,-1)))
+ # define __releases(x)		__attribute__((context(x,1,0)))
+ # define __acquire(x)		__context__(x,1)
+ # define __release(x)		__context__(x,-1)
+@@ -302,15 +302,32 @@ static inline void _context_unsafe_alias(void **p) { }
+  */
+ # define __acquires(x)		__acquires_ctx_guard(x)
  
- #define lockdep_assert_held(l)		\
--	lockdep_assert(lockdep_is_held(l) != LOCK_STATE_NOT_HELD)
-+	do { lockdep_assert(lockdep_is_held(l) != LOCK_STATE_NOT_HELD); __assume_ctx_guard(l); } while (0)
++/*
++ * Clang's analysis does not care precisely about the value, only that it is
++ * either zero or non-zero. So the __cond_acquires() interface might be
++ * misleading if we say that @ret is the value returned if acquired. Instead,
++ * provide symbolic variants which we translate.
++ */
++#define __cond_acquires_impl_true(x, ...)     __try_acquires##__VA_ARGS__##_ctx_guard(1, x)
++#define __cond_acquires_impl_false(x, ...)    __try_acquires##__VA_ARGS__##_ctx_guard(0, x)
++#define __cond_acquires_impl_nonzero(x, ...)  __try_acquires##__VA_ARGS__##_ctx_guard(1, x)
++#define __cond_acquires_impl_0(x, ...)        __try_acquires##__VA_ARGS__##_ctx_guard(0, x)
++#define __cond_acquires_impl_nonnull(x, ...)  __try_acquires##__VA_ARGS__##_ctx_guard(1, x)
++#define __cond_acquires_impl_NULL(x, ...)     __try_acquires##__VA_ARGS__##_ctx_guard(0, x)
++
+ /**
+  * __cond_acquires() - function attribute, function conditionally
+  *                     acquires a context guard exclusively
++ * @ret: abstract value returned by function if context guard acquired
+  * @x: context guard instance pointer
+  *
+  * Function attribute declaring that the function conditionally acquires the
+- * given context guard instance @x exclusively, but does not release it.
++ * given context guard instance @x exclusively, but does not release it. The
++ * function return value @ret denotes when the context guard is acquired.
++ *
++ * @ret may be one of: true, false, nonzero, 0, nonnull, NULL.
+  */
+-# define __cond_acquires(x)	__try_acquires_ctx_guard(1, x)
++# define __cond_acquires(ret, x) __cond_acquires_impl_##ret(x)
  
- #define lockdep_assert_not_held(l)	\
- 	lockdep_assert(lockdep_is_held(l) != LOCK_STATE_HELD)
+ /**
+  * __releases() - function attribute, function releases a context guard exclusively
+@@ -377,12 +394,16 @@ static inline void _context_unsafe_alias(void **p) { }
+ /**
+  * __cond_acquires_shared() - function attribute, function conditionally
+  *                            acquires a context guard shared
++ * @ret: abstract value returned by function if context guard acquired
+  * @x: context guard instance pointer
+  *
+  * Function attribute declaring that the function conditionally acquires the
+- * given context guard instance @x with shared access, but does not release it.
++ * given context guard instance @x with shared access, but does not release it. The
++ * function return value @ret denotes when the context guard is acquired.
++ *
++ * @ret may be one of: true, false, nonzero, 0, nonnull, NULL.
+  */
+-# define __cond_acquires_shared(x) __try_acquires_shared_ctx_guard(1, x)
++# define __cond_acquires_shared(ret, x) __cond_acquires_impl_##ret(x, _shared)
  
- #define lockdep_assert_held_write(l)	\
--	lockdep_assert(lockdep_is_held_type(l, 0))
-+	do { lockdep_assert(lockdep_is_held_type(l, 0)); __assume_ctx_guard(l); } while (0)
+ /**
+  * __releases_shared() - function attribute, function releases a
+diff --git a/include/linux/refcount.h b/include/linux/refcount.h
+index 80dc023ac2bf..3da377ffb0c2 100644
+--- a/include/linux/refcount.h
++++ b/include/linux/refcount.h
+@@ -478,9 +478,9 @@ static inline void refcount_dec(refcount_t *r)
  
- #define lockdep_assert_held_read(l)	\
--	lockdep_assert(lockdep_is_held_type(l, 1))
-+	do { lockdep_assert(lockdep_is_held_type(l, 1)); __assume_shared_ctx_guard(l); } while (0)
+ extern __must_check bool refcount_dec_if_one(refcount_t *r);
+ extern __must_check bool refcount_dec_not_one(refcount_t *r);
+-extern __must_check bool refcount_dec_and_mutex_lock(refcount_t *r, struct mutex *lock) __cond_acquires(lock);
+-extern __must_check bool refcount_dec_and_lock(refcount_t *r, spinlock_t *lock) __cond_acquires(lock);
++extern __must_check bool refcount_dec_and_mutex_lock(refcount_t *r, struct mutex *lock) __cond_acquires(true, lock);
++extern __must_check bool refcount_dec_and_lock(refcount_t *r, spinlock_t *lock) __cond_acquires(true, lock);
+ extern __must_check bool refcount_dec_and_lock_irqsave(refcount_t *r,
+ 						       spinlock_t *lock,
+-						       unsigned long *flags) __cond_acquires(lock);
++						       unsigned long *flags) __cond_acquires(true, lock);
+ #endif /* _LINUX_REFCOUNT_H */
+diff --git a/include/linux/spinlock.h b/include/linux/spinlock.h
+index 2bcb3f0bf00e..274d866a0be3 100644
+--- a/include/linux/spinlock.h
++++ b/include/linux/spinlock.h
+@@ -362,7 +362,7 @@ static __always_inline void spin_lock_bh(spinlock_t *lock)
+ }
  
- #define lockdep_assert_held_once(l)		\
- 	lockdep_assert_once(lockdep_is_held(l) != LOCK_STATE_NOT_HELD)
-@@ -389,10 +389,10 @@ extern int lockdep_is_held(const void *);
- #define lockdep_assert(c)			do { } while (0)
- #define lockdep_assert_once(c)			do { } while (0)
+ static __always_inline int spin_trylock(spinlock_t *lock)
+-	__cond_acquires(lock) __no_context_analysis
++	__cond_acquires(true, lock) __no_context_analysis
+ {
+ 	return raw_spin_trylock(&lock->rlock);
+ }
+@@ -422,13 +422,13 @@ static __always_inline void spin_unlock_irqrestore(spinlock_t *lock, unsigned lo
+ }
  
--#define lockdep_assert_held(l)			do { (void)(l); } while (0)
-+#define lockdep_assert_held(l)			__assume_ctx_guard(l)
- #define lockdep_assert_not_held(l)		do { (void)(l); } while (0)
--#define lockdep_assert_held_write(l)		do { (void)(l); } while (0)
--#define lockdep_assert_held_read(l)		do { (void)(l); } while (0)
-+#define lockdep_assert_held_write(l)		__assume_ctx_guard(l)
-+#define lockdep_assert_held_read(l)		__assume_shared_ctx_guard(l)
- #define lockdep_assert_held_once(l)		do { (void)(l); } while (0)
- #define lockdep_assert_none_held_once()	do { } while (0)
+ static __always_inline int spin_trylock_bh(spinlock_t *lock)
+-	__cond_acquires(lock) __no_context_analysis
++	__cond_acquires(true, lock) __no_context_analysis
+ {
+ 	return raw_spin_trylock_bh(&lock->rlock);
+ }
+ 
+ static __always_inline int spin_trylock_irq(spinlock_t *lock)
+-	__cond_acquires(lock) __no_context_analysis
++	__cond_acquires(true, lock) __no_context_analysis
+ {
+ 	return raw_spin_trylock_irq(&lock->rlock);
+ }
+diff --git a/include/linux/spinlock_api_smp.h b/include/linux/spinlock_api_smp.h
+index d19327e04df9..7e7d7d373213 100644
+--- a/include/linux/spinlock_api_smp.h
++++ b/include/linux/spinlock_api_smp.h
+@@ -34,8 +34,8 @@ unsigned long __lockfunc _raw_spin_lock_irqsave(raw_spinlock_t *lock)
+ unsigned long __lockfunc
+ _raw_spin_lock_irqsave_nested(raw_spinlock_t *lock, int subclass)
+ 								__acquires(lock);
+-int __lockfunc _raw_spin_trylock(raw_spinlock_t *lock)		__cond_acquires(lock);
+-int __lockfunc _raw_spin_trylock_bh(raw_spinlock_t *lock)	__cond_acquires(lock);
++int __lockfunc _raw_spin_trylock(raw_spinlock_t *lock)		__cond_acquires(true, lock);
++int __lockfunc _raw_spin_trylock_bh(raw_spinlock_t *lock)	__cond_acquires(true, lock);
+ void __lockfunc _raw_spin_unlock(raw_spinlock_t *lock)		__releases(lock);
+ void __lockfunc _raw_spin_unlock_bh(raw_spinlock_t *lock)	__releases(lock);
+ void __lockfunc _raw_spin_unlock_irq(raw_spinlock_t *lock)	__releases(lock);
+@@ -84,7 +84,7 @@ _raw_spin_unlock_irqrestore(raw_spinlock_t *lock, unsigned long flags)
+ #endif
+ 
+ static inline int __raw_spin_trylock(raw_spinlock_t *lock)
+-	__cond_acquires(lock)
++	__cond_acquires(true, lock)
+ {
+ 	preempt_disable();
+ 	if (do_raw_spin_trylock(lock)) {
+@@ -177,7 +177,7 @@ static inline void __raw_spin_unlock_bh(raw_spinlock_t *lock)
+ }
+ 
+ static inline int __raw_spin_trylock_bh(raw_spinlock_t *lock)
+-	__cond_acquires(lock)
++	__cond_acquires(true, lock)
+ {
+ 	__local_bh_disable_ip(_RET_IP_, SOFTIRQ_LOCK_OFFSET);
+ 	if (do_raw_spin_trylock(lock)) {
+diff --git a/net/ipv4/tcp_sigpool.c b/net/ipv4/tcp_sigpool.c
+index d8a4f192873a..10b2e5970c40 100644
+--- a/net/ipv4/tcp_sigpool.c
++++ b/net/ipv4/tcp_sigpool.c
+@@ -257,7 +257,7 @@ void tcp_sigpool_get(unsigned int id)
+ }
+ EXPORT_SYMBOL_GPL(tcp_sigpool_get);
+ 
+-int tcp_sigpool_start(unsigned int id, struct tcp_sigpool *c) __cond_acquires(RCU_BH)
++int tcp_sigpool_start(unsigned int id, struct tcp_sigpool *c) __cond_acquires(0, RCU_BH)
+ {
+ 	struct crypto_ahash *hash;
  
 -- 
 2.52.0.rc1.455.g30608eb744-goog
