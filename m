@@ -1,86 +1,84 @@
-Received: from mail-ed1-f51.google.com (mail-ed1-f51.google.com [209.85.208.51])
+Received: from mail-ej1-f48.google.com (mail-ej1-f48.google.com [209.85.218.48])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5A3111A0712
-	for <linux-sparse@vger.kernel.org>; Tue,  9 Dec 2025 03:41:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.51
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CAED42571A0
+	for <linux-sparse@vger.kernel.org>; Tue,  9 Dec 2025 07:26:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765251667; cv=none; b=nHFy5Sq94135OgJfYQoGqmbjEHN6JBpa01lG0CVkIK8EgJsu87AAOZzc1hR2CzRtNgHG+04NE+39DKGn1M5mVqSn+drotVK2MXwCgzzSQyb7axWPB9sIjHiy1P4cPVtoJAGnNdeaPCm7zSGErJwZiQVJ5llxHzw6SoncA5kCH2E=
+	t=1765265184; cv=none; b=rpowkHs97IWAYcMbvthP1cSIoT+/bzj2SlsI1cRKZ0blOvtwP9JRuQHSrrem1svO6vCECcgogdxxZAyDXOTDTK3C3cuzH2FVBD595z2hABBl0LoySr97tgh70+ttb6YPSKtjDxu8oky8BPmP2adZGWWK0d566K8kTrjle8pO27Q=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765251667; c=relaxed/simple;
-	bh=mArw2vAL0D2NHk8zLQ2Ijxxx1bFuIg9r7rH/hnyrq/A=;
+	s=arc-20240116; t=1765265184; c=relaxed/simple;
+	bh=8nT8939qWUoJYlT2R7sKtRouAfpezWZVT5T0CEHq2FI=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=cpIDEDc/6eMT4CIvdqb7ImPXPpYsaH5A++LBu3wglkkL4wyCPRO0W7q++h/oYG7UYG8gMINGnbpqSGAysfUkatdEl+dNjNvVALtC3j7RzmWcSze+RlaYs+YpVVmfzIOv0WyR1FYsQMO3JM2plCO1XbEzl5Ofz085+FYvFFZxuoM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org; spf=pass smtp.mailfrom=linuxfoundation.org; dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b=SIy4f8Ba; arc=none smtp.client-ip=209.85.208.51
+	 To:Cc:Content-Type; b=C8VMuAHSbyuEo0TWu1Q/V98nwIvzDL6803LEX0/JGXpwiuxqaIoHcwKfWQmZHizhxVXmFdZirBcpkrnv4ZwyPkDA82V8NglPb+TqUDZ8USl+8ye6Knb5C0euWmuyIjoa9pvXz2hi46m0JFydQheMeMLtNd2Yjjff/ZwwwQyGvgA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org; spf=pass smtp.mailfrom=linuxfoundation.org; dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b=bLwkTlHc; arc=none smtp.client-ip=209.85.218.48
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linuxfoundation.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="SIy4f8Ba"
-Received: by mail-ed1-f51.google.com with SMTP id 4fb4d7f45d1cf-640aa1445c3so7586562a12.1
-        for <linux-sparse@vger.kernel.org>; Mon, 08 Dec 2025 19:41:03 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="bLwkTlHc"
+Received: by mail-ej1-f48.google.com with SMTP id a640c23a62f3a-b79af62d36bso209424066b.3
+        for <linux-sparse@vger.kernel.org>; Mon, 08 Dec 2025 23:26:21 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linux-foundation.org; s=google; t=1765251662; x=1765856462; darn=vger.kernel.org;
+        d=linux-foundation.org; s=google; t=1765265180; x=1765869980; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=ve41G5hMhFJfqXtFvhXu3GnjjOI5g5mevMdggrYlYVI=;
-        b=SIy4f8BafISTauU/V/46v+naSpEHevno8Np7QQvhlgmy2xhsruMu5iQkZTKMETWUjA
-         ndwPlDGejVAgxsDk+kVvtZQehnZ3oVe0lrAMcCD3+PIAf4ySo2qc7GGKvz9dh7LnNX8W
-         TgFtQHCM+wNI1tjfHKZO89N6wyFYKV2oIlyng=
+        bh=7QhMUSo0zLDlINi8GAqDQeQHdxTHsyz1r33NHLku5hM=;
+        b=bLwkTlHcWQMBb8tY5U8TY+BoyY1bQaAgjOvn5Pb2tufZIWtWZX1vMsOlhsRD46FJui
+         EbvQVXbNFzRR01zBOazf07qk/Z4GMDHRTd4Hz3K3qCHL3jVQg0WJ+cJzrNwa0OumUK5Y
+         FpFusuE/Nm/EUhL1IdkhusVg94AygieSmpSbQ=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1765251662; x=1765856462;
+        d=1e100.net; s=20230601; t=1765265180; x=1765869980;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=ve41G5hMhFJfqXtFvhXu3GnjjOI5g5mevMdggrYlYVI=;
-        b=p4vcPhZJImNkpcnjc8xZ4Jb4BypTgjQ3/YrDqPGvlc3dfmAiUw8LWV1LmH4LY3FoE0
-         tqi4qSyUGqQX+xClzle3hvNj5Aggx1wCzEfRtOEu485TYCwK2qfgskS34Ixy2EP/IJPO
-         95q+J4fqTfgy71PRFOrUFysx6tIolzrB5tl6ReZDeQ9qxYkhI4FFYR+oKwxkeElJtX1o
-         9UPv8BPC9DKJXRLyIRiigrPv7K+x43zqlSbWm73aVEOcpOyWds9AvmgslclJN2ub0wqX
-         B6t5JdhDdsZjIJWD8DC354OIkfxKKtSWC5QrK1zje+AI5BqUtItWKDAaq8wMFj2HsQxP
-         o6aA==
-X-Forwarded-Encrypted: i=1; AJvYcCXJklhpuzkTB6BNFc3GC9rPiSmMjqt64RPL29SvZ5X7yO4CIbHLzDvi5QhdyKAMVRZa3HtYU7bA6zb/1CE=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxI7v5BFbzq1QARf4ko0n6GXzXspi3CWHpdDQLqoyYVCBgrArL3
-	i185dboaN4Kz9hnRZe4SlfUyW5hmjVS93ISxuEpTnfOqVB+s/4zK0Ym5Jc2doLWiOaK2IYnDI7A
-	rhyCvgXroyw==
-X-Gm-Gg: ASbGnctC5CLAydy6kCJL/DNQk/mgVZjWnuUyi9RC44XWznTsFQ4d9dzpXfF4wCjxfCB
-	iM7plgFIw1aG7Z0qVx7Q+LGRjxz/LuRoaOZhEs8USIoyFV7pjr+fEEih3aq9NBdPKQ5Qwisxt6T
-	cD1RX+tMbJoex/0AZAhOCtcSHfTHvx9jXfOQCoXlJnFAeKGt+IPTTWOfpCzBi4vQepila8zLgb8
-	S12odhe+HhUkdPM5M9QAcMq5IqEfJIzJ9ZrmDZOXgujioWppF8p6TTQj8wQSoP88X+t3t/JbRjt
-	Ege9JhpS7m+Z2L0gFzpyxSe0RCVgY+OR+DYRA864ccldbKPa9JFdMUxovcQB3ejn+WX7v8nhbCz
-	kl3bmh3nATvWquJ8/KErT9nW2irE6RgwWc+HG0kqw1Xcm+a3cAPndO/SrRvM5q+pKpc4PdeImSC
-	Hr4JDWETqpBn791JawcbtWoSkDbvnU6Wn7O7ocjAp7yUmo4tF/aaV1vs/eUoiA
-X-Google-Smtp-Source: AGHT+IEOktBKVfK2hr7B71Di/ytjRzUK2nYoMZwmGYl7a82Nd85PzypGkaqsaSXUIE59hvo92zI0Ig==
-X-Received: by 2002:a17:907:25ca:b0:b77:1a42:d5c0 with SMTP id a640c23a62f3a-b7a24827918mr1027915166b.43.1765251662426;
-        Mon, 08 Dec 2025 19:41:02 -0800 (PST)
-Received: from mail-wm1-f45.google.com (mail-wm1-f45.google.com. [209.85.128.45])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-b79f49765f3sm1222474666b.37.2025.12.08.19.41.01
+        bh=7QhMUSo0zLDlINi8GAqDQeQHdxTHsyz1r33NHLku5hM=;
+        b=kKodGrRCYruSlzIt/0P8pEvv/a5RAbTLR2Cpa8hwbtutkLL5xh0ucNbPju0Nsrxlza
+         DmvQAlpzxCAjhbWh4liM+jhMjhg+ckG7/ytc2CU2XvCJOTqkVWfLcaSkoEec73biJd2u
+         /K4I3xY2DMr3LD3xjEVfB6LJ/EMCLA0yweLZsldvp1Wfo9ZGe6KW7POf78w7yPP3GHH1
+         ZV0IsaVfuEyBBWB0BLznd7Ug/YUmTz/2lzEzkxosBe2fIJqrRaUzIB+pc6JMPBQKeo8q
+         kYs6NRDGebrb78hQ/3Yzht+EpTllXo++6u6lVII8sAngsiHfsZagmJJPpO0IAQG5gu0v
+         Y7RA==
+X-Forwarded-Encrypted: i=1; AJvYcCXtVFvHO6IDPgAJWCfauOOa2hirDFG+tHSUG4UD9hXcCmViS7ppAYEp4lznBdnAvLRlWM7eDbAIJQc/zFQ=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwPOboBwZYdyldiGMH+67YhTp36Tu4vdHbj1bJBEWhK37VafEKS
+	UAiz9be2bVxY8ce2qOFTfW8pRcesCVQ0E5NhkTXFIxByGsGt0F8tuxy1dz4p4qdLlMMoVOCmj5J
+	gVUNs2PKJog==
+X-Gm-Gg: ASbGncs1PNcV3ZLucsHPF8t3zY4CJESICEudrjTAOwDNRoAqsMFRp0YVmf0p0BPLzts
+	AvgFfj3x+P0BqImW8efFqPXkE8mhMQC0pPqzKxZBY+kh1FnPMPiMlVU6OcZQcV2R9lALEagPbOW
+	LpZC+u6ROU+Am/X8yKINPsoVl28qtcvW/Q/8NZcbmCdavRQ6N+coBL9xKn8iCvsBFWIIaAZorva
+	9Nhx6r8QxzFcoiKiPiLeycyOUqgNCVTu0GbPkAOLMlXqI3swNtgZQKy25IzvZ7U3isTpMLMhwPu
+	tzZ1gIKi93vpGaLyOHPjUfMNcddgHT/VIJ6REjP+klSFOmOGFRKFLFztpoVXTuQsuFXozHkHpss
+	HQUlAtMBPhR5DtCAKQoWXSmjFHv/nvT5cejVqVfW2666sdfkh3w644e+iwNt3w1+Foky9BDvf6Y
+	BtdYq3I3ScYBHUk8wBLO0vf80dayrCg3P2DVdOqUIU0x5Mg33EZg6phnNmGnrB
+X-Google-Smtp-Source: AGHT+IGCS6avTZqu5iG5f0UdRKzgT0DngQoKd6HOb+nh3Ng01eXWhngK7pJI1WYls/X7GtWRQ0ceSQ==
+X-Received: by 2002:a17:907:7ea5:b0:b73:6998:7bce with SMTP id a640c23a62f3a-b7a2476f98amr1084478866b.33.1765265179913;
+        Mon, 08 Dec 2025 23:26:19 -0800 (PST)
+Received: from mail-ed1-f41.google.com (mail-ed1-f41.google.com. [209.85.208.41])
+        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-647b2edd772sm12747328a12.12.2025.12.08.23.26.17
         for <linux-sparse@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 08 Dec 2025 19:41:02 -0800 (PST)
-Received: by mail-wm1-f45.google.com with SMTP id 5b1f17b1804b1-4775ae77516so61572955e9.1
-        for <linux-sparse@vger.kernel.org>; Mon, 08 Dec 2025 19:41:01 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCUfizHHVISlVcWMztL/rqhpO0+dXvrTabAI9TYISodwzBNL5Hj9FNg5xKzv8cyuO04u/LUxcqPvVx64Pt0=@vger.kernel.org
-X-Received: by 2002:a05:6402:d0d:b0:647:5e6c:3220 with SMTP id
- 4fb4d7f45d1cf-6491aded554mr6980906a12.21.1765251222388; Mon, 08 Dec 2025
- 19:33:42 -0800 (PST)
+        Mon, 08 Dec 2025 23:26:18 -0800 (PST)
+Received: by mail-ed1-f41.google.com with SMTP id 4fb4d7f45d1cf-640a0812658so9046277a12.0
+        for <linux-sparse@vger.kernel.org>; Mon, 08 Dec 2025 23:26:17 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCXhIZ0XDR44i98CmvmrUvqI2GALot5srQVMxF2QNbYESXdrZDm0TWsSjgzsJdi2b33snlZx9HrnO2MExdI=@vger.kernel.org
+X-Received: by 2002:a05:6402:350b:b0:643:883a:2668 with SMTP id
+ 4fb4d7f45d1cf-6491a430019mr7384754a12.21.1765265177527; Mon, 08 Dec 2025
+ 23:26:17 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20251208235528.3670800-1-hpa@zytor.com> <176523908321.3343091.17738363732550848005.pr-tracker-bot@kernel.org>
- <CAHk-=wi0RqQPHME0xgrAZBQijKuos97cQO05N4f176DkH7msbg@mail.gmail.com> <ee693efe-5b7b-4d38-a12c-3cea6681f610@zytor.com>
-In-Reply-To: <ee693efe-5b7b-4d38-a12c-3cea6681f610@zytor.com>
+References: <20251208235528.3670800-1-hpa@zytor.com>
+In-Reply-To: <20251208235528.3670800-1-hpa@zytor.com>
 From: Linus Torvalds <torvalds@linux-foundation.org>
-Date: Tue, 9 Dec 2025 12:33:26 +0900
-X-Gmail-Original-Message-ID: <CAHk-=wghm5NFZQcfObuNQHMMsNQ_Of+H7jpoMTZJDrFscxrSCw@mail.gmail.com>
-X-Gm-Features: AQt7F2ofRIAXVmCzZb3EAMnphwigz_H3r18InwGDDrhalL1GL85PEFWZ4uBTknk
-Message-ID: <CAHk-=wghm5NFZQcfObuNQHMMsNQ_Of+H7jpoMTZJDrFscxrSCw@mail.gmail.com>
+Date: Tue, 9 Dec 2025 16:26:00 +0900
+X-Gmail-Original-Message-ID: <CAHk-=wiNMD7tCkYvVQMs1=omU9=J=zw_ryvtZ+A-sNR7MN2iuw@mail.gmail.com>
+X-Gm-Features: AQt7F2pU3mtSVlk8xXoOHi4ywQ2NpA8rkmyzrskk-X7c-Gbp__mUx8NnR72v7NM
+Message-ID: <CAHk-=wiNMD7tCkYvVQMs1=omU9=J=zw_ryvtZ+A-sNR7MN2iuw@mail.gmail.com>
 Subject: Re: [GIT PULL] __auto_type conversion for v6.19-rc1
 To: "H. Peter Anvin" <hpa@zytor.com>
-Cc: pr-tracker-bot@kernel.org, 
-	Konstantin Ryabitsev <konstantin@linuxfoundation.org>, =?UTF-8?Q?Eugenio_P=C3=A9rez?= <eperezma@redhat.com>, 
+Cc: =?UTF-8?Q?Eugenio_P=C3=A9rez?= <eperezma@redhat.com>, 
 	=?UTF-8?Q?Ilpo_J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>, 
 	"Michael S. Tsirkin" <mst@redhat.com>, Al Viro <viro@zeniv.linux.org.uk>, 
 	Alexei Starovoitov <ast@kernel.org>, Alexey Dobriyan <adobriyan@gmail.com>, 
@@ -91,7 +89,7 @@ Cc: pr-tracker-bot@kernel.org,
 	Dinh Nguyen <dinguyen@kernel.org>, Eduard Zingerman <eddyz87@gmail.com>, 
 	Gatlin Newhouse <gatlin.newhouse@gmail.com>, Hao Luo <haoluo@google.com>, 
 	Ingo Molnar <mingo@redhat.com>, Jakub Sitnicki <jakub@cloudflare.com>, 
-	Jan Hendrik Farr <kernel@jfarr.cc>, Jason Wang <jasowang@redhat.com>, Jir i Olsa <jolsa@kernel.org>, 
+	Jan Hendrik Farr <kernel@jfarr.cc>, Jason Wang <jasowang@redhat.com>, Jiri Olsa <jolsa@kernel.org>, 
 	John Fastabend <john.fastabend@gmail.com>, Jonathan Cameron <Jonathan.Cameron@huawei.com>, 
 	Josh Poimboeuf <jpoimboe@kernel.org>, KP Singh <kpsingh@kernel.org>, Kees Cook <kees@kernel.org>, 
 	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Marc Herbert <Marc.Herbert@linux.intel.com>, 
@@ -103,21 +101,22 @@ Cc: pr-tracker-bot@kernel.org,
 	Thorsten Blum <thorsten.blum@linux.dev>, Uros Bizjak <ubizjak@gmail.com>, 
 	Xuan Zhuo <xuanzhuo@linux.alibaba.com>, Yafang Shao <laoar.shao@gmail.com>, 
 	Ye Bin <yebin10@huawei.com>, Yonghong Song <yonghong.song@linux.dev>, 
-	Yu feng Wang <wangyufeng@kylinos.cn>, bpf@vger.kernel.org, linux-fsdevel@vger.kernel.org, 
+	Yufeng Wang <wangyufeng@kylinos.cn>, bpf@vger.kernel.org, linux-fsdevel@vger.kernel.org, 
 	linux-kernel@vger.kernel.org, linux-kselftest@vger.kernel.org, 
 	linux-sparse@vger.kernel.org, virtualization@lists.linux.dev, x86@kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Tue, 9 Dec 2025 at 09:24, H. Peter Anvin <hpa@zytor.com> wrote:
+On Tue, 9 Dec 2025 at 08:57, H. Peter Anvin <hpa@zytor.com> wrote:
 >
-> Yeah, it commented on the master branch, which is of course ... yours.
+>   git://git.kernel.org/pub/scm/linux/kernel/git/hpa/linux-auto.git
+>
+> for you to fetch changes up to branch auto-type-for-6.19
 
-Ahh. It's because you didn't use the standard pull request format, and
-instead did the branch name elsewhere.
+Oh, and as I was going to merge this, I noticed it's not signed.
 
-Which btw also messes with my "just cut and paste the address" thing,
-because now I'll cut-and-paste two different things.
+Let's not break our perfect recent record of using proper signed tags.
+when I know you have a pgp key and I even have it on my keyring.
 
-"Poor Linus - all the pain he has to go through".
+Please?
 
-          Linus "think of all those extra clicks" Torvalds
+              Linus
