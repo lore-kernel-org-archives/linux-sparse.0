@@ -1,132 +1,202 @@
-Received: from mail-ej1-f45.google.com (mail-ej1-f45.google.com [209.85.218.45])
+Received: from mail-wm1-f44.google.com (mail-wm1-f44.google.com [209.85.128.44])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A693A202963
-	for <linux-sparse@vger.kernel.org>; Tue,  9 Dec 2025 20:47:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.45
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 65CBB28643A
+	for <linux-sparse@vger.kernel.org>; Wed, 10 Dec 2025 16:18:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.44
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765313278; cv=none; b=JLJQfQqnAbo8aZ75klR2sEmRKgVvR8ou6qJ6eXUeJzdCVGdnyiwOsQhvdLUOGeGSfnfsqaNBiMGuGLSyvF4moeKUONTQ75LCvaLw1CRBA6hY+sr58w4rIXSK9tKNPoNb5dfOtdsxKP5pwFxv27NMyHiWljJGXExA2PqL7wLiCUg=
+	t=1765383509; cv=none; b=c/ETH+JMnyW6UkQigSeOH5l4DHEQwyvP1RWHeU/Z3DjgL58Gtdo+UTIeMv0eijtZyFQrDV3zk57WaOEWJ98YCULagS5crsssXzU9StlAlAO8Ro0mfLOceJF0M11KjXjs1wMSX296LqrzLxqZ0Nq83kC+DB6VsmofMUfvxj6iy0Q=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765313278; c=relaxed/simple;
-	bh=rd2xZtg1TUqhPE9MjX+asDiZUF22CLDQ+9AXCBYKRVA=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=l3W8LPoMPILLk2N1Fvxd+c/6skWqioDJbbbeYq0QUCC90YiQJaAMdz7/I4COi5H2/nAe5vm77UNNyle/QPMOIfgcaX93kFXXwQJmIMRG8yLfvlf17yOcgJIh/CuN8JFo6x0Pg5UA13vjFvuc26gJqd97+4ZWOS2FL+bQB09i8yw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org; spf=pass smtp.mailfrom=linuxfoundation.org; dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b=S5Xjpdml; arc=none smtp.client-ip=209.85.218.45
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linuxfoundation.org
+	s=arc-20240116; t=1765383509; c=relaxed/simple;
+	bh=8fukvFVHvNsSJut9kyMPtVjty3xkgDR42FqSOIyq0Vs=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=mB+gD7v3IZSVIeXZTTx12yWSvtjp9FeAmd22vS6ToL0kAlsukozsd5CQPKsKXhPRAaWiY1W7GUN6YLLhNZcEBt6owpkJJ/nIkMXoWeX1HKxu26Z3lR4CfWDwSQ6xE0yHwZHT2lXO6dYjjpESFwzIpSXzqQXpF820S/BahkiFtZs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=4Knpx6Ys; arc=none smtp.client-ip=209.85.128.44
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="S5Xjpdml"
-Received: by mail-ej1-f45.google.com with SMTP id a640c23a62f3a-b713c7096f9so920160866b.3
-        for <linux-sparse@vger.kernel.org>; Tue, 09 Dec 2025 12:47:56 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="4Knpx6Ys"
+Received: by mail-wm1-f44.google.com with SMTP id 5b1f17b1804b1-477a2ab455fso80351975e9.3
+        for <linux-sparse@vger.kernel.org>; Wed, 10 Dec 2025 08:18:27 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linux-foundation.org; s=google; t=1765313275; x=1765918075; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=8qFu6Gyyu/IjR2ufdMGg+lZtY71e20af3aIOCWzwQgQ=;
-        b=S5XjpdmlDcSQFXEDK3Jvcjov7hK17zUDW3wJq254bsGtCOL8Q/bLzuDTufOMbZ7u+e
-         wWneaIQltcOHG9B/Mk/xqr3nbW/ddrTBEU5NpeH7YPGZn0eevzL9JnFs6TUSsyUtIvGX
-         +3JPD/evWldNMuaefJ/VyeVWaMNwvAhDo75Mc=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1765313275; x=1765918075;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+        d=google.com; s=20230601; t=1765383506; x=1765988306; darn=vger.kernel.org;
+        h=user-agent:in-reply-to:content-disposition:mime-version:references
+         :message-id:subject:cc:to:from:date:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=8qFu6Gyyu/IjR2ufdMGg+lZtY71e20af3aIOCWzwQgQ=;
-        b=Xl1xP5nmpdj+C795KQV9pThLaqYjnT+GFBRU84Y0Am8bwVdM3VM+4/wCK7ezy0vOJ/
-         5MtWED6aQ6y6S9KJRLPHOTcr2Jwoa2Bzd4fnVJfxmcJvy8a0e1pMj/smLP3CGTNH20pd
-         OAksuV265Pnd5fUYMvX/iKLfb+yLmJglBrzfwYIQNOyaWGV5lQN397C+lVnx8bT5cdPK
-         kO9dAhSD69CguLcKdMMu8UDZG62oX0s9c1EVPjduogOZauthvT0cmd/dbXgXeoBiIVA6
-         vUbWlOnBT62hTLE7enePS3l1WtjjS+qdlKOUsMyERIHiXdfk2ohUQSK29f3pGvL/VOXc
-         d6kg==
-X-Forwarded-Encrypted: i=1; AJvYcCX+ceaaIpXaroNl/f/jPCL6IcpIOLn4LoEfP/tmBkYMtZFc1mk92YVN/Z3Y29MeepikcUN3kx2mkb79riQ=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yyz4BRx48rwnnF6NAIxTN5cjx7/CQNiTdSYlEyplFOAUu+0QQ3l
-	VdXm0xGdnZ8QmqvRCs86bUifdnBQSIXQ30mzkWki4XEDlOp8YkK3ZjAj2ywWcfBkTQNshRgnrts
-	KvF2lkYEhGQ==
-X-Gm-Gg: ASbGncsblfx/6WglxUVd04fY5ZFeqHGS+qb+uT9hqW2ji2IwBPWYMYI+HOnVtYeZuMm
-	4gWRAKmvETIlirlEby+JEXzEZg6bdmLmDET6sqQeRJrF0W5jyCpOr3wwX5lkjGPObq/inAYDHB2
-	BkjxOYKZBlybJkqlioiC3x/zUd13SnIBviDie3IJnSIsNGZ95pZQiqOJCWo3P85O1+LvCB2tYdg
-	G3+XF11ss8wmGPOy9IHoDsRHXS9GejFWjBHSjOz1STptProCHcROOxN8odFRN3p5cy556HlGRF3
-	mtk0XOsnfAPFrjjyO5NWxI+NZktoHcMl1JK53ZLRKfoXsI5H8azUOKBs+TA+NDHI+ziUgaFiKhQ
-	rTLUA5cxcKbcI7MFMExPxYVVHPbcvGdXARTuLqrwSGpax5f2qFJIYV08lVgOMQY4RnZ0tcI5bCz
-	bOBj6F6THBO/Iyttyax4woVO88dboqc4gTF9kY86QlY/yJomzlB9Yd2HQw3WlDWUbjIvZuYTI=
-X-Google-Smtp-Source: AGHT+IF/YEa77Oe15smdV5sJqsUPBO9lctdkn90shoj1iEwJkqViSRI3YeZjdQcMe+MbCgjuB+sgiQ==
-X-Received: by 2002:a17:907:9608:b0:b76:b76e:112a with SMTP id a640c23a62f3a-b7a24305f73mr1373675066b.11.1765313274799;
-        Tue, 09 Dec 2025 12:47:54 -0800 (PST)
-Received: from mail-ej1-f53.google.com (mail-ej1-f53.google.com. [209.85.218.53])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-b79f49a7951sm1517836966b.49.2025.12.09.12.47.54
-        for <linux-sparse@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 09 Dec 2025 12:47:54 -0800 (PST)
-Received: by mail-ej1-f53.google.com with SMTP id a640c23a62f3a-b713c7096f9so920158166b.3
-        for <linux-sparse@vger.kernel.org>; Tue, 09 Dec 2025 12:47:54 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCUqzDYUbmtVV/VJINKI+6913p1f6rfCqagaa1acDBAOGQtt22z3E04dydnHP2qDBsFsip5T6JtVrJQCoUU=@vger.kernel.org
-X-Received: by 2002:a05:6402:27d2:b0:640:74f5:d9f6 with SMTP id
- 4fb4d7f45d1cf-6496db38dccmr139683a12.25.1765312868177; Tue, 09 Dec 2025
- 12:41:08 -0800 (PST)
+        bh=5R7EEgKhSIj0MssK61oG5hvlzLQojw/c9iQ7wtMJnfU=;
+        b=4Knpx6Ys5jZM/3xzn4TkUlQ5MOn07tNXFGzWuQHetRSxVoOxFT3OFL1dI6aUzMhyEu
+         xnYtbM7h+xr7oTrp7lflQAsqfG0dB83aJPa0N0Lzyw30KdGksmfQW3kYujbtnt3DkuVA
+         fwmEmugctaKD9pNusDQNeXd1UfmY+fHvGPOWDw8BAfKfkIxSgy+w8UbI4YYUCqj4I6jX
+         aI8c6m7cRh6B35onFu9uYiBhaBJoI1i9z8h4Mkeyxj9du9M621C5tHRNfX5XJmAb/f0q
+         TuIXXyB2cjbM17BbTAqn37phQDIzp91gAiU1SG6JW6826VDNB+PT3RdVCI3rvFZjl/bg
+         gWLw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1765383506; x=1765988306;
+        h=user-agent:in-reply-to:content-disposition:mime-version:references
+         :message-id:subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=5R7EEgKhSIj0MssK61oG5hvlzLQojw/c9iQ7wtMJnfU=;
+        b=O0yxpRfM4LrvmGCFFQJgd/u/UblF9AtJ0zxucPCA3+4W4hFAJgol4xubyiKNAKoQ4Z
+         Km/oMTxajyFZ/wSB96vFMdA5Oluya7r5EfdbOZk3mPzpCiibpGd6Sd1+8MuFM18/QP/f
+         G41r++5NZKd7cvyKxGf6bxVzlE7NlNd6MZhGR/sQpxKc/ynSoGYnvkb4YQDavydw4QBN
+         bX/q6saRgghyjFqO++G9jWo5fwnKDb2zMoP0ddj3vgl2+0WjvHBblS8aHIo65KlsJ/EA
+         NSHiVPDFVDK3T9PQ6H/MTjVuRBrWnngtvIEYPcdKmvZ8PP49DcsxNEA5hhAcGSeadehS
+         6vDw==
+X-Forwarded-Encrypted: i=1; AJvYcCWLKwIiynqjDibHpPsSq1mlvp3l7skD7K1v7Zvy7yCUxOtEw3lz7m9T8C5HMDsAwxubxmkxzKl1A0WeFio=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwIQTLnaiYXawfq32a+LqFn2SWMJyQCsB/tcs8Zxuaf7n6QpkQS
+	36MT3FeJM8BWmCgwwEOMgmM65NgRcFFBUjAvL58KNxGQfIcxlrLn63W7Edsx/f0SKw==
+X-Gm-Gg: ASbGncvltoX7ezeRpUDvVizf7pBgz+RtxA+tSWdXVomndEjE4cX7ImEhtPxXTO6ZG0U
+	yEP6U6dNNjQM7qrbkeyuI4JxFiPoEoVSCpT9MromEQq6srCPmQAYZGc0eaEbHJZZS64hDTGUSoO
+	YrCKSOzaXJ2QgFC3rV5wavES7zm2DI1+Fbd5C5Ou9A/2TfinwvbCUtJ48jEUtGqA0L9fOfSdueJ
+	t10rcB8gecP1VzS+FprNmFEePeG5zkGjjau8EHLCT/istPNmV4AhTbRfWDne0BxpMHUDO65+RYr
+	g8djLj4HaUw0Y7ftBBFK8h1YSzmdpYHiOnkL4KyWW05XAruzYcc/J5t7CLtXcnVOIkWmfct78KR
+	pDVlLev2N+8hgCIdepm0WW8SoLlD3vlnHVTlO5u1dW0tlHUROUgv23d//2qQlP1Dms5SJIOsGX5
+	K52mTxbZiZnUm+X7jmhr8lA0tmMWiNHXbm1VjeTvArhM8AQxs=
+X-Google-Smtp-Source: AGHT+IE5gG+0fezF5tzXHFusF2dBV52zxvrbxnDDqwGYfilnFo0IcpTyJU4lWfuQsZFtfQAM3eL7LQ==
+X-Received: by 2002:a05:600c:687:b0:46e:59bd:f7d3 with SMTP id 5b1f17b1804b1-47a83cc5528mr15763325e9.20.1765383505415;
+        Wed, 10 Dec 2025 08:18:25 -0800 (PST)
+Received: from elver.google.com ([2a00:79e0:2834:9:edfc:ec3:194e:c3b3])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-47a7d3a75a3sm45109085e9.6.2025.12.10.08.18.22
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 10 Dec 2025 08:18:24 -0800 (PST)
+Date: Wed, 10 Dec 2025 17:18:16 +0100
+From: Marco Elver <elver@google.com>
+To: Peter Zijlstra <peterz@infradead.org>,
+	Boqun Feng <boqun.feng@gmail.com>, Ingo Molnar <mingo@kernel.org>,
+	Will Deacon <will@kernel.org>,
+	Linus Torvalds <torvalds@linux-foundation.org>
+Cc: "David S. Miller" <davem@davemloft.net>,
+	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
+	Chris Li <sparse@chrisli.org>,
+	"Paul E. McKenney" <paulmck@kernel.org>,
+	Alexander Potapenko <glider@google.com>,
+	Arnd Bergmann <arnd@arndb.de>, Bart Van Assche <bvanassche@acm.org>,
+	Christoph Hellwig <hch@lst.de>, Dmitry Vyukov <dvyukov@google.com>,
+	Eric Dumazet <edumazet@google.com>,
+	Frederic Weisbecker <frederic@kernel.org>,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+	Herbert Xu <herbert@gondor.apana.org.au>,
+	Ian Rogers <irogers@google.com>, Jann Horn <jannh@google.com>,
+	Joel Fernandes <joelagnelf@nvidia.com>,
+	Johannes Berg <johannes.berg@intel.com>,
+	Jonathan Corbet <corbet@lwn.net>,
+	Josh Triplett <josh@joshtriplett.org>,
+	Justin Stitt <justinstitt@google.com>, Kees Cook <kees@kernel.org>,
+	Kentaro Takeda <takedakn@nttdata.co.jp>,
+	Lukas Bulwahn <lukas.bulwahn@gmail.com>,
+	Mark Rutland <mark.rutland@arm.com>,
+	Mathieu Desnoyers <mathieu.desnoyers@efficios.com>,
+	Miguel Ojeda <ojeda@kernel.org>,
+	Nathan Chancellor <nathan@kernel.org>,
+	Neeraj Upadhyay <neeraj.upadhyay@kernel.org>,
+	Nick Desaulniers <nick.desaulniers+lkml@gmail.com>,
+	Steven Rostedt <rostedt@goodmis.org>,
+	Tetsuo Handa <penguin-kernel@i-love.sakura.ne.jp>,
+	Thomas Gleixner <tglx@linutronix.de>, Thomas Graf <tgraf@suug.ch>,
+	Uladzislau Rezki <urezki@gmail.com>,
+	Waiman Long <longman@redhat.com>, kasan-dev@googlegroups.com,
+	linux-crypto@vger.kernel.org, linux-doc@vger.kernel.org,
+	linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org,
+	linux-mm@kvack.org, linux-security-module@vger.kernel.org,
+	linux-sparse@vger.kernel.org, linux-wireless@vger.kernel.org,
+	llvm@lists.linux.dev, rcu@vger.kernel.org
+Subject: Re: [PATCH v4 00/35] Compiler-Based Context- and Locking-Analysis
+Message-ID: <aTmdSMuP0LUAdfO_@elver.google.com>
+References: <20251120145835.3833031-2-elver@google.com>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20251208235528.3670800-1-hpa@zytor.com> <20251209002519.GT1712166@ZenIV>
- <43CDF85F-800F-449C-8CA6-F35BEC88E18E@zytor.com> <20251209032206.GU1712166@ZenIV>
- <87F4003B-5011-49EF-A807-CEA094EA0DAC@zytor.com> <20251209090707.GV1712166@ZenIV>
-In-Reply-To: <20251209090707.GV1712166@ZenIV>
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Date: Wed, 10 Dec 2025 05:40:51 +0900
-X-Gmail-Original-Message-ID: <CAHk-=wi=2errb29CgwA4eSaLCEojo2Jq1d3ptDhxANfcKPH9xw@mail.gmail.com>
-X-Gm-Features: AQt7F2qPCXJihSB0EifxcMqIJwZJZTW_3j7hMQ2OwASD92TgZWMxviusY-ovH6E
-Message-ID: <CAHk-=wi=2errb29CgwA4eSaLCEojo2Jq1d3ptDhxANfcKPH9xw@mail.gmail.com>
-Subject: Re: [GIT PULL] __auto_type conversion for v6.19-rc1
-To: Al Viro <viro@zeniv.linux.org.uk>
-Cc: "H. Peter Anvin" <hpa@zytor.com>, =?UTF-8?Q?Eugenio_P=C3=A9rez?= <eperezma@redhat.com>, 
-	=?UTF-8?Q?Ilpo_J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>, 
-	"Michael S. Tsirkin" <mst@redhat.com>, Alexei Starovoitov <ast@kernel.org>, Alexey Dobriyan <adobriyan@gmail.com>, 
-	Andrew Morton <akpm@linux-foundation.org>, Andrii Nakryiko <andrii@kernel.org>, 
-	Arnd Bergmann <arnd@kernel.org>, Borislav Petkov <bp@alien8.de>, Dan Williams <dan.j.williams@intel.com>, 
-	Daniel Borkmann <daniel@iogearbox.net>, Dave Hansen <dave.hansen@linux.intel.com>, 
-	David Laight <David.Laight@aculab.com>, David Lechner <dlechner@baylibre.com>, 
-	Dinh Nguyen <dinguyen@kernel.org>, Eduard Zingerman <eddyz87@gmail.com>, 
-	Gatlin Newhouse <gatlin.newhouse@gmail.com>, Hao Luo <haoluo@google.com>, 
-	Ingo Molnar <mingo@redhat.com>, Jakub Sitnicki <jakub@cloudflare.com>, 
-	Jan Hendrik Farr <kernel@jfarr.cc>, Jason Wang <jasowang@redhat.com>, Jiri Olsa <jolsa@kernel.org>, 
-	John Fastabend <john.fastabend@gmail.com>, Jonathan Cameron <Jonathan.Cameron@huawei.com>, 
-	Josh Poimboeuf <jpoimboe@kernel.org>, KP Singh <kpsingh@kernel.org>, Kees Cook <kees@kernel.org>, 
-	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Marc Herbert <Marc.Herbert@linux.intel.com>, 
-	Martin KaFai Lau <martin.lau@linux.dev>, Mateusz Guzik <mjguzik@gmail.com>, Michal Luczaj <mhal@rbox.co>, 
-	Miguel Ojeda <ojeda@kernel.org>, Mykola Lysenko <mykolal@fb.com>, NeilBrown <neil@brown.name>, 
-	Peter Zijlstra <peterz@infradead.org>, Przemek Kitszel <przemyslaw.kitszel@intel.com>, 
-	Sami Tolvanen <samitolvanen@google.com>, Shuah Khan <shuah@kernel.org>, Song Liu <song@kernel.org>, 
-	Stanislav Fomichev <sdf@fomichev.me>, Thomas Gleixner <tglx@linutronix.de>, 
-	Thorsten Blum <thorsten.blum@linux.dev>, Uros Bizjak <ubizjak@gmail.com>, 
-	Xuan Zhuo <xuanzhuo@linux.alibaba.com>, Yafang Shao <laoar.shao@gmail.com>, 
-	Ye Bin <yebin10@huawei.com>, Yonghong Song <yonghong.song@linux.dev>, 
-	Yufeng Wang <wangyufeng@kylinos.cn>, bpf@vger.kernel.org, linux-fsdevel@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-kselftest@vger.kernel.org, 
-	linux-sparse@vger.kernel.org, virtualization@lists.linux.dev, x86@kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20251120145835.3833031-2-elver@google.com>
+User-Agent: Mutt/2.2.13 (2024-03-09)
 
-On Tue, 9 Dec 2025 at 18:06, Al Viro <viro@zeniv.linux.org.uk> wrote:
->
-> BTW, speaking of C23 fun that is supported by gcc 8, but not by sparse:
-> __has_include().
->
-> Linus?  Seeing that I'm touching pre-process.c anyway for the sake of
-> __VA_OPT__, adding that thing ought to be reasonably easy
+All,
 
-It sounds straightforward, and I'm certainly not going to object. I'm
-not sure how much we'd want to use it in the kernel: it might make it
-slightly easier to deal with various architectures and the "if the
-architecture has this header, use it, otherwise use the generic
-implementation" kinds of issues, but we do have fairly straightforward
-solutions for that already in our build system ('generic-y' and
-friends).
+On Thu, Nov 20, 2025 at 03:49PM +0100, Marco Elver wrote:
+> Context Analysis is a language extension, which enables statically
+> checking that required contexts are active (or inactive) by acquiring
+> and releasing user-definable "context guards". An obvious application is
+> lock-safety checking for the kernel's various synchronization primitives
+> (each of which represents a "context guard"), and checking that locking
+> rules are not violated.
+[...] 
+> A Clang version that supports `-Wthread-safety-pointer` and the new
+> alias-analysis of context-guard pointers is required (from this version
+> onwards):
+> 
+> 	https://github.com/llvm/llvm-project/commit/7ccb5c08f0685d4787f12c3224a72f0650c5865e
+> 
+> The minimum required release version will be Clang 22.
+> 
+> This series is also available at this Git tree:
+> 
+> 	https://git.kernel.org/pub/scm/linux/kernel/git/melver/linux.git/log/?h=ctx-analysis/dev
+[...] 
 
-So I'm not convinced it really buys us anything - I suspect it's a lot
-more useful in "normal" projects that have to deal with non-standard
-system headers and possible lack of libraries etc etc. Our build
-environment is so self-sufficient that it's not nearly the same issue
-for the kernel.
+I realize that I sent this series at the end of the last release cycle,
+and now we're in the merge window, along with LPC going on -- so it
+wasn't the best timing (however, it might be something to discuss at
+LPC, too :-) .. I'm attending virtually, however :-/).
 
-              Linus
+How to proceed?
+
+I'll be preparing a rebased and retested version of all this when
+v6.19-rc1 is out. One outstanding recommendation from Linus was to
+investigate compile-times, but as-is, it's unclear there's any notable
+overhead per brief investigation: https://lore.kernel.org/all/aR-plHrWDMqRRlcI@elver.google.com/
+
+From what I can tell most of this has to go through the locking tree,
+given the potential for conflict there. However, it is possible to split
+this up as follows:
+
+Batch 1:
+
+>   compiler_types: Move lock checking attributes to
+>     compiler-context-analysis.h
+>   compiler-context-analysis: Add infrastructure for Context Analysis
+>     with Clang
+>   compiler-context-analysis: Add test stub
+>   Documentation: Add documentation for Compiler-Based Context Analysis
+>   checkpatch: Warn about context_unsafe() without comment
+>   cleanup: Basic compatibility with context analysis
+>   lockdep: Annotate lockdep assertions for context analysis
+>   locking/rwlock, spinlock: Support Clang's context analysis
+>   compiler-context-analysis: Change __cond_acquires to take return value
+>   locking/mutex: Support Clang's context analysis
+>   locking/seqlock: Support Clang's context analysis
+>   bit_spinlock: Include missing <asm/processor.h>
+>   bit_spinlock: Support Clang's context analysis
+>   rcu: Support Clang's context analysis
+>   srcu: Support Clang's context analysis
+>   kref: Add context-analysis annotations
+>   locking/rwsem: Support Clang's context analysis
+>   locking/local_lock: Include missing headers
+>   locking/local_lock: Support Clang's context analysis
+>   locking/ww_mutex: Support Clang's context analysis
+>   debugfs: Make debugfs_cancellation a context guard struct
+>   compiler-context-analysis: Remove Sparse support
+>   compiler-context-analysis: Remove __cond_lock() function-like helper
+>   compiler-context-analysis: Introduce header suppressions
+>   compiler: Let data_race() imply disabled context analysis
+>   MAINTAINERS: Add entry for Context Analysis
+
+Batch 2: Everything below this can wait for the initial support in
+mainline, at which point subsystem maintainers can pick them up if
+deemed appropriate.
+
+>   kfence: Enable context analysis
+>   kcov: Enable context analysis
+>   kcsan: Enable context analysis
+>   stackdepot: Enable context analysis
+>   rhashtable: Enable context analysis
+>   printk: Move locking annotation to printk.c
+>   security/tomoyo: Enable context analysis
+>   crypto: Enable context analysis
+>   sched: Enable context analysis for core.c and fair.c
+
+Thanks,
+	-- Marco
