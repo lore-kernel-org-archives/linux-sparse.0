@@ -1,59 +1,59 @@
-Received: from mail-yx1-f54.google.com (mail-yx1-f54.google.com [74.125.224.54])
+Received: from mail-pf1-f170.google.com (mail-pf1-f170.google.com [209.85.210.170])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 96D2EF9D9
-	for <linux-sparse@vger.kernel.org>; Thu, 11 Dec 2025 13:25:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.54
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C95E52C0F6C
+	for <linux-sparse@vger.kernel.org>; Thu, 11 Dec 2025 13:54:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.170
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765459539; cv=none; b=lFU/zzgPZX4N8tsMQvB5te6EmHt8gFf4CJhVNnYM9cXrGcwRMscufSXUbMAMvZ2lsUO2hkRtzpb5Kdw9gdnKCx4fUT/sVo/hDmCOeDUennNFFfuVCE/ncBTVM7OGH8+Il+95q6BclIL6Vuqw6Ekh34JGXd1zcMKVD/dHqF6knw4=
+	t=1765461288; cv=none; b=kjv8NRj8qP4JTEh2uC9eh1e784bMlkmKyfcmtJSLh3hmljqRd7hrPGiT9kmcfIFtdPv3KavrLWZUCFy81V8KBjylyNp+8iU8/JSODz2gXrb/0CgUoBWkO64G7ICExqtg48s/a5+d2uazFKphe4HkBS3XD+958ILLy+17y9oTzuE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765459539; c=relaxed/simple;
-	bh=4koDoOQRFcQ8EnbnmmJvgwasJ9ijqSyJnmmWmgQ4c2s=;
+	s=arc-20240116; t=1765461288; c=relaxed/simple;
+	bh=asjipvlumTAG9LX/ZrgSM7qOg2tY3hiQLpH2JweZG4Y=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=C/lBrGkkKNzfMZ8r7NS9XdEhxylaqxznGcKnL0f4FkMYRb2NcfYlVB0fo9SNG0tI/OCmqqqi2+SlD11/MwIVEvos/0BOWLVtFcEOXyEOeMj9pD+y10nPHwWUXPXFXSMj7LTYSxmmPsfTsqMV9h3joJ0Llv6DPKmARhuA0R0Scbw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=S3sYjDGk; arc=none smtp.client-ip=74.125.224.54
+	 To:Cc:Content-Type; b=mq95tXZ+GrlF0fK636/t+p+uVrq86Bv0qE1yMP6OnYWsgP3B3kBaBhQd16PhtbDKlQBblG7nmLiP50Y22EyPb74yicCn56sXbjIMwmm6MqTL/k0ceRiezj+dRopxRysjNSIHXH2Zi0s29923mf2iP+2Zr4PcE5cAAab1w7ZhBvg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=uDYj/hL7; arc=none smtp.client-ip=209.85.210.170
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="S3sYjDGk"
-Received: by mail-yx1-f54.google.com with SMTP id 956f58d0204a3-6446c1a7a1cso43102d50.3
-        for <linux-sparse@vger.kernel.org>; Thu, 11 Dec 2025 05:25:37 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="uDYj/hL7"
+Received: by mail-pf1-f170.google.com with SMTP id d2e1a72fcca58-7b8bbf16b71so106241b3a.2
+        for <linux-sparse@vger.kernel.org>; Thu, 11 Dec 2025 05:54:45 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20230601; t=1765459537; x=1766064337; darn=vger.kernel.org;
+        d=google.com; s=20230601; t=1765461285; x=1766066085; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=bWA/kjxAjN+uRNvgRsuZ3C4JKMpyTL0y62dCZ1FivCw=;
-        b=S3sYjDGkvoZmbdvrKBBU43ykeWBEyeIUzGZ1bUJYcShsHuHKiW4SEI2gYcMdxdZWwk
-         2aA7slM8MmQr4oatTRXGZSDUu9aaPNBM5UXKIo4tZu3aBCHtdy1H/9eebAGdUo6qgX8L
-         DvHj6zwUMUlBjO2u0UJVOCuNjgIiGKpFJ3xkH9rQCWgifZulMuykpqPtovrI/gQQK4fX
-         tWozvIJabkt3lh8qlKQzKY5OQDpzBc2BgZrGHZlvzzLYrhdrhOMCB5DCqM/inYUnmrTm
-         BOMqEJRR2hhdiarGzrCSpdsUJZAL7hGLrXSyYC+4RigvkTH6UsHPfhyza3j2GXbJnMLT
-         uY7g==
+        bh=aWRPRAJ89lgq7qGLYK1gyasHO8BcBnTXm3hkZRbZKOw=;
+        b=uDYj/hL7oGwh2XUzc1hqD9+sdZ/Sx2Sq2KIskqtRR/WRmu2isIV04TAqo6JOKiX4kF
+         NCpsGtZjwJuX40Ngt1BNK/SQaQ2XpxVQUmNG0btiWJ2i0K4XwxIlSK8GOLCMHLZZhDWN
+         WwjUXaxR3Abzxj6Dcz0KKvvpDorVhHMUBws/PgXonrmgS/0ghFX/2ApTrYXWqPZn6utb
+         dD/vbXSKFO6Yi5HxsWNMKFQNDEVQRC/xUBmSXlp5CmOLIAyyLDUr+XUKig6XSeGgXovr
+         0TEArh7ZcaNENoq1epGedgYRQErJdCKsp57ZQPTUpjmd0nyjiuCtg+KRrEgd72Q3Y6cn
+         cRQg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1765459537; x=1766064337;
+        d=1e100.net; s=20230601; t=1765461285; x=1766066085;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=bWA/kjxAjN+uRNvgRsuZ3C4JKMpyTL0y62dCZ1FivCw=;
-        b=xVVz2Pk3yN9q11sfaguUAmxwLse5AqoH8G1PFWLwq2+Zl8aSI5Mq5pK2IUde31Tp96
-         NDCXPSVowO6PK/+NVsbUFwyv7aP1darWHUGiuBtTvlZbx6PPV1MJt8+6DkBy/NPps75f
-         i9OVdwLjod8QtbOKrAip0PI9SMKNGPRRQaG7qipG9JSC9AU0qyTNfDHBXZOLe14gEygt
-         bn6X4sxu5zaXssyiOW84cSdtNsKOqq/YSrBfvugeshc2Db0K4VKgVSxIjA9oPJvuUl8n
-         /RI/9gR98/d78YNV0K8GlnebG1ev09SpNsSnfgzk8KCgDcGdtN6AQ36CYIXtqtSPeFWn
-         15vw==
-X-Forwarded-Encrypted: i=1; AJvYcCVDZrOeD1wcOfFuTd7JtUgpG5EeGQ7U3rYNAC07FFRDwxSnbbE8UrcDoX1HWHKgXvZlAjBSR9lAZHIgAr8=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxfHFqKmMPom5Ehf0dMJDoDkvSpAfj1eweyKO7EON9gpGdcv/qV
-	sH26gd4FVAIaVhTVHd3JHdkW32lW1ajWGlQarFkPcM1q8CGVmfRE5STYAzS+tkaz9q1V/EtPgcG
-	74iPe9BCFh/J5VP+K6SIszxIwQXb5ohFr8hdtA0mi
-X-Gm-Gg: AY/fxX6kH4NLnzur8+mlfdSG+XQOYLXPhP9CnzWzSXbKxdNTjyXHBUwHGSzveUiDXAO
-	WHz9WnJie9XSyt86V6ipWuSUWgsC+QWk22DgxcemV9J0SKEgQuz2gm5CM/kSbiSsHZJuFWEM50J
-	2mHqftsEqpLdcsQ/mU2IZzxgclEVgskYiiKE7OkMzEO2vNhEoQ3BeNYbM4xS6BRXkguyzWg1+nJ
-	b+zhiuoNVX8YBWLg2gYQFaW8pg1DOu/FblHvqUFd+/jLBJDWsvNRrcJC3rJhwLJhMmR4y8N0p0I
-	jf97oGbHRn0r+hpeVXfQXdU4uadbjcIIpHw=
-X-Google-Smtp-Source: AGHT+IGPj4VYuvzobJuySeUtMjR2owpUV9b14snNLjzBypYDLw2+crQYToZkiUGcBVWZIJW//ll4Or+5K7PYShnu4As=
-X-Received: by 2002:a53:d01b:0:b0:643:1a78:4492 with SMTP id
- 956f58d0204a3-6446eb6016cmr3860639d50.81.1765459536448; Thu, 11 Dec 2025
- 05:25:36 -0800 (PST)
+        bh=aWRPRAJ89lgq7qGLYK1gyasHO8BcBnTXm3hkZRbZKOw=;
+        b=R+nJvzk4D2cWePFT1oLcUoMoOJIEeG7az1HGeoBASUAd2X+ieC9gWN9SUd9YmdbM4m
+         vmOhhk7BEYoHVJdZs4OyK6YXXmeUhpnBL3KdaTsGR+pvgO0ogymj8lU8X5AswcsDUPDo
+         INDq2rHloCysh7I9MmFzazpdGJJh+vAFGb425WK8X2VAY2hY6Oa3O3Mwy1LPRLVFzIWZ
+         DQuv41kELGaagNW1yj2L8xIY00HNBqapgTKC2r+gAGeDL+UAMkweofxT9QletFH1EO5A
+         7lfCPHWc5WuWf8sNqr5QinT6DnWdB3hzthP0RE8p1BFQPDHbdBxWx/BnvgP3nLdgRGeE
+         GYIQ==
+X-Forwarded-Encrypted: i=1; AJvYcCV75eXQYHasQTJy04fuE0Y9D6WOjnMZH6SRq8V0QAGpYhSpZXz7qYN8IJ9qblT0TxX9iEpu2Gz3VJsvYqk=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxQ15Ov5IBCXfl2tRcpqv6AZzhd4Q3NpW1s/JKUn3GBNjewv4ot
+	IcyZXYRDxj4JQ9yGzYY8K+7wecJDcfWdJrbVgDdehFTBSFhnGvqN/NCMbZnsXSlM2sxpKmjkU6i
+	ihfLuajYJiOUSCYmIxfv9WMIY9NO0ReucyTY9T9mW
+X-Gm-Gg: AY/fxX5SAAC+d6/ops9EgfNwVIuL0rhduT7b7aYqD/YeJG+qOpPwaurR210E7S4VSlq
+	YMh/kd2+d4U1qZQ8IcwXmdaBlUfWgsZBrCiipn7eD+QXbiw3z1VgWzWdg/XyolwhCCe94hHdVt5
+	2x3hf9eg5qlo15BeFuWIjf3Ti52DkWLMosD8EznjZTo8DXRDrH75CADwle7HlVv96bHMGLC9cbu
+	q3Wo3Tmdw7haoZnUk61qX/J9hCJepvx1gzBVDOPsaVwK8ky9GpaJErJw8p4FPX/rQBveliAxEsD
+	5lWF+LjmUmfGN4gqW3DeaDW1
+X-Google-Smtp-Source: AGHT+IEaaruplzdVpdnApdH4OVSrHUz40RptUVIyI3MxrgnCoT6vGrQB2vef/vIeMxQHfT2Nk7cub+UMnQmlsyGPvik=
+X-Received: by 2002:a05:7022:2219:b0:11b:bf3f:5208 with SMTP id
+ a92af1059eb24-11f296558d9mr5045780c88.1.1765461284380; Thu, 11 Dec 2025
+ 05:54:44 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
@@ -61,13 +61,13 @@ List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 References: <20251120145835.3833031-2-elver@google.com> <20251120151033.3840508-7-elver@google.com>
- <20251120151033.3840508-8-elver@google.com> <20251211114302.GC3911114@noisy.programming.kicks-ass.net>
-In-Reply-To: <20251211114302.GC3911114@noisy.programming.kicks-ass.net>
+ <20251120151033.3840508-17-elver@google.com> <20251211122636.GI3911114@noisy.programming.kicks-ass.net>
+In-Reply-To: <20251211122636.GI3911114@noisy.programming.kicks-ass.net>
 From: Marco Elver <elver@google.com>
-Date: Thu, 11 Dec 2025 14:24:57 +0100
-X-Gm-Features: AQt7F2r5KNsATXW8d-J0gXHLFG6W_D0lOL42kIv9mnu54Km1ZPN_9U9TSDd09do
-Message-ID: <CANpmjNObaGarY1_niCkgEXMNm2bLAVwKwQsLVYekE=Ce6y3ehQ@mail.gmail.com>
-Subject: Re: [PATCH v4 07/35] lockdep: Annotate lockdep assertions for context analysis
+Date: Thu, 11 Dec 2025 14:54:06 +0100
+X-Gm-Features: AQt7F2oz75av79IX-Fsq5GL2dibuf0pX45-76DYGUr2aahssaITkwrN9Ju3gYq8
+Message-ID: <CANpmjNN+zafzhvUBBmjyy+TL1ecqJUHQNRX3bo9fBJi2nFUt=A@mail.gmail.com>
+Subject: Re: [PATCH v4 16/35] kref: Add context-analysis annotations
 To: Peter Zijlstra <peterz@infradead.org>
 Cc: Boqun Feng <boqun.feng@gmail.com>, Ingo Molnar <mingo@kernel.org>, 
 	Will Deacon <will@kernel.org>, "David S. Miller" <davem@davemloft.net>, 
@@ -94,34 +94,54 @@ Cc: Boqun Feng <boqun.feng@gmail.com>, Ingo Molnar <mingo@kernel.org>,
 	linux-wireless@vger.kernel.org, llvm@lists.linux.dev, rcu@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Thu, 11 Dec 2025 at 12:43, Peter Zijlstra <peterz@infradead.org> wrote:
+On Thu, 11 Dec 2025 at 13:26, Peter Zijlstra <peterz@infradead.org> wrote:
 >
-> On Thu, Nov 20, 2025 at 04:09:32PM +0100, Marco Elver wrote:
->
-> >  include/linux/lockdep.h | 12 ++++++------
-> >  1 file changed, 6 insertions(+), 6 deletions(-)
+> On Thu, Nov 20, 2025 at 04:09:41PM +0100, Marco Elver wrote:
+> > Mark functions that conditionally acquire the passed lock.
 > >
-> > diff --git a/include/linux/lockdep.h b/include/linux/lockdep.h
-> > index 67964dc4db95..2c99a6823161 100644
-> > --- a/include/linux/lockdep.h
-> > +++ b/include/linux/lockdep.h
-> > @@ -282,16 +282,16 @@ extern void lock_unpin_lock(struct lockdep_map *lock, struct pin_cookie);
-> >       do { WARN_ON_ONCE(debug_locks && !(cond)); } while (0)
+> > Signed-off-by: Marco Elver <elver@google.com>
+> > ---
+> >  include/linux/kref.h | 2 ++
+> >  1 file changed, 2 insertions(+)
+> >
+> > diff --git a/include/linux/kref.h b/include/linux/kref.h
+> > index 88e82ab1367c..9bc6abe57572 100644
+> > --- a/include/linux/kref.h
+> > +++ b/include/linux/kref.h
+> > @@ -81,6 +81,7 @@ static inline int kref_put(struct kref *kref, void (*release)(struct kref *kref)
+> >  static inline int kref_put_mutex(struct kref *kref,
+> >                                void (*release)(struct kref *kref),
+> >                                struct mutex *mutex)
+> > +     __cond_acquires(true, mutex)
+> >  {
+> >       if (refcount_dec_and_mutex_lock(&kref->refcount, mutex)) {
+> >               release(kref);
+> > @@ -102,6 +103,7 @@ static inline int kref_put_mutex(struct kref *kref,
+> >  static inline int kref_put_lock(struct kref *kref,
+> >                               void (*release)(struct kref *kref),
+> >                               spinlock_t *lock)
+> > +     __cond_acquires(true, lock)
+> >  {
+> >       if (refcount_dec_and_lock(&kref->refcount, lock)) {
+> >               release(kref);
+> > --
+> > 2.52.0.rc1.455.g30608eb744-goog
+> >
 >
-> Since I typically read patches without first reading the Changelog --
-> because when I read the code later, I also don't see changelogs.
->
-> I must admit to getting most terribly confused here -- *again*, as I
-> then search back to previous discussions and found I was previously also
-> confused.
->
-> As such, I think we want a comment here that explains that assume_ctx
-> thing.
->
-> It is *NOT* (as the clang naming suggests) an assertion of holding the
-> lock (which is requires_ctx), but rather an annotation that forces the
-> ctx to be considered held.
+> Note that both use the underlying refcount_dec_and_*lock() functions.
+> Its a bit sad that annotation those isn't sufficient. These are inline
+> functions after all, the compiler should be able to see through all that.
 
-Noted. I'll add some appropriate wording above the
-__assumes_ctx_guard() attribute, so this is not lost in the commit
-logs.
+Wrappers will need their own annotations; for this kind of static
+analysis (built-in warning diagnostic), inferring things like
+__cond_acquires(true, lock) is far too complex (requires
+intra-procedural control-flow analysis), and would likely be
+incomplete too.
+
+It might also be reasonable to argue that the explicit annotation is
+good for documentation.
+
+Aside: There's other static analysis tooling, like clang-analyzer that
+can afford to do more complex flow-sensitive intra-procedural
+analysis. But that has its own limitations, requires separate
+invocation, and is pretty slow in comparison.
