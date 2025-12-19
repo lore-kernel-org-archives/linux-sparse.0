@@ -1,107 +1,128 @@
-Received: from mail-wr1-f68.google.com (mail-wr1-f68.google.com [209.85.221.68])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1CB72325701
-	for <linux-sparse@vger.kernel.org>; Fri, 19 Dec 2025 12:44:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.68
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DBB1433DED3;
+	Fri, 19 Dec 2025 14:59:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1766148254; cv=none; b=PyNN+FA1+GjBZRMxzDQU/Gm6GWQqE+/LXH9RZtIFsBh6xwfuJNmQKSjNgCqKqN85r3f1s1/ANf8Iri/tQ96uYWqYOvFRM5vz5TRZbiApjXoV0i5Iv9g9M99TXkZ66WodlH2l0AgiI8N1gIi30yRbdqhPDTWy1K/JMWQM20hwMPA=
+	t=1766156398; cv=none; b=CK7g1jp+TWM0PRV2tZJvKvRDhJCOQrkqvBD4zXmJqqABQuMZAn16B2vwAk/W0Jmhl1RqejzlHdeeePT8xWK/aDgMfAB9XjybZ7B8JJRoymQtRX5QjOQNSiRybQvtfRaNnHUdunkmcVrgcTdfh5GynfInSl6yjxkZsh9dGqZ097w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1766148254; c=relaxed/simple;
-	bh=GPZuwoozuAGjv9w0ymSfsuTZftLR4oDKUlvOpzKbWMY=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ebQggPJeB7y/+Z0Gfu/5RTl5ha5/v3ytoqr702p6UuM1vQAlUvrKeE8Kh2iO1kWwoQUVRiDSZw+2rHqOh1ex3bs6dDhxN0VR+PeqcFmWm6bx4p4ucRHobpZrPQlkLVrssJZ5yjKQVfzAGrKVQ93Dj6wLwVb3638IdkzHlt+SeBE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=TTmHsRZX; arc=none smtp.client-ip=209.85.221.68
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1766156398; c=relaxed/simple;
+	bh=7L/q4HPuFy1vCm2MmLUJST8v/l7o4IYp77xRl8XO9N4=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=rd9fg2B7KuHnmlTQ1yvJeTj88yizBdrK7OnHOf1sVTOcolQvMydHRx/5Hy2KpB6dslkuUPYh6ZJsGoPagxyp4jjLZRCg71h+Qk3xZ3yvTPeImB137sT5Yl13EQ0t/zzf8s0lOE0CPqaBcIAt7X++HJHYjgLpTuGj3M3Jk2TtAII=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=As/oYeNx; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="TTmHsRZX"
-Received: by mail-wr1-f68.google.com with SMTP id ffacd0b85a97d-42fed090e5fso869135f8f.1
-        for <linux-sparse@vger.kernel.org>; Fri, 19 Dec 2025 04:44:11 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1766148250; x=1766753050; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=zqJodAAexbDXbzG4ziuX+RHvdrWJghAK+tfZzJOfXvE=;
-        b=TTmHsRZXPGUgJxj8hgN+4+IOD7HK1pQRi72gZFBcbGIHIoaWt+b0M8ztEVs4HWnaK6
-         sKoNjjXyAiq2fPwkQCrSOLHfoKFEMcygsKeIAxoQjocci+rCEFHFHSU2JBb012wDbUoB
-         Kc/0FYKlHXoq7dPmhIa5n0J7mZ4GQlmUwdwGZ+e31oHKv4fxSPP/fHHELL8HUARZ108o
-         LbsBX+hFnWvXiQPnG2UdTarWSg5dZqe61ULWjZQMzaJl04aDa/+ucQXprbJhcCpWExLA
-         uAFU7HnQ5X7yxPFg33tSafjUKXPh0TEelj7IJDsvASVjgumur08JiIuAMUQBhLX7tW5e
-         mFvQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1766148250; x=1766753050;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=zqJodAAexbDXbzG4ziuX+RHvdrWJghAK+tfZzJOfXvE=;
-        b=SMhllJlMx2ikeb1d1JPWCYg/P0d5zsdIaHIP6nGse0GuGJHOLJrOPjegwMrizTDzSF
-         w6tLLwJ5NLGz3rlDExz7E+NRBOilnz4iIoiKltcS00v8kTOE3mYnjj2JveipExQ+5Zxo
-         BBHh4w1kn7xRbflnpgNqA5Ne24tv3c4vxdAuOnvABcl6cAtWnAgLmL++qK9HaEbjVBMO
-         +oqm+8peAvEdR1Pnz9Gw1u/CwaeUXvMZpF0jZ5hDbaM9q3YqsUb+IWgkw7jQZsSZdN/J
-         Z5KzSp1oj1GpF1E7gPQ1+vVcEoMkiF16Wex9Nzz8rry1QtsU16Bu5B0mvcYDiGx9k/7g
-         jr5g==
-X-Forwarded-Encrypted: i=1; AJvYcCU1JLqKDGh/QmeCrreEfdNnMKWA5AI33R0Cy6+JXmy/5cVJI5YXaHE6ucdnfVD7Ytt3pM0T/eyO8BuBNnA=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx6t0GXh5qo6oLv8+eB0YNq69RbycHM4KUD8BAfB3IJqfBD8dgf
-	QBBUYStZNnfmuhaPys8aNu5p1C9D65Z5A1Vr5vx5YKP5nj0uP7MfHV/s+vTh0iXADK8=
-X-Gm-Gg: AY/fxX4xHllUMCOWvtW0qsOQv0KKo0rzTrYvdwxYulm7vI8DwMxKS30EGkoGOhgjXTO
-	Tu43XDEG2ara94eWaKbDnBa4cll0msnq8Z2E3DcFDwHARbMr/WlZvHe9ulR7W/1rR//FL3+0vcl
-	/SXOO9nRGht2vWh+D69yGbsrEfvHMx+otct4nJLsfn97exLcWZH3Bo0TrMbjIRKdEYxUpilOMDM
-	8DrmobnfK/Kmd96fbFH1ywqz9QhgilEeZIdGD93fHvMGcyJ1INHMvNeyzn/SPgf3ft76jUHYOGO
-	8ks3t9OwACjxg3j9EEtzH2s+e+aE1ymAL0uesvMY6raTEUr+5Rr2aWZYgoPT7gf7/oXS4xDclDV
-	x/rO9vRst6xdRp5wM/U8La2tkWo3pR5QFyIH7xqLi0p47EazaO/fzUn0riaQ71ABElglBk/2Muz
-	iUVwdxYiemfK0jTBi3
-X-Google-Smtp-Source: AGHT+IGG+wVBFX9Lbyf5X5m7oA1PcjdwjHnK15w70nggTuAbT2I1hgnSsU2lA7AlrqPTLo9GEXlYag==
-X-Received: by 2002:a05:6000:220e:b0:430:fc63:8c1 with SMTP id ffacd0b85a97d-4324e4c9e4emr2999115f8f.18.1766148250366;
-        Fri, 19 Dec 2025 04:44:10 -0800 (PST)
-Received: from localhost ([196.207.164.177])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-4324ea225fcsm4983162f8f.16.2025.12.19.04.44.09
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 19 Dec 2025 04:44:09 -0800 (PST)
-Date: Fri, 19 Dec 2025 15:44:06 +0300
-From: Dan Carpenter <dan.carpenter@linaro.org>
-To: Matthieu Baerts <matttbe@kernel.org>
-Cc: Kees Cook <kees@kernel.org>, Rusty Russell <rusty@rustcorp.com.au>,
-	Petr Pavlu <petr.pavlu@suse.com>,
-	Daniel Gomez <da.gomez@kernel.org>,
-	Sami Tolvanen <samitolvanen@google.com>,
-	linux-modules@vger.kernel.org,
-	Hans Verkuil <hverkuil+cisco@kernel.org>,
-	Malcolm Priestley <tvboxspy@gmail.com>,
-	Mauro Carvalho Chehab <mchehab@kernel.org>,
-	Hans Verkuil <hverkuil@kernel.org>,
-	Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= <u.kleine-koenig@pengutronix.de>,
-	linux-kernel@vger.kernel.org, linux-media@vger.kernel.org,
-	linux-hardening@vger.kernel.org,
-	Luis Chamberlain <mcgrof@kernel.org>, Chris Li <sparse@chrisli.org>,
-	linux-sparse@vger.kernel.org
-Subject: Re: [PATCH v2 3/3] module: Add compile-time check for embedded NUL
- characters
-Message-ID: <aUVIlvOSvobrdrKV@stanley.mountain>
-References: <20251010030348.it.784-kees@kernel.org>
- <20251010030610.3032147-3-kees@kernel.org>
- <47a2f0c7-c25f-4734-840b-fdefc2f3c4a9@kernel.org>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="As/oYeNx"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 08884C4CEF1;
+	Fri, 19 Dec 2025 14:59:52 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1766156396;
+	bh=7L/q4HPuFy1vCm2MmLUJST8v/l7o4IYp77xRl8XO9N4=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=As/oYeNxM4abW+3WVENKEEewYHXwfd4Jel7Df6FpFo45nRTlozbZSFIujcnEqMw5M
+	 Q7MEhHLM1FYJpcmfke7YN1SETscuUbR2VvMjmfOAt3gKCbwybpX+SFWFXkTNhpwpqo
+	 iHa3tFsHhiU3kqOO0OwWWMyIYwbST8yDDW9EvhA4dZn7qQOvfHMvdyx8Im0dYlvQRA
+	 GJ0A3BWC0gHhj3KK3TbMVsJhBG9kt2hk/gDXpmegR9r4o1DgwW894hinlFKRZHtPtU
+	 VeVz2TnQdhwdtp/bwwQvMr8Ckqv5KniUEdqB8aKMwf8NaBAFzrW+3edcsWryr44Yej
+	 MhKKjtXqHXgeQ==
+Message-ID: <bf5b9a62-a120-421e-908d-1404c42e0b60@kernel.org>
+Date: Fri, 19 Dec 2025 15:59:48 +0100
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <47a2f0c7-c25f-4734-840b-fdefc2f3c4a9@kernel.org>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2 3/3] module: Add compile-time check for embedded NUL
+ characters
+Content-Language: en-GB, fr-BE
+To: Dan Carpenter <dan.carpenter@linaro.org>,
+ Daniel Gomez <da.gomez@kernel.org>
+Cc: Kees Cook <kees@kernel.org>, Rusty Russell <rusty@rustcorp.com.au>,
+ Petr Pavlu <petr.pavlu@suse.com>, Sami Tolvanen <samitolvanen@google.com>,
+ linux-modules@vger.kernel.org, Hans Verkuil <hverkuil+cisco@kernel.org>,
+ Malcolm Priestley <tvboxspy@gmail.com>,
+ Mauro Carvalho Chehab <mchehab@kernel.org>,
+ Hans Verkuil <hverkuil@kernel.org>,
+ =?UTF-8?Q?Uwe_Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>,
+ linux-kernel@vger.kernel.org, linux-media@vger.kernel.org,
+ linux-hardening@vger.kernel.org, Luis Chamberlain <mcgrof@kernel.org>,
+ Chris Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org
+References: <20251010030348.it.784-kees@kernel.org>
+ <20251010030610.3032147-3-kees@kernel.org>
+ <47a2f0c7-c25f-4734-840b-fdefc2f3c4a9@kernel.org>
+ <aUVIlvOSvobrdrKV@stanley.mountain>
+From: Matthieu Baerts <matttbe@kernel.org>
+Autocrypt: addr=matttbe@kernel.org; keydata=
+ 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
+ lzVbFe7fduHbABmYz9cefQpO7wDE/Q==
+Organization: NGI0 Core
+In-Reply-To: <aUVIlvOSvobrdrKV@stanley.mountain>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Fri, Dec 19, 2025 at 01:29:21PM +0100, Matthieu Baerts wrote:
-> net/mptcp/crypto_test.c:72:1: error: bad integer constant expression
-> net/mptcp/crypto_test.c:72:1: error: static assertion failed: "MODULE_INFO(license, ...) contains embedded NUL byte"
-> net/mptcp/crypto_test.c:73:1: error: bad integer constant expression
-> net/mptcp/crypto_test.c:73:1: error: static assertion failed: "MODULE_INFO(description, ...) contains embedded NUL byte"
+Hi Dan, Daniel
 
-There was a fix for that posted.  Let me ping them to see if anyone is
-planning to send an actual patch.
+On 19/12/2025 13:44, Dan Carpenter wrote:
+> On Fri, Dec 19, 2025 at 01:29:21PM +0100, Matthieu Baerts wrote:
+>> net/mptcp/crypto_test.c:72:1: error: bad integer constant expression
+>> net/mptcp/crypto_test.c:72:1: error: static assertion failed: "MODULE_INFO(license, ...) contains embedded NUL byte"
+>> net/mptcp/crypto_test.c:73:1: error: bad integer constant expression
+>> net/mptcp/crypto_test.c:73:1: error: static assertion failed: "MODULE_INFO(description, ...) contains embedded NUL byte"
+> 
+> There was a fix for that posted.  Let me ping them to see if anyone is
+> planning to send an actual patch.
+> 
+> https://lore.kernel.org/all/20251211175101.GA3405942@google.com/
 
-https://lore.kernel.org/all/20251211175101.GA3405942@google.com/
+Thank you both for your reply! I didn't think about looking at the v1.
 
-regards
-dan carpenter
+I confirm that Sami's patch silences the errors on my side. Thanks!
+
+Cheers,
+Matt
+-- 
+Sponsored by the NGI0 Core fund.
 
