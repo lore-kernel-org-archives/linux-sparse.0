@@ -1,55 +1,55 @@
-Received: from mail-ed1-f74.google.com (mail-ed1-f74.google.com [209.85.208.74])
+Received: from mail-wm1-f74.google.com (mail-wm1-f74.google.com [209.85.128.74])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 312AD34CFC0
-	for <linux-sparse@vger.kernel.org>; Fri, 19 Dec 2025 15:46:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.74
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0E03F34D3A6
+	for <linux-sparse@vger.kernel.org>; Fri, 19 Dec 2025 15:46:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.74
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1766159212; cv=none; b=IJVQ9hsdLIvRukHqQ6WhAo/qaoDaUvpVmiXVc0NgQp0TdtBEMsw+8CclJfrIbOPoBdN9sD9Sqd/GhWjVT5Y8WmfenTgbuI6i7DfqL18yj/vPjEqnyttyKr42yosXtnHj5ue0xQNEOC+3sQL058MGQzys1Tx1KxPnY8KN6tCdwHQ=
+	t=1766159216; cv=none; b=HWl8YG0AhVg+6FWGqNVggdIt8jzFYhU4UG9ko4DMN9SnYKD6lMEfRTlBDUqD83I1DsQAR2xNfHHRPDiFHlfZX70tSJnXLP6cbQCpIVXlap2Jlly7T6tAWdZIYmrI/ud3Umi/GlVYyHtKd5mvm4w+gi8ZZVuPJVI4L60IxIB6y+k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1766159212; c=relaxed/simple;
-	bh=ln67g4FksJVOa0BRa1f5CRH52V/ROTo9NVPtsH31YyE=;
+	s=arc-20240116; t=1766159216; c=relaxed/simple;
+	bh=ffn5A72rAl7FAFjS1rk5YlULl8qajeM/K30VyhzfQ+s=;
 	h=Date:In-Reply-To:Mime-Version:References:Message-ID:Subject:From:
-	 To:Cc:Content-Type; b=fDAgghePt6t4UyxBoz6LonBFBu/zw3l+02x35zaUuesoI7s3JBVqCjkmZE1LknH2NKE7ZRt2pJufeqJLv9O0U3eBhIACo0A69tro8qdC6EK/DyQRA5dzxptQslgoXZ/MmhJcuiXh5haFlAz6jig6bKg/iISomONFgtnFuiKjL2s=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--elver.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=4oadzVeY; arc=none smtp.client-ip=209.85.208.74
+	 To:Cc:Content-Type; b=PWXyPByw5sh2QGMXh6G3mfrbsf2+vIeaZff/yFRfob4LZNim3GgSWgDX4w7cirBD+xLQ6JhFekYM/BPbs2pWsfLoxF79qBn2uhdnEzL1zpPuzmz9G1ExzwCOLzNaeZUOwiqjF+EyAZuHJ1YoPZHwXfetAzKLmlNFmWENyiSxtzM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--elver.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=cKbw4Wbp; arc=none smtp.client-ip=209.85.128.74
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--elver.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="4oadzVeY"
-Received: by mail-ed1-f74.google.com with SMTP id 4fb4d7f45d1cf-6409f6d6800so2069165a12.0
-        for <linux-sparse@vger.kernel.org>; Fri, 19 Dec 2025 07:46:50 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="cKbw4Wbp"
+Received: by mail-wm1-f74.google.com with SMTP id 5b1f17b1804b1-47918084ac1so15311005e9.2
+        for <linux-sparse@vger.kernel.org>; Fri, 19 Dec 2025 07:46:53 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20230601; t=1766159208; x=1766764008; darn=vger.kernel.org;
+        d=google.com; s=20230601; t=1766159212; x=1766764012; darn=vger.kernel.org;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:from:to:cc:subject:date:message-id:reply-to;
-        bh=iwJwFE4RR+G0qPj93NacKXfc9Bqs8f3KUgfNaIjFSIY=;
-        b=4oadzVeYYlhSHL8EVuAggfjknO+wAgJgEn/pDwg3EUlp4Al8SWsMW/bllQrjMC24xJ
-         7OEJoJiYIdsTBQhs4TobyKhHejj/Zj/EKOVAfmN/w2a9BkPp2V2F1s5ijG+bv/FWCc+6
-         9XqtRYZkLCZ4toa/eliZ05VtbcLdtKK7vzijZuOkemDKYBP8+FdRBqYBAMAZWRoLru5s
-         ZZGpdD8ulG2vHnalpjuwDcYADtxfE2DW7gRNwQj3aXfRlEYmWZNmk7Ur04noWaT4NY6C
-         bEbbLnV9VdGnaPku6sZ/Y+6hS6G59XEew6PGJcmZ0rOJaWQj/5kaWvOs0Gxq5ewpe6LZ
-         gDSg==
+        bh=BPiD3KqRf4YAgh6EJvt9JR+cuwWr4Dg7H+dSvPnSAFc=;
+        b=cKbw4WbpL+Cvqd22rO3gflpWRfLXWYBA5lTrVXemFojS3IzY5B9bWRbqDk2NK0N5t+
+         S5DGaTfJHL9AqeYURPH5JK9KoHPOx9g7bg1oGlDBd5GIM6jdMJ/GYz0brlm5FgEwe3/R
+         8hzLlb7c2OIt0Cz3ZEsSa5XLsFON5bYu4TWEly9dZ54gGSaJ1d5Fn2IqyQv0ACbeidRj
+         5AvEhmdol57VZWfEu7fgZNF/nPMGpICpSyo/4PHezLaG/9mBryDgF9i+ajBGDFX/Q2wW
+         tFpczKzYxk4WX11wkI5XPDZVYqjZOqtv3il3BJ6fDvOV3P8nlfkM9y986Cc1BrDN3PPQ
+         1grg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1766159208; x=1766764008;
+        d=1e100.net; s=20230601; t=1766159212; x=1766764012;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=iwJwFE4RR+G0qPj93NacKXfc9Bqs8f3KUgfNaIjFSIY=;
-        b=o8D8D9SRmiqc/MsZvcP6EglwDHbHiwVEY78d1rjiIR/8WV0aKy2qyuCmjY34HMZ01T
-         8Ma/oNW/hEbsY9Q1VhsXNYzaSZH1RkV4oEI/CgnPCc46V9wPRD0TdMnq8fRWSUsQGQ0i
-         /wdVgwU2SQ3tUsyO0QAGGP3HAaKrsA7WvI/ah+UuAisKtLktUPFfHAP30/v1EyI8a05f
-         Cg1YOhA+k4aeosr+PfYGYro80ffvh3ibodRYQfbMmktswhZeTH/OOHnusus24WIBIZGi
-         2TN3cMActE3E4W5EUlKZ+6Tkbqt9zZOXbjdppAL+CAa6maw3jBFFWyVr3u3Slirme1ra
-         TlsQ==
-X-Forwarded-Encrypted: i=1; AJvYcCX+Svp9NjkPbIwPnpTdQwTPixSRGthRlGDIL1NmDg//6uvJhqeCsrCfzFj2aKaFMu9vIMVMMha/Ol1mSmU=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yw4fXn7oKtWY7z5i7s5GvpoKHft0qYk5ww9DyztlxGCUf1vgdE/
-	eq5qGxlbALLHbxIdwtxPJGg/DONIfeRY5G1O+FK8/kgdlz2ouJIN4BRa2B16AL2eZN4r2DRy11G
-	IuQ==
-X-Google-Smtp-Source: AGHT+IFnXG6cE34nzlKUaF0YLjZuRw/c6GtHv7aWsx/cCEAUfVEyphXLuEYpLswMSP0zGStw/fZIKiWOPA==
-X-Received: from edwv2.prod.google.com ([2002:aa7:cd42:0:b0:643:8c4d:bca0])
- (user=elver job=prod-delivery.src-stubby-dispatcher) by 2002:a05:6402:27cb:b0:64b:46d4:5d5c
- with SMTP id 4fb4d7f45d1cf-64b8e9379dcmr2970087a12.5.1766159208169; Fri, 19
- Dec 2025 07:46:48 -0800 (PST)
-Date: Fri, 19 Dec 2025 16:40:10 +0100
+        bh=BPiD3KqRf4YAgh6EJvt9JR+cuwWr4Dg7H+dSvPnSAFc=;
+        b=CLFYb76RHRnKj/VIXJBKt1Wun6FL01NYjUz5zL5CnRft37d6Z7w6kc1C+J7kVb0XEg
+         OP0C2RUIy/vTidClW4qFqQ3cTKUh3UP+04woJBBvly7+QB9BlofQzbpfSCRWzHQsMOR9
+         L1yd1JjpkeSCJxEX0NAOWCn/vxj9uZ7TRT7ObHkoj+iZkgu3mEXRO9JzMj4yUqCAa58a
+         Sl/bJzj+mDt6tlndacZEeqcC0+lAkg2XC5HT08EX4xHJg4M+7EO+P1DtXmzgRJErOucb
+         VE36PVa4uOucrOPwQ3fkhiqiiMMBOhYhltLJDgwJj89jd0ysd8Dw7sKhSw87M5x5G5ym
+         oqzw==
+X-Forwarded-Encrypted: i=1; AJvYcCWfA2VuU/+VRzqVjtitxXosbVvYuJ1TTyLKBHGs2FCmP2SKBXx8J3gb0YWGLuDoT90D3gBVdBhf8Ow7+qU=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxcGJ/1YudZusGNWwFPKZR5rbrEZInJz5rSLe10gNIFtw19eVXN
+	WlIT93xnb9vkujLPVelFMYvrom4V6eTxBaJWkKYAWMEf+60aeoZyg6KMkszdrZEmrCFHREG4dF+
+	HZQ==
+X-Google-Smtp-Source: AGHT+IGhAhPmou604sSjPj23AvOGmEtACeK8/O1HXfeBpY2WmsP8AIbWuFkf2cEj+zrFEmw2cUXjp49BYQ==
+X-Received: from wmco23.prod.google.com ([2002:a05:600c:a317:b0:477:93dd:bbb1])
+ (user=elver job=prod-delivery.src-stubby-dispatcher) by 2002:a05:600d:108:20b0:477:214f:bd95
+ with SMTP id 5b1f17b1804b1-47d1c036d6cmr18724405e9.23.1766159212483; Fri, 19
+ Dec 2025 07:46:52 -0800 (PST)
+Date: Fri, 19 Dec 2025 16:40:11 +0100
 In-Reply-To: <20251219154418.3592607-1-elver@google.com>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
@@ -59,8 +59,8 @@ List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 Mime-Version: 1.0
 References: <20251219154418.3592607-1-elver@google.com>
 X-Mailer: git-send-email 2.52.0.322.g1dd061c0dc-goog
-Message-ID: <20251219154418.3592607-22-elver@google.com>
-Subject: [PATCH v5 21/36] debugfs: Make debugfs_cancellation a context lock struct
+Message-ID: <20251219154418.3592607-23-elver@google.com>
+Subject: [PATCH v5 22/36] um: Fix incorrect __acquires/__releases annotations
 From: Marco Elver <elver@google.com>
 To: elver@google.com, Peter Zijlstra <peterz@infradead.org>, 
 	Boqun Feng <boqun.feng@gmail.com>, Ingo Molnar <mingo@kernel.org>, Will Deacon <will@kernel.org>
@@ -84,62 +84,116 @@ Cc: "David S. Miller" <davem@davemloft.net>, Luc Van Oostenryck <luc.vanoostenry
 	linux-doc@vger.kernel.org, linux-kbuild@vger.kernel.org, 
 	linux-kernel@vger.kernel.org, linux-mm@kvack.org, 
 	linux-security-module@vger.kernel.org, linux-sparse@vger.kernel.org, 
-	linux-wireless@vger.kernel.org, llvm@lists.linux.dev, rcu@vger.kernel.org
+	linux-wireless@vger.kernel.org, llvm@lists.linux.dev, rcu@vger.kernel.org, 
+	kernel test robot <lkp@intel.com>, Johannes Berg <johannes@sipsolutions.net>, 
+	Tiwei Bie <tiwei.btw@antgroup.com>
 Content-Type: text/plain; charset="UTF-8"
 
-When compiling include/linux/debugfs.h with CONTEXT_ANALYSIS enabled, we
-can see this error:
+With Clang's context analysis, the compiler is a bit more strict about
+what goes into the __acquires/__releases annotations and can't refer to
+non-existent variables.
 
-./include/linux/debugfs.h:239:17: error: use of undeclared identifier 'cancellation'
-  239 | void __acquires(cancellation)
+On an UM build, mm_id.h is transitively included into mm_types.h, and we
+can observe the following error (if context analysis is enabled in e.g.
+stackdepot.c):
 
-Move the __acquires(..) attribute after the declaration, so that the
-compiler can see the cancellation function argument, as well as making
-struct debugfs_cancellation a real context lock to benefit from Clang's
-context analysis.
+   In file included from lib/stackdepot.c:17:
+   In file included from include/linux/debugfs.h:15:
+   In file included from include/linux/fs.h:5:
+   In file included from include/linux/fs/super.h:5:
+   In file included from include/linux/fs/super_types.h:7:
+   In file included from include/linux/list_lru.h:14:
+   In file included from include/linux/xarray.h:16:
+   In file included from include/linux/gfp.h:7:
+   In file included from include/linux/mmzone.h:22:
+   In file included from include/linux/mm_types.h:26:
+   In file included from arch/um/include/asm/mmu.h:12:
+>> arch/um/include/shared/skas/mm_id.h:24:54: error: use of undeclared identifier 'turnstile'
+      24 | void enter_turnstile(struct mm_id *mm_id) __acquires(turnstile);
+         |                                                      ^~~~~~~~~
+   arch/um/include/shared/skas/mm_id.h:25:53: error: use of undeclared identifier 'turnstile'
+      25 | void exit_turnstile(struct mm_id *mm_id) __releases(turnstile);
+         |                                                     ^~~~~~~~~
 
-This change is a preparatory change to allow enabling context analysis
-in subsystems that include the above header.
+One (discarded) option was to use token_context_lock(turnstile) to just
+define a token with the already used name, but that would not allow the
+compiler to distinguish between different mm_id-dependent instances.
 
+Another constraint is that struct mm_id is only declared and incomplete
+in the header, so even if we tried to construct an expression to get to
+the mutex instance, this would fail (including more headers transitively
+everywhere should also be avoided).
+
+Instead, just declare an mm_id-dependent helper to return the mutex, and
+use the mm_id-dependent call expression in the __acquires/__releases
+attributes; the compiler will consider the identity of the mutex to be
+the call expression. Then using __get_turnstile() in the lock/unlock
+wrappers (with context analysis enabled for mmu.c) the compiler will be
+able to verify the implementation of the wrappers as-is.
+
+We leave context analysis disabled in arch/um/kernel/skas/ for now. This
+change is a preparatory change to allow enabling context analysis in
+subsystems that include any of the above headers.
+
+No functional change intended.
+
+Closes: https://lore.kernel.org/oe-kbuild-all/202512171220.vHlvhpCr-lkp@intel.com/
+Reported-by: kernel test robot <lkp@intel.com>
 Signed-off-by: Marco Elver <elver@google.com>
+Cc: Johannes Berg <johannes@sipsolutions.net>
+Cc: Tiwei Bie <tiwei.btw@antgroup.com>
 ---
-v5:
-* Rename "context guard" -> "context lock".
+ arch/um/include/shared/skas/mm_id.h |  5 +++--
+ arch/um/kernel/skas/mmu.c           | 13 ++++++++-----
+ 2 files changed, 11 insertions(+), 7 deletions(-)
 
-v4:
-* Rename capability -> context analysis.
----
- include/linux/debugfs.h | 12 +++++-------
- 1 file changed, 5 insertions(+), 7 deletions(-)
-
-diff --git a/include/linux/debugfs.h b/include/linux/debugfs.h
-index 7cecda29447e..4177c4738282 100644
---- a/include/linux/debugfs.h
-+++ b/include/linux/debugfs.h
-@@ -239,18 +239,16 @@ ssize_t debugfs_read_file_str(struct file *file, char __user *user_buf,
-  * @cancel: callback to call
-  * @cancel_data: extra data for the callback to call
-  */
--struct debugfs_cancellation {
-+context_lock_struct(debugfs_cancellation) {
- 	struct list_head list;
- 	void (*cancel)(struct dentry *, void *);
- 	void *cancel_data;
+diff --git a/arch/um/include/shared/skas/mm_id.h b/arch/um/include/shared/skas/mm_id.h
+index fb96c0bd8222..18c0621430d2 100644
+--- a/arch/um/include/shared/skas/mm_id.h
++++ b/arch/um/include/shared/skas/mm_id.h
+@@ -21,8 +21,9 @@ struct mm_id {
+ 	int syscall_fd_map[STUB_MAX_FDS];
  };
  
--void __acquires(cancellation)
--debugfs_enter_cancellation(struct file *file,
--			   struct debugfs_cancellation *cancellation);
--void __releases(cancellation)
--debugfs_leave_cancellation(struct file *file,
--			   struct debugfs_cancellation *cancellation);
-+void debugfs_enter_cancellation(struct file *file,
-+				struct debugfs_cancellation *cancellation) __acquires(cancellation);
-+void debugfs_leave_cancellation(struct file *file,
-+				struct debugfs_cancellation *cancellation) __releases(cancellation);
+-void enter_turnstile(struct mm_id *mm_id) __acquires(turnstile);
+-void exit_turnstile(struct mm_id *mm_id) __releases(turnstile);
++struct mutex *__get_turnstile(struct mm_id *mm_id);
++void enter_turnstile(struct mm_id *mm_id) __acquires(__get_turnstile(mm_id));
++void exit_turnstile(struct mm_id *mm_id) __releases(__get_turnstile(mm_id));
  
- #else
+ void notify_mm_kill(int pid);
  
+diff --git a/arch/um/kernel/skas/mmu.c b/arch/um/kernel/skas/mmu.c
+index 00957788591b..b5017096028b 100644
+--- a/arch/um/kernel/skas/mmu.c
++++ b/arch/um/kernel/skas/mmu.c
+@@ -23,18 +23,21 @@ static_assert(sizeof(struct stub_data) == STUB_DATA_PAGES * UM_KERN_PAGE_SIZE);
+ static spinlock_t mm_list_lock;
+ static struct list_head mm_list;
+ 
+-void enter_turnstile(struct mm_id *mm_id) __acquires(turnstile)
++struct mutex *__get_turnstile(struct mm_id *mm_id)
+ {
+ 	struct mm_context *ctx = container_of(mm_id, struct mm_context, id);
+ 
+-	mutex_lock(&ctx->turnstile);
++	return &ctx->turnstile;
+ }
+ 
+-void exit_turnstile(struct mm_id *mm_id) __releases(turnstile)
++void enter_turnstile(struct mm_id *mm_id)
+ {
+-	struct mm_context *ctx = container_of(mm_id, struct mm_context, id);
++	mutex_lock(__get_turnstile(mm_id));
++}
+ 
+-	mutex_unlock(&ctx->turnstile);
++void exit_turnstile(struct mm_id *mm_id)
++{
++	mutex_unlock(__get_turnstile(mm_id));
+ }
+ 
+ int init_new_context(struct task_struct *task, struct mm_struct *mm)
 -- 
 2.52.0.322.g1dd061c0dc-goog
 
