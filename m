@@ -1,180 +1,131 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f54.google.com (mail-wm1-f54.google.com [209.85.128.54])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3C0CD2417E0;
-	Thu, 18 Dec 2025 22:31:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 85ADC23EA88
+	for <linux-sparse@vger.kernel.org>; Fri, 19 Dec 2025 06:56:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.54
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1766097110; cv=none; b=uUR1ckXug24YllZr1+zMjOuSzH8fJTQRPG8V8/gByzlJ7aG/u5f3wmiAlYFl0G9MqNIsHeRJAXa1cPLzkEi3u0ft7UMT+Mtcy+qsY+Ubt1bCwyK3zBBUVyUWe3Gsi1ZpvQCBUKhDEGclLX22dbQEBE0fFCopges2PxrtTr/qD20=
+	t=1766127372; cv=none; b=OyUSi6RAJj6XZgle1jnwi1rldCSH5v+sGitCySQY2VO1VudP8YVbk81PgTr2RtQxcpF4YmgPWxrSgr5x69y+SVgoC8LsU26hRFSRkvjJlWcDm+8dYK4T2AXUlRF92YOgJKReeeGQrXV98eJDjKwNVnPAsSvy+KiNiuVQLE/Qolc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1766097110; c=relaxed/simple;
-	bh=own/YW+jwQswxII/qxW2HPNWs6Q2EnHJVVXWsC138hA=;
-	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
-	 In-Reply-To:Content-Type; b=V3eZ+7UH3u9tXjcg2mz5hSj42OkD5BPlWkCX+Nji6+yJvEKday4o5P/7a0ywGJTF1lC5//sffS6JCCpOE5ZOhu9pjarjL2iTBpo3VyBp2mdVEudx7TWi8+O7BhDzblS1uZ5nK3s5169hfi9lnbWyVcvRlEOKJBl4Gul9CkFYMO8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=LQ4S7jWA; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1766127372; c=relaxed/simple;
+	bh=rK2YSV2LQI36XGOcBtrahoUPHaJW1KtgnbjA4zRpGec=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=nmGo5+tjzzTtvNc+qHHQUg+GnxQQecx599fb2QPFGtLrVFi918BAWxJOVPCDwe02sqNDbYVMiXmSfLNJLYaSNRfXpkHpjcHu4Um7tMEFXwcduDVkAW1HzmGiS/Il0unImR8wdrEx/OTGO0OTIgkQJABv5qj4vtm20yPMhRHyy2Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=dd3nINGP; arc=none smtp.client-ip=209.85.128.54
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="LQ4S7jWA"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id AB013C4CEFB;
-	Thu, 18 Dec 2025 22:31:42 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1766097107;
-	bh=own/YW+jwQswxII/qxW2HPNWs6Q2EnHJVVXWsC138hA=;
-	h=Date:From:Subject:To:Cc:References:In-Reply-To:From;
-	b=LQ4S7jWA2JU3Q4ZOvQsY6EzobdghyZAR6fbE374ejTiDLOvaHBM2/aHcHBBUFgPtH
-	 L4zOEXINKTQ9UokTKcZeyVj1LADNAMaXKgCqOjHqznsTS3f0mpDvTHZDvS+sXUlqAX
-	 A3t1u6iYasV0sB/8JtOaNsSzOQC8U8St1JIkTddw8MdylBhDK2yOntlFn4CvTcM9Kz
-	 JbW/TB1rf6C9rOU1bSaSk9wkxHtsbBk/LuiQn7PS+fkAuGkcqtz1qDDQ8+QzkAbHOC
-	 SSNP7W+3k1qz75yrbWB8PK1+CXIJY9S30KOBO5qpr8H+Crboe/KyLq+amVdWHTRrZS
-	 1QfN7svbNc6wA==
-Message-ID: <480c3c06-7b3c-4150-b347-21057678f619@kernel.org>
-Date: Thu, 18 Dec 2025 23:31:40 +0100
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="dd3nINGP"
+Received: by mail-wm1-f54.google.com with SMTP id 5b1f17b1804b1-4779adb38d3so9441585e9.2
+        for <linux-sparse@vger.kernel.org>; Thu, 18 Dec 2025 22:56:10 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1766127369; x=1766732169; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=1uvUrNBTPpChg3H7Mj1KDqnB8rAwuiPMf9e+Kj7W0oA=;
+        b=dd3nINGPUFNwXHcCDxx7rXO/W4jLghXh6FqJGrTPs8FGVTXifVcsxy10LP11xzrncf
+         5HT3ZWVSnvprhUj032EvaMSJ4eKnETDsTBY/FEmmyhnN8x/oem7lzj5uyLh3L9gS03M9
+         l2mfV74L7w30Xa9zPhrd8+/Pq7ckIaGxMBsiNrxBzTFDX8f9QEiCKMlWUR4fn9BG21/7
+         HCcBmuWpfW3DRuy41r3Q7dxawH8nzPS38ecpScHQpYNImmB1mmwp8JvMCNVWYyQ3z8fH
+         C20hiJxRpJhafDMwjCGyi+ro8U6IZJYVS5ZAHNvVa+cJhvbmmSE1kYhTsyCtUqScF+F3
+         Hhrw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1766127369; x=1766732169;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=1uvUrNBTPpChg3H7Mj1KDqnB8rAwuiPMf9e+Kj7W0oA=;
+        b=XVCh9OKYULKIuWQsLRtPT8xNME0hoPHW/WIkR0CPTh73X7zVJ1FAEZoyuwkrOFVO1W
+         Kq0EOXmMli4r0vM8/cTMGtcY9rM5Lk4Yn5QESGJxm6jEtf4K87gdJabQU3LcqKmSCK9f
+         vCXCjXQkGMbK2Xom1QJOqqRLygG48VMve9kC/8LegUpBpX0JGxu4rtayaYDycW6Q4Ca5
+         Hy2VHk4SMFIDUT9XenfiIrNlvC1exQHR7yM6rWnuEYP6uO40ydvoSJm5RLyJKmKbAe5F
+         KQ/HLgArzJK+gWChgN2ew9veVBXO8slDw1KEsZsXHOYzmB95DhmpCoyOAkivIZSV4ldL
+         dAjg==
+X-Forwarded-Encrypted: i=1; AJvYcCUvu1N0j17RvKAHD/4sJiGN3fY9QDUEZKF5pco/GLuGlqv+4QwyB8M8lR9hAMfYFJdXCGafXKu8dZU2Bi8=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzzQGNwBFqPHgdFVfg7FgtPiuqaPEJLgbv56STxShcHzXq0h34j
+	6q0FqnVMRKUOtgDg/viwkVmaELg+l8qj1NiAt2t05Vp4CLP8ys8IWKu/ZqU5EnRI544=
+X-Gm-Gg: AY/fxX4TOCPCOGUjLRVb+/KnfZ+zmIVwdseGUgUgfcLVDmDbsX4CeqO6OrhbI+3A5CT
+	SF0BkS1C5qaHFvS1XoCB2P3PoqpMqCbHcnU8uJm0uuJ1yHcSPrTHd2KdrXxZf7mxW71k3zpe1G5
+	CyJWtZSeEsMvtih0Jp531eN10vUwXjDUs99WiJTQjb0/pdpCDN4W/FHO2b+XNe7XW+C98p0whMM
+	y0Qo5anAGVsNtoiqdtJMbhbT0wnKlIHBHahDJnNfSf65KLCHeK7Qj1uYvLfqU5YzSdlzus84QCd
+	DqU9v1UwePgR/bNeeRk/0HeAuk8gYmXlbFGzS1WwndNcF7Yvo148wAEiU8NZdP34Jpn6Om4hVtC
+	j8YGBb0QR0wQ/Md1ZKmiPxzQM1fhh26A9h//8d88q6dfGKrZCJY5/r0hHOs2x/JW/VgNtXYfuC0
+	zhESgFG33Q4730psrK
+X-Google-Smtp-Source: AGHT+IETUnYjoqlX0nTA5YutvCCmQpud7Xc95qZZjrAyjw0urEK/i2B0DG8TW5LtsWwvJaxJadbpvQ==
+X-Received: by 2002:a05:600c:45cf:b0:47a:7fdd:2906 with SMTP id 5b1f17b1804b1-47d1954a550mr12510385e9.12.1766127368714;
+        Thu, 18 Dec 2025 22:56:08 -0800 (PST)
+Received: from localhost ([196.207.164.177])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-47be3a0fb5bsm30212905e9.1.2025.12.18.22.56.07
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 18 Dec 2025 22:56:08 -0800 (PST)
+Date: Fri, 19 Dec 2025 09:56:05 +0300
+From: Dan Carpenter <dan.carpenter@linaro.org>
+To: Vincent Mailhol <mailhol@kernel.org>
+Cc: Nathan Chancellor <nathan@kernel.org>, Nicolas Schier <nsc@kernel.org>,
+	Nick Desaulniers <nick.desaulniers+lkml@gmail.com>,
+	Bill Wendling <morbo@google.com>,
+	Justin Stitt <justinstitt@google.com>,
+	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
+	Maxime Ripard <mripard@kernel.org>,
+	Thomas Zimmermann <tzimmermann@suse.de>,
+	David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
+	Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.com>,
+	Linus Torvalds <torvalds@linux-foundation.org>,
+	linux-kbuild@vger.kernel.org, linux-sparse@vger.kernel.org,
+	linux-kernel@vger.kernel.org, llvm@lists.linux.dev,
+	dri-devel@lists.freedesktop.org, linux-btrfs@vger.kernel.org
+Subject: Re: [PATCH 1/2] kbuild: remove gcc's -Wtype-limits
+Message-ID: <aUT3BYAT1bLCk1w9@stanley.mountain>
+References: <20251218-remove_wtype-limits-v1-0-735417536787@kernel.org>
+ <20251218-remove_wtype-limits-v1-1-735417536787@kernel.org>
+ <aURXpAwm-ITVlHMl@stanley.mountain>
+ <480c3c06-7b3c-4150-b347-21057678f619@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-From: Vincent Mailhol <mailhol@kernel.org>
-Subject: Re: [PATCH 1/2] kbuild: remove gcc's -Wtype-limits
-To: Dan Carpenter <dan.carpenter@linaro.org>
-Cc: Nathan Chancellor <nathan@kernel.org>, Nicolas Schier <nsc@kernel.org>,
- Nick Desaulniers <nick.desaulniers+lkml@gmail.com>,
- Bill Wendling <morbo@google.com>, Justin Stitt <justinstitt@google.com>,
- Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
- Maxime Ripard <mripard@kernel.org>, Thomas Zimmermann <tzimmermann@suse.de>,
- David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
- Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.com>,
- Linus Torvalds <torvalds@linux-foundation.org>,
- linux-kbuild@vger.kernel.org, linux-sparse@vger.kernel.org,
- linux-kernel@vger.kernel.org, llvm@lists.linux.dev,
- dri-devel@lists.freedesktop.org, linux-btrfs@vger.kernel.org
-References: <20251218-remove_wtype-limits-v1-0-735417536787@kernel.org>
- <20251218-remove_wtype-limits-v1-1-735417536787@kernel.org>
- <aURXpAwm-ITVlHMl@stanley.mountain>
-Content-Language: en-US
-Autocrypt: addr=mailhol@kernel.org; keydata=
- xjMEZluomRYJKwYBBAHaRw8BAQdAf+/PnQvy9LCWNSJLbhc+AOUsR2cNVonvxhDk/KcW7FvN
- JFZpbmNlbnQgTWFpbGhvbCA8bWFpbGhvbEBrZXJuZWwub3JnPsKZBBMWCgBBFiEE7Y9wBXTm
- fyDldOjiq1/riG27mcIFAmdfB/kCGwMFCQp/CJcFCwkIBwICIgIGFQoJCAsCBBYCAwECHgcC
- F4AACgkQq1/riG27mcKBHgEAygbvORJOfMHGlq5lQhZkDnaUXbpZhxirxkAHwTypHr4A/joI
- 2wLjgTCm5I2Z3zB8hqJu+OeFPXZFWGTuk0e2wT4JzjgEZx4y8xIKKwYBBAGXVQEFAQEHQJrb
- YZzu0JG5w8gxE6EtQe6LmxKMqP6EyR33sA+BR9pLAwEIB8J+BBgWCgAmFiEE7Y9wBXTmfyDl
- dOjiq1/riG27mcIFAmceMvMCGwwFCQPCZwAACgkQq1/riG27mcJU7QEA+LmpFhfQ1aij/L8V
- zsZwr/S44HCzcz5+jkxnVVQ5LZ4BANOCpYEY+CYrld5XZvM8h2EntNnzxHHuhjfDOQ3MAkEK
-In-Reply-To: <aURXpAwm-ITVlHMl@stanley.mountain>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <480c3c06-7b3c-4150-b347-21057678f619@kernel.org>
 
-Hi Dan,
-
-On 18/12/2025 at 20:36, Dan Carpenter wrote:
-> On Thu, Dec 18, 2025 at 07:50:01PM +0100, Vincent Mailhol wrote:
-
-(...)
-
->> With this, remove gcc's -Wtype-limits. People who still want to catch
->> incorrect comparisons between unsigned integers and zero can now use
->> sparse instead.
->>
->> On a side note, clang also has a -Wtype-limits warning but:
->>
->>   * it is not enabled in the kernel at the moment because, contrary to
->>     gcc, clang did not include it under -Wextra.
->>
->>   * it does not warn if the code results from a macro expansion. So,
->>     if activated, it would not cause as much spam as gcc does.
->>
->>   * -Wtype-limits is split into four sub-warnings [3] meaning that if
->>     it were to be activated, we could select which one to keep.
->>
+On Thu, Dec 18, 2025 at 11:31:40PM +0100, Vincent Mailhol wrote:
+> Hi Dan,
 > 
-> Sounds good.  I like your Sparse check.
+> On 18/12/2025 at 20:36, Dan Carpenter wrote:
+> > On Thu, Dec 18, 2025 at 07:50:01PM +0100, Vincent Mailhol wrote:
+> 
+> (...)
+> 
+> >> With this, remove gcc's -Wtype-limits. People who still want to catch
+> >> incorrect comparisons between unsigned integers and zero can now use
+> >> sparse instead.
+> >>
+> >> On a side note, clang also has a -Wtype-limits warning but:
+> >>
+> >>   * it is not enabled in the kernel at the moment because, contrary to
+> >>     gcc, clang did not include it under -Wextra.
+> >>
+> >>   * it does not warn if the code results from a macro expansion. So,
+> >>     if activated, it would not cause as much spam as gcc does.
+> >>
+> >>   * -Wtype-limits is split into four sub-warnings [3] meaning that if
+> >>     it were to be activated, we could select which one to keep.
+> >>
+> > 
+> > Sounds good.  I like your Sparse check.
+> 
+> Does it mean I have your Reviewed-by?
+> 
+> > Maybe we should enable the Sparse checking as well because it sounds
+> > like they are doing a lot of things right.
+> 
+> I am not sure to understand what do you mean by "enable the Sparse checking"?
 
-Does it mean I have your Reviewed-by?
+I meant Clang...  Sorry.  Doh.
 
-> Maybe we should enable the Sparse checking as well because it sounds
-> like they are doing a lot of things right.
-
-I am not sure to understand what do you mean by "enable the Sparse checking"?
-The new sparse check I introduced is on by default.
-
-> I think Smatch catches the
-> same bugs that Clang would but it would be good to have multiple
-> implementations.  The -Wtautological-unsigned-enum-zero-compare trips
-> people up because they aren't necessarily expecting enums to be
-> unsigned.
-
-I do not know enough about Smatch, I will let you judge on that one.
-
-
-Concerning clang, here are the statistics:
-
-	$ make -s LLVM=1 CFLAGS_KERNEL="-Wtype-limits" 2>&1 | grep -o '\[-W\S*\]' | sort | uniq -c
-	      2 [-Wtautological-type-limit-compare]
-	     15 [-Wtautological-unsigned-enum-zero-compare]$ make -s LLVM=1 CFLAGS_KERNEL="-Wtype-limits"
-
-(done on a linux v6.19-rc1 defconfig with clang v20.1.8)
-
-Not so many warnings, at least, less than what I would have thought!
-
--Wtautological-unsigned-char-zero-compare and
--Wtautological-unsigned-zero-compare gave zero findings. So those two
-can be enabled, I guess? I am still surprised that
--Wtautological-unsigned-zero-compare gives nothing. I would have
-expected some kind of false positives on that one. No sure if I missed
-something here.
-
-
-The two -Wtautological-type-limit-compare are:
-
-	fs/libfs.c:1640:20: warning: result of comparison 'u64' (aka 'unsigned long long') > 18446744073709551615 is always false [-Wtautological-type-limit-compare]
-	 1640 |             (last_fs_page > (pgoff_t)(~0ULL))) {
-	      |              ~~~~~~~~~~~~ ^ ~~~~~~~~~~~~~~~~
-	1 warning generated.
-	block/ioctl.c:765:29: warning: result of comparison 'sector_t' (aka 'unsigned long long') > 18446744073709551615 is always false [-Wtautological-type-limit-compare]
-	  765 |                 if (bdev_nr_sectors(bdev) > ~0UL)
-	      |                     ~~~~~~~~~~~~~~~~~~~~~ ^ ~~~~
-	1 warning generated.
-
-If I got it correctly, those checks are just meant for the case where
-unsigned long are 32 bits.
-
-Because clang does not warn when the code comes from a macro
-expansion, a way to silent these would be to use:
-
-	(last_fs_page > type_max(pgoff_t))
-
-in fs/libfs.c and:
-
-	if (bdev_nr_sectors(bdev) > ULONG_MAX)
-
-in block/ioctl.c.
-
-Well, none of those findings were incorrect to begin with, but
-arguably, the code readability can be improved.
-
-So, I would say why not for -Wtautological-type-limit-compare.
+regards,
+dan carpenter
 
 
-Concerning the -Wtautological-unsigned-enum-zero-compare, here is a
-representative finding:
-
-	drivers/video/hdmi.c:1099:20: warning: result of comparison of unsigned enum expression < 0 is always false [-Wtautological-unsigned-enum-zero-compare]
-	 1099 |         if (active_aspect < 0 || active_aspect > 0xf)
-	      |             ~~~~~~~~~~~~~ ^ ~
-
-(all the other 14 findings follow the same pattern).
-
-Here, the code just want to check that a value is in range. This is
-the same logic as gcc's -Wtype-limits: something we do *not* want.
-
-So -Wtautological-unsigned-enum-zero-compare will stay disabled.
-
-In conclusion, I agree that we could enable three of clang's
--Wtype-limits sub-warning. But this is not the scope of that series. I
-would rather prefer to have this as a separate series.
-
-
-Yours sincerely,
-Vincent Mailhol
