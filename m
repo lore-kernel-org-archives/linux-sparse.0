@@ -1,151 +1,178 @@
-Received: from mail-pg1-f196.google.com (mail-pg1-f196.google.com [209.85.215.196])
+Received: from mail-wm1-f43.google.com (mail-wm1-f43.google.com [209.85.128.43])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1E0C42DAFCA
-	for <linux-sparse@vger.kernel.org>; Fri, 19 Dec 2025 23:40:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.196
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CFF1529DB64
+	for <linux-sparse@vger.kernel.org>; Sat, 20 Dec 2025 10:02:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.43
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1766187620; cv=none; b=j28nCM7iZuPVnA3pGjiVbH+BfJlu1NBmrUqRscpSqh3TCE+8C/QNHobWzyOJvp/iN2zVeKWovN2bh2kPcCrs16GB0imcEvFaoQIWcXOi3JB7BVJaows7qRiU8+ZhjdniB7GeeKdy/ktCiBzthRaCsh4zgskhub6he7H8xzdWhi4=
+	t=1766224928; cv=none; b=V3QxHNr8txz5IM2PkDLcV1vZOlauAKZYg1U+Rpm9C4QHUQLaRlX95CMVl2W0VYRuz8rhBfycEpqwRWSBL6cMQLZMHZwKspk/FgHX2ya6ICS//fbbaddbgAiKbJjLtXIFZOI3tLeTxjnFLrlWtDiGpzTPvmz2kmMqZ3GFeEwycnI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1766187620; c=relaxed/simple;
-	bh=kqYAQZ609rJygFWC7CbHOEHNatKsPADzGjHUdHPU3XE=;
-	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
-	 In-Reply-To:Content-Type; b=qOtdI3Q5ZyTWnUOLz/asJPQ0FEXGTGx973GbHcYx5qgZW83pdnRW6Hj1XIN6TKQcpLO2+968bkmuke4yfx/Ov0rSMlpCEd+ilc3rM65iI9Jx2unwtAPfb+dFe+eMrZd+pDPo5CuoPZooEe8Y73RDD0O3i6a9DzsikSSUXttySGw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=CQyvMghs; arc=none smtp.client-ip=209.85.215.196
+	s=arc-20240116; t=1766224928; c=relaxed/simple;
+	bh=bxFgAEY81SjNvUJ+kxxs2m1wYC/4BSvGlgWSuaRMhJw=;
+	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=fw1sdPa3NQEgWuRGJaBvQZpsK6dbTmTrGUq2jOKN9X+K3fM7yYYgDvftfZRUwNDLeYaSCRC0a/15PyNAhjwS8I6wzHgY9F1m/woly2PwSrzepojPQweZwmXg5nqw8Vu6NAQxlDnpM72OFYFB+xFzBUbGXgalmBS28yDNnWftJkQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=em41QCIU; arc=none smtp.client-ip=209.85.128.43
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="CQyvMghs"
-Received: by mail-pg1-f196.google.com with SMTP id 41be03b00d2f7-c05d66dbab2so2360414a12.0
-        for <linux-sparse@vger.kernel.org>; Fri, 19 Dec 2025 15:40:18 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="em41QCIU"
+Received: by mail-wm1-f43.google.com with SMTP id 5b1f17b1804b1-47d182a8c6cso7740985e9.1
+        for <linux-sparse@vger.kernel.org>; Sat, 20 Dec 2025 02:02:05 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1766187618; x=1766792418; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:content-language:references
-         :cc:to:subject:from:user-agent:mime-version:date:message-id:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=Xjhz9NvSIj1nkwStS3EsBbpnWvjG3hzX9yFNjSmaNpQ=;
-        b=CQyvMghsSbX5BIuTDI2Su+/M3ooSPbtl2aW3aXcUu++7Bheq5ougSdTezJ8VPC9fh2
-         TD/ImfxVx2Cc2t8jQzjQ6j26ReGxmApxbdmv9GhUN0Rq+26uUk7pfd14G61007MneUpW
-         9Kx34RT5FPYxXIYBkMO2XZj+U/R3/Ttq0eyhsa+eRpuJVmEheOcBAwt2xVLN14rHOJTD
-         bvj6RnQCTKAOH1rQYrNiGEh5KSGaJWK8Rx9U99FFTKXMfL5aMOdyBfg5VSNWdjxsFCNF
-         e4B3sQDOXnw/sQX/53MyEbRPr2dpStu9Ku/pbecX+7/Cr3PVosfS9gz4BqnPc/KC+PGe
-         iGBg==
+        d=gmail.com; s=20230601; t=1766224924; x=1766829724; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:subject:cc:to:from:date:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=6b6TgfZ4l4yfYsx0rUlhXwOOOgK1ZGgIr0RlxGtU3To=;
+        b=em41QCIUfIpTaePp09bYqEG9fP0XivMmMT6qoKVHG8dQQ5lz21fOYZsasKdptPCM5S
+         C0jbJFdWopKnJLWEt0Xz4910XxoiVB7j/Umhjo5OsvhOU6pKrqwKIL4cc6eGAlTflWd2
+         0DRk13PDiDaGMLe/ZXkfR9FKmt2i5HRG+1/CRPqGUAJvsARDmg789ogFSMD8ts8XZ5Vf
+         rVkguRxaKEB/ktO+1kZqll9fYw3sN7ZBU8Ibt957O1pQgp+nsBjP+RM3cuIxApD2eXle
+         OcW8T6SYggyCZ2hJwQ4YDsgUygxCv7vm+SOiL0LYpqiG/SAD+Lx2qvJCxL10Hqxmkj8I
+         h0xA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1766187618; x=1766792418;
-        h=content-transfer-encoding:in-reply-to:content-language:references
-         :cc:to:subject:from:user-agent:mime-version:date:message-id:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=Xjhz9NvSIj1nkwStS3EsBbpnWvjG3hzX9yFNjSmaNpQ=;
-        b=DR82j7Nb9DvVxk6wTkaLp2E4wOYzIlu94dftTEc08zNnTZQYfNcpZh8aAcK5kWEr0F
-         rIOqUpZBbndml/56eGhJgHzYAoi5L85IO367HZnj9oP+pw0VQ3+Bvb+bpENfcJjiiUWk
-         DEUDElxezJimzTRuyafCnnizHFDdAGor1stc+7vNLQVyHp9dON0HzdqfEYn7kS+0Q2xM
-         nfGejrUBiXK692bAcadxbPDniPgsuEvcAwjeCbSnOV4aWJQ9dXaVtEenCx6AxUYF8g0h
-         rDRp4fuU0R7ydeKAb9DA9pMA8uauO6WaNXCocsCKqcSe/lUw5Cp2ckmTxzJUiJ9s6Pk2
-         7n4w==
-X-Forwarded-Encrypted: i=1; AJvYcCV7cE6UtXIVgQMePpg2OQVcuDKw4ItuYCLWx6rAjHQhNGzufyTgXcqi27jqpPVYH1zTklksS88dlNkTBgY=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzYF0SdBanBccQgK8+RBUj2YTuMYolTIVslNmADFEa8HZdP1LXG
-	p6JyF6rRGVOiqhc68iUyCIfy85M5tHL6gCV59T3Eo3dqwdhgvY6sruYzhrp74pQUnzs=
-X-Gm-Gg: AY/fxX6qPYjo49oDPNmADWoHA7m3a86Sk9ysADph5A03XWdaO8aeawMNJBP0aMHiSp4
-	IW28ZA4AZ2ppo12byf89HZKZs+ZiCvM/F2kUop8bVX6/bOlmN3lmTobVR836aSyoay54cN5KOBs
-	6/KDOvJoHcy/wWX3WGpRxBX4C03aFE78pn22cRhaq9zTTa0o8xZTeLG6kJuxrO7b+71q+WQsxKL
-	6iVAijRu3VKo9blyXQIMo1ehQ2AnmVfDb2+SyfQJtGfsAZoRuRlL2O6QyhhP6f4t0THIRms2/Qs
-	LOnsilw4jOaXF0M67yVtWNeo3YCA/+rBisTOEV7Ug5DCMsSoxECVVkTdLlvBMWiNT8x+j86x9XO
-	4NJjyn+//INys/kFQYgKar+QTVT4N0hTKRVa3a8umL/F+nwhWlCkL6K0piB4J3b2O+SCb9ZVU3X
-	ohAEr8KEmAUUI7YjAqcN5Wy7+i8BTKGAVpS9KTWUwaQd+CNsClTVJRY2wGI2QB06RnbKan/5Cuc
-	AoVKOUyULVc54VSVGtrr6tkXATpHqQCJzGDS+bvgOvy1hF8isBR9whmpgFL4E7tTAPgZEJaJ2lV
-	7b4=
-X-Google-Smtp-Source: AGHT+IFD9VEfhTkWGAUJ+KrkgUpiheofAxrSZVwNtEffu0+8gx+hrdlGu9tKXSDKwQO+mDr4xt9mXg==
-X-Received: by 2002:a05:7022:3a83:b0:11c:b397:2657 with SMTP id a92af1059eb24-121722be81emr4954809c88.22.1766180747284;
-        Fri, 19 Dec 2025 13:45:47 -0800 (PST)
-Received: from ?IPV6:2a00:79e0:2e7c:8:5874:79f3:80da:a7a3? ([2a00:79e0:2e7c:8:5874:79f3:80da:a7a3])
-        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-2b05fe99410sm10260116eec.2.2025.12.19.13.45.45
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 19 Dec 2025 13:45:46 -0800 (PST)
-Message-ID: <ae957ee5-cb47-433f-b0b3-f4ac8ec7116b@gmail.com>
-Date: Fri, 19 Dec 2025 14:45:45 -0700
+        d=1e100.net; s=20230601; t=1766224924; x=1766829724;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=6b6TgfZ4l4yfYsx0rUlhXwOOOgK1ZGgIr0RlxGtU3To=;
+        b=EgztxHWxACJvYUIMFtUt1cRm8da1MQq+Dc9PJl8XrDeuKpoAp+SS8c8kkAQcJIO5hS
+         obsxB0NRq3ZzxOZQn/zSBwJtAyWUuq3HhjciOd+XtvokiNMbbMBXkWvuUUSOkZ4t/ydX
+         qSNrzjVIZe8ZRovggUNM4Y+kduvYSiEDx6udAlVCkwL0Jbb8Xkw+kFaxqkxf0gB4Qu4R
+         KuDNqk7PeTboXEa04PeyU0xcsu4SXGF4dDuipyKghKbYMtl8T85DuP1PSVjHDTSkK4zE
+         8nFv9jcGVrvSjOYJHmZukJrlvGc0Gx2BDjYaiRa24CfGZ3vBg1nF9LXlOatX8OD1WkpK
+         UCcg==
+X-Forwarded-Encrypted: i=1; AJvYcCVOoJM7y/w6Q0dManYxbVB7+BFH/deLnAl7C3hQdLo6rYjGv3iWz7GKBWJ2aCTZXF1Bs3GbcKXLkWht1BI=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxBjP5LP6qVNkLV6S66VrHrD9vjrYpKGMHyC38ddOoMkAC1Lij0
+	DOeQ8uA5IY8jt1K8ORun+IQsE6gT1fxFQP5Tw8UXvXoiyGYdQ4r59uut
+X-Gm-Gg: AY/fxX6S2TLbAHn++TR7IGmJey2tHRNu+6fizb6JKkHgHGPDIn7oGQ0/iatR7zz+hcL
+	4dR97BBVayrOTrtE2VZKXyR+Bx/zmU2uMmIt+2L5zaqxLSOWGxkLt5UujKFi1a8hXBPgqPK0ukl
+	Ui4xjeztAaEcy1lD68V+1acHddUD7CRVUX3OZ3EKEJKRJFyg9KNlUVftPiSD/JwKqxK4BKUPQ0/
+	0YlyOlgu3ahQjmM2Amxnpiv1EOxA5W5mqCDAIIJP9QssacOTzLZDMUprVonqHgWSpbAm9eyOMoW
+	eH61oNAN0bWTyqBTP0vq5O/jypFFNhycZD92jAQurSYgBKFkCFYHJ7a5zKdJN4xPf/3MIV4Enxz
+	20jJOS2NrCf8sejFby2iuTJnQrO48gz48p/htsk/XDIRvZRgCMWAxCz85LO4SSq0K+VZ2Hvsht1
+	Uwvn8i870OFpZQJBX8rCWTiVoADXXhKB8UjtW7/821/ksR6DVB//y4
+X-Google-Smtp-Source: AGHT+IHQOJ0Ua+zWZlb0QPcZUUI/HtzVKK9z+yFIQMbNJiEgWc0RnGqXX7qQpeO5IWGkqcyJJpZw3A==
+X-Received: by 2002:a05:600c:1d1d:b0:471:d2f:7987 with SMTP id 5b1f17b1804b1-47d1958f9c5mr48722805e9.26.1766224923818;
+        Sat, 20 Dec 2025 02:02:03 -0800 (PST)
+Received: from pumpkin (82-69-66-36.dsl.in-addr.zen.co.uk. [82.69.66.36])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-4324eab257asm9840402f8f.38.2025.12.20.02.02.02
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 20 Dec 2025 02:02:03 -0800 (PST)
+Date: Sat, 20 Dec 2025 10:02:01 +0000
+From: David Laight <david.laight.linux@gmail.com>
+To: Vincent Mailhol <mailhol@kernel.org>
+Cc: Nathan Chancellor <nathan@kernel.org>, Nicolas Schier <nsc@kernel.org>,
+ Nick Desaulniers <nick.desaulniers+lkml@gmail.com>, Bill Wendling
+ <morbo@google.com>, Justin Stitt <justinstitt@google.com>, Maarten
+ Lankhorst <maarten.lankhorst@linux.intel.com>, Maxime Ripard
+ <mripard@kernel.org>, Thomas Zimmermann <tzimmermann@suse.de>, David Airlie
+ <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>, Chris Mason
+ <clm@fb.com>, David Sterba <dsterba@suse.com>, Kees Cook <kees@kernel.org>,
+ "Gustavo A. R. Silva" <gustavoars@kernel.org>, Linus Torvalds
+ <torvalds@linux-foundation.org>, linux-kbuild@vger.kernel.org,
+ linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org,
+ llvm@lists.linux.dev, dri-devel@lists.freedesktop.org,
+ linux-btrfs@vger.kernel.org, linux-hardening@vger.kernel.org
+Subject: Re: [PATCH v2 4/4] minmax: remove useless cast in __is_nonneg()
+Message-ID: <20251220100201.26d9b0db@pumpkin>
+In-Reply-To: <20251219-remove_wtype-limits-v2-4-2e92b3f566c5@kernel.org>
+References: <20251219-remove_wtype-limits-v2-0-2e92b3f566c5@kernel.org>
+	<20251219-remove_wtype-limits-v2-4-2e92b3f566c5@kernel.org>
+X-Mailer: Claws Mail 4.1.1 (GTK 3.24.38; arm-unknown-linux-gnueabihf)
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-From: Bart Van Assche <bart.vanassche@gmail.com>
-Subject: Re: [PATCH v5 08/36] locking/rwlock, spinlock: Support Clang's
- context analysis
-To: Peter Zijlstra <peterz@infradead.org>, Marco Elver <elver@google.com>
-Cc: Boqun Feng <boqun.feng@gmail.com>, Ingo Molnar <mingo@kernel.org>,
- Will Deacon <will@kernel.org>, "David S. Miller" <davem@davemloft.net>,
- Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
- Chris Li <sparse@chrisli.org>, "Paul E. McKenney" <paulmck@kernel.org>,
- Alexander Potapenko <glider@google.com>, Arnd Bergmann <arnd@arndb.de>,
- Christoph Hellwig <hch@lst.de>, Dmitry Vyukov <dvyukov@google.com>,
- Eric Dumazet <edumazet@google.com>, Frederic Weisbecker
- <frederic@kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
- Herbert Xu <herbert@gondor.apana.org.au>, Ian Rogers <irogers@google.com>,
- Jann Horn <jannh@google.com>, Joel Fernandes <joelagnelf@nvidia.com>,
- Johannes Berg <johannes.berg@intel.com>, Jonathan Corbet <corbet@lwn.net>,
- Josh Triplett <josh@joshtriplett.org>, Justin Stitt
- <justinstitt@google.com>, Kees Cook <kees@kernel.org>,
- Kentaro Takeda <takedakn@nttdata.co.jp>,
- Lukas Bulwahn <lukas.bulwahn@gmail.com>, Mark Rutland
- <mark.rutland@arm.com>, Mathieu Desnoyers <mathieu.desnoyers@efficios.com>,
- Miguel Ojeda <ojeda@kernel.org>, Nathan Chancellor <nathan@kernel.org>,
- Neeraj Upadhyay <neeraj.upadhyay@kernel.org>,
- Nick Desaulniers <nick.desaulniers+lkml@gmail.com>,
- Steven Rostedt <rostedt@goodmis.org>,
- Tetsuo Handa <penguin-kernel@i-love.sakura.ne.jp>,
- Thomas Gleixner <tglx@linutronix.de>, Thomas Graf <tgraf@suug.ch>,
- Uladzislau Rezki <urezki@gmail.com>, Waiman Long <longman@redhat.com>,
- kasan-dev@googlegroups.com, linux-crypto@vger.kernel.org,
- linux-doc@vger.kernel.org, linux-kbuild@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-mm@kvack.org,
- linux-security-module@vger.kernel.org, linux-sparse@vger.kernel.org,
- linux-wireless@vger.kernel.org, llvm@lists.linux.dev, rcu@vger.kernel.org
-References: <20251219154418.3592607-1-elver@google.com>
- <20251219154418.3592607-9-elver@google.com>
- <17723ae6-9611-4731-905c-60dab9fb7102@acm.org>
- <CANpmjNO0B_BBse12kAobCRBK0D2pKkSu7pKa5LQAbdzBZa2xcw@mail.gmail.com>
-Content-Language: en-US
-In-Reply-To: <CANpmjNO0B_BBse12kAobCRBK0D2pKkSu7pKa5LQAbdzBZa2xcw@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
 
-On 12/19/25 1:02 PM, Marco Elver wrote:
-> On Fri, 19 Dec 2025 at 21:26, Bart Van Assche <bvanassche@acm.org> wrote:
->> On 12/19/25 7:39 AM, Marco Elver wrote:
->>> - extern void do_raw_read_lock(rwlock_t *lock) __acquires(lock);
->>> + extern void do_raw_read_lock(rwlock_t *lock) __acquires_shared(lock);
->>
->> Given the "one change per patch" rule, shouldn't the annotation fixes
->> for rwlock operations be moved into a separate patch?
->>
->>> -typedef struct {
->>> +context_lock_struct(rwlock) {
->>>        arch_rwlock_t raw_lock;
->>>    #ifdef CONFIG_DEBUG_SPINLOCK
->>>        unsigned int magic, owner_cpu;
->>> @@ -31,7 +31,8 @@ typedef struct {
->>>    #ifdef CONFIG_DEBUG_LOCK_ALLOC
->>>        struct lockdep_map dep_map;
->>>    #endif
->>> -} rwlock_t;
->>> +};
->>> +typedef struct rwlock rwlock_t;
->>
->> This change introduces a new globally visible "struct rwlock". Although
->> I haven't found any existing "struct rwlock" definitions, maybe it's a
->> good idea to use a more unique name instead.
+On Fri, 19 Dec 2025 23:39:48 +0100
+Vincent Mailhol <mailhol@kernel.org> wrote:
+
+> The function like macro __is_nonneg() casts its argument to (long long)
+> in an attempt to silence -Wtype-limits warnings on unsigned values.
+
+nak.
+
+The cast is needed for pointer types, not for -Wtype-limits.
+which is why the '#if __SIZEOF_POINTER__ == __SIZEOF_LONG_LONG__'
+test is there.
+
+	David
+
 > 
-> This doesn't actually introduce a new globally visible "struct
-> rwlock", it's already the case before.
-> An inlined struct definition in a typedef is available by its struct
-> name, so this is not introducing a new name
-> (https://godbolt.org/z/Y1jf66e1M).
+> But this workaround is incomplete as proven here:
+> 
+>   $ cat foo.c
+>   #include <linux/minmax.h>
+> 
+>   int foo(unsigned int a)
+>   {
+>   	return __is_nonneg(a);
+>   }
+>   $ make CFLAGS_KERNEL="-Wtype-limits" foo.o
+>     CALL    scripts/checksyscalls.sh
+>     DESCEND objtool
+>     INSTALL libsubcmd_headers
+>     CC      foo.o
+>   foo.c: In function 'foo':
+>   ./include/linux/minmax.h:68:57: warning: comparison is always true due to limited range of data type [-Wtype-limits]
+>      68 | #define __is_nonneg(ux) statically_true((long long)(ux) >= 0)
+>         |                                                         ^~
+>   ./include/linux/compiler.h:350:50: note: in definition of macro 'statically_true'
+>     350 | #define statically_true(x) (__builtin_constant_p(x) && (x))
+>         |                                                  ^
+>   foo.c:5:16: note: in expansion of macro '__is_nonneg'
+>       5 |         return __is_nonneg(a);
+>         |                ^~~~~~~~~~~
+>   ./include/linux/minmax.h:68:57: warning: comparison is always true due to limited range of data type [-Wtype-limits]
+>      68 | #define __is_nonneg(ux) statically_true((long long)(ux) >= 0)
+>         |                                                         ^~
+>   ./include/linux/compiler.h:350:57: note: in definition of macro 'statically_true'
+>     350 | #define statically_true(x) (__builtin_constant_p(x) && (x))
+>         |                                                         ^
+>   foo.c:5:16: note: in expansion of macro '__is_nonneg'
+>       5 |         return __is_nonneg(a);
+>         |                ^~~~~~~~~~~
+> 
+> And because -Wtype-limits is now globally disabled, such a workaround
+> now becomes useless. Remove the __is_nonneg()'s cast and its related
+> comment.
+> 
+> Signed-off-by: Vincent Mailhol <mailhol@kernel.org>
+> ---
+> Changelog:
+> 
+>   v1 -> v2: new patch
+> ---
+>  include/linux/minmax.h | 5 +----
+>  1 file changed, 1 insertion(+), 4 deletions(-)
+> 
+> diff --git a/include/linux/minmax.h b/include/linux/minmax.h
+> index a0158db54a04..3e2e3e539ba1 100644
+> --- a/include/linux/minmax.h
+> +++ b/include/linux/minmax.h
+> @@ -52,9 +52,6 @@
+>  /*
+>   * Check whether a signed value is always non-negative.
+>   *
+> - * A cast is needed to avoid any warnings from values that aren't signed
+> - * integer types (in which case the result doesn't matter).
+> - *
+>   * On 64-bit any integer or pointer type can safely be cast to 'long long'.
+>   * But on 32-bit we need to avoid warnings about casting pointers to integers
+>   * of different sizes without truncating 64-bit values so 'long' or 'long long'
+> @@ -65,7 +62,7 @@
+>   * but they are handled by the !is_signed_type() case).
+>   */
+>  #if __SIZEOF_POINTER__ == __SIZEOF_LONG_LONG__
+> -#define __is_nonneg(ux) statically_true((long long)(ux) >= 0)
+> +#define __is_nonneg(ux) statically_true((ux) >= 0)
+>  #else
+>  #define __is_nonneg(ux) statically_true( \
+>  	(typeof(__builtin_choose_expr(sizeof(ux) > 4, 1LL, 1L)))(ux) >= 0)
+> 
 
-Please take another look. The godbolt example follows the pattern
-"typedef struct name { ... } name_t;". The "name" part is missing from
-the rwlock_t definition. This is why I wrote that the above code
-introduces a new global struct name.
-
-Bart.
