@@ -1,150 +1,162 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.17])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1804E32D44B;
-	Mon, 22 Dec 2025 19:55:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.17
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CB825201004
+	for <linux-sparse@vger.kernel.org>; Wed, 24 Dec 2025 11:38:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1766433328; cv=none; b=jZY3vVsh1SLOFbb7Rtf9KOH3gwI/9bsKcebRFOvXk7pOdyrs3R0HUw8cTPp5EhAY4V03Gs5CuCHocgB6O6vfx8Eti7EI94Q6EE43j7CWn8GZLhWqw5XSzzM46aCbc2D9r9RBy8jxymEWRX2zyYyHIIv4N1orLQFTLG0nG1aP26I=
+	t=1766576318; cv=none; b=f/iw3PTGP2z/TR/5v6I8Ks8fj+6xpUQBh+U8e2V5u7bUJhebbV6zItzi526fuUv2EJpPl0Il5P+dNii7YPbzQBmIOvSv8sUTeOVTQ35eaX+J5LdEa5fOeRn0BguSpgNg7juT6rhpizmNu6X0w4mDgmENMV4NAs+AGg7P3PsrODM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1766433328; c=relaxed/simple;
-	bh=faxuRQ98w3w3AiTuKAdaMxKF7N4LhPW8CIv8V3TK6l0=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=SZ3EPEHRyb2ot4pVyfEVBrZQIlcdXpgU791UMSFnhGlt+/4FKQdQ/M4isthGGlY/oGE90gls7WgFs0oIIvV/bRPBKQeS8OK3Hm4e58tcOtmgLkRPsjq+9eklvDjR4mCvXJi/NkQ9cCvUi0B7V0zqvAEpKnea+XOpEUqUBzuPSbI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=dnU6kI1V; arc=none smtp.client-ip=198.175.65.17
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1766576318; c=relaxed/simple;
+	bh=mNpO19fO9MF+AsIy9tYRBeLyyNhRdxjEi10GhTix83I=;
+	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
+	 Content-Disposition; b=Po6kwd4/GSU7bYrgd6g3Ic1cXm7Zxey0aR5NPNUHbyDJlpXLt+NylcHy5bCfZYaBHrTBSU9OLgY5VKmhrjMRgMhOH+C3f6pR4UUAaVE5wNYoJJ3iFaLGS9SvO4qeSlH+uw7zYSVkBbQCQnYnFvQ77S91+Fja0PxXyGZ7FHiqIEY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=VZY7c6RR; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="dnU6kI1V"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1766433328; x=1797969328;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=faxuRQ98w3w3AiTuKAdaMxKF7N4LhPW8CIv8V3TK6l0=;
-  b=dnU6kI1VhDnbl+9zlPWw6O9J8XoeuWHX7FU5cDXU8mE3Dw31G9poNknC
-   uJDSltchR2JN5M6vQfecJ8zjVhAUCMhRKbSVBEbH+U/3m2rx+TtvmJjx9
-   JY2YATxLaN1p2oVsjq65rsTUR9TYgrhPA8We6h8G2upaz4IFjboC0eHku
-   dxtDdca7kMSlCroGbrr9GFGYmH4rapXomxoNUFJen47rGUQ7z0MwPeMw3
-   VswA0EypP4ayC9klPGtNpa00Z6LO9nygSKOl4ArVSRM1URrohf6zroE+s
-   1qVHQG9VXJTpCBT+UJuWTqxD03mYSXIRAmlZAtMBYMlqus6KY0Uk4P2cv
-   A==;
-X-CSE-ConnectionGUID: XgvzLm9lQMeCtQ1Nj9RE8A==
-X-CSE-MsgGUID: zwEe4emiR9+FjFqaxmSRmA==
-X-IronPort-AV: E=McAfee;i="6800,10657,11650"; a="68274160"
-X-IronPort-AV: E=Sophos;i="6.21,169,1763452800"; 
-   d="scan'208";a="68274160"
-Received: from orviesa001.jf.intel.com ([10.64.159.141])
-  by orvoesa109.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 22 Dec 2025 11:55:27 -0800
-X-CSE-ConnectionGUID: 1xlpX9p5Q2WyLoOdvs0kaw==
-X-CSE-MsgGUID: BmooQDGgRI+OgxdmXGgAKw==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.21,169,1763452800"; 
-   d="scan'208";a="237011330"
-Received: from lkp-server02.sh.intel.com (HELO dd3453e2b682) ([10.239.97.151])
-  by orviesa001.jf.intel.com with ESMTP; 22 Dec 2025 11:55:21 -0800
-Received: from kbuild by dd3453e2b682 with local (Exim 4.98.2)
-	(envelope-from <lkp@intel.com>)
-	id 1vXlzy-0000000013h-24Qj;
-	Mon, 22 Dec 2025 19:55:18 +0000
-Date: Tue, 23 Dec 2025 03:55:07 +0800
-From: kernel test robot <lkp@intel.com>
-To: Vincent Mailhol <mailhol@kernel.org>,
-	Nathan Chancellor <nathan@kernel.org>,
-	Nicolas Schier <nsc@kernel.org>,
-	Nick Desaulniers <nick.desaulniers+lkml@gmail.com>,
-	Bill Wendling <morbo@google.com>,
-	Justin Stitt <justinstitt@google.com>,
-	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
-	Maxime Ripard <mripard@kernel.org>,
-	Thomas Zimmermann <tzimmermann@suse.de>,
-	David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
-	Chris Mason <chris.mason@fusionio.com>,
-	David Sterba <dsterba@suse.com>, Kees Cook <kees@kernel.org>,
-	"Gustavo A. R. Silva" <gustavoars@kernel.org>
-Cc: oe-kbuild-all@lists.linux.dev, linux-kbuild@vger.kernel.org,
-	linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org,
-	llvm@lists.linux.dev, dri-devel@lists.freedesktop.org,
-	linux-btrfs@vger.kernel.org, linux-hardening@vger.kernel.org,
-	Vincent Mailhol <mailhol@kernel.org>
-Subject: Re: [PATCH v3 3/3] overflow: Remove is_non_negative() and
- is_negative()
-Message-ID: <202512230342.Lgha2HGH-lkp@intel.com>
-References: <20251220-remove_wtype-limits-v3-3-24b170af700e@kernel.org>
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="VZY7c6RR"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1766576315;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type;
+	bh=34EJpF30wqqTk3LFAHKokO6CodFlyTtIxX/FNKJwdNM=;
+	b=VZY7c6RRU9wjMycatEiYHmav/iZufxP+XtPJAe3YslqR7tfd+qUFTLkbTGPnpG8mYhksaB
+	EENdxBbbNdNve/1Tx+ve8vyeu7kZrOdXqvi6liaQRIT/So/lQBRsPtCoFl1IOBC+pfDT2Z
+	fodt64fNX0lgmSTbnImtKlKz9p2/9Rk=
+Received: from mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-683-QbnNCyuaO0SfbxCWanyjWg-1; Wed,
+ 24 Dec 2025 06:38:32 -0500
+X-MC-Unique: QbnNCyuaO0SfbxCWanyjWg-1
+X-Mimecast-MFC-AGG-ID: QbnNCyuaO0SfbxCWanyjWg_1766576311
+Received: from mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.12])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 75A7D195608E;
+	Wed, 24 Dec 2025 11:38:31 +0000 (UTC)
+Received: from fedora (unknown [10.44.32.73])
+	by mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with SMTP id B76FA19560A7;
+	Wed, 24 Dec 2025 11:38:29 +0000 (UTC)
+Received: by fedora (nbSMTP-1.00) for uid 1000
+	oleg@redhat.com; Wed, 24 Dec 2025 12:38:31 +0100 (CET)
+Date: Wed, 24 Dec 2025 12:38:23 +0100
+From: Oleg Nesterov <oleg@redhat.com>
+To: Chris Li <sparse@chrisli.org>, Luc Van Oostenryck <lucvoo@kernel.org>
+Cc: Alexey Gladkov <legion@kernel.org>, linux-sparse@vger.kernel.org
+Subject: [PATCH] sparse/dissect: introduce do_inline(struct symbol *sym)
+Message-ID: <aUvQr9q1ePtvSwCs@redhat.com>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+X-Scanned-By: MIMEDefang 3.0 on 10.30.177.12
+X-Mimecast-Spam-Score: 0
+X-Mimecast-MFC-PROC-ID: tBZdVCpZ6yoRxWKJWHUlHiDNDy-J9zaGML9ms1gN5_Y_1766576311
+X-Mimecast-Originator: redhat.com
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20251220-remove_wtype-limits-v3-3-24b170af700e@kernel.org>
 
-Hi Vincent,
+parse_function_body() doesn't do add_symbol(decl) if MOD_INLINE, this
+means that dissect/semind can't see the definitions of inline functions
+in translation_unit_used_list.
 
-kernel test robot noticed the following build warnings:
+Test-case:
 
-[auto build test WARNING on 3e7f562e20ee87a25e104ef4fce557d39d62fa85]
+	$ cat -n INLINE.c
+	     1	static inline void i_func(void)
+	     2	{
+	     3		unknown();
+	     4	}
+	     5
+	     6	void func(void)
+	     7	{
+	     8		i_func();
+	     9		i_func();
+	    10	}
 
-url:    https://github.com/intel-lab-lkp/linux/commits/Vincent-Mailhol/kbuild-remove-gcc-s-Wtype-limits/20251220-190509
-base:   3e7f562e20ee87a25e104ef4fce557d39d62fa85
-patch link:    https://lore.kernel.org/r/20251220-remove_wtype-limits-v3-3-24b170af700e%40kernel.org
-patch subject: [PATCH v3 3/3] overflow: Remove is_non_negative() and is_negative()
-config: i386-randconfig-141-20251222 (https://download.01.org/0day-ci/archive/20251223/202512230342.Lgha2HGH-lkp@intel.com/config)
-compiler: gcc-14 (Debian 14.2.0-19) 14.2.0
+Before this patch:
 
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202512230342.Lgha2HGH-lkp@intel.com/
+	$ ./test-dissect INLINE.c
 
-New smatch warnings:
-block/blk-settings.c:702 blk_stack_atomic_writes_chunk_sectors() warn: unsigned '*_d' is never less than zero.
-block/blk-settings.c:702 blk_stack_atomic_writes_chunk_sectors() warn: unsigned '_a' is never less than zero.
-drivers/nvme/host/core.c:3353 nvme_mps_to_sectors() warn: unsigned '*_d' is never less than zero.
-drivers/nvme/host/core.c:3353 nvme_mps_to_sectors() warn: unsigned '_a' is never less than zero.
+	   6:6                    def   f func                             void ( ... )
+	   8:9   func             --r   f i_func                           void ( ... )
+	   9:9   func             --r   f i_func                           void ( ... )
 
-Old smatch warnings:
-drivers/nvme/host/core.c:5032 nvme_free_cels() warn: iterator 'i' not incremented
+With this patch:
 
-vim +702 block/blk-settings.c
+	$ ./test-dissect INLINE.c
 
-d7f36dc446e894 John Garry 2024-11-18  689  
-63d092d1c1b1f7 John Garry 2025-07-11  690  static void blk_stack_atomic_writes_chunk_sectors(struct queue_limits *t)
-d7f36dc446e894 John Garry 2024-11-18  691  {
-63d092d1c1b1f7 John Garry 2025-07-11  692  	unsigned int chunk_bytes;
-d7f36dc446e894 John Garry 2024-11-18  693  
-63d092d1c1b1f7 John Garry 2025-07-11  694  	if (!t->chunk_sectors)
-63d092d1c1b1f7 John Garry 2025-07-11  695  		return;
-63d092d1c1b1f7 John Garry 2025-07-11  696  
-63d092d1c1b1f7 John Garry 2025-07-11  697  	/*
-63d092d1c1b1f7 John Garry 2025-07-11  698  	 * If chunk sectors is so large that its value in bytes overflows
-63d092d1c1b1f7 John Garry 2025-07-11  699  	 * UINT_MAX, then just shift it down so it definitely will fit.
-63d092d1c1b1f7 John Garry 2025-07-11  700  	 * We don't support atomic writes of such a large size anyway.
-63d092d1c1b1f7 John Garry 2025-07-11  701  	 */
-63d092d1c1b1f7 John Garry 2025-07-11 @702  	if (check_shl_overflow(t->chunk_sectors, SECTOR_SHIFT, &chunk_bytes))
-63d092d1c1b1f7 John Garry 2025-07-11  703  		chunk_bytes = t->chunk_sectors;
-d7f36dc446e894 John Garry 2024-11-18  704  
-d7f36dc446e894 John Garry 2024-11-18  705  	/*
-d7f36dc446e894 John Garry 2024-11-18  706  	 * Find values for limits which work for chunk size.
-d7f36dc446e894 John Garry 2024-11-18  707  	 * b->atomic_write_hw_unit_{min, max} may not be aligned with chunk
-63d092d1c1b1f7 John Garry 2025-07-11  708  	 * size, as the chunk size is not restricted to a power-of-2.
-d7f36dc446e894 John Garry 2024-11-18  709  	 * So we need to find highest power-of-2 which works for the chunk
-d7f36dc446e894 John Garry 2024-11-18  710  	 * size.
-63d092d1c1b1f7 John Garry 2025-07-11  711  	 * As an example scenario, we could have t->unit_max = 16K and
-63d092d1c1b1f7 John Garry 2025-07-11  712  	 * t->chunk_sectors = 24KB. For this case, reduce t->unit_max to a
-63d092d1c1b1f7 John Garry 2025-07-11  713  	 * value aligned with both limits, i.e. 8K in this example.
-d7f36dc446e894 John Garry 2024-11-18  714  	 */
-63d092d1c1b1f7 John Garry 2025-07-11  715  	t->atomic_write_hw_unit_max = min(t->atomic_write_hw_unit_max,
-63d092d1c1b1f7 John Garry 2025-07-11  716  					max_pow_of_two_factor(chunk_bytes));
-d7f36dc446e894 John Garry 2024-11-18  717  
-63d092d1c1b1f7 John Garry 2025-07-11  718  	t->atomic_write_hw_unit_min = min(t->atomic_write_hw_unit_min,
-d7f36dc446e894 John Garry 2024-11-18  719  					  t->atomic_write_hw_unit_max);
-63d092d1c1b1f7 John Garry 2025-07-11  720  	t->atomic_write_hw_max = min(t->atomic_write_hw_max, chunk_bytes);
-63d092d1c1b1f7 John Garry 2025-07-11  721  }
-d7f36dc446e894 John Garry 2024-11-18  722  
+	   6:6                    def   f func                             void ( ... )
+	   1:20                   def   f i_func                           void ( ... )
+	   3:9   i_func           --r   f unknown                          bad type
+	   8:9   func             --r   f i_func                           void ( ... )
+	   9:9   func             --r   f i_func                           void ( ... )
 
+This change is not really needed if dissect_show_all_symbols == 1, in
+this case do_file() uses file_scope/global_scope. do_inline() doesn't
+bother to check dissect_show_all_symbols, it relies on sym->visited.
+
+Signed-off-by: Oleg Nesterov <oleg@redhat.com>
+---
+ dissect.c | 17 +++++++++++++++--
+ 1 file changed, 15 insertions(+), 2 deletions(-)
+
+diff --git a/dissect.c b/dissect.c
+index 5fed8e22..62f927c5 100644
+--- a/dissect.c
++++ b/dissect.c
+@@ -59,6 +59,7 @@ static void do_sym_list(struct symbol_list *list);
+ 
+ static struct symbol
+ 	*base_type(struct symbol *sym),
++	*do_symbol(struct symbol *sym),
+ 	*do_initializer(struct symbol *type, struct expression *expr),
+ 	*do_expression(usage_t mode, struct expression *expr),
+ 	*do_statement(usage_t mode, struct statement *stmt);
+@@ -331,6 +332,16 @@ static struct expression *peek_preop(struct expression *expr, int op)
+ 	return NULL;
+ }
+ 
++static inline void do_inline(struct symbol *sym)
++{
++	if (sym && !sym->visited && (sym->ctype.modifiers & MOD_INLINE)) {
++		struct symbol *dctx = dissect_ctx;
++		dissect_ctx = NULL;
++		do_symbol(sym);
++		dissect_ctx = dctx;
++	}
++}
++
+ static struct symbol *do_expression(usage_t mode, struct expression *expr)
+ {
+ 	struct symbol *ret = &int_ctype;
+@@ -377,8 +388,10 @@ again:
+ 		ret = do_expression(mode, expr->cond_false);
+ 
+ 	break; case EXPR_CALL:
+-		if (expr->fn->type == EXPR_SYMBOL)
++		if (expr->fn->type == EXPR_SYMBOL) {
+ 			expr->fn->op = 'f'; /* for expr_symbol() */
++			do_inline(expr->fn->symbol);
++		}
+ 		ret = do_expression(U_R_PTR, expr->fn);
+ 		if (is_ptr(ret))
+ 			ret = ret->ctype.base_type;
+@@ -621,7 +634,7 @@ static inline bool is_typedef(struct symbol *sym)
+ 	return (sym->namespace == NS_TYPEDEF);
+ }
+ 
+-static inline struct symbol *do_symbol(struct symbol *sym)
++static struct symbol *do_symbol(struct symbol *sym)
+ {
+ 	struct symbol *type = base_type(sym);
+ 	struct symbol *dctx = dissect_ctx;
 -- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+2.52.0
+
+
