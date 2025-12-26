@@ -1,127 +1,115 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.16])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D7CAF24E4C4;
-	Thu, 25 Dec 2025 06:04:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.16
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7D0DC3A1E60
+	for <linux-sparse@vger.kernel.org>; Fri, 26 Dec 2025 14:32:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1766642692; cv=none; b=LEIvtHW6ctrj3n9O+DGHAViH+MIX8JD/f0gcF3SlwHSDwvM7MjhfA5yFXfJ7+i3Qdyv+MCdkRUo43QsEebz9PZSbxKQhEYvLBIGUlhPeC565HWTzVd8pBBZMSNogIOnGKHMBn4Me+nB/Aae8/j+gUQY8Qxrhc8BNRBz0GI3SMlo=
+	t=1766759525; cv=none; b=CQ7e7NQieU8o9Rz26sK8WygvsyvQsYtkNpd9frq/A758PLhAa2yqaAVtnWpzqtxBAmtS8VcmqChEIXJRByuNJ78D3apmFXhBjH3F6xE73GyUMlHx1l9R/N16HhzuVOzGW7h9AHN+8RFQPioVC/mkvswf40OUY7LBKI3TlwC7K8I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1766642692; c=relaxed/simple;
-	bh=VcKC9/CBFU8uwKDrnoVC8HUQENdMl7CZvAYW/cKoi9o=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=qq6zFN6azqVGD1/LILnP4GDX8hJ14LDHGYuF3klbrVRJ/Ho/G29nb6y8Kp7n8mjywKgMFqDMnzPlWjeQwn7Etyab/RXhSWIWRRIo1peczTNuTzO/uyCrCAowalPF/Io7Of2OoZFjaDEzAuha4vv20QuQ9bsrtENM5uv/MUNQeR4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=dlRbJmyH; arc=none smtp.client-ip=198.175.65.16
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1766759525; c=relaxed/simple;
+	bh=/tKKPzd1OL3FL+umGHfeLviD6ucp+0CNBpqjWcPmyl0=;
+	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
+	 Content-Disposition; b=Ty7zUAykxPCcXAQ5bMpefAOx934DIG4aaieNVDX1aVwPANMGebMDMpILDBWj3vK8XY9cXhlE8atSszx0/vt0TStWqecedGfAouM1JOSU+EbHrA6C3I+P1LBlN67ISvvTCqeeXYHvaO1zbL3KNthDyYvqzzQDPy455YL1yS7gwsI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=UW56cyFv; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="dlRbJmyH"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1766642691; x=1798178691;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=VcKC9/CBFU8uwKDrnoVC8HUQENdMl7CZvAYW/cKoi9o=;
-  b=dlRbJmyH2W8ncRgJ80QS9ehukvPhZVNlYNCujHJiRp2/LLEXrvFUqQvi
-   lY7yp+g7J0Z8njnixwdIwNxTfw6NdNa/Qvp2mTXsziIh/Yxck2Bcrk2zk
-   OBbzleGr7OF1C+6X0DqfDAAiEI7f2YZrq6WdgCNh10eAitXYBvlJjDePK
-   24UQwpBwLyruIXRCJ3Jek82w0ayHxvX8csk0v20o7eLMc5L4+vITzTO+n
-   71kl2qf25LI0olUdTSnOlv7YMT2Gdg44aYlMWQ7fGvn1QIgGqFzluxiz8
-   C61f6+qIQJcM3pwgxB8tLiU94jiBFr14jjAX2sdBelgwb6WhqPyYVvLqD
-   Q==;
-X-CSE-ConnectionGUID: /dPN4JKsSXqVzMQUmv1LNw==
-X-CSE-MsgGUID: A805pBMgTYiq51W0D3AiiA==
-X-IronPort-AV: E=McAfee;i="6800,10657,11652"; a="68613581"
-X-IronPort-AV: E=Sophos;i="6.21,175,1763452800"; 
-   d="scan'208";a="68613581"
-Received: from orviesa006.jf.intel.com ([10.64.159.146])
-  by orvoesa108.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Dec 2025 22:04:50 -0800
-X-CSE-ConnectionGUID: YjemtR3sRSKp5bj/xnm3fA==
-X-CSE-MsgGUID: wALkkXzzQruU2rIXRw2m+A==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.21,175,1763452800"; 
-   d="scan'208";a="199305559"
-Received: from lkp-server02.sh.intel.com (HELO dd3453e2b682) ([10.239.97.151])
-  by orviesa006.jf.intel.com with ESMTP; 24 Dec 2025 22:04:45 -0800
-Received: from kbuild by dd3453e2b682 with local (Exim 4.98.2)
-	(envelope-from <lkp@intel.com>)
-	id 1vYeSo-000000003nv-31Ir;
-	Thu, 25 Dec 2025 06:04:42 +0000
-Date: Thu, 25 Dec 2025 14:04:28 +0800
-From: kernel test robot <lkp@intel.com>
-To: Vincent Mailhol <mailhol@kernel.org>,
-	Nathan Chancellor <nathan@kernel.org>,
-	Nicolas Schier <nsc@kernel.org>,
-	Nick Desaulniers <nick.desaulniers+lkml@gmail.com>,
-	Bill Wendling <morbo@google.com>,
-	Justin Stitt <justinstitt@google.com>,
-	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
-	Maxime Ripard <mripard@kernel.org>,
-	Thomas Zimmermann <tzimmermann@suse.de>,
-	David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
-	Chris Mason <chris.mason@fusionio.com>,
-	David Sterba <dsterba@suse.com>, Kees Cook <kees@kernel.org>,
-	"Gustavo A. R. Silva" <gustavoars@kernel.org>
-Cc: oe-kbuild-all@lists.linux.dev, linux-kbuild@vger.kernel.org,
-	linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org,
-	llvm@lists.linux.dev, dri-devel@lists.freedesktop.org,
-	linux-btrfs@vger.kernel.org, linux-hardening@vger.kernel.org,
-	Vincent Mailhol <mailhol@kernel.org>
-Subject: Re: [PATCH v3 3/3] overflow: Remove is_non_negative() and
- is_negative()
-Message-ID: <202512251340.UApIFw9R-lkp@intel.com>
-References: <20251220-remove_wtype-limits-v3-3-24b170af700e@kernel.org>
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="UW56cyFv"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1766759523;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type;
+	bh=1QdLUV3cXKLDm5bUtna847OneK77XC4e+aeTqa6z/J4=;
+	b=UW56cyFvKwb9v9ROuZbw5alClxwfSSsjR7iVatJd27QXIkFIiZpomk7favkaxBgoqNPgDc
+	x/Q+qxXut5Q1LKe6Da2JXdxlDb7y/JgsMrVYEDwLGFU2fSm+hmuNbQpedasbIxFoNQ6xM8
+	Bc76Qx7D4IbsUvBkDcIvaerfYcqScBs=
+Received: from mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-637-TTofv-n-PeKgAyJdli48bw-1; Fri,
+ 26 Dec 2025 09:32:01 -0500
+X-MC-Unique: TTofv-n-PeKgAyJdli48bw-1
+X-Mimecast-MFC-AGG-ID: TTofv-n-PeKgAyJdli48bw_1766759520
+Received: from mx-prod-int-06.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-06.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.93])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 0EDA6195F156;
+	Fri, 26 Dec 2025 14:32:00 +0000 (UTC)
+Received: from fedora (unknown [10.45.224.10])
+	by mx-prod-int-06.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with SMTP id 342681800367;
+	Fri, 26 Dec 2025 14:31:57 +0000 (UTC)
+Received: by fedora (nbSMTP-1.00) for uid 1000
+	oleg@redhat.com; Fri, 26 Dec 2025 15:31:59 +0100 (CET)
+Date: Fri, 26 Dec 2025 15:31:56 +0100
+From: Oleg Nesterov <oleg@redhat.com>
+To: Chris Li <sparse@chrisli.org>, Luc Van Oostenryck <lucvoo@kernel.org>
+Cc: Alexey Gladkov <legion@kernel.org>, linux-sparse@vger.kernel.org
+Subject: [PATCH 1/2] sparse/semind: add the new --param=dissect-show-compiled
+ option
+Message-ID: <aU6cXFyfwtD9GMYa@redhat.com>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.93
+X-Mimecast-Spam-Score: 0
+X-Mimecast-MFC-PROC-ID: XhwwolnL3wuzrJvT3QciT4MXTTCgp-CAyAxa_K-cTf8_1766759520
+X-Mimecast-Originator: redhat.com
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20251220-remove_wtype-limits-v3-3-24b170af700e@kernel.org>
 
-Hi Vincent,
+parse_cmdline_add() sets dissect_show_all_symbols = 1 unconditionally
+and currently it is not possible to clear this option.
 
-kernel test robot noticed the following build warnings:
+We could simply remove this line; users could use
+"semind add --param=dissect-show-all-symbols," but this would break
+existing setups.
 
-[auto build test WARNING on 3e7f562e20ee87a25e104ef4fce557d39d62fa85]
+Signed-off-by: Oleg Nesterov <oleg@redhat.com>
+---
+ options.c | 2 ++
+ semind.c  | 4 ++--
+ 2 files changed, 4 insertions(+), 2 deletions(-)
 
-url:    https://github.com/intel-lab-lkp/linux/commits/Vincent-Mailhol/kbuild-remove-gcc-s-Wtype-limits/20251220-190509
-base:   3e7f562e20ee87a25e104ef4fce557d39d62fa85
-patch link:    https://lore.kernel.org/r/20251220-remove_wtype-limits-v3-3-24b170af700e%40kernel.org
-patch subject: [PATCH v3 3/3] overflow: Remove is_non_negative() and is_negative()
-config: i386-randconfig-141-20251225 (https://download.01.org/0day-ci/archive/20251225/202512251340.UApIFw9R-lkp@intel.com/config)
-compiler: gcc-13 (Debian 13.3.0-16) 13.3.0
-
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202512251340.UApIFw9R-lkp@intel.com/
-
-smatch warnings:
-drivers/md/dm-stripe.c:463 stripe_io_hints() warn: unsigned '*_d' is never less than zero.
-drivers/md/dm-stripe.c:463 stripe_io_hints() warn: unsigned '_a' is never less than zero.
-
-vim +463 drivers/md/dm-stripe.c
-
-af4874e03ed82f Mike Snitzer    2009-06-22  454  
-40bea431274c24 Mike Snitzer    2009-09-04  455  static void stripe_io_hints(struct dm_target *ti,
-40bea431274c24 Mike Snitzer    2009-09-04  456  			    struct queue_limits *limits)
-40bea431274c24 Mike Snitzer    2009-09-04  457  {
-40bea431274c24 Mike Snitzer    2009-09-04  458  	struct stripe_c *sc = ti->private;
-1071d560afb4c2 Mikulas Patocka 2025-08-11  459  	unsigned int io_min, io_opt;
-40bea431274c24 Mike Snitzer    2009-09-04  460  
-5fb9d4341b782a John Garry      2025-07-11  461  	limits->chunk_sectors = sc->chunk_size;
-1071d560afb4c2 Mikulas Patocka 2025-08-11  462  
-1071d560afb4c2 Mikulas Patocka 2025-08-11 @463  	if (!check_shl_overflow(sc->chunk_size, SECTOR_SHIFT, &io_min) &&
-1071d560afb4c2 Mikulas Patocka 2025-08-11  464  	    !check_mul_overflow(io_min, sc->stripes, &io_opt)) {
-1071d560afb4c2 Mikulas Patocka 2025-08-11  465  		limits->io_min = io_min;
-1071d560afb4c2 Mikulas Patocka 2025-08-11  466  		limits->io_opt = io_opt;
-1071d560afb4c2 Mikulas Patocka 2025-08-11  467  	}
-40bea431274c24 Mike Snitzer    2009-09-04  468  }
-40bea431274c24 Mike Snitzer    2009-09-04  469  
-
+diff --git a/options.c b/options.c
+index 0f207e80..dbe0349f 100644
+--- a/options.c
++++ b/options.c
+@@ -976,6 +976,8 @@ static char **handle_param(char *arg, char **next)
+ 
+ 	if (!strcmp(value, "dissect-show-all-symbols"))
+ 		dissect_show_all_symbols = 1;
++	else if (!strcmp(value, "dissect-show-compiled"))
++		dissect_show_all_symbols = 0;
+ 
+ 	return next;
+ }
+diff --git a/semind.c b/semind.c
+index ad8003ba..fa084e04 100644
+--- a/semind.c
++++ b/semind.c
+@@ -322,14 +322,14 @@ done:
+ 		show_usage();
+ 	}
+ 
+-	// enforce tabstop
++	// enforce defaults
+ 	tabstop = 1;
++	dissect_show_all_symbols = 1;
+ 
+ 	// step back since sparse_initialize will ignore argv[0].
+ 	optind--;
+ 
+ 	sparse_initialize(argc - optind, argv + optind, &semind_filelist);
+-	dissect_show_all_symbols = 1;
+ }
+ 
+ static void parse_cmdline_rm(int argc, char **argv)
 -- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+2.52.0
+
+
