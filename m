@@ -1,76 +1,40 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.10])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 156411A76DE;
-	Sat, 27 Dec 2025 08:50:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.10
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9840329B8EF
+	for <linux-sparse@vger.kernel.org>; Sat, 27 Dec 2025 15:58:13 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1766825428; cv=none; b=AIr2+Z+ptbnVucQbkGEAmYKCd2CosxngleXcj1br+esSzGOGVHN81Eg7j+DLG/oXV3Bi3xH0TMkwLV6ZhbeJUHMG5oQ1FAHJfOLGA69VZEKJE5AXmh3vZRKei+4bkvqtzUmCm9JVRblp5R/RTPaHM9w3c8HGRIw7gtJW50OXg68=
+	t=1766851093; cv=none; b=TyYlBktjeLj9tOFYgc5jI1y35yz+JFrijfG60ZEp4P4iPUGzTJqeso04UK8FfDo/ko3nYtE95Np/spwNhY5/OfSGCuFaVcZJCUagnVmVEOHsZEqkmgMu5PormoKq7FdhOoFTKjmzX0bHDmF3uX+XMIoGIk+rLB8CHKbCbatxqZY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1766825428; c=relaxed/simple;
-	bh=RTojEMiAD/uiUEkVv8WCKlz5qD03a5+9MsYox/dtBt0=;
+	s=arc-20240116; t=1766851093; c=relaxed/simple;
+	bh=otnVkfSYraKd+S0uhp1c/HjW6jU9ayzcP7I7l2Wmjc4=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=W4lE+B0mytYq8j/+TIuxfUN7h6wm6Atg6QG9/i11d41tFn0itTxf0YKLKgju3c8XgaUCt67tlBVwlPJ3F3YmnT5uh239YD8TYcLt2Zxp4D/DLJTmz46h2UTbeoqkRKLBwkbHjwbjEmT5qfk36MXJzMLms8JOgLISUNx7hlf38U0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=J7XzFEBN; arc=none smtp.client-ip=198.175.65.10
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=V8r4c7y4rFCj0WKlOYaiFVdPZwbqe9FU+QIjFApUN7qwZbSwwmP3wYgDLTBpn69/XEL5lqKT/QUc2agfH2TcB2ERNItEs68xKRdRLjpJYuRV9lNCB3iqVn1bWYLURtxU9oN/mSdFt/AS8rLe86Tw0U14OfNlyxgw3YHOIuLn+fM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=fyrGmUU1; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="J7XzFEBN"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1766825425; x=1798361425;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=RTojEMiAD/uiUEkVv8WCKlz5qD03a5+9MsYox/dtBt0=;
-  b=J7XzFEBN4EFbFyu+gkedVrIxTnIvhzmlMicx/TMWkSRZy563N2RZIrdC
-   WfTY6ZiCv7XYwlEAS9y4377hLtdu4g8dFfuEHlYjyulYEL30wNaOPk3Tf
-   Zq90gdkf7KesmkBL/rD94oA3kK7+obReSD0j88RnKZQW3bll8XoOOcA8D
-   QY/iBeptoKLaWzn2lzz96Vn6TjgvH1Z2+lqt+8c+KePdJCYh321BOHQhJ
-   noBMgVRhYecmS4E94haG+YHHM8TPqv/S4soWAbw7ovW87P+KfeIexWsgw
-   M44CqGouQupe3UU6a2WFAAxhjXnKtTapjm6yfn5qoibFQnekcNfWIbIJu
-   g==;
-X-CSE-ConnectionGUID: ud7rBzVkTzy1HLH1izU0hw==
-X-CSE-MsgGUID: uz49ghO4RbC6JFiaEa/liw==
-X-IronPort-AV: E=McAfee;i="6800,10657,11653"; a="85957970"
-X-IronPort-AV: E=Sophos;i="6.21,180,1763452800"; 
-   d="scan'208";a="85957970"
-Received: from orviesa001.jf.intel.com ([10.64.159.141])
-  by orvoesa102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Dec 2025 00:50:24 -0800
-X-CSE-ConnectionGUID: kEUaqMdDROuKkw6VwT9uhg==
-X-CSE-MsgGUID: tYrD3lycQiO3GJGRIEib5Q==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.21,180,1763452800"; 
-   d="scan'208";a="237927639"
-Received: from lkp-server02.sh.intel.com (HELO dd3453e2b682) ([10.239.97.151])
-  by orviesa001.jf.intel.com with ESMTP; 27 Dec 2025 00:50:19 -0800
-Received: from kbuild by dd3453e2b682 with local (Exim 4.98.2)
-	(envelope-from <lkp@intel.com>)
-	id 1vZQ04-000000005hJ-2JLG;
-	Sat, 27 Dec 2025 08:50:13 +0000
-Date: Sat, 27 Dec 2025 16:49:41 +0800
-From: kernel test robot <lkp@intel.com>
-To: Vincent Mailhol <mailhol@kernel.org>,
-	Nathan Chancellor <nathan@kernel.org>,
-	Nicolas Schier <nsc@kernel.org>,
-	Nick Desaulniers <nick.desaulniers+lkml@gmail.com>,
-	Bill Wendling <morbo@google.com>,
-	Justin Stitt <justinstitt@google.com>,
-	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
-	Maxime Ripard <mripard@kernel.org>,
-	Thomas Zimmermann <tzimmermann@suse.de>,
-	David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
-	Chris Mason <chris.mason@fusionio.com>,
-	David Sterba <dsterba@suse.com>, Kees Cook <kees@kernel.org>,
-	"Gustavo A. R. Silva" <gustavoars@kernel.org>
-Cc: oe-kbuild-all@lists.linux.dev, linux-kbuild@vger.kernel.org,
-	linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org,
-	llvm@lists.linux.dev, dri-devel@lists.freedesktop.org,
-	linux-btrfs@vger.kernel.org, linux-hardening@vger.kernel.org,
-	Vincent Mailhol <mailhol@kernel.org>
-Subject: Re: [PATCH v3 3/3] overflow: Remove is_non_negative() and
- is_negative()
-Message-ID: <202512271618.33YepxDC-lkp@intel.com>
-References: <20251220-remove_wtype-limits-v3-3-24b170af700e@kernel.org>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="fyrGmUU1"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id DE592C4CEF1;
+	Sat, 27 Dec 2025 15:58:11 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1766851093;
+	bh=otnVkfSYraKd+S0uhp1c/HjW6jU9ayzcP7I7l2Wmjc4=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=fyrGmUU1WSkn7yQ5TB62S6v0vF9wu3Sjlatu2kgrUtmHWSpxUmbwXneps5CeZiRiS
+	 lDmxXoSaJbyZVrImDaslGBWmJou0nN2skBMquClKDLCEMxTTu4j1wdujr4BawsC2DL
+	 dCqj30o97yE94g605BkK+X3d3jCjtSBcSXJw8ZafpuqGTvfs0Buu6UP0nbGyMGgKfB
+	 bc6/9yG8p2HeQjpT5hlEwdp39g7wL9qq2tiBz25iP52mTL7iIAOZeCIgf/ZK0OBq7+
+	 OJSDJfdef72ONQu38Yk6DHoHOKbtYPzyUjnibWzg86Mwzm4Fn3FCu8Agx+8BUYlxVe
+	 LpS/k0UviE3vA==
+Date: Sat, 27 Dec 2025 16:58:08 +0100
+From: Alexey Gladkov <legion@kernel.org>
+To: Oleg Nesterov <oleg@redhat.com>
+Cc: Chris Li <sparse@chrisli.org>, Luc Van Oostenryck <lucvoo@kernel.org>,
+	linux-sparse@vger.kernel.org
+Subject: Re: [PATCH 2/2] sparse/semind: robustify parse_cmdline_add()
+Message-ID: <aVACEIgAFSJgUJYj@example.org>
+References: <aU6cXFyfwtD9GMYa@redhat.com>
+ <aU6ceAt7RhlwGJ9-@redhat.com>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
@@ -79,81 +43,97 @@ List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20251220-remove_wtype-limits-v3-3-24b170af700e@kernel.org>
+In-Reply-To: <aU6ceAt7RhlwGJ9-@redhat.com>
 
-Hi Vincent,
+On Fri, Dec 26, 2025 at 03:32:24PM +0100, Oleg Nesterov wrote:
+> "semind add -ftabstop=8 ..." works as expected, but (for example)
+> "semind add --param=dissect-show-all-symbols ..." doesn't, this
+> arg is not passed to sparse_initialize().
+> 
+> Because in the latter case getopt_long() increments optind when it
+> sees --param=dissect-show-all-symbols. I have no idea if getopt_long()
+> is correct or not, but lets change parse_cmdline_add() so that it doesn't
+> depend on getopt_long()'s behaviour.
+> 
+> Signed-off-by: Oleg Nesterov <oleg@redhat.com>
 
-kernel test robot noticed the following build warnings:
+Hm. This behavior seems very strange to me. I couldn't find an explanation
+for it in getopt_long(3) man page. But I tried this sample with glibc and
+musl, and the behavior was the same and does not depend on POSIXLY_CORRECT
 
-[auto build test WARNING on 3e7f562e20ee87a25e104ef4fce557d39d62fa85]
+  #include <stdio.h>
+  #include <getopt.h>
+  
+  int main(int argc, char **argv)
+  {
+          char c;
+          opterr = 0;
+  
+          while ((c = getopt_long(argc, argv, "", NULL, NULL)) != -1) {
+                  if (c != '?')
+                          printf("unexpected known option: %c\n", c);
+                  break;
+          }
+          printf("optind=%d\n", optind);
+          return 0;
+  }
 
-url:    https://github.com/intel-lab-lkp/linux/commits/Vincent-Mailhol/kbuild-remove-gcc-s-Wtype-limits/20251220-190509
-base:   3e7f562e20ee87a25e104ef4fce557d39d62fa85
-patch link:    https://lore.kernel.org/r/20251220-remove_wtype-limits-v3-3-24b170af700e%40kernel.org
-patch subject: [PATCH v3 3/3] overflow: Remove is_non_negative() and is_negative()
-config: sparc-randconfig-r072-20251227 (https://download.01.org/0day-ci/archive/20251227/202512271618.33YepxDC-lkp@intel.com/config)
-compiler: sparc64-linux-gcc (GCC) 15.1.0
+Here are the results from both libc:
 
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202512271618.33YepxDC-lkp@intel.com/
+  for o in --f "--f f" -f -ff "-f f"; do printf '%s\t' "args='$o'"; ./z-musl $o; done
+  args='--f'	optind=1
+  args='--f f'	optind=1
+  args='-f'	optind=2
+  args='-ff'	optind=1
+  args='-f f'	optind=2
 
-smatch warnings:
-drivers/block/nbd.c:1612 __nbd_ioctl() warn: unsigned '_a' is never less than zero.
+So it seems that this is common behavior for different libc's.
+Thank you so much for finding this and fixing it!
 
-vim +/_a +1612 drivers/block/nbd.c
+Acked-by: Alexey Gladkov <legion@kernel.org>
 
-55313e92bd17a87 Mike Christie     2019-08-13  1591  
-9442b739207aab6 Josef Bacik       2017-02-07  1592  /* Must be called with config_lock held */
-9442b739207aab6 Josef Bacik       2017-02-07  1593  static int __nbd_ioctl(struct block_device *bdev, struct nbd_device *nbd,
-9442b739207aab6 Josef Bacik       2017-02-07  1594  		       unsigned int cmd, unsigned long arg)
-9442b739207aab6 Josef Bacik       2017-02-07  1595  {
-5ea8d10802ec4c1 Josef Bacik       2017-04-06  1596  	struct nbd_config *config = nbd->config;
-fad7cd3310db309 Baokun Li         2021-08-04  1597  	loff_t bytesize;
-5ea8d10802ec4c1 Josef Bacik       2017-04-06  1598  
-9442b739207aab6 Josef Bacik       2017-02-07  1599  	switch (cmd) {
-9442b739207aab6 Josef Bacik       2017-02-07  1600  	case NBD_DISCONNECT:
-29eaadc0364943b Josef Bacik       2017-04-06  1601  		return nbd_disconnect(nbd);
-9442b739207aab6 Josef Bacik       2017-02-07  1602  	case NBD_CLEAR_SOCK:
-0c1c9a27ce909e3 Christoph Hellwig 2023-08-11  1603  		nbd_clear_sock_ioctl(nbd);
-29eaadc0364943b Josef Bacik       2017-04-06  1604  		return 0;
-9442b739207aab6 Josef Bacik       2017-02-07  1605  	case NBD_SET_SOCK:
-e46c7287b1c2768 Josef Bacik       2017-04-06  1606  		return nbd_add_socket(nbd, arg, false);
-9442b739207aab6 Josef Bacik       2017-02-07  1607  	case NBD_SET_BLKSIZE:
-dcbddf541f18e36 Christoph Hellwig 2020-11-16  1608  		return nbd_set_size(nbd, config->bytesize, arg);
-9442b739207aab6 Josef Bacik       2017-02-07  1609  	case NBD_SET_SIZE:
-41e76c6a3c83c85 Nick Desaulniers  2021-09-20  1610  		return nbd_set_size(nbd, arg, nbd_blksize(config));
-9442b739207aab6 Josef Bacik       2017-02-07  1611  	case NBD_SET_SIZE_BLOCKS:
-41e76c6a3c83c85 Nick Desaulniers  2021-09-20 @1612  		if (check_shl_overflow(arg, config->blksize_bits, &bytesize))
-fad7cd3310db309 Baokun Li         2021-08-04  1613  			return -EINVAL;
-41e76c6a3c83c85 Nick Desaulniers  2021-09-20  1614  		return nbd_set_size(nbd, bytesize, nbd_blksize(config));
-9442b739207aab6 Josef Bacik       2017-02-07  1615  	case NBD_SET_TIMEOUT:
-55313e92bd17a87 Mike Christie     2019-08-13  1616  		nbd_set_cmd_timeout(nbd, arg);
-9442b739207aab6 Josef Bacik       2017-02-07  1617  		return 0;
-9442b739207aab6 Josef Bacik       2017-02-07  1618  
-9442b739207aab6 Josef Bacik       2017-02-07  1619  	case NBD_SET_FLAGS:
-5ea8d10802ec4c1 Josef Bacik       2017-04-06  1620  		config->flags = arg;
-9442b739207aab6 Josef Bacik       2017-02-07  1621  		return 0;
-9442b739207aab6 Josef Bacik       2017-02-07  1622  	case NBD_DO_IT:
-2a852a693f8839b Christoph Hellwig 2022-03-30  1623  		return nbd_start_device_ioctl(nbd);
-^1da177e4c3f415 Linus Torvalds    2005-04-16  1624  	case NBD_CLEAR_QUE:
-4b2f0260c74324a Herbert Xu        2006-01-06  1625  		/*
-4b2f0260c74324a Herbert Xu        2006-01-06  1626  		 * This is for compatibility only.  The queue is always cleared
-4b2f0260c74324a Herbert Xu        2006-01-06  1627  		 * by NBD_DO_IT or NBD_CLEAR_SOCK.
-4b2f0260c74324a Herbert Xu        2006-01-06  1628  		 */
-^1da177e4c3f415 Linus Torvalds    2005-04-16  1629  		return 0;
-^1da177e4c3f415 Linus Torvalds    2005-04-16  1630  	case NBD_PRINT_DEBUG:
-fd8383fd88a2fd8 Josef Bacik       2016-09-08  1631  		/*
-fd8383fd88a2fd8 Josef Bacik       2016-09-08  1632  		 * For compatibility only, we no longer keep a list of
-fd8383fd88a2fd8 Josef Bacik       2016-09-08  1633  		 * outstanding requests.
-fd8383fd88a2fd8 Josef Bacik       2016-09-08  1634  		 */
-^1da177e4c3f415 Linus Torvalds    2005-04-16  1635  		return 0;
-^1da177e4c3f415 Linus Torvalds    2005-04-16  1636  	}
-1a2ad21128bb4eb Pavel Machek      2009-04-02  1637  	return -ENOTTY;
-1a2ad21128bb4eb Pavel Machek      2009-04-02  1638  }
-1a2ad21128bb4eb Pavel Machek      2009-04-02  1639  
+> ---
+>  semind.c | 8 ++++----
+>  1 file changed, 4 insertions(+), 4 deletions(-)
+> 
+> diff --git a/semind.c b/semind.c
+> index fa084e04..e9708444 100644
+> --- a/semind.c
+> +++ b/semind.c
+> @@ -298,7 +298,7 @@ static void parse_cmdline_add(int argc, char **argv)
+>  		{ "help", no_argument, NULL, 'h' },
+>  		{ NULL }
+>  	};
+> -	int c;
+> +	int parsed = optind, c;
+>  
+>  	opterr = 0;
+>  
+> @@ -315,6 +315,7 @@ static void parse_cmdline_add(int argc, char **argv)
+>  			case '?':
+>  				goto done;
+>  		}
+> +		parsed = optind;
+>  	}
+>  done:
+>  	if (optind == argc) {
+> @@ -327,9 +328,8 @@ done:
+>  	dissect_show_all_symbols = 1;
+>  
+>  	// step back since sparse_initialize will ignore argv[0].
+> -	optind--;
+> -
+> -	sparse_initialize(argc - optind, argv + optind, &semind_filelist);
+> +	parsed--;
+> +	sparse_initialize(argc - parsed, argv + parsed, &semind_filelist);
+>  }
+>  
+>  static void parse_cmdline_rm(int argc, char **argv)
+> -- 
+> 2.52.0
+> 
+> 
 
 -- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+Rgrds, legion
+
