@@ -1,136 +1,101 @@
-Received: from smtp.domeneshop.no (smtp.domeneshop.no [194.63.252.55])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f177.google.com (mail-pl1-f177.google.com [209.85.214.177])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4D9EF155C87;
-	Thu,  1 Jan 2026 20:12:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.63.252.55
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E41E22DF13B
+	for <linux-sparse@vger.kernel.org>; Fri,  2 Jan 2026 11:04:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.177
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767298377; cv=none; b=GOt4sRmbsTerEWTCpko9QCJjxgYWFbxZ4pZkpX+IA5gqrsFVT7l4dtLuo5xox+R5x+xJHpXAQJLaID4qy0n/B/MbKByDFrzx/vkJPvnOL6s+X1DwznGJoRkYgpeFx7LvG/Fbkv6k+kmm5FuQtUdmgZxMeM3416eEDVXDT4pGLac=
+	t=1767351885; cv=none; b=USdU9fs0Skz3Zwekdrs9FsfpYOxrkIOwbn7BaO7eQv4o1yZDV6klOkPm3z2zhqsI3KX9H2ejTRfOgABRGcgONVF8tsSnkiKJRIuYwojh+LVGYqdU9IoUTr90EyTtM71QffqoIwhsDIoJFQfti+EJf3mYa564+63ur1qOJwX60C8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767298377; c=relaxed/simple;
-	bh=rY42i1BlFFAUFUS1FaOmIWfRKJkDvn94zmHyZkEyVEo=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=rQnYDpTRLWz8Yf9ATXAJ9Oa/GZkhtaRNO9kpXhzxZ/S9iTmYJB6e6fBxTQNBSgy8DSoTDauqJoV2kXxZiRFBXUB8wS2R6VFhka5oBT65nOLWtgLDFHZaToxTCScqQKkAyKKL3dJ/tUkhWPavJ2BvFwq3whEitnDUa8F95GqpuDE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fjasle.eu; spf=pass smtp.mailfrom=fjasle.eu; dkim=pass (2048-bit key) header.d=fjasle.eu header.i=@fjasle.eu header.b=ntNIn8qf; arc=none smtp.client-ip=194.63.252.55
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fjasle.eu
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fjasle.eu
+	s=arc-20240116; t=1767351885; c=relaxed/simple;
+	bh=wSApN7eIEmxe+ZlkFun1Wolx+BI8xxAaYv9APOnMXbc=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=ZpyAz8k3ufIGIZ2WpN8+mvMMBFGlSjY5pHVWh/jEajpAyw2qpt4jqu2wdCa9h2EgkKVEJjnSFCDmBT0FX+tFG/+D4D0cU9V0vFJWgX+tYIIi0XCEBZNGkujYbV2ApVJdOIZON63A5gRu4cxIoT4V3ptOLNtgt5VDa6VgcrGhmg4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ipCfHJYf; arc=none smtp.client-ip=209.85.214.177
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fjasle.eu header.i=@fjasle.eu header.b="ntNIn8qf"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=fjasle.eu;
-	s=ds202307; h=In-Reply-To:Content-Type:MIME-Version:References:Message-ID:
-	Subject:Cc:To:From:Date:From:Sender:Reply-To:Subject:Date:Message-ID:To:Cc:
-	MIME-Version:Content-Type:Content-Transfer-Encoding:Content-ID:
-	Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc
-	:Resent-Message-ID:In-Reply-To:References:List-Id:List-Help:List-Unsubscribe:
-	List-Subscribe:List-Post:List-Owner:List-Archive;
-	bh=NfmiQM37ly0jL0rmd/GvAkOHEOuwHHfshS7CwxNb0e4=; b=ntNIn8qfYcw2SPrD7yXav4rYqN
-	/xYUT6kpVbB5gXiOBwfL/XtrTJPf3kp1Vs5QyeSCV0jDQAxEzNX3LOTWOV5c/EjNp/WqdLD4ZtcEK
-	R1nQfMzJN9fd8yznJH3h4nKtcVxb4qeeBfXmR3tmSKCMzdRoiAF6hIexQpjlP6iPyogK7Yoqhgx6i
-	ziCqYyVkpeMoAFWMlg492axc7U2S99wbnB1tJBnXKMLlSQ+ejICAr55c+b0jz77nzBPBz9k3udoTY
-	IfZfMlqatnfYcnDym2NslBWRa1dRFTFHQUfjMCvdVbUH7bAED3Akln5um2AB+y8+qvr6BsMEPje7P
-	qmPjbTOQ==;
-Received: from smtp
-	by smtp.domeneshop.no with esmtpsa (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-	(Exim 4.95)
-	id 1vbOWY-00DiJn-Rw;
-	Thu, 01 Jan 2026 20:39:54 +0100
-Date: Thu, 1 Jan 2026 20:39:46 +0100
-From: Nicolas Schier <nicolas@fjasle.eu>
-To: Vincent Mailhol <mailhol@kernel.org>
-Cc: Nathan Chancellor <nathan@kernel.org>, Nicolas Schier <nsc@kernel.org>,
-	Nick Desaulniers <nick.desaulniers+lkml@gmail.com>,
-	Bill Wendling <morbo@google.com>,
-	Justin Stitt <justinstitt@google.com>,
-	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
-	Maxime Ripard <mripard@kernel.org>,
-	Thomas Zimmermann <tzimmermann@suse.de>,
-	David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
-	Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.com>,
-	Kees Cook <kees@kernel.org>,
-	"Gustavo A. R. Silva" <gustavoars@kernel.org>,
-	Linus Torvalds <torvalds@linux-foundation.org>,
-	linux-kbuild@vger.kernel.org, linux-sparse@vger.kernel.org,
-	linux-kernel@vger.kernel.org, llvm@lists.linux.dev,
-	dri-devel@lists.freedesktop.org, linux-btrfs@vger.kernel.org,
-	linux-hardening@vger.kernel.org, kernel test robot <lkp@intel.com>
-Subject: Re: [PATCH v3 3/3] overflow: Remove is_non_negative() and
- is_negative()
-Message-ID: <20260101-futuristic-petrel-of-ecstasy-23db5f@lindesnes>
-References: <20251220-remove_wtype-limits-v3-0-24b170af700e@kernel.org>
- <20251220-remove_wtype-limits-v3-3-24b170af700e@kernel.org>
- <acdd84b2-e893-419c-8a46-da55d695dda2@kernel.org>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ipCfHJYf"
+Received: by mail-pl1-f177.google.com with SMTP id d9443c01a7336-2a097cc08d5so31194045ad.0
+        for <linux-sparse@vger.kernel.org>; Fri, 02 Jan 2026 03:04:42 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1767351882; x=1767956682; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=FIDs7EpZgwjKHQTJkjqicwJWn0vuoECrubEqmgA+6vU=;
+        b=ipCfHJYf8oQoFqMJ+NDl0a9F86WRdEFeyHHJECOrCJTgF9zJ/8gSfv2wupCMMIxJfj
+         eku/SNf83ymrhL/SQUYtzhPbgVk4ruSA1LYT9k/bKsYW9SrdCKgZevYG4Cg9TNfQwqoS
+         caWuMb+pHVQgf1AW/BKGS9coLPWn9/MleoZ1hUJ6cuzG1lK59asRwBtVKq9C43ayEBWR
+         qdj7iEyYMLFOU/K0uf6CjK8jVAxXEukfQluV/1sjZCjrJvwffOAohbgoIDdSsiOO13MX
+         Ie2peETA/AJYICK2qlJpeNUpGfgbkOJ95hXdXg9xP1mWPAXH/MUYeYL6CVBcOSxhjMgz
+         2WTA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1767351882; x=1767956682;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=FIDs7EpZgwjKHQTJkjqicwJWn0vuoECrubEqmgA+6vU=;
+        b=CFonSyGbyAFKI8bTsESoLVr7/eVaZyuTerQtZLA+nW/HJxV4rncxVqHvLDVa3j5AJw
+         ONEj5VUTcOmGjD/7iq9t6L4Mkq6N1xFAnVflNZ4MXUH2ukjSCTD7R+cdLRjzyv8f9gkD
+         9OB2nr5G02u/ic9qqJ8V5FxAOZIC2dUhqHFo5owPiRgwucDaPrAIcGTGm4VPXdh+RKTc
+         62dNijZ/HRTF9wAI0TiVUb2YAz1Vsm+LMtDsko6oxU9AR7fNg1ENlsBLEr7+kRtktMW2
+         9+/tt8TBke7BUMKUHGVbNCNMC/ITZXCniFZX/O2OfIE+9KQCcluimfQWyn++tE4LxLEy
+         xbCw==
+X-Forwarded-Encrypted: i=1; AJvYcCX6F032uikDUGCl+bc040eZz+qqNSemo+YYwobcD1MKQUeVq76MBNmB+MIcwqSYZ1XgWvE97FrVc1nM1Io=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyqdypbY44OyxpWde09BdtB11o94G4ekMlS30jJN9L5qq22zPiL
+	l6050T5DpZ/NM7T+RedCl9F7BuG4Xo0UFjF6WnrgjqMPKnWVmdym4pjwhJzl+13imVKxWSklB65
+	+7fEzMDmQHn8SPMKoqPE2EyaN0mqnRcv5OCoB
+X-Gm-Gg: AY/fxX7RbytRZIuXXWdo5rsyiWTjX/YqJ3cCJLjGW0nJt/eYHjU/ahCiMyCtiKFWwAz
+	IPV6/1TBUPwJNuPFtYHQWxcKWgHXVwgJZ6Hf9V5nMZflSC16W6AS5zbSxBNua1GG/Lm3KwSG7FS
+	X4l6Vhtj2tSumk3lGwjYIzxoyp5ljF/s2FZAYHsLjwaue6D7+N3asnioHQxiGYzB0sZMDqe18kS
+	JhZgh9RH7I9rJ+uJ2kgHPFYZ2Y/UaAhDHVguKCNzA6p9+xP1qsnXQ7Ong4oB63xabblqvtPIdDZ
+	YTrZgHkpK3jg3QmiSxcpmN1wWlwYPV/Ffk5yu4ieL3S1N6GDVwv/PT85BmeaNvnxX/JmSskxMgX
+	dFZkOLY0TEsGm
+X-Google-Smtp-Source: AGHT+IEZHP2Tt0L93hKtfLRSYNZV76m0YyhGtrMg6HK8YOKF7WDdzMO7LFlzqH2gnVcYBfD5MuH9A9W3GVedPNVkD/I=
+X-Received: by 2002:a05:7301:1509:b0:2a4:3592:cf89 with SMTP id
+ 5a478bee46e88-2b05ea19892mr15172023eec.0.1767351882060; Fri, 02 Jan 2026
+ 03:04:42 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="0BVVorEFNEq+bZUt"
-Content-Disposition: inline
-In-Reply-To: <acdd84b2-e893-419c-8a46-da55d695dda2@kernel.org>
-X-Operating-System: Debian GNU/Linux forky/sid
-
-
---0BVVorEFNEq+bZUt
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
+References: <20251220-remove_wtype-limits-v3-0-24b170af700e@kernel.org>
+ <20251220-remove_wtype-limits-v3-3-24b170af700e@kernel.org>
+ <acdd84b2-e893-419c-8a46-da55d695dda2@kernel.org> <20260101-futuristic-petrel-of-ecstasy-23db5f@lindesnes>
+In-Reply-To: <20260101-futuristic-petrel-of-ecstasy-23db5f@lindesnes>
+From: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
+Date: Fri, 2 Jan 2026 12:04:28 +0100
+X-Gm-Features: AQt7F2rb7qQrF04KAinb0u8Ra4qw05S31gwaEul2jMZEj1pMA4QwOapz60W1DHs
+Message-ID: <CANiq72=jRT+6+2PBgshsK-TpxPiRK70H-+3D6sYaN-fdfC83qw@mail.gmail.com>
+Subject: Re: [PATCH v3 3/3] overflow: Remove is_non_negative() and is_negative()
+To: Nicolas Schier <nicolas@fjasle.eu>
+Cc: Vincent Mailhol <mailhol@kernel.org>, Nathan Chancellor <nathan@kernel.org>, 
+	Nicolas Schier <nsc@kernel.org>, Nick Desaulniers <nick.desaulniers+lkml@gmail.com>, 
+	Bill Wendling <morbo@google.com>, Justin Stitt <justinstitt@google.com>, 
+	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, Maxime Ripard <mripard@kernel.org>, 
+	Thomas Zimmermann <tzimmermann@suse.de>, David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>, 
+	Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.com>, Kees Cook <kees@kernel.org>, 
+	"Gustavo A. R. Silva" <gustavoars@kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>, 
+	linux-kbuild@vger.kernel.org, linux-sparse@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, llvm@lists.linux.dev, 
+	dri-devel@lists.freedesktop.org, linux-btrfs@vger.kernel.org, 
+	linux-hardening@vger.kernel.org, kernel test robot <lkp@intel.com>
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Thu, Jan 01, 2026 at 04:10:36PM +0100, Vincent Mailhol wrote:
-> On 20/12/2025 at 12:02, Vincent Mailhol wrote:
-> > The is_non_negative() and is_negative() function-like macros just
-> > exist as a workaround to silence the -Wtype-limits warning. Now that
-> > this warning is disabled, those two macros have lost their raison
-> > d'=EAtre. Remove them.
-> >=20
-> > This reverts commit dc7fe518b049 ("overflow: Fix -Wtype-limits
-> > compilation warnings").
-> >=20
-> > Suggested-by: Nicolas Schier <nsc@kernel.org>
-> > Link: https://lore.kernel.org/all/aUT_yWin_xslnOFh@derry.ads.avm.de
-> > Signed-off-by: Vincent Mailhol <mailhol@kernel.org>
->=20
-> So at the end, this patch got five kernel test robot reports:
->=20
->   https://lore.kernel.org/all/202512221735.mRV4BZqB-lkp@intel.com/
->   https://lore.kernel.org/all/202512230342.Lgha2HGH-lkp@intel.com/
->   https://lore.kernel.org/all/202512251340.UApIFw9R-lkp@intel.com/
->   https://lore.kernel.org/all/202512271618.33YepxDC-lkp@intel.com/
->   https://lore.kernel.org/all/202512280906.wt7UNpya-lkp@intel.com/
->=20
-> All these are the same smatch warning just triggered from a different
-> place. I think it is still too early to undo that workaround in
-> include/linux/overflow.h, otherwise developers would be getting that
-> smatch report too often.
->=20
-> I will send a v4 in which I will drop this patch. This basically means
-> that the v4 is a revert to v1...
+On Thu, Jan 1, 2026 at 9:13=E2=80=AFPM Nicolas Schier <nicolas@fjasle.eu> w=
+rote:
+>
+> thanks!  I think it's a bit sad to keep code only to make some checker
+> tooling happy, but for now it seems to be the right thing to do.
 
-thanks!  I think it's a bit sad to keep code only to make some checker=20
-tooling happy, but for now it seems to be the right thing to do.
+Perhaps a patch to add a comment explaining Vincent's findings would
+be a good outcome, i.e. explaining the reason it needs to remain in
+place for the moment (even a link to lore.kernel.org to this thread
+would help).
 
-Kind Regards,
-Nicolas
-
---0BVVorEFNEq+bZUt
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEh0E3p4c3JKeBvsLGB1IKcBYmEmkFAmlWzYIACgkQB1IKcBYm
-Emkv5A/+JGh8gXsgclOmUAW84XlSnEuwIhRXs3PO+BaFvveNaRIkkKUPw6dsHWDR
-VlbsSCp/6fyRrH5A2UQ8i7mAgkaFPrmi76d50HrYsMDFDPcCmmFkQP+6UTSvymZo
-KBiXwBoypXpUzcUaoWPmwhMfWH+0Ov4IMj6Suy808QAaESPPwJORFmd7zTl7ZE3i
-zUibhRVpU3qlgcV0ZcpJAkx4KJFHc0ADv9GTAmWTeBHGMsqWk4xZaFCwLB8bv+IB
-1l1X+7DjY9GzqupPzrfTZxeFZsrG/DVQAtKUutcbvZJPM8XWD9sHtb4oM9BEbQr8
-ShaZ3CbtXBGo5MCzQCw/Sb9DGCYm66apPE3NWbcEFKPqLG4slF7PdQ8o1DyyDbjK
-v8icj6elb23wmQGRd47aIVTcsFUeis+nJHAMnlQSMfVgDNB+trggaEHrzhcgP4Ff
-IhouTrsvdLsqzz01Oa+XQfR4GkjBxL6nWZLMbbOlXmHin4iSKqLKiCWrc6lkPJ7I
-d2F1JJoEH4XpbfdTV4YtsU+D3gpjywC7uGWSweHGTs8DihnQ/x5bwBUX3Bo98+pK
-T59NTfnjD02v+802qjCKvOoM90j5dX1FUCqhekc8Nm+TUlC5UHDjtts8SAmf1x9u
-OatEZU2f5zGPJBL91kVMQS7/psD1ZkDNucVtKBKX9gCveWFvVnQ=
-=7eoQ
------END PGP SIGNATURE-----
-
---0BVVorEFNEq+bZUt--
+Cheers,
+Miguel
