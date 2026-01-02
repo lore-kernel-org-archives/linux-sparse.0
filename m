@@ -1,101 +1,89 @@
-Received: from mail-pl1-f177.google.com (mail-pl1-f177.google.com [209.85.214.177])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from imap5.colo.codethink.co.uk (imap5.colo.codethink.co.uk [78.40.148.171])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E41E22DF13B
-	for <linux-sparse@vger.kernel.org>; Fri,  2 Jan 2026 11:04:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.177
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 999B230EF76
+	for <linux-sparse@vger.kernel.org>; Fri,  2 Jan 2026 12:09:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=78.40.148.171
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767351885; cv=none; b=USdU9fs0Skz3Zwekdrs9FsfpYOxrkIOwbn7BaO7eQv4o1yZDV6klOkPm3z2zhqsI3KX9H2ejTRfOgABRGcgONVF8tsSnkiKJRIuYwojh+LVGYqdU9IoUTr90EyTtM71QffqoIwhsDIoJFQfti+EJf3mYa564+63ur1qOJwX60C8=
+	t=1767355768; cv=none; b=AJo7VUzSfoF3OX18AViVc0DFdI03TYo+qSEuATzw1voAlwc5C14nU8rPXqc8Wu9Pyx77e975h/qOozX2xdFFgsgx2j5i94R3fmpo14sykPyXn0GpFvJkLLmuYUVFsj6Rp525EKSGw2uXCoi2monqfR2j+OGHkrYE/T7UJcVbJOs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767351885; c=relaxed/simple;
-	bh=wSApN7eIEmxe+ZlkFun1Wolx+BI8xxAaYv9APOnMXbc=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=ZpyAz8k3ufIGIZ2WpN8+mvMMBFGlSjY5pHVWh/jEajpAyw2qpt4jqu2wdCa9h2EgkKVEJjnSFCDmBT0FX+tFG/+D4D0cU9V0vFJWgX+tYIIi0XCEBZNGkujYbV2ApVJdOIZON63A5gRu4cxIoT4V3ptOLNtgt5VDa6VgcrGhmg4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ipCfHJYf; arc=none smtp.client-ip=209.85.214.177
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1767355768; c=relaxed/simple;
+	bh=s2EyDQjTgg2RCdccckdJ5JFFrG10s/9+Du5ubd+1N4M=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version; b=eNZ9NXt9VVThiAchIk3/07QAl51VqDXOGaNgDtlTkyawheJmtqKc1aQrg35IeOaOKC0rWQv3ULjYA+gZRs9hBS4PI3msxDQd+1APpMXiFNBOVjMLdS2FSbLdH4LZcHPorgITyi1MExwm66NsVVTUCRtL9o0jLEAb67lkXx/sm7E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=codethink.co.uk; spf=pass smtp.mailfrom=codethink.com; dkim=pass (2048-bit key) header.d=codethink.co.uk header.i=@codethink.co.uk header.b=6a3a/+6d; arc=none smtp.client-ip=78.40.148.171
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=codethink.co.uk
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=codethink.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ipCfHJYf"
-Received: by mail-pl1-f177.google.com with SMTP id d9443c01a7336-2a097cc08d5so31194045ad.0
-        for <linux-sparse@vger.kernel.org>; Fri, 02 Jan 2026 03:04:42 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1767351882; x=1767956682; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=FIDs7EpZgwjKHQTJkjqicwJWn0vuoECrubEqmgA+6vU=;
-        b=ipCfHJYf8oQoFqMJ+NDl0a9F86WRdEFeyHHJECOrCJTgF9zJ/8gSfv2wupCMMIxJfj
-         eku/SNf83ymrhL/SQUYtzhPbgVk4ruSA1LYT9k/bKsYW9SrdCKgZevYG4Cg9TNfQwqoS
-         caWuMb+pHVQgf1AW/BKGS9coLPWn9/MleoZ1hUJ6cuzG1lK59asRwBtVKq9C43ayEBWR
-         qdj7iEyYMLFOU/K0uf6CjK8jVAxXEukfQluV/1sjZCjrJvwffOAohbgoIDdSsiOO13MX
-         Ie2peETA/AJYICK2qlJpeNUpGfgbkOJ95hXdXg9xP1mWPAXH/MUYeYL6CVBcOSxhjMgz
-         2WTA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1767351882; x=1767956682;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=FIDs7EpZgwjKHQTJkjqicwJWn0vuoECrubEqmgA+6vU=;
-        b=CFonSyGbyAFKI8bTsESoLVr7/eVaZyuTerQtZLA+nW/HJxV4rncxVqHvLDVa3j5AJw
-         ONEj5VUTcOmGjD/7iq9t6L4Mkq6N1xFAnVflNZ4MXUH2ukjSCTD7R+cdLRjzyv8f9gkD
-         9OB2nr5G02u/ic9qqJ8V5FxAOZIC2dUhqHFo5owPiRgwucDaPrAIcGTGm4VPXdh+RKTc
-         62dNijZ/HRTF9wAI0TiVUb2YAz1Vsm+LMtDsko6oxU9AR7fNg1ENlsBLEr7+kRtktMW2
-         9+/tt8TBke7BUMKUHGVbNCNMC/ITZXCniFZX/O2OfIE+9KQCcluimfQWyn++tE4LxLEy
-         xbCw==
-X-Forwarded-Encrypted: i=1; AJvYcCX6F032uikDUGCl+bc040eZz+qqNSemo+YYwobcD1MKQUeVq76MBNmB+MIcwqSYZ1XgWvE97FrVc1nM1Io=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyqdypbY44OyxpWde09BdtB11o94G4ekMlS30jJN9L5qq22zPiL
-	l6050T5DpZ/NM7T+RedCl9F7BuG4Xo0UFjF6WnrgjqMPKnWVmdym4pjwhJzl+13imVKxWSklB65
-	+7fEzMDmQHn8SPMKoqPE2EyaN0mqnRcv5OCoB
-X-Gm-Gg: AY/fxX7RbytRZIuXXWdo5rsyiWTjX/YqJ3cCJLjGW0nJt/eYHjU/ahCiMyCtiKFWwAz
-	IPV6/1TBUPwJNuPFtYHQWxcKWgHXVwgJZ6Hf9V5nMZflSC16W6AS5zbSxBNua1GG/Lm3KwSG7FS
-	X4l6Vhtj2tSumk3lGwjYIzxoyp5ljF/s2FZAYHsLjwaue6D7+N3asnioHQxiGYzB0sZMDqe18kS
-	JhZgh9RH7I9rJ+uJ2kgHPFYZ2Y/UaAhDHVguKCNzA6p9+xP1qsnXQ7Ong4oB63xabblqvtPIdDZ
-	YTrZgHkpK3jg3QmiSxcpmN1wWlwYPV/Ffk5yu4ieL3S1N6GDVwv/PT85BmeaNvnxX/JmSskxMgX
-	dFZkOLY0TEsGm
-X-Google-Smtp-Source: AGHT+IEZHP2Tt0L93hKtfLRSYNZV76m0YyhGtrMg6HK8YOKF7WDdzMO7LFlzqH2gnVcYBfD5MuH9A9W3GVedPNVkD/I=
-X-Received: by 2002:a05:7301:1509:b0:2a4:3592:cf89 with SMTP id
- 5a478bee46e88-2b05ea19892mr15172023eec.0.1767351882060; Fri, 02 Jan 2026
- 03:04:42 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=codethink.co.uk header.i=@codethink.co.uk header.b="6a3a/+6d"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=codethink.co.uk; s=imap5-20230908; h=Sender:Content-Transfer-Encoding:
+	MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:
+	Reply-To; bh=zjo3PiQezr0MQPpRQGd3WNZe5cObPVmGZc16I/iCTxM=; b=6a3a/+6dJV28MUgj
+	URCBnzM1u5/k+99yZ0Tlzo76y0REbr26aQSuw9SqGKcvcQH4gzJ2mQEHdOcmElqpfR/t9iAt28i+H
+	kLUvFrWcIZQuqz7rZqzn/pAv5MK8nfFOnh88Rl0wiwtBayQXTLcDzY0nYxKnWPi3dKvQnx34O2W6M
+	mfT5o+HTdmWGv+PbEjzY5OmM5bAOD74p774HwxqbARqe89OvrRssdFptYZbqHFqkuP/jT8/UF1kNZ
+	uNpROgAV360MlP585IMXiM2S+RseQVQXCoxoJFxON80LYNIgqKly+1iDxxB5MpxFK22DUfwqAe6xY
+	EBpLsaDnSl4gkE+vJQ==;
+Received: from [167.98.27.226] (helo=rainbowdash)
+	by imap5.colo.codethink.co.uk with esmtpsa  (Exim 4.94.2 #2 (Debian))
+	id 1vbdaM-00HP3W-TF; Fri, 02 Jan 2026 11:44:50 +0000
+Received: from ben by rainbowdash with local (Exim 4.99.1)
+	(envelope-from <ben@rainbowdash>)
+	id 1vbdaM-00000002FXn-2JHX;
+	Fri, 02 Jan 2026 11:44:50 +0000
+From: Ben Dooks <ben.dooks@codethink.co.uk>
+To: linux-sparse@vger.kernel.org
+Cc: Ben Dooks <ben.dooks@codethink.co.uk>
+Subject: [PATCH 2/2] RISC-V: restart extension search on match
+Date: Fri,  2 Jan 2026 11:44:49 +0000
+Message-Id: <20260102114449.535597-3-ben.dooks@codethink.co.uk>
+X-Mailer: git-send-email 2.37.2.352.g3c44437643
+In-Reply-To: <20260102114449.535597-1-ben.dooks@codethink.co.uk>
+References: <20260102114449.535597-1-ben.dooks@codethink.co.uk>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20251220-remove_wtype-limits-v3-0-24b170af700e@kernel.org>
- <20251220-remove_wtype-limits-v3-3-24b170af700e@kernel.org>
- <acdd84b2-e893-419c-8a46-da55d695dda2@kernel.org> <20260101-futuristic-petrel-of-ecstasy-23db5f@lindesnes>
-In-Reply-To: <20260101-futuristic-petrel-of-ecstasy-23db5f@lindesnes>
-From: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
-Date: Fri, 2 Jan 2026 12:04:28 +0100
-X-Gm-Features: AQt7F2rb7qQrF04KAinb0u8Ra4qw05S31gwaEul2jMZEj1pMA4QwOapz60W1DHs
-Message-ID: <CANiq72=jRT+6+2PBgshsK-TpxPiRK70H-+3D6sYaN-fdfC83qw@mail.gmail.com>
-Subject: Re: [PATCH v3 3/3] overflow: Remove is_non_negative() and is_negative()
-To: Nicolas Schier <nicolas@fjasle.eu>
-Cc: Vincent Mailhol <mailhol@kernel.org>, Nathan Chancellor <nathan@kernel.org>, 
-	Nicolas Schier <nsc@kernel.org>, Nick Desaulniers <nick.desaulniers+lkml@gmail.com>, 
-	Bill Wendling <morbo@google.com>, Justin Stitt <justinstitt@google.com>, 
-	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, Maxime Ripard <mripard@kernel.org>, 
-	Thomas Zimmermann <tzimmermann@suse.de>, David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>, 
-	Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.com>, Kees Cook <kees@kernel.org>, 
-	"Gustavo A. R. Silva" <gustavoars@kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>, 
-	linux-kbuild@vger.kernel.org, linux-sparse@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, llvm@lists.linux.dev, 
-	dri-devel@lists.freedesktop.org, linux-btrfs@vger.kernel.org, 
-	linux-hardening@vger.kernel.org, kernel test robot <lkp@intel.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+Sender: srv_ts003@codethink.com
 
-On Thu, Jan 1, 2026 at 9:13=E2=80=AFPM Nicolas Schier <nicolas@fjasle.eu> w=
-rote:
->
-> thanks!  I think it's a bit sad to keep code only to make some checker
-> tooling happy, but for now it seems to be the right thing to do.
+If we are passed multiple extensions in -march, don't assume these will
+be in any sort of order. If we do match, then restart the loop by setting
+the search back to 0, and retrying.
 
-Perhaps a patch to add a comment explaining Vincent's findings would
-be a good outcome, i.e. explaining the reason it needs to remain in
-place for the moment (even a link to lore.kernel.org to this thread
-would help).
+This sorts out issues with the current kernel build where there are now
+lots of extensions for the rv64i and even adding zacas doesn't silence the
+warnings generated.
 
-Cheers,
-Miguel
+Signed-off-by: Ben Dooks <ben.dooks@codethink.co.uk>
+---
+ target-riscv.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/target-riscv.c b/target-riscv.c
+index 80c25285..ddf50e61 100644
+--- a/target-riscv.c
++++ b/target-riscv.c
+@@ -56,7 +56,7 @@ static void parse_march_riscv(const char *arg)
+ 
+ 	// Each -march=.. options entirely overrides previous ones
+ 	riscv_flags = 0;
+-
++	
+ 	for (i = 0; i < ARRAY_SIZE(basic_sets); i++) {
+ 		const char *pat = basic_sets[i].pattern;
+ 		size_t len = strlen(pat);
+@@ -80,6 +80,7 @@ ext:
+ 		if (!strncmp(arg, pat, len)) {
+ 			riscv_flags |= extensions[i].flags;
+ 			arg += len;
++			i = 0;
+ 		}
+ 	}
+ 	if (arg[0])
+-- 
+2.37.2.352.g3c44437643
+
