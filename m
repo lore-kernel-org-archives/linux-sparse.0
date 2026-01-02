@@ -1,43 +1,43 @@
-Received: from imap5.colo.codethink.co.uk (imap5.colo.codethink.co.uk [78.40.148.171])
+Received: from imap4.hz.codethink.co.uk (imap4.hz.codethink.co.uk [188.40.203.114])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 999B230EF76
-	for <linux-sparse@vger.kernel.org>; Fri,  2 Jan 2026 12:09:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=78.40.148.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 35E39154BF5
+	for <linux-sparse@vger.kernel.org>; Fri,  2 Jan 2026 12:26:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=188.40.203.114
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767355768; cv=none; b=AJo7VUzSfoF3OX18AViVc0DFdI03TYo+qSEuATzw1voAlwc5C14nU8rPXqc8Wu9Pyx77e975h/qOozX2xdFFgsgx2j5i94R3fmpo14sykPyXn0GpFvJkLLmuYUVFsj6Rp525EKSGw2uXCoi2monqfR2j+OGHkrYE/T7UJcVbJOs=
+	t=1767356807; cv=none; b=Idfk/3AdEB9SdtWZfwAVsWf0C4x+wu5jDkSTSIwV4zZI0/yc2NJR2R/yg1K/knrqISWWvyy10ubsgom3PNz1JSl0bhtgGqTd0i+dx8F8iwiC6fnR9ZPgZ4tgjvLPgPSBpmi3bRQwzxs/+ABfkYkAoBtx9i8iwVItKAhRaZF8HIM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767355768; c=relaxed/simple;
-	bh=s2EyDQjTgg2RCdccckdJ5JFFrG10s/9+Du5ubd+1N4M=;
+	s=arc-20240116; t=1767356807; c=relaxed/simple;
+	bh=Axn9yvQTDr8iE9WkmAi1sT44ZFvCnT20G9DfRVZHlas=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=eNZ9NXt9VVThiAchIk3/07QAl51VqDXOGaNgDtlTkyawheJmtqKc1aQrg35IeOaOKC0rWQv3ULjYA+gZRs9hBS4PI3msxDQd+1APpMXiFNBOVjMLdS2FSbLdH4LZcHPorgITyi1MExwm66NsVVTUCRtL9o0jLEAb67lkXx/sm7E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=codethink.co.uk; spf=pass smtp.mailfrom=codethink.com; dkim=pass (2048-bit key) header.d=codethink.co.uk header.i=@codethink.co.uk header.b=6a3a/+6d; arc=none smtp.client-ip=78.40.148.171
+	 MIME-Version; b=iVbMMyhHVkhXZajAsa8D89VHupe4nuYg7AquFEs9V/C5neWJpZRKpVDSYVN93JJqZsUpY8v8gPvh2E5LQOZ7/TOv3aGIUfrWAjmpT+pZXJECBSzTWo1PbIemXQhzcFNmc3gdJ+v4yhowEVgR7LwAQv3yJy8nqHZI7RRux6qMp4I=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=codethink.co.uk; spf=pass smtp.mailfrom=codethink.com; dkim=pass (2048-bit key) header.d=codethink.co.uk header.i=@codethink.co.uk header.b=u0Ei5SmU; arc=none smtp.client-ip=188.40.203.114
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=codethink.co.uk
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=codethink.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=codethink.co.uk header.i=@codethink.co.uk header.b="6a3a/+6d"
+	dkim=pass (2048-bit key) header.d=codethink.co.uk header.i=@codethink.co.uk header.b="u0Ei5SmU"
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=codethink.co.uk; s=imap5-20230908; h=Sender:Content-Transfer-Encoding:
+	d=codethink.co.uk; s=imap4-20230908; h=Sender:Content-Transfer-Encoding:
 	MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:
-	Reply-To; bh=zjo3PiQezr0MQPpRQGd3WNZe5cObPVmGZc16I/iCTxM=; b=6a3a/+6dJV28MUgj
-	URCBnzM1u5/k+99yZ0Tlzo76y0REbr26aQSuw9SqGKcvcQH4gzJ2mQEHdOcmElqpfR/t9iAt28i+H
-	kLUvFrWcIZQuqz7rZqzn/pAv5MK8nfFOnh88Rl0wiwtBayQXTLcDzY0nYxKnWPi3dKvQnx34O2W6M
-	mfT5o+HTdmWGv+PbEjzY5OmM5bAOD74p774HwxqbARqe89OvrRssdFptYZbqHFqkuP/jT8/UF1kNZ
-	uNpROgAV360MlP585IMXiM2S+RseQVQXCoxoJFxON80LYNIgqKly+1iDxxB5MpxFK22DUfwqAe6xY
-	EBpLsaDnSl4gkE+vJQ==;
+	Reply-To; bh=A/oPUVC995fZtlQ5hcnZuZKofYdrDDgjMGWMWw8cFJY=; b=u0Ei5SmUqAqK4Tf9
+	dvI85aEJOYIxF7Uj2VHl0UNQlzTvkKvLj6sXckDAeqdK7sZtDCMxhEJIVTw0xMECADYTSU5Vbz+OT
+	NSkDw51UjzLyBfhl1VJM2s9nBVfssZXt+dcd/ViziB+KNdYP9mGAiQAyzTo735N80sKpeBm7TIhuQ
+	wpajM9L5u197SEhE3G4IFrz3Rtb8TxyG8fN4W/gbKw02VupIrT8rj7rnanOJ9QJx+KbaCUbb5U6fa
+	FRFMkDbjN62PPPWDqBxc1P8O5BQu6u7FDsF64EZNGCJmATcx12ouQh8XcOid2PHBtDvkGybu+lfC5
+	y8bQP8XPFAWzLY6/ng==;
 Received: from [167.98.27.226] (helo=rainbowdash)
-	by imap5.colo.codethink.co.uk with esmtpsa  (Exim 4.94.2 #2 (Debian))
-	id 1vbdaM-00HP3W-TF; Fri, 02 Jan 2026 11:44:50 +0000
+	by imap4.hz.codethink.co.uk with esmtpsa  (Exim 4.94.2 #2 (Debian))
+	id 1vbdaM-003fEa-PP; Fri, 02 Jan 2026 11:44:50 +0000
 Received: from ben by rainbowdash with local (Exim 4.99.1)
 	(envelope-from <ben@rainbowdash>)
-	id 1vbdaM-00000002FXn-2JHX;
+	id 1vbdaM-00000002FXj-1ynz;
 	Fri, 02 Jan 2026 11:44:50 +0000
 From: Ben Dooks <ben.dooks@codethink.co.uk>
 To: linux-sparse@vger.kernel.org
 Cc: Ben Dooks <ben.dooks@codethink.co.uk>
-Subject: [PATCH 2/2] RISC-V: restart extension search on match
-Date: Fri,  2 Jan 2026 11:44:49 +0000
-Message-Id: <20260102114449.535597-3-ben.dooks@codethink.co.uk>
+Subject: [PATCH 1/2] RISC-V: Stop warning about Zabha and Zacas
+Date: Fri,  2 Jan 2026 11:44:48 +0000
+Message-Id: <20260102114449.535597-2-ben.dooks@codethink.co.uk>
 X-Mailer: git-send-email 2.37.2.352.g3c44437643
 In-Reply-To: <20260102114449.535597-1-ben.dooks@codethink.co.uk>
 References: <20260102114449.535597-1-ben.dooks@codethink.co.uk>
@@ -50,40 +50,39 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: srv_ts003@codethink.com
 
-If we are passed multiple extensions in -march, don't assume these will
-be in any sort of order. If we do match, then restart the loop by setting
-the search back to 0, and retrying.
+The zabha (atomic byte and halfword) and zacas (atomic compare/swap)
+are now being used by the kernel, so parse these and stop the warnings
+when running make C=1 on current kernels.
 
-This sorts out issues with the current kernel build where there are now
-lots of extensions for the rv64i and even adding zacas doesn't silence the
-warnings generated.
+WARNING: invalid argument to '-march': '_zacas_zabha'
 
 Signed-off-by: Ben Dooks <ben.dooks@codethink.co.uk>
 ---
- target-riscv.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ target-riscv.c | 4 ++++
+ 1 file changed, 4 insertions(+)
 
 diff --git a/target-riscv.c b/target-riscv.c
-index 80c25285..ddf50e61 100644
+index d30be04b..80c25285 100644
 --- a/target-riscv.c
 +++ b/target-riscv.c
-@@ -56,7 +56,7 @@ static void parse_march_riscv(const char *arg)
+@@ -22,6 +22,8 @@
+ #define RISCV_ZICBOM	(1 << 12)
+ #define RISCV_ZIHINTPAUSE	(1 << 13)
+ #define RISCV_VECTOR	(1 << 14)
++#define RISCV_ATOMIC_CAS (1 << 15)
++#define RISCV_ATOMIC_BH	 (1 << 16)
  
- 	// Each -march=.. options entirely overrides previous ones
- 	riscv_flags = 0;
--
-+	
- 	for (i = 0; i < ARRAY_SIZE(basic_sets); i++) {
- 		const char *pat = basic_sets[i].pattern;
- 		size_t len = strlen(pat);
-@@ -80,6 +80,7 @@ ext:
- 		if (!strncmp(arg, pat, len)) {
- 			riscv_flags |= extensions[i].flags;
- 			arg += len;
-+			i = 0;
- 		}
- 	}
- 	if (arg[0])
+ static unsigned int riscv_flags;
+ 
+@@ -43,6 +45,8 @@ static void parse_march_riscv(const char *arg)
+ 		{ "d",		RISCV_DOUBLE|RISCV_FDIV|RISCV_ZICSR },
+ 		{ "c",		RISCV_COMP },
+ 		{ "v",		RISCV_VECTOR|RISCV_FPU|RISCV_ZICSR },
++		{ "_zacas",	RISCV_ATOMIC_CAS },
++		{ "_zabha",	RISCV_ATOMIC_BH },
+ 		{ "_zicsr",	RISCV_ZICSR },
+ 		{ "_zifencei",	RISCV_ZIFENCEI },
+ 		{ "_zicbom",	RISCV_ZICBOM },
 -- 
 2.37.2.352.g3c44437643
 
