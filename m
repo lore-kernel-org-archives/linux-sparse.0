@@ -1,89 +1,59 @@
-Received: from mail-wr1-f44.google.com (mail-wr1-f44.google.com [209.85.221.44])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4EC46126F0A
-	for <linux-sparse@vger.kernel.org>; Sat,  3 Jan 2026 10:02:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.44
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 11BD71E231E;
+	Sat,  3 Jan 2026 11:10:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767434578; cv=none; b=GiwXKFn0Er+FGXlcKS5FUsPTO11iutzx7wOjT9tBa6Gh0wuyxSiNxDU3NNWhQ91vz/czs6ZDGZk63tKiJ5sg8vnKMH3IJgNYUzhYssbWcfPqTwotEdD938cwiTykXYCEv6V2XepRLD1xMcTK0R+QiuEvfwqqdrsBIPR7dfvfePo=
+	t=1767438655; cv=none; b=rRC5+c2yPEOckgjSYbGBfurtolZptxjYOf8ZKWi8ervMI4Ea43WKMhYFjlf6NNYhmMjLt6gIVDZ/Y0lWd8gIT16i517wkMQFSEJyhsHwu25umt4++8L8Kr3ZcBK9GWoJvESX9+1HfoI6yni7A47zN34dmAMQH2EEJWPTduIWRyA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767434578; c=relaxed/simple;
-	bh=qPbRsMMm0OalGU9qVWShgfi/u94dI5ZvzdhcCM49xKU=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=XPizQIZZwEj4U4e3CQrqk8/OAS+M135kkM8C0Lnbgou3ko2k+i/J0gY2VeYOw+bMcu0mh9JVG4a6pK9dlOL5tw14BiceU0EO6ADoUNUqNwPv8QR3BGri8wOMUuB9TSZwdOQbjvzCvu13N3CgKyRC2vq/lsK9/dNMmLQcApRcjyA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=FwgzKfIY; arc=none smtp.client-ip=209.85.221.44
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1767438655; c=relaxed/simple;
+	bh=jp68MVC+P0p1UuoNYPzbcHr6LPN+K8JU4atA5jieR/w=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=n/fhXSWeF9/i8+6XEV8VIAqak4Bo8z91IC7JqLBhDk11vMKnPz8qOYsw3SP/Y7rvqzL/z9Dsjq0tP6/dJ+lgTSlNr/uA9vpDw1mhkmDEux1ZjDjjD7G7+MagnXl3lxzr56RentXDE59lnj+LOaxyeoEYv7L0RMMG3kzoDdvpawg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=gtpV5Lwh; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="FwgzKfIY"
-Received: by mail-wr1-f44.google.com with SMTP id ffacd0b85a97d-42fed090e5fso5800055f8f.1
-        for <linux-sparse@vger.kernel.org>; Sat, 03 Jan 2026 02:02:55 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1767434574; x=1768039374; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=pVMxWDM6IlrZiTwjie+uTeOt+ekq2BmDE9odN218w14=;
-        b=FwgzKfIYM1ex2C/PxtpeVUnJAA+ULw7L2VMcXJqrCfix8tgyA4w/nOGqo/3NUkQn8J
-         lDo6qrMLDBd+lORO2LSqRhF0ScNbvTaSN9oy4v/o6M3wGRBhFDQ1MPNjt3ib6iIqIu5+
-         +O1YrMfn9B8Jjr2xunyKhHpJSpltlfDN+eZ87dpNmt4l+k0CDH7pYiihKqcXZuPHY2sx
-         dSak1ir4ZQ4hftt/bGNrtkQXvm4zBQnxSN5iL+qH3hTAxAFwo0eCvbJ7OrIGnV88OQL6
-         Ukdr8zFlwE67pOXI7CVx0wND88xAQ2g7mhVxR3ca/pIkESKER5mjgewzbuInPc2F2aYN
-         wHMw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1767434574; x=1768039374;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=pVMxWDM6IlrZiTwjie+uTeOt+ekq2BmDE9odN218w14=;
-        b=Uwn7sGVwVWBf2kNY8z+FF6mOZF4L7G9UL53oyrvKFS4Y6DIQDDlxQ0GK+ZfVPBPkoj
-         KVvfTdKNoxdBHqreNxm/W2U0yjXE2QwEy6sElPqS8AtE29plHt27502vC1m3qxy42LYZ
-         dNz52ZO0lBh8TktQEcx0wFyKTOTwqst1HcOxxXVs/5PxhGKI7XDJSI/ueqlQDA0YlGEE
-         tGj6eJVo3QZpJOXacwwXpOl9smeIY0IXlUOUdfQWnNz6S+ReEH66/EWQBbiSQLSZ1M9w
-         qc/phuRziH/gIiU8VqZFdRarF7It4foyODYI1qfPkg5HTmavMzO91AIFbpQJ+VPIgg5s
-         blIw==
-X-Forwarded-Encrypted: i=1; AJvYcCX3BjRN7z78em6DPPULKDKzG61VVhqLl19NHhyLDlh5cXKHopiGRv8/daNR9tIaSCaF4GqpOkMOiazr8MY=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yz73LBRpPq/yuC20ZlRUon45Xq39+SScIkPqn2bRfql1AyM3mC0
-	Pm2RMOqEPKtwONAHUVz6V3kUi0Cnugfp+Zx6bZK3mKzMDFUNdO5i3E9MaPIbDsBkYP4=
-X-Gm-Gg: AY/fxX5mEd801ADMOMxnyjwpDYLkm7VIsYwFyBilUd7rB1Iycy8joQ6OWGIJ3CM4YfZ
-	NqDrh5tdiez5lQW5S4LmnZkCR4EKsm8WuQLsxyL2J6VBvMHcN5HEnZr5diVGoE/nRgnYJczElnl
-	mW+NRPmSyZWy3wMXWWma0jMFuVc+T5HJ9vhvXSCjBppNK7tEE7cxgS3cXARRUCP9S72KNl/IaDh
-	3bqLhdTs4zGZPZj1+qi21+sJM4QWZ1N6w+bNSw/y7WGmGN7Qa8t/mAi8fdh5OBezWenpQ+OEKUG
-	gxG7Mw3I3/P4l6wc9MpLCmHcH95HQQVatnywnl/59hk7nr6QYVG6G95hDNn/k0AytzY4y+H6wJM
-	KSKDOqVr9kPiDybtBB412+okjKR0/oky8ZbMRqyKx0F2BgeUMoLkt8a2W4Bo78XiMAdbQ0/srrP
-	pCrae0isr6yx/eAvDzTSq/XrBnxQ==
-X-Google-Smtp-Source: AGHT+IFPkanq3RHUbcsbNCpasG6Z313jdsfGQVH9J5om8n/FtqWwK7E4sTbdu6zUmursa5ksRK1pIw==
-X-Received: by 2002:a05:6000:3113:b0:42f:bb4a:9989 with SMTP id ffacd0b85a97d-4324e4d0fc1mr49661835f8f.28.1767434573075;
-        Sat, 03 Jan 2026 02:02:53 -0800 (PST)
-Received: from localhost ([196.207.164.177])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-4324eab2a94sm89174903f8f.43.2026.01.03.02.02.51
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 03 Jan 2026 02:02:52 -0800 (PST)
-Date: Sat, 3 Jan 2026 13:02:48 +0300
-From: Dan Carpenter <dan.carpenter@linaro.org>
-To: Randy Dunlap <rdunlap@infradead.org>
-Cc: Vincent Mailhol <mailhol@kernel.org>,
-	Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>,
-	Nicolas Schier <nicolas@fjasle.eu>,
-	Nathan Chancellor <nathan@kernel.org>,
-	Nicolas Schier <nsc@kernel.org>,
-	Nick Desaulniers <nick.desaulniers+lkml@gmail.com>,
-	Bill Wendling <morbo@google.com>,
-	Justin Stitt <justinstitt@google.com>,
-	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
-	Maxime Ripard <mripard@kernel.org>,
-	Thomas Zimmermann <tzimmermann@suse.de>,
-	David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
-	Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.com>,
-	Kees Cook <kees@kernel.org>,
-	"Gustavo A. R. Silva" <gustavoars@kernel.org>,
-	Linus Torvalds <torvalds@linux-foundation.org>,
-	linux-kbuild@vger.kernel.org, linux-sparse@vger.kernel.org,
-	linux-kernel@vger.kernel.org, llvm@lists.linux.dev,
-	dri-devel@lists.freedesktop.org, linux-btrfs@vger.kernel.org,
-	linux-hardening@vger.kernel.org, kernel test robot <lkp@intel.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="gtpV5Lwh"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 06867C113D0;
+	Sat,  3 Jan 2026 11:10:47 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1767438654;
+	bh=jp68MVC+P0p1UuoNYPzbcHr6LPN+K8JU4atA5jieR/w=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=gtpV5LwhGhrXdfl38aFrNPwsxttqYVKBjkVzJbHCFG01awWWliOKdheB+Hf4xt7fP
+	 CqOlafebvGWjoA6tZDI08FKuuXkfL+AyvO7futZye0fOTuv88/W9b/Cjf9m9PeBjnE
+	 0Y5UyRQJNX/BfkOSgBEtvfZdc7kcW8KtvxFeHomIcF/41xQ6Is24RoP0H5cpmmXjLg
+	 tCnqWUmp8NCwGom++XAcTH3W+7E7cpPBpwR0QSWn6Pmmz4+idRPaJfAZZc4RCc4/Vn
+	 FGfbl0KZ8k5SS7AUR0TgRmWtB0cXQOT+nVv4HzV7mEPLv4qCBc4PMVk8qUy2CO9Rtk
+	 C51zVShkrX+QA==
+Message-ID: <c84557e6-aa92-42e9-8768-e246676ec1e9@kernel.org>
+Date: Sat, 3 Jan 2026 12:10:45 +0100
+Precedence: bulk
+X-Mailing-List: linux-sparse@vger.kernel.org
+List-Id: <linux-sparse.vger.kernel.org>
+List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
+List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
 Subject: Re: [PATCH] overflow: Update is_non_negative() and is_negative()
  comment
-Message-ID: <903ba91b-f052-4b1c-827d-6292965026c5@moroto.mountain>
+To: Dan Carpenter <dan.carpenter@linaro.org>,
+ Randy Dunlap <rdunlap@infradead.org>
+Cc: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>,
+ Nicolas Schier <nicolas@fjasle.eu>, Nathan Chancellor <nathan@kernel.org>,
+ Nicolas Schier <nsc@kernel.org>,
+ Nick Desaulniers <nick.desaulniers+lkml@gmail.com>,
+ Bill Wendling <morbo@google.com>, Justin Stitt <justinstitt@google.com>,
+ Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
+ Maxime Ripard <mripard@kernel.org>, Thomas Zimmermann <tzimmermann@suse.de>,
+ David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
+ Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.com>,
+ Kees Cook <kees@kernel.org>, "Gustavo A. R. Silva" <gustavoars@kernel.org>,
+ Linus Torvalds <torvalds@linux-foundation.org>,
+ linux-kbuild@vger.kernel.org, linux-sparse@vger.kernel.org,
+ linux-kernel@vger.kernel.org, llvm@lists.linux.dev,
+ dri-devel@lists.freedesktop.org, linux-btrfs@vger.kernel.org,
+ linux-hardening@vger.kernel.org, kernel test robot <lkp@intel.com>
 References: <20251220-remove_wtype-limits-v3-0-24b170af700e@kernel.org>
  <20251220-remove_wtype-limits-v3-3-24b170af700e@kernel.org>
  <acdd84b2-e893-419c-8a46-da55d695dda2@kernel.org>
@@ -91,34 +61,55 @@ References: <20251220-remove_wtype-limits-v3-0-24b170af700e@kernel.org>
  <CANiq72=jRT+6+2PBgshsK-TpxPiRK70H-+3D6sYaN-fdfC83qw@mail.gmail.com>
  <b549e430-5623-4c60-acb1-4b5e095ae870@kernel.org>
  <b6b35138-2c37-4b82-894e-59e897ec7d58@kernel.org>
-Precedence: bulk
-X-Mailing-List: linux-sparse@vger.kernel.org
-List-Id: <linux-sparse.vger.kernel.org>
-List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
-List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <b6b35138-2c37-4b82-894e-59e897ec7d58@kernel.org>
+ <903ba91b-f052-4b1c-827d-6292965026c5@moroto.mountain>
+From: Vincent Mailhol <mailhol@kernel.org>
+Content-Language: en-US
+Autocrypt: addr=mailhol@kernel.org; keydata=
+ xjMEZluomRYJKwYBBAHaRw8BAQdAf+/PnQvy9LCWNSJLbhc+AOUsR2cNVonvxhDk/KcW7FvN
+ JFZpbmNlbnQgTWFpbGhvbCA8bWFpbGhvbEBrZXJuZWwub3JnPsKZBBMWCgBBFiEE7Y9wBXTm
+ fyDldOjiq1/riG27mcIFAmdfB/kCGwMFCQp/CJcFCwkIBwICIgIGFQoJCAsCBBYCAwECHgcC
+ F4AACgkQq1/riG27mcKBHgEAygbvORJOfMHGlq5lQhZkDnaUXbpZhxirxkAHwTypHr4A/joI
+ 2wLjgTCm5I2Z3zB8hqJu+OeFPXZFWGTuk0e2wT4JzjgEZx4y8xIKKwYBBAGXVQEFAQEHQJrb
+ YZzu0JG5w8gxE6EtQe6LmxKMqP6EyR33sA+BR9pLAwEIB8J+BBgWCgAmFiEE7Y9wBXTmfyDl
+ dOjiq1/riG27mcIFAmceMvMCGwwFCQPCZwAACgkQq1/riG27mcJU7QEA+LmpFhfQ1aij/L8V
+ zsZwr/S44HCzcz5+jkxnVVQ5LZ4BANOCpYEY+CYrld5XZvM8h2EntNnzxHHuhjfDOQ3MAkEK
+In-Reply-To: <903ba91b-f052-4b1c-827d-6292965026c5@moroto.mountain>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-Thanks Randy, for sending this to me.  I'm on the sparse list, but
-I've been on vacation and haven't caught up with my email.  I can
-easily silence this in Smatch.
+On 03/01/2026 at 11:02, Dan Carpenter wrote:
+> Thanks Randy, for sending this to me.  I'm on the sparse list, but
+> I've been on vacation and haven't caught up with my email. 
 
-regards,
-dan carpenter
+Welcome back, hope you enjoyed your holidays!
 
-diff --git a/check_unsigned_lt_zero.c b/check_unsigned_lt_zero.c
-index bfeb3261f91d..ac3e650704ce 100644
---- a/check_unsigned_lt_zero.c
-+++ b/check_unsigned_lt_zero.c
-@@ -105,7 +105,8 @@ static bool is_allowed_zero(struct expression *expr)
- 	    strcmp(macro, "STRTO_H") == 0 ||
- 	    strcmp(macro, "SUB_EXTEND_USTAT") == 0 ||
- 	    strcmp(macro, "TEST_CASTABLE_TO_TYPE_VAR") == 0 ||
--	    strcmp(macro, "TEST_ONE_SHIFT") == 0)
-+	    strcmp(macro, "TEST_ONE_SHIFT") == 0 ||
-+	    strcmp(macro, "check_shl_overflow") == 0)
- 		return true;
- 	return false;
- }
+>I can easily silence this in Smatch.
+
+Thanks. I ran this locally, I can confirm that this silences the
+warning. So:
+
+Tested-by: Vincent Mailhol <mailhol@kernel.org>
+
+> diff --git a/check_unsigned_lt_zero.c b/check_unsigned_lt_zero.c
+> index bfeb3261f91d..ac3e650704ce 100644
+> --- a/check_unsigned_lt_zero.c
+> +++ b/check_unsigned_lt_zero.c
+> @@ -105,7 +105,8 @@ static bool is_allowed_zero(struct expression *expr)
+>  	    strcmp(macro, "STRTO_H") == 0 ||
+>  	    strcmp(macro, "SUB_EXTEND_USTAT") == 0 ||
+>  	    strcmp(macro, "TEST_CASTABLE_TO_TYPE_VAR") == 0 ||
+> -	    strcmp(macro, "TEST_ONE_SHIFT") == 0)
+> +	    strcmp(macro, "TEST_ONE_SHIFT") == 0 ||
+> +	    strcmp(macro, "check_shl_overflow") == 0)
+
+But, for the long term, wouldn't it better to just ignore all the code
+coming from macro extensions instead of maintaining this allow-list?
+
+>  		return true;
+>  	return false;
+>  }
+
+
+Yours sincerely,
+Vincent Mailhol
+
