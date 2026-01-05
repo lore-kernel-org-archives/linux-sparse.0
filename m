@@ -1,119 +1,92 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4FF144414;
-	Mon,  5 Jan 2026 20:47:11 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F40CD2EFD95;
+	Mon,  5 Jan 2026 23:56:51 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767646031; cv=none; b=C3/FN6+pPHDIeKSpcREF0NdltQ4SI9pivwVGdizjt2VBE+q/3d5TTjPlgEq3s21GjABL5H4fCCs0upr0savkX5IaBcx5Y78m6NhBCGjIVzCO3E9sslupZ7GRBjk2sl1QLSsoLjEt1s9inEB2vEjLTJYOyij17fugshmPN0KXYc0=
+	t=1767657412; cv=none; b=tUwNy2ZAWVuXCeYWcTGpWwDSC8t0mxq2mkA863YdVvu3GvVgDLkm3WGKeGlaAKe8pnDXLMLJNtAeqoBkGRyWzl0f4U4QFy38yR3oHWZrvYdI/r1eJ5WDeSt/FsG1sHsbCgh/UQMJtt5GKI6letdftmw7XWwJ42GLaRIytlQboRo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767646031; c=relaxed/simple;
-	bh=0cXxgiKJYEDsCA8YbH5UmnzTobnhAPOmLswUtmtPxRA=;
-	h=Message-ID:Date:MIME-Version:Subject:To:References:From:Cc:
-	 In-Reply-To:Content-Type; b=LuKOchQqB7TmivGmzXmu2zILvGXh3NwrmO/4U5Xb4Dg0Barv4zedUE/tvvG84FCUmEq+Xh57MrR14MAbgl+bcxNbDXoAwY3psPlpARfQi3fqpKV6Sc82O5v0kbSloh71mFuTYTPZ/1cDco1H2VvdjZa6zc4818eJjNN3Zd+87xE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=BMHzx6W0; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1767657412; c=relaxed/simple;
+	bh=HBefWBHNf4ymkXE1PWUOS9//5AiwqnDSrYphgTjisOw=;
+	h=From:To:Cc:In-Reply-To:References:Subject:Message-Id:Date:
+	 MIME-Version:Content-Type; b=CEUZrwbwO4Knkxh5+yATwEKppzRLRnBRXzHNbrx/Qr3mo7s03jsAlRTSdGWhhh+QnzunEtudaXJIAbnvPeR0dvh05N++57sEMUt1VkQq7JPrHZZheQ7c0DPJzKhIG7YZuVyiqc0tuqs9FxIRyPdOQxmX5o/gu76SDClYzGc1J3w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=nDg/o9QI; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="BMHzx6W0"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B913DC116D0;
-	Mon,  5 Jan 2026 20:47:04 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="nDg/o9QI"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 30CAFC16AAE;
+	Mon,  5 Jan 2026 23:56:47 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1767646030;
-	bh=0cXxgiKJYEDsCA8YbH5UmnzTobnhAPOmLswUtmtPxRA=;
-	h=Date:Subject:To:References:From:Cc:In-Reply-To:From;
-	b=BMHzx6W0wYpa3dgpAYuiWxtwk/g6bicVK04ntKuo+FrzNCEcut784a7NVdkREQZ4Q
-	 n4b9t2XKZwfbQY6ArCYQZMAmEdWhpQGSVD7qkABSAfRymBfqNTZYJpXZpRI7C7lRRR
-	 oesQ925GuAJP+kPS+GIt2TaKlrtanK8p9EXO57ajadGtvsbqVeMrKEVFhcwYQdIYa7
-	 VkFFAlpclS3v14r8gKi2wB1f3DcqJU46CQEAqo980IZaN8BYe9OfQtj3CP1niifHIy
-	 FlIgh+mkVBtY0Cf10+z+7TjcjSnOIynxH6CzYDfTlgR9raoYjiNClOWiXo9nZjKbUj
-	 kczLXVhiwMwjg==
-Message-ID: <54fe30d3-856e-45d4-ba30-b9e770d9afc6@kernel.org>
-Date: Mon, 5 Jan 2026 21:47:02 +0100
+	s=k20201202; t=1767657411;
+	bh=HBefWBHNf4ymkXE1PWUOS9//5AiwqnDSrYphgTjisOw=;
+	h=From:To:Cc:In-Reply-To:References:Subject:Date:From;
+	b=nDg/o9QIX94RGxQ8o4uWO4940lF6rBh8EFCk3iRRe/0G/kimpAVyxBjGu72E209mZ
+	 Y5ZOLi28OSOum6l7U3P09kVpW9Q2LnDDcyqt2OhvRjROl0Bsj0UVcBzi6NDmpBKrsB
+	 wf4GUjw9MHOHelPU40BYYO+3r9YrNQurpm2lKJojrcAOM+sEOw0Q/9F5DhoFZCzoo9
+	 fWxBGf1doRNqR/a1PAaLfulyfPTtPLgYKbwz4s8i0O3VXiS5pQElQ7gweku3dkN4Tg
+	 GSi+yG3RZnvRpG6OOh+KtL4zREbWF6dmCW/spLJ7som9azTud0QYzBXHd/gIFvWwez
+	 +2YeHHtpWUTjw==
+From: Nathan Chancellor <nathan@kernel.org>
+To: Nathan Chancellor <nathan@kernel.org>, Nicolas Schier <nsc@kernel.org>, 
+ Nick Desaulniers <nick.desaulniers+lkml@gmail.com>, 
+ Bill Wendling <morbo@google.com>, Justin Stitt <justinstitt@google.com>, 
+ Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, 
+ Maxime Ripard <mripard@kernel.org>, Thomas Zimmermann <tzimmermann@suse.de>, 
+ David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>, 
+ Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.com>, 
+ Kees Cook <kees@kernel.org>, "Gustavo A. R. Silva" <gustavoars@kernel.org>, 
+ Vincent Mailhol <mailhol@kernel.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, 
+ linux-kbuild@vger.kernel.org, linux-sparse@vger.kernel.org, 
+ linux-kernel@vger.kernel.org, llvm@lists.linux.dev, 
+ dri-devel@lists.freedesktop.org, linux-btrfs@vger.kernel.org, 
+ linux-hardening@vger.kernel.org
+In-Reply-To: <20251220-remove_wtype-limits-v3-0-24b170af700e@kernel.org>
+References: <20251220-remove_wtype-limits-v3-0-24b170af700e@kernel.org>
+Subject: Re: [PATCH v3 0/3] kbuild: remove gcc's -Wtype-limits
+Message-Id: <176765740692.3236304.10853846154010651497.b4-ty@kernel.org>
+Date: Mon, 05 Jan 2026 16:56:46 -0700
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v4 0/2] kbuild: remove gcc's -Wtype-limits
-To: Nathan Chancellor <nathan@kernel.org>, Nicolas Schier <nsc@kernel.org>
-References: <20260101-remove_wtype-limits-v4-0-225b75c29086@kernel.org>
- <aVutfSk4PWbGac_Q@levanger>
-From: Vincent Mailhol <mailhol@kernel.org>
-Content-Language: en-US
-Cc: Nick Desaulniers <nick.desaulniers+lkml@gmail.com>,
- Bill Wendling <morbo@google.com>, Justin Stitt <justinstitt@google.com>,
- Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
- Maxime Ripard <mripard@kernel.org>, Thomas Zimmermann <tzimmermann@suse.de>,
- David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
- Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.com>,
- Kees Cook <kees@kernel.org>, "Gustavo A. R. Silva" <gustavoars@kernel.org>,
- Linus Torvalds <torvalds@linux-foundation.org>,
- linux-kbuild@vger.kernel.org, linux-sparse@vger.kernel.org,
- linux-kernel@vger.kernel.org, llvm@lists.linux.dev,
- dri-devel@lists.freedesktop.org, linux-btrfs@vger.kernel.org,
- linux-hardening@vger.kernel.org, Daniel Plakosh <dplakosh@sei.cmu.edu>
-Autocrypt: addr=mailhol@kernel.org; keydata=
- xjMEZluomRYJKwYBBAHaRw8BAQdAf+/PnQvy9LCWNSJLbhc+AOUsR2cNVonvxhDk/KcW7FvN
- JFZpbmNlbnQgTWFpbGhvbCA8bWFpbGhvbEBrZXJuZWwub3JnPsKZBBMWCgBBFiEE7Y9wBXTm
- fyDldOjiq1/riG27mcIFAmdfB/kCGwMFCQp/CJcFCwkIBwICIgIGFQoJCAsCBBYCAwECHgcC
- F4AACgkQq1/riG27mcKBHgEAygbvORJOfMHGlq5lQhZkDnaUXbpZhxirxkAHwTypHr4A/joI
- 2wLjgTCm5I2Z3zB8hqJu+OeFPXZFWGTuk0e2wT4JzjgEZx4y8xIKKwYBBAGXVQEFAQEHQJrb
- YZzu0JG5w8gxE6EtQe6LmxKMqP6EyR33sA+BR9pLAwEIB8J+BBgWCgAmFiEE7Y9wBXTmfyDl
- dOjiq1/riG27mcIFAmceMvMCGwwFCQPCZwAACgkQq1/riG27mcJU7QEA+LmpFhfQ1aij/L8V
- zsZwr/S44HCzcz5+jkxnVVQ5LZ4BANOCpYEY+CYrld5XZvM8h2EntNnzxHHuhjfDOQ3MAkEK
-In-Reply-To: <aVutfSk4PWbGac_Q@levanger>
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
+X-Mailer: b4 0.15-dev
 
-On 05/01/2026 at 13:24, Nicolas Schier wrote:
-> On Thu, Jan 01, 2026 at 04:21:38PM +0100, Vincent Mailhol wrote:
->> I often read on the mailing list people saying "who cares about W=2
->> builds anyway?". At least I do. Not that I want to fix all of them,
->> but on some occasions, such as new driver submissions, I have often
->> found a couple valid diagnostics in the W=2 output.
->>
->> That said, the annoying thing is that W=2 is heavily polluted by one
->> warning: -Wtype-limits. Try a gcc W=2 build on any file and see the
->> results for yourself. I suspect this to be the reason why so few
->> people are using W=2.
->>
->> This series removes gcc's -Wtype-limits in an attempt to make W=2 more
->> useful. Those who do not use W=2 can continue to not use it if they
->> want. Those who, like me, use it for time to time will get an improved
->> experience from the reduced spam.
->>
->> Patch #1 deactivates -Wtype-limits. Extra details on statistics, past
->> attempts and alternatives are given in the description.
->>
->> Patch #2 clean-ups the local Kbuild -Wno-type-limits exceptions.
->>
->> Signed-off-by: Vincent Mailhol <mailhol@kernel.org>
->> ---
->> Changes in v4:
->>
->>   - Remove patch #3.
->>   - Aside from minor changes in the patch descriptions, this is
->>     basially a revert to v1.
->>
->> Link to v3: https://lore.kernel.org/r/20251220-remove_wtype-limits-v3-0-24b170af700e@kernel.org
+On Sat, 20 Dec 2025 12:02:18 +0100, Vincent Mailhol wrote:
+> I often read on the mailing list people saying "who cares about W=2
+> builds anyway?". At least I do. Not that I want to fix all of them,
+> but on some occasions, such as new driver submissions, I have often
+> found a couple valid diagnostics in the W=2 output.
 > 
-> just to prevent confusions:  As Dan silenced the Smatch warning caused
-> by patch #3 [1] (thanks!), the additional comment patch [2] is obsolete
-> and v3 of the series is a more complete version than v4.
+> That said, the annoying thing is that W=2 is heavily polluted by one
+> warning: -Wtype-limits. Try a gcc W=2 build on any file and see the
+> results for yourself. I suspect this to be the reason why so few
+> people are using W=2.
+> 
+> [...]
 
-Exactly!
+Applied to
 
-Thanks to Daniel's effort we finally have a complete fix.
+  https://git.kernel.org/pub/scm/linux/kernel/git/kbuild/linux.git kbuild-next
 
-Let me know if you need any actions from my side. Otherwise, I will
-assume that my part of the work is done here and will just wait for the
-v3 to be picked.
+Thanks!
 
-(I am so happy to start 2026 by getting rid of this annoying
--Wtype-limits spam :D)
+[1/3] kbuild: remove gcc's -Wtype-limits
+      https://git.kernel.org/kbuild/c/660e899103e29
+[2/3] kbuild: cleanup local -Wno-type-limits exceptions
+      https://git.kernel.org/kbuild/c/34a1bd0b6b2c0
+[3/3] overflow: Remove is_non_negative() and is_negative()
+      https://git.kernel.org/kbuild/c/5ce3218d4f102
 
+Please look out for regression or issue reports or other follow up
+comments, as they may result in the patch/series getting dropped or
+reverted.
 
-Yours sincerely,
-Vincent Mailhol
+Best regards,
+-- 
+Nathan Chancellor <nathan@kernel.org>
 
