@@ -1,35 +1,48 @@
-Received: from imap4.hz.codethink.co.uk (imap4.hz.codethink.co.uk [188.40.203.114])
+Received: from 011.lax.mailroute.net (011.lax.mailroute.net [199.89.1.14])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C0D363BBA14
-	for <linux-sparse@vger.kernel.org>; Thu,  8 Jan 2026 09:38:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=188.40.203.114
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 69FDD2F39B5;
+	Thu,  8 Jan 2026 22:10:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=199.89.1.14
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767865124; cv=none; b=bGpdBYqaBXRaZxe8clYzyQR0IhTgF6GwkNqWHZ8I80rYHW9ZTS2Iav8Qct+rbJsbFhVaVsA1d0dZdrTWw4zHVyhs+MMI+x+lN1pvOCZx5wcOaPT1bf5KHv3cdoNRDrccfiUbFl1bk5ZftShG1aozwfWEQXHnz/N8MdMMtJSDPxM=
+	t=1767910254; cv=none; b=eIjfP4fuQlK47m4pGdvOrFJNWmLKHkqjTAS9ZUfygYbPxgTE9x/N69MkA4P9dlzFCu1zxK6VLL+3d7MDrHQQAlnRR4TkTaaRAb7qKQNJycwkW9OOmPRhxsOrCVfk5mWW2vCt0LSZ53jNDFi5LYqSIIxzQWGwpForbymN9R/VEUM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767865124; c=relaxed/simple;
-	bh=BuQYe089HDWu6lVFjQ9bI5Yfn6LuYXkzyLeIhE+R23o=;
+	s=arc-20240116; t=1767910254; c=relaxed/simple;
+	bh=Zrh6g3iqQucP/rJuVPvG/r1wbhapoAMvUjp8oSDN/3U=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=o+NsVJk7abiDQaxNI0E6n1gDKJU/5xhuCwdEfUYTdj02HaJa/31gPcPw85KVPPYzXHCtOYV8BaJYlXQvspoumfNSDyhuQsZ0DJxu99FHfMpn9/Jn0djRBCKDHNbG4oIkaoZ8aM1LgBojtlt3FrXhJp8NzQvoWSW++GqOlWvKiLo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=codethink.co.uk; spf=pass smtp.mailfrom=codethink.co.uk; dkim=pass (2048-bit key) header.d=codethink.co.uk header.i=@codethink.co.uk header.b=rSBQFNqj; arc=none smtp.client-ip=188.40.203.114
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=codethink.co.uk
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=codethink.co.uk
+	 In-Reply-To:Content-Type; b=ZGxoPMA4sgdkuxU2OlMaha98jEK/GGGw9tbduEwb1fVYq+Jy7o7aaUSx9ezZ3XtxxGexGNALlqAiGwVHC9k5YQOviddeW+O11yiFgTCHrLPc014sNo1Vu3QLdp12VmkvJMvUkRk5x3V3N5QuYgS6d/1/QPdggZaFxotPPEmlQng=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org; spf=pass smtp.mailfrom=acm.org; dkim=pass (2048-bit key) header.d=acm.org header.i=@acm.org header.b=y3DnIpMC; arc=none smtp.client-ip=199.89.1.14
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=acm.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=codethink.co.uk header.i=@codethink.co.uk header.b="rSBQFNqj"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=codethink.co.uk; s=imap4-20230908; h=Sender:Content-Transfer-Encoding:
-	In-Reply-To:From:References:Cc:To:Subject:MIME-Version:Date:Message-ID:
-	Reply-To; bh=L41T5mTCI2k4//h3ALXPwwgF53kW9rqiME0VNRDt5Ig=; b=rSBQFNqjtdTs/pUy
-	uis/FwZQQorLY/ixdZi0np9yssvPGiLNQ/4x42JewZS2qzkqzZtEvWIixq/khdLZnFwkzRl9YtfYK
-	aJcWpqzA3tjkK+nV2FWXJcPExg+tP3aCkeo6hHCeJHBKKrePJIBlzPmMZP5b/Ip29WMX7EFBOEcjK
-	ewgGt1m6biF8WMVu9ax0C7blRiSS0VWzyjw/RDaHAfiv8cGvNWLeDQa1AuWxf8/cy9HnMeVS4/0o1
-	Zvdv5DFX+DjIls35vEv3SsM+0/11Ed/Okx+I2JbTN5ePNZLv4trxVGJPDrLl+NsXWZxHGSNBoYQE4
-	gMAZfabGlLFLPq6Vsg==;
-Received: from [167.98.27.226] (helo=[10.35.6.194])
-	by imap4.hz.codethink.co.uk with esmtpsa  (Exim 4.94.2 #2 (Debian))
-	id 1vdmTN-00AS5O-3J; Thu, 08 Jan 2026 09:38:29 +0000
-Message-ID: <13cb6e5b-94f0-487d-a8fb-9e5ab8a3e45c@codethink.co.uk>
-Date: Thu, 8 Jan 2026 09:38:25 +0000
+	dkim=pass (2048-bit key) header.d=acm.org header.i=@acm.org header.b="y3DnIpMC"
+Received: from localhost (localhost [127.0.0.1])
+	by 011.lax.mailroute.net (Postfix) with ESMTP id 4dnJxx5cFFz1XT1Z9;
+	Thu,  8 Jan 2026 22:10:45 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=acm.org; h=
+	content-transfer-encoding:content-type:content-type:in-reply-to
+	:from:from:content-language:references:subject:subject
+	:user-agent:mime-version:date:date:message-id:received:received;
+	 s=mr01; t=1767910237; x=1770502238; bh=9wcZSTi8w0Set4rh18vUE4zP
+	r/D6QOeIA+Se4D2Yz7E=; b=y3DnIpMCSQnKfEQcNUdJmBRbcLno92oeKfo+WMYi
+	GH7blNKN0irLymfpBF3Hg2QDn+bUOND9Ph7+2f+3JOuxuWVyZeHsX/eUX6nr4u42
+	Xo2+GsL+38yL5abFm2PTOhHHNbpFxaViFrEYePNdHtMs7t66UhI3rEcsqAbQ0git
+	yvIzwW2Puf3sh2g2Yh6ypqckaBLqa3pUBV8iuttx96qnQS6WndngwpK8KdYd2a1p
+	gWKipnbDHZpiaajmh8SgTT8KCPLDjeAtbIOlGRsmWTvjAkHdDpnNsQrr3OZChyg8
+	yuKl6RyxlRCmlJ0VSvSzQ99QFu2RTNvj4T9gnBxHCvPCnw==
+X-Virus-Scanned: by MailRoute
+Received: from 011.lax.mailroute.net ([127.0.0.1])
+ by localhost (011.lax [127.0.0.1]) (mroute_mailscanner, port 10029) with LMTP
+ id 2VIQQt_5Aq81; Thu,  8 Jan 2026 22:10:37 +0000 (UTC)
+Received: from [100.119.48.131] (unknown [104.135.180.219])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	(Authenticated sender: bvanassche@acm.org)
+	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4dnJxZ1xlYz1XZYyy;
+	Thu,  8 Jan 2026 22:10:26 +0000 (UTC)
+Message-ID: <57062131-e79e-42c2-aa0b-8f931cb8cac2@acm.org>
+Date: Thu, 8 Jan 2026 14:10:25 -0800
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
@@ -37,54 +50,75 @@ List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: issue with _Static_assert and __builtin()s
-To: Dan Carpenter <dan.carpenter@linaro.org>
-Cc: linux-sparse@vger.kernel.org
-References: <2943a1fd-1168-4043-bede-8f39cad4444b@codethink.co.uk>
- <aV9DhtIM7Z5ZmJRz@stanley.mountain>
-Content-Language: en-GB
-From: Ben Dooks <ben.dooks@codethink.co.uk>
-Organization: Codethink Limited.
-In-Reply-To: <aV9DhtIM7Z5ZmJRz@stanley.mountain>
+Subject: Re: [PATCH v5 10/36] locking/mutex: Support Clang's context analysis
+To: Marco Elver <elver@google.com>, Peter Zijlstra <peterz@infradead.org>,
+ Boqun Feng <boqun.feng@gmail.com>, Ingo Molnar <mingo@kernel.org>,
+ Will Deacon <will@kernel.org>
+Cc: "David S. Miller" <davem@davemloft.net>,
+ Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
+ Chris Li <sparse@chrisli.org>, "Paul E. McKenney" <paulmck@kernel.org>,
+ Alexander Potapenko <glider@google.com>, Arnd Bergmann <arnd@arndb.de>,
+ Christoph Hellwig <hch@lst.de>, Dmitry Vyukov <dvyukov@google.com>,
+ Eric Dumazet <edumazet@google.com>, Frederic Weisbecker
+ <frederic@kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+ Herbert Xu <herbert@gondor.apana.org.au>, Ian Rogers <irogers@google.com>,
+ Jann Horn <jannh@google.com>, Joel Fernandes <joelagnelf@nvidia.com>,
+ Johannes Berg <johannes.berg@intel.com>, Jonathan Corbet <corbet@lwn.net>,
+ Josh Triplett <josh@joshtriplett.org>, Justin Stitt
+ <justinstitt@google.com>, Kees Cook <kees@kernel.org>,
+ Kentaro Takeda <takedakn@nttdata.co.jp>,
+ Lukas Bulwahn <lukas.bulwahn@gmail.com>, Mark Rutland
+ <mark.rutland@arm.com>, Mathieu Desnoyers <mathieu.desnoyers@efficios.com>,
+ Miguel Ojeda <ojeda@kernel.org>, Nathan Chancellor <nathan@kernel.org>,
+ Neeraj Upadhyay <neeraj.upadhyay@kernel.org>,
+ Nick Desaulniers <nick.desaulniers+lkml@gmail.com>,
+ Steven Rostedt <rostedt@goodmis.org>,
+ Tetsuo Handa <penguin-kernel@I-love.SAKURA.ne.jp>,
+ Thomas Gleixner <tglx@linutronix.de>, Thomas Graf <tgraf@suug.ch>,
+ Uladzislau Rezki <urezki@gmail.com>, Waiman Long <longman@redhat.com>,
+ kasan-dev@googlegroups.com, linux-crypto@vger.kernel.org,
+ linux-doc@vger.kernel.org, linux-kbuild@vger.kernel.org,
+ linux-kernel@vger.kernel.org, linux-mm@kvack.org,
+ linux-security-module@vger.kernel.org, linux-sparse@vger.kernel.org,
+ linux-wireless@vger.kernel.org, llvm@lists.linux.dev, rcu@vger.kernel.org
+References: <20251219154418.3592607-1-elver@google.com>
+ <20251219154418.3592607-11-elver@google.com>
+Content-Language: en-US
+From: Bart Van Assche <bvanassche@acm.org>
+In-Reply-To: <20251219154418.3592607-11-elver@google.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Sender: ben.dooks@codethink.co.uk
 
-On 08/01/2026 05:41, Dan Carpenter wrote:
-> On Wed, Jan 07, 2026 at 07:41:45PM +0000, Ben Dooks wrote:
->> So I am looking at why the Linux kernel's check for nul characters
->> in strings is causing errors out of sparse.
->>
->> EG:
->> drivers/md/dm.c:3813:1: error: bad constant expression
->> drivers/md/dm.c:3814:1: error: bad constant expression
->> drivers/md/dm.c:3816:1: error: bad constant expression
->> drivers/md/dm.c:3817:1: error: bad constant expression
->>
->> I've tracked it down to the sizeof(str) - 1 == __builtin_strlen(str)
->> failing to be a good constant expression...
->>
->> This is an example of the assert which isn't working:
->>
->> _Static_assert(sizeof("moo") - 1 == __builtin_strlen("moo"), "nul!");
->>
->> This does at least get past w/o warnings
->> _Static_assert(__builtin_types_compatible_p(int, int), "doh!");
->>
->> I've had a go at updating builtin.c to deal with __builtin_strlen()
->> for a string constant (attached) but that's just changing the
->> output to "error: bad integer constant expression" so not sure
->> what I've missed here.
->>
-> 
-> Al has a fix for that.
-> https://git.kernel.org/pub/scm/linux/kernel/git/viro/sparse.git/commit/?id=2634e39bf02697a18fece057208150362c985992
+On 12/19/25 8:39 AM, Marco Elver wrote:
+> diff --git a/include/linux/mutex.h b/include/linux/mutex.h
+> index bf535f0118bb..89977c215cbd 100644
+> --- a/include/linux/mutex.h
+> +++ b/include/linux/mutex.h
+> @@ -62,6 +62,7 @@ do {									\
+>   	static struct lock_class_key __key;				\
+>   									\
+>   	__mutex_init((mutex), #mutex, &__key);				\
+> +	__assume_ctx_lock(mutex);					\
+>   } while (0)
 
-Ah thanks, that'll save me a few hours of prodding my code to try
-getting it working.
+The above type of change probably will have to be reverted. If I enable
+context analysis for the entire kernel tree, drivers/base/devcoredump.c
+doesn't build. The following error is reported:
 
--- 
-Ben Dooks				http://www.codethink.co.uk/
-Senior Engineer				Codethink - Providing Genius
+drivers/base/devcoredump.c:406:2: error: acquiring mutex '_res->mutex' 
+that is already held [-Werror,-Wthread-safety-analysis]
+   406 |         mutex_lock(&devcd->mutex);
+       |         ^
 
-https://www.codethink.co.uk/privacy.html
+dev_coredumpm_timeout() calls mutex_init() and mutex_lock() from the 
+same function. The above type of change breaks compilation of all code
+that initializes and locks a synchronization object from the same
+function. My understanding of dev_coredumpm_timeout() is that there is a
+good reason for calling both mutex_init() and mutex_lock() from that
+function. Possible solutions are disabling context analysis for that
+function or removing __assume_ctx_lock() again from mutex_init(). Does
+anyone want to share their opinion about this?
+
+Thanks,
+
+Bart.
