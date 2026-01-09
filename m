@@ -1,97 +1,125 @@
-Received: from relay.hostedemail.com (smtprelay0010.hostedemail.com [216.40.44.10])
+Received: from 011.lax.mailroute.net (011.lax.mailroute.net [199.89.1.14])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C8F612EAD10;
-	Fri,  9 Jan 2026 13:07:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=216.40.44.10
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D1CD1366DD6;
+	Fri,  9 Jan 2026 20:16:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=199.89.1.14
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767964025; cv=none; b=a2ztNGYwBKt0cU34PdFh5YMkA70C4T6/XVaJQjnL5x5PNgS0BSs3CyxTUcRN80hZSrFQXYazzJmgamfv7w8WcwgmB6yv1UYDSESBT1aT6qQvkpg43NOD9TOF8tR8xWhCgylCG/GDXXYTIOLT5wuIwOxOjc8jVryh0/TYR+kqrLA=
+	t=1767989817; cv=none; b=TtQxWF0dTnHoXATSEMDJLBiZUyTBb9z7pf7oz9+7okSKowb9IXo49H7SGET3Ktn1ICtVBMQW8ZGrA01AUQXj2pLNX63ZFx8PbparcVOyZ5BQBmYVb2yxP3kuiQ2x3ZzzYZuiOnK1VuIXDvUOEXSarNgfGNQp7lRpk5pGQvBreAc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767964025; c=relaxed/simple;
-	bh=I5Q9VQte+4cFW14Gz8D4egaODJhcInTga4GejSY4LNE=;
-	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=uUs5nxC8Ontljgziu66/phRF7ShB9N3os14dCcZthpN0A95gCX8a4Eq6+YaC7yVHAf6P4lpiCxwMY07Y28DjaSP+m7/s+LFng+LezdZn0/APNv+W/nsIaW02O1eRY992Kl2DtOlCNvd0neusKlLbg9wnqgV6k5N9n0FZAz+yfnw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=goodmis.org; spf=pass smtp.mailfrom=goodmis.org; arc=none smtp.client-ip=216.40.44.10
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=goodmis.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=goodmis.org
-Received: from omf13.hostedemail.com (a10.router.float.18 [10.200.18.1])
-	by unirelay05.hostedemail.com (Postfix) with ESMTP id 32BC75ACA9;
-	Fri,  9 Jan 2026 13:06:58 +0000 (UTC)
-Received: from [HIDDEN] (Authenticated sender: rostedt@goodmis.org) by omf13.hostedemail.com (Postfix) with ESMTPA id A03A520010;
-	Fri,  9 Jan 2026 13:06:44 +0000 (UTC)
-Date: Fri, 9 Jan 2026 08:07:15 -0500
-From: Steven Rostedt <rostedt@goodmis.org>
-To: Christoph Hellwig <hch@lst.de>
-Cc: Marco Elver <elver@google.com>, Bart Van Assche <bvanassche@acm.org>,
- Peter Zijlstra <peterz@infradead.org>, Boqun Feng <boqun.feng@gmail.com>,
- Ingo Molnar <mingo@kernel.org>, Will Deacon <will@kernel.org>, "David S.
- Miller" <davem@davemloft.net>, Luc Van Oostenryck
- <luc.vanoostenryck@gmail.com>, Chris Li <sparse@chrisli.org>, "Paul E.
- McKenney" <paulmck@kernel.org>, Alexander Potapenko <glider@google.com>,
- Arnd Bergmann <arnd@arndb.de>, Dmitry Vyukov <dvyukov@google.com>, Eric
- Dumazet <edumazet@google.com>, Frederic Weisbecker <frederic@kernel.org>,
- Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Herbert Xu
- <herbert@gondor.apana.org.au>, Ian Rogers <irogers@google.com>, Jann Horn
- <jannh@google.com>, Joel Fernandes <joelagnelf@nvidia.com>, Johannes Berg
- <johannes.berg@intel.com>, Jonathan Corbet <corbet@lwn.net>, Josh Triplett
- <josh@joshtriplett.org>, Justin Stitt <justinstitt@google.com>, Kees Cook
- <kees@kernel.org>, Kentaro Takeda <takedakn@nttdata.co.jp>, Lukas Bulwahn
- <lukas.bulwahn@gmail.com>, Mark Rutland <mark.rutland@arm.com>, Mathieu
- Desnoyers <mathieu.desnoyers@efficios.com>, Miguel Ojeda
- <ojeda@kernel.org>, Nathan Chancellor <nathan@kernel.org>, Neeraj Upadhyay
- <neeraj.upadhyay@kernel.org>, Nick Desaulniers
- <nick.desaulniers+lkml@gmail.com>, Tetsuo Handa
- <penguin-kernel@i-love.sakura.ne.jp>, Thomas Gleixner <tglx@linutronix.de>,
- Thomas Graf <tgraf@suug.ch>, Uladzislau Rezki <urezki@gmail.com>, Waiman
- Long <longman@redhat.com>, kasan-dev@googlegroups.com,
- linux-crypto@vger.kernel.org, linux-doc@vger.kernel.org,
- linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org,
- linux-mm@kvack.org, linux-security-module@vger.kernel.org,
- linux-sparse@vger.kernel.org, linux-wireless@vger.kernel.org,
- llvm@lists.linux.dev, rcu@vger.kernel.org
-Subject: Re: [PATCH v5 10/36] locking/mutex: Support Clang's context
- analysis
-Message-ID: <20260109080715.0a390f6b@gandalf.local.home>
-In-Reply-To: <20260109060249.GA5259@lst.de>
-References: <20251219154418.3592607-1-elver@google.com>
-	<20251219154418.3592607-11-elver@google.com>
-	<57062131-e79e-42c2-aa0b-8f931cb8cac2@acm.org>
-	<aWA9P3_oI7JFTdkC@elver.google.com>
-	<20260109060249.GA5259@lst.de>
-X-Mailer: Claws Mail 3.20.0git84 (GTK+ 2.24.33; x86_64-pc-linux-gnu)
+	s=arc-20240116; t=1767989817; c=relaxed/simple;
+	bh=ADaYwFS3kKhM5xXVlApjjoRfDaP+xucJXVcKN8R+3xU=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=Fge9O7k51LaQUobXhpyUldTjEH8GkE262e2jssE3pWokm88FHFeEnPqfQBzLUWQnlCycOp72mrqHmZ6m6HcGxym3jXWJhpGP+WJfs3JW0qjC0jDIl04WgT9m6eXsKIUHcI6MmDD2uHox0tMbC0/0aSWsXneh9OGKidrYri32FEw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org; spf=pass smtp.mailfrom=acm.org; dkim=pass (2048-bit key) header.d=acm.org header.i=@acm.org header.b=RjLtkJa1; arc=none smtp.client-ip=199.89.1.14
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=acm.org
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=acm.org header.i=@acm.org header.b="RjLtkJa1"
+Received: from localhost (localhost [127.0.0.1])
+	by 011.lax.mailroute.net (Postfix) with ESMTP id 4dntN66qC7z1XSVtL;
+	Fri,  9 Jan 2026 20:16:54 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=acm.org; h=
+	content-transfer-encoding:content-type:content-type:in-reply-to
+	:from:from:content-language:references:subject:subject
+	:user-agent:mime-version:date:date:message-id:received:received;
+	 s=mr01; t=1767989807; x=1770581808; bh=MWWlok8ve6te0Z1LFT3tDlJ2
+	/NkqaoxHzzfJCelUW48=; b=RjLtkJa1D0QD6TAtBF7G2Jt4AHXQc+brZdc/5Tt3
+	jLo0eDAvbJmHIgNEXvLWEKHxTHRyVyb8D/Q06Ur+0T8jENUFddkat1ZKTy3z3SCC
+	yDf86qyZn7Mw6O42JTSazct3a+5P6OhdLUxYoG2N+K1nLDa+zdW6XgfbDJXsR7ng
+	jwo0GO2ay6yXtRwcQHBbI2rYmhtkOiawoqZQXc3Ti/WgrYqhAEUZOdNAs9KC7uUn
+	Qq0xxt6q5wZuMIdq5Cl7pFCXgskRMzaEvQTOGgVF3O1ctVoejnnjZWNZJ35Ht4/9
+	VhXFXR50Omzjcooxo8ojFKm5X7x9JePv61sq2YtntHteEg==
+X-Virus-Scanned: by MailRoute
+Received: from 011.lax.mailroute.net ([127.0.0.1])
+ by localhost (011.lax [127.0.0.1]) (mroute_mailscanner, port 10029) with LMTP
+ id JY_Dc9oQqhZL; Fri,  9 Jan 2026 20:16:47 +0000 (UTC)
+Received: from [100.119.48.131] (unknown [104.135.180.219])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	(Authenticated sender: bvanassche@acm.org)
+	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4dntMk3WPZz1XT1Zk;
+	Fri,  9 Jan 2026 20:16:33 +0000 (UTC)
+Message-ID: <05c77ca1-7618-43c5-b259-d89741808479@acm.org>
+Date: Fri, 9 Jan 2026 12:16:33 -0800
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v5 20/36] locking/ww_mutex: Support Clang's context
+ analysis
+To: Marco Elver <elver@google.com>, Peter Zijlstra <peterz@infradead.org>,
+ Boqun Feng <boqun.feng@gmail.com>, Ingo Molnar <mingo@kernel.org>,
+ Will Deacon <will@kernel.org>
+Cc: "David S. Miller" <davem@davemloft.net>,
+ Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
+ Chris Li <sparse@chrisli.org>, "Paul E. McKenney" <paulmck@kernel.org>,
+ Alexander Potapenko <glider@google.com>, Arnd Bergmann <arnd@arndb.de>,
+ Christoph Hellwig <hch@lst.de>, Dmitry Vyukov <dvyukov@google.com>,
+ Eric Dumazet <edumazet@google.com>, Frederic Weisbecker
+ <frederic@kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+ Herbert Xu <herbert@gondor.apana.org.au>, Ian Rogers <irogers@google.com>,
+ Jann Horn <jannh@google.com>, Joel Fernandes <joelagnelf@nvidia.com>,
+ Johannes Berg <johannes.berg@intel.com>, Jonathan Corbet <corbet@lwn.net>,
+ Josh Triplett <josh@joshtriplett.org>, Justin Stitt
+ <justinstitt@google.com>, Kees Cook <kees@kernel.org>,
+ Kentaro Takeda <takedakn@nttdata.co.jp>,
+ Lukas Bulwahn <lukas.bulwahn@gmail.com>, Mark Rutland
+ <mark.rutland@arm.com>, Mathieu Desnoyers <mathieu.desnoyers@efficios.com>,
+ Miguel Ojeda <ojeda@kernel.org>, Nathan Chancellor <nathan@kernel.org>,
+ Neeraj Upadhyay <neeraj.upadhyay@kernel.org>,
+ Nick Desaulniers <nick.desaulniers+lkml@gmail.com>,
+ Steven Rostedt <rostedt@goodmis.org>,
+ Tetsuo Handa <penguin-kernel@I-love.SAKURA.ne.jp>,
+ Thomas Gleixner <tglx@linutronix.de>, Thomas Graf <tgraf@suug.ch>,
+ Uladzislau Rezki <urezki@gmail.com>, Waiman Long <longman@redhat.com>,
+ kasan-dev@googlegroups.com, linux-crypto@vger.kernel.org,
+ linux-doc@vger.kernel.org, linux-kbuild@vger.kernel.org,
+ linux-kernel@vger.kernel.org, linux-mm@kvack.org,
+ linux-security-module@vger.kernel.org, linux-sparse@vger.kernel.org,
+ linux-wireless@vger.kernel.org, llvm@lists.linux.dev, rcu@vger.kernel.org
+References: <20251219154418.3592607-1-elver@google.com>
+ <20251219154418.3592607-21-elver@google.com>
+Content-Language: en-US
+From: Bart Van Assche <bvanassche@acm.org>
+In-Reply-To: <20251219154418.3592607-21-elver@google.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
-X-Stat-Signature: xo5wgurkrpym6obtb6d77z4eqezppqwq
-X-Rspamd-Server: rspamout02
-X-Rspamd-Queue-Id: A03A520010
-X-Session-Marker: 726F737465647440676F6F646D69732E6F7267
-X-Session-ID: U2FsdGVkX1/Yuy/xlEJ4FchBK8FGPRyEzpxFlfJw7cM=
-X-HE-Tag: 1767964004-230449
-X-HE-Meta: U2FsdGVkX1/mK5KxM694kU63Rdn/iZMuRkOJbrkqpBY9gVZfABZTPJnGV+GXEC41f1CraOV8yVb8JwE6ex2vbV4aoxOT3VLKLF5Thmk+n9vBrpyyHnFtGdrkM3exSJJfO3l1oVR97XyrKK8Hkfj/5sdmmAH04zSgJDoYobVhPLcJaqT68Q0XdWN9PbI1sOsFrspcL2fHNGmrmo/p6rwpjlSypMilSM5I5ewwgNFo1hyODxJhs+YqTtFErumcaYRIY1tmmRLhIj0JwjIBTskcyNNIQY/Qv4I7CCtQ3inbL2pdKc5Mrj40SiW4O33CrPwJHtQvEPJd1GEXqrywF3gfPLCE0T+XQaZa
 
-On Fri, 9 Jan 2026 07:02:49 +0100
-Christoph Hellwig <hch@lst.de> wrote:
-
-> On Fri, Jan 09, 2026 at 12:26:55AM +0100, Marco Elver wrote:
-> > Probably the most idiomatic option is to just factor out construction.
-> > Clearly separating complex object construction from use also helps
-> > readability regardless, esp. where concurrency is involved. We could
-> > document such advice somewhere.  
+On 12/19/25 8:40 AM, Marco Elver wrote:
+> Add support for Clang's context analysis for ww_mutex.
 > 
-> Initializing and locking a mutex (or spinlock, or other primitive) is a
-> not too unusual pattern, often used when inserting an object into a
-> hash table or other lookup data structure.  So supporting it without
-> creating pointless wrapper functions would be really useful.  One thing
-> that would be nice to have and probably help here is to have lock
-> initializers that create the lock in a held state.
+> The programming model for ww_mutex is subtly more complex than other
+> locking primitives when using ww_acquire_ctx. Encoding the respective
+> pre-conditions for ww_mutex lock/unlock based on ww_acquire_ctx state
+> using Clang's context analysis makes incorrect use of the API harder.
 
-Right. If tooling can't handle a simple pattern of initializing a lock than
-taking it, that's a hard show stopper of adding that tooling.
+That's a very short description. It should have been explained in the
+patch description how the ww_acquire_ctx changes affect callers of the
+ww_acquire_{init,done,fini}() functions.
 
--- Steve
+>   static inline void ww_acquire_init(struct ww_acquire_ctx *ctx,
+>   				   struct ww_class *ww_class)
+> +	__acquires(ctx) __no_context_analysis
+> [ ... ]
+>   static inline void ww_acquire_done(struct ww_acquire_ctx *ctx)
+> +	__releases(ctx) __acquires_shared(ctx) __no_context_analysis
+>   {
+> [ ... ]
+>   static inline void ww_acquire_fini(struct ww_acquire_ctx *ctx)
+> +	__releases_shared(ctx) __no_context_analysis
+
+The above changes make it mandatory to call ww_acquire_done() before
+calling ww_acquire_fini(). In Documentation/locking/ww-mutex-design.rst
+there is an example where there is no ww_acquire_done() call between
+ww_acquire_init() and ww_acquire_fini() (see also line 202). The
+function dma_resv_lockdep() in drivers/dma-buf/dma-resv.c doesn't call
+ww_acquire_done() at all. Does this mean that the above annotations are
+wrong? Is there a better solution than removing the __acquire() and
+__release() annotations from the above three functions?
+
+Bart.
