@@ -1,66 +1,103 @@
-Received: from desiato.infradead.org (desiato.infradead.org [90.155.92.199])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D6560EEA8;
-	Thu, 15 Jan 2026 21:31:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=90.155.92.199
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 07D06299AAB;
+	Thu, 15 Jan 2026 23:01:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768512664; cv=none; b=Qz/MApQu/Hn8cvvcSoiCwz/B7AgbQNVcsCOgVNDWHx/KJJ03PDGKRiZ08m8A8T3ch6b/mgonTi2Cxz+dGb+Rj559yES4UGUxlneqDKMDyLM0EEIAVFbinY7Z3BxJmNq2WFq4s2qa6QOoHUKg8T7Ua9CHkqramrQorcdl8mwWpVo=
+	t=1768518084; cv=none; b=DUrSl/vphuLYoRNu3XzwrsTntC+NJEsXuCQ6E3CifwT+PMf/STgUjTa7K+PSCLRrj9D7w+cDaHCk/ZnFL6LSsVi+O4Nt7ZjbrOMZOoGk0Pdm9xLpCjNuEqNGGz1jiw6m2VfR3FQ7REc0sXJ3i9jDaghBs9W8LWh/5ctCM6oEl24=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768512664; c=relaxed/simple;
-	bh=wWdi1yjzITr/KyeB35zzyJq2Nt+yrxqjCmmCrZIelKo=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=YVL2/kQ1kdNvQ4tcVuD4a24Ezik24jF0gleoE6A4Tb8X/7Ga30Dz6SyzevSq399dDet+2LQO7Ci9RPImfE68hUwel6XF/dAQolyUSncpQRIIpiUjNrSZzqoGdt5QM08JvezuxaQAMSHArMP3GFdEDZ6wa4xQf2T0J7zqhEijDcs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=qyfZJm61; arc=none smtp.client-ip=90.155.92.199
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=infradead.org
+	s=arc-20240116; t=1768518084; c=relaxed/simple;
+	bh=2Y4aFG4LAGkCN7lGD12I3005Rj2YsjfuDSzZWGB2q1E=;
+	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
+	 MIME-Version:Content-Type; b=cyouHEIrca6+5ugVQ+FM/aGTLrE5tdH3/VbiE4l0bc8bt3D5FNTHh0CKdyb4oh5sFMzXhrniOjdAhP58KIQlwsq+0oGeERFDzzGxoaDL07MEiSQWMKtVHlec5XneN/k3Qpe8SHj42HgpM0LfeWVjSJxpxyzPncD+8phQrVuaKwg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=qnNE2bH6; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="qyfZJm61"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=desiato.20200630; h=In-Reply-To:Content-Type:MIME-Version:
-	References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=wWdi1yjzITr/KyeB35zzyJq2Nt+yrxqjCmmCrZIelKo=; b=qyfZJm61wo8lm4z3OuFfosea4Z
-	O8Vw0fb3KCo9odHXhgCzNJJ5IzPmSeMh5gMmn4O7GvqpRg/l/AAkmEFr3osM0YPolUPPXVsGHX6TI
-	k8jkIKHkaDR/Uss+Ut17oy13kUxM+QeVHqUD2UTZTp6uTPEtGV7NGIYWvKeAnGC4QziZ67w9/DXy1
-	+GEmenKQyE5861w3fMtt+x8U5FG2SlD2u+0aiKwaOIAzMx3bIW+u/OcutwZKqE/vxDVXAf0Nlap9F
-	kj0yR5itWZuljtjotAFOPOjcVFejiaQGQNe9kThT81aD1MxEyX8RF9/s37VKod8lNV8WX9xCcSmWT
-	msWsuwHA==;
-Received: from 77-249-17-252.cable.dynamic.v4.ziggo.nl ([77.249.17.252] helo=noisy.programming.kicks-ass.net)
-	by desiato.infradead.org with esmtpsa (Exim 4.98.2 #2 (Red Hat Linux))
-	id 1vgUvf-00000007fnq-0N3a;
-	Thu, 15 Jan 2026 21:30:55 +0000
-Received: by noisy.programming.kicks-ass.net (Postfix, from userid 1000)
-	id 9B05F3003C4; Thu, 15 Jan 2026 22:30:54 +0100 (CET)
-Date: Thu, 15 Jan 2026 22:30:54 +0100
-From: Peter Zijlstra <peterz@infradead.org>
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Thomas Gleixner <tglx@kernel.org>, kernel test robot <lkp@intel.com>,
-	Ian Rogers <irogers@google.com>, oe-kbuild-all@lists.linux.dev,
-	linux-kernel@vger.kernel.org, x86@kernel.org, sparse@chrisli.org,
-	linux-sparse@vger.kernel.org, Marco Elver <elver@google.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="qnNE2bH6"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0A782C116D0;
+	Thu, 15 Jan 2026 23:01:22 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1768518083;
+	bh=2Y4aFG4LAGkCN7lGD12I3005Rj2YsjfuDSzZWGB2q1E=;
+	h=From:To:Cc:Subject:In-Reply-To:References:Date:From;
+	b=qnNE2bH6fC9WSUZlfNEotz/D6aKTt85lQZtlhiM9dOqfwxDBpZRgc+0MUdCKW9oFi
+	 cgZAL4ZdXPUeD1d6vMjmz9U69jCMtDZa5gYWlEY8wlNdYkTYnj7oi4jqR99oYi4e5W
+	 oVqfaogzh7nLVGPr0CZ1H7OCFhzPYCpPZksSr8juE6Fig5lcU3Dc8d469OTPPF9AaC
+	 Vn96TjlGppkD9A1qecxx6ersBDrdsFnLlGHe+E73xh2pq+iAPY+yQfyVB/RF0UvV/j
+	 o/r0yuXENhS4lQYnxEkPWV97SLRt5oi062MAz+W8wVOtaGsPsIyqB9iSHaouKiigHM
+	 fvTOucKMhaFog==
+From: Thomas Gleixner <tglx@kernel.org>
+To: Peter Zijlstra <peterz@infradead.org>
+Cc: kernel test robot <lkp@intel.com>, Ian Rogers <irogers@google.com>,
+ oe-kbuild-all@lists.linux.dev, linux-kernel@vger.kernel.org,
+ x86@kernel.org, sparse@chrisli.org, linux-sparse@vger.kernel.org, Marco
+ Elver <elver@google.com>
 Subject: Re: [tip:timers/vdso 12/14] net/rds/ib_cm.c:96:35: sparse: sparse:
  incorrect type in argument 1 (different modifiers)
-Message-ID: <20260115213054.GF831050@noisy.programming.kicks-ass.net>
-References: <202601150001.sKSN644a-lkp@intel.com>
- <87v7h23cb0.ffs@tglx>
+In-Reply-To: <20260115211120.GD831050@noisy.programming.kicks-ass.net>
+References: <202601150001.sKSN644a-lkp@intel.com> <87v7h23cb0.ffs@tglx>
  <20260115211120.GD831050@noisy.programming.kicks-ass.net>
- <CAHk-=wg9pxiKm3kcZ0XQrFvz6fFek_A1WGqRh9yeghx3pE2d3w@mail.gmail.com>
+Date: Fri, 16 Jan 2026 00:01:19 +0100
+Message-ID: <87ms2e32gw.ffs@tglx>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAHk-=wg9pxiKm3kcZ0XQrFvz6fFek_A1WGqRh9yeghx3pE2d3w@mail.gmail.com>
+Content-Type: text/plain
 
-On Thu, Jan 15, 2026 at 01:19:14PM -0800, Linus Torvalds wrote:
+On Thu, Jan 15 2026 at 22:11, Peter Zijlstra wrote:
 
-> Eventually we can just force that everywhere, but as Al pointed out in
-> another thread, we're not quite there yet (ie we'd need clang-19.0.1
-> and gcc-8.4 to be able to just switch entirely over to
-> __typeof_unqual__).
+> On Thu, Jan 15, 2026 at 08:28:51PM +0100, Thomas Gleixner wrote:
+>> On Thu, Jan 15 2026 at 00:36, kernel test robot wrote:
+>> 
+>> Cc+ sparse folks.
+>> 
+>> > sparse warnings: (new ones prefixed by >>)
+>> >>> net/rds/ib_cm.c:96:35: sparse: sparse: incorrect type in argument 1 (different modifiers) @@     expected void * @@     got restricted __be64 const * @@
+>> >    net/rds/ib_cm.c:96:35: sparse:     expected void *
+>> >    net/rds/ib_cm.c:96:35: sparse:     got restricted __be64 const *
+>> >    net/rds/ib_cm.c:103:27: sparse: sparse: incorrect type in argument 1 (different modifiers) @@     expected void * @@     got restricted __be64 const * @@
+>> >    net/rds/ib_cm.c:103:27: sparse:     expected void *
+>> >    net/rds/ib_cm.c:103:27: sparse:     got restricted __be64 const *
+>> 
+>> After staring a while at it, it turns out that get_unaligned_t(), which
+>> uses __unqual_scalar_typeof() to get an unqualified type makes sparse
+>> unhappy when the data type is __be64 (or any other __beNN variant).
+>> 
+>> __beNN is annotated with __attribute__((bitwise)) when sparse is invoked
+>> (#ifdef CHECKER). That allows sparse to detect incompatible math
+>> operations with __beNN variables.
+>> 
+>
+> Per:
+>
+>   https://git.kernel.org/pub/scm/devel/sparse/sparse-dev.git/commit/?id=dc9efe442b8949234a6599fdc94dc7221dd040e1
+>
+> it seems Sparse now knows about __typeof_unqual__; and it looks like the
+> implementation does what you want here (although I've not tested it).
+>
+> Something like so perhaps, which then mandates the very latest Sparse.
 
-GCC-14 :-/ The GCC-8.4 one was the function return value trick.
+I tried that before and sparse is still upset:
+
+  net/rds/ib_cm.c:96:35: warning: incorrect type in argument 1 (different modifiers)
+  net/rds/ib_cm.c:96:35:    expected void *
+  net/rds/ib_cm.c:96:35:    got restricted __be64 const *
+  net/rds/ib_cm.c:103:27: warning: incorrect type in argument 1 (different modifiers)
+  net/rds/ib_cm.c:103:27:    expected void *
+  net/rds/ib_cm.c:103:27:    got restricted __be64 const *
+
+This time I looked deeper and it seems that USE_TYPEOF_UNQUAL is not
+set.
+
+If I force it to be set and use a proper compiler and top of tree
+sparse, everything seems to be happy.
+
+Figuring that out is something for tomorrow...
+
+Thanks,
+
+        tglx
+
