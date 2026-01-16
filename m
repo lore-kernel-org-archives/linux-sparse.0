@@ -1,249 +1,114 @@
-Received: from mail-yw1-f171.google.com (mail-yw1-f171.google.com [209.85.128.171])
+Received: from mail-yw1-f170.google.com (mail-yw1-f170.google.com [209.85.128.170])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1685D31C57B
-	for <linux-sparse@vger.kernel.org>; Fri, 16 Jan 2026 23:29:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.171
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768606194; cv=none; b=jirRpK0qrQHAU++flzxKlmwqNN/iPyImm/7+uxXG+r5LqhtC+PmbciAbPBjO/fKOA/q/kxqXyacj5PBzhoSXbpg33au1L0cFgTMDCA3Of/m1w/z/Y9jPbbVRd6VyoONqYIgow+2a9mbsbEy61gidHGL+Wt94l6s6MWxzulXxKR8=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768606194; c=relaxed/simple;
-	bh=27+OCgtPFvChP4VVAqWrBqFH05bQZdNOVemsDw+Jfx4=;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5D9092D8364
+	for <linux-sparse@vger.kernel.org>; Fri, 16 Jan 2026 23:31:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.128.170
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1768606307; cv=pass; b=nACiM/FjmvC2SqSB8SsMFBOYOSm4vyxIex6Wje7sI/WG2yEb8Q3/QZHgVO8nIMt2BbmJmwTRDl3N4cIp31V79Zsdjb0noGwbAWUbhBXcGX06xqP7QMOEBScXh1j8uVHVNCPOkx20LMR/ZvvJzZbFj2Wu7sAtIo17LxEaV0UqRI0=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1768606307; c=relaxed/simple;
+	bh=lEwXwLPdEEr8vRExQCImRDLhD1elclpYiA4Dx59RpmY=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=oUZOCgdLyzVUqtaQmCMQdYgfCSVmxIJ0SJuP8p72QmvrGIF/STSQviu9JYjaji/ysoBaXB33LY264kTifJyVh1W/lpUENnyD6+gW396Y5yUnBha/LFdOC4Jz3jicMW4tpmtN4JNDasK06rEPbbjpTRs4oruaZDm6r3crA+j6ffs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=chrisli.org; spf=pass smtp.mailfrom=chrisli.org; arc=none smtp.client-ip=209.85.128.171
+	 To:Cc:Content-Type; b=e0dbHe0N0o+JlLtfu4esD2e1XbDP1YuCbUT7WTF+gHIly0YB+jJyg5MgrCpACBLuZWDZOGWenoZbrJ/FqGjaFCRG0K5bp6nCMGd3J6Ls9BLffQI7tnRJx5kr2K7+kUMZkWJldILqF43xEKUxpUVvpltyxcUAHq/asS+AfnzZfKk=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=chrisli.org; spf=pass smtp.mailfrom=chrisli.org; arc=pass smtp.client-ip=209.85.128.170
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=chrisli.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=chrisli.org
-Received: by mail-yw1-f171.google.com with SMTP id 00721157ae682-78fb9a67b06so26877217b3.1
-        for <linux-sparse@vger.kernel.org>; Fri, 16 Jan 2026 15:29:52 -0800 (PST)
+Received: by mail-yw1-f170.google.com with SMTP id 00721157ae682-78fc0f33998so24829887b3.0
+        for <linux-sparse@vger.kernel.org>; Fri, 16 Jan 2026 15:31:42 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1768606301; cv=none;
+        d=google.com; s=arc-20240605;
+        b=fMiCqn/BGPtgPRHnYC/IAPE5srgDA6hGY0lUW9Sr7h2tQq8HDW9MHOnmYOJnmcooIQ
+         jEOTDX3E52d7H/Y3x3PZsBOe3T4A6HVUnd1M0KribldkFbJYRufE2rRz0pfWcFCmVOjw
+         d0cM1xNviJw0dFpfA2pIaYK4RbWrgEslP45duH8pUTzlNlNuewqjWjgqCboMItQSnzTA
+         qNDT5mACU+cLTOdvP8hLXwfPAgQx16A6u9HlyAK9IcEXsYUsi0uann8vLlXC0YIkkVTe
+         /D5q+oFAAZlyeKg7kHdrFpoSik7snzYFnmvOCMtVHOol0ho4FLpDX66kzermZOx0I4bA
+         OHYg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version;
+        bh=j2yPGquDDo/a0G7vj6dAli2KD97oUaI3w9qOlOVbP4k=;
+        fh=/0LOF2E2fVFDTWhHXF1V08WvKOGVWkYBMMBmDje3smo=;
+        b=d2TQu5WLC4G8+VoUKrdRGKXBBqWc99X0ms7RUZcaLmnVPofF6lK6wzFecX5oBZuHVa
+         PjWehsBByVG2j5nrP5t6P0qrJhoWZTl076kEC6yyuYQvcZEqXE9iNHNzV8Ab6ZfPnxqx
+         M3gD1QR4qRTJ7xeJ27C/HteTJp/ZUKkAYOsHhJndAje1J8Bew6kdNiiW57Vfew+zqOpC
+         3J5ziTFV7m7D401zsXIARZuV0kiXhK9HR5FEROlOOojkNX6VHYPhOuDhh9xNExPiG3ar
+         9hvsX/++MZkuKw4o6OygeYuu2NQiwbcYmvNZJj5zBqOCTHVcrajOgz20RDMq9u2UkvZA
+         gt+g==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1768606192; x=1769210992;
+        d=1e100.net; s=20230601; t=1768606301; x=1769211101;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=w8SjSjMVVJWIBW1puKZ6IJpmHQebI8XPDrw3RVvWTKA=;
-        b=BN7uVDKX/V1lpGIW6Anqn2dg2VNJcQnjuJlYB3f6PBPg69xpfEW1rhv/VnzkjfvFkF
-         DOCT0R7nYGP+RwCfR3YtzWFPi68T55NOvErAzHKfrAmZgbvOBYwvKJvOJTPPE+Z3I0ba
-         nvFLB+Ozs70oL5/OXyZXXGylrO4ffCUFazApcO3dFn8/kPUDc825zG6I5rv+IFCZDIZh
-         lcyim13JHroD6BYUzkgqzLmZ7JplKIoL/h6HuLG5h3GQezApS2Butpk/Eyo0COTKR0jR
-         yzwivuU/UMZI0fDtRJ07VDF9dN8cbiGg7YKX7LTV2BpryWxsWFaU+PQcXxoegosjmE1g
-         /X/A==
-X-Forwarded-Encrypted: i=1; AJvYcCUVMXUZOZL+emEa1Eie3U4roY+yHhUxCEIENiRdFvV+VNG8nVZ1yUPgwYeD+7rGbAPLyDkDqsQ7JKQ0CAw=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yy247Cn7reDzCboVQ7B76QH90vFRdoCO2ZzcPyYTnbOFXCtJHBO
-	0HtcHbjVpZQJmUs/v9EcCGKR8qH559as42COsV7RXd7xpMeloirAGYJ5FgO4ySKRoXLCeMIfj39
-	+IivSpNjyxG4VCHo/HKVX4hykjVAZxhXYOsOP+qTPNA==
-X-Gm-Gg: AY/fxX4Y3gHenXcfiyfUFV3hfuQz62uiMqSTHY6Wreu9cYnkWxLRqLJekip5n5hH3cD
-	mzSLuQrN0dk52pC8q+xaZCGUZSYro12nAzABhFLt/CwiMc/+8qFvA4ZZvwAYCZGmhvmyqzLmMII
-	Kp8J86W7jNkXq9nbNMnbcB7C41S84RbZdnaXfgb0KTZ1sHL1doIqHX1+JjqyFW4spCtkHzU3cC9
-	ZAF0jdm2LVF6zZmbURtvZwWNGutFYE15jM6W1JmnFmyhK5vPFGfpR1xNWT9Cb+UtvBqI9F4gGrR
-	KoU6ymRZf4tbI2Sh0N5MopD++uh46BEcOv4VUZko/CY0/cI9AbnawsMMkA==
-X-Received: by 2002:a05:690c:c52c:b0:786:5ebb:4837 with SMTP id
- 00721157ae682-793c67f7e92mr32738257b3.33.1768606191904; Fri, 16 Jan 2026
- 15:29:51 -0800 (PST)
+        bh=j2yPGquDDo/a0G7vj6dAli2KD97oUaI3w9qOlOVbP4k=;
+        b=eBJW6LFKSJMPpxtcm3ddp+UR74FsqjAtYZ88EzSEN8Or2HbZ0zAfJOntSusbo8zI2l
+         vQ9tVl0NHC7wsIq8Gds6CsMFZnYIBpR6j9ONyjZT8LBVarb/Fm6v3tjFU6qqlttfIStW
+         vkt01kEeNe5ehSZ+/KBx6gNzANN1fCPNH+MagqGAAaiib4SWOpTyrepNd4JQHRGArBvx
+         zVJYg5xxWk+lhKdnAe8N2hMuphyKvF76HHxhqJQZg0lofqqnZiheYYEqUqAC+70DKzOG
+         hIfHU5fbxXROvAgqktZvRxfGqPfDgyKysDDoc4rwk4hStR7eaaXtJm/DynZ2buRcK7Pf
+         Z0VA==
+X-Forwarded-Encrypted: i=1; AJvYcCXv9Pjr9PBvrTC7c2uxdzC7MnZ+BK3GdAh61qDHWJ58PNUEU19ficPgyPRTGxYniVcJAHoeL9hI9g2N+KU=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxOMmWScDWXOYs4zM4G4W7+mmMordjpA1iUiJkPH6RRZffR21Rx
+	OvCJYIA6BwQGK1vJ253mIRUTdCDLB/sb9RvFwBjgtQA91wWSzaXbnmYbxe6hsl4nkzXSqeImqd0
+	d01uQufZOSc2zWmxYDa8t7yqEPFRtD0bfA0YqQz/a9QTxtkXg0zC3
+X-Gm-Gg: AY/fxX6SiT5/IPJ3W+twXzA1wH40/j2bXs17imMtu/q+CHIb2fEXubTN4s/dO8sPSr9
+	yqHXnoxCoamSit1PFsgRoC40s3a/xKR9dcSR1SCFPppPOSqwppoGiqsEMXLp5TIOeFHtpbjW5Qf
+	QxVlGwGcks5jKvopuiaUi5D9T1+Q2BpQl393C3iVtDzob0vFDi7czeZOrdpYMl14Pnyo1deL53s
+	C/5wnw22+7uXGolJxWRCLtF91f3aqlJf+vRQo+bY1c0dAzKEGcdacvTntv91YVP2spD2YodSfdV
+	lYkmtBtyNxhMCf+bvan8O1inF1sO44knIk4Y/cz4VYONSfTRkLpMsH43TQ==
+X-Received: by 2002:a05:690c:6b85:b0:786:62bb:f6f5 with SMTP id
+ 00721157ae682-793c52686d1mr80908347b3.17.1768606301042; Fri, 16 Jan 2026
+ 15:31:41 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <aULJmGi8yib_XH0P@redhat.com>
-In-Reply-To: <aULJmGi8yib_XH0P@redhat.com>
+References: <20251218060921.995516-1-rdunlap@infradead.org>
+In-Reply-To: <20251218060921.995516-1-rdunlap@infradead.org>
 From: Chris Li <sparse@chrisli.org>
-Date: Fri, 16 Jan 2026 15:29:41 -0800
-X-Gm-Features: AZwV_QhcKklISLrbJ7r4opm-5DmLOIRoCiAn4VRjEtJdtlChwuwRHE-mm1SNFWk
-Message-ID: <CACePvbW2OybP7P-Vk+pa23SqA0+R0i8=20TiQMq99PvNAYJ8GA@mail.gmail.com>
-Subject: Re: [PATCH] sparse/pre-process: introduce "dissect_mode" option to
- fix dissect/semind
-To: Oleg Nesterov <oleg@redhat.com>
-Cc: Luc Van Oostenryck <lucvoo@kernel.org>, Alexey Gladkov <legion@kernel.org>, linux-sparse@vger.kernel.org
+Date: Fri, 16 Jan 2026 15:31:30 -0800
+X-Gm-Features: AZwV_QiZ6mOuarjS8muO7KegbO029hGFzUfOeno9n_1LC9hnuZW8xIHhkx_l6m4
+Message-ID: <CACePvbVNiWKOHxT0GAtFUp7QcP7t43RZnZR75yM_SR28a6TNvA@mail.gmail.com>
+Subject: Re: [PATCH] sparse: update MAINTAINERS info.
+To: Randy Dunlap <rdunlap@infradead.org>
+Cc: linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, 
+	linux-sparse@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-Hi Oleg,
-
-Slowly catching up my back log from the holidays.
-
-On Wed, Dec 17, 2025 at 7:26=E2=80=AFAM Oleg Nesterov <oleg@redhat.com> wro=
-te:
->
-> I don't quite understand why does expand() -> collect_arg() path
-> update ->pos for each token in the input *list, but this breaks
-> dissect and thus semind.
-
-That is a good question, I don't understand why it did that either. I
-did some digging, inside macro argument list expansion, the "#include
-" is not allowed. It is not possible to switch streams here. The
-"pos.pos" is for human consumption anyway, it has no effect on the IR
-generation. The only visible effect as far as I can tell is related to
-the preprocessor "-E" in lib.c:
-
-        if (preprocess_only) {
-                while (!eof_token(token)) {
-                        int prec =3D 1;
-                        struct token *next =3D token->next;
-                        const char *separator =3D "";
-                        if (next->pos.whitespace)
-                                separator =3D " ";
-                        if (next->pos.newline) {
-                                separator =3D "\n\t\t\t\t\t";
-                                prec =3D next->pos.pos; <--- use pos as
-indentation level.
-                                if (prec > 4)
-                                        prec =3D 4;
-                        }
-                        printf("%s%.*s", show_token(token), prec, separator=
-);
-                        token =3D next;
-
-The "-E" output has some indentation enhancement to turn space into
-tab level indentation. This "pos" assignment tries to align the
-indentation context of the input arguments to the same level of the
-expanding macro name.
-
-> Test-case:
->
->         $ cat -n PP_POS.c
->              1  #define READ_ONCE(x) x
->              2  #define WRITE_ONCE(x, y) x =3D y
->              3
->              4  int R, W;
->              5
->              6  void func(void)
->              7  {
->              8    WRITE_ONCE(
->              9       W,
-
-With your patch, when doing "-E", the W will get indentation deeper
-than WRITE_ONCE.
-
->             10       READ_ONCE(R)
->             11    );
->             12  }
->
->         $ ./test-dissect PP_POS.c
->            4:5                    def   v R                              =
-  int
->            4:8                    def   v W                              =
-  int
->            6:6                    def   f func                           =
-  void ( ... )
->            8:3   func             -w-   v W                              =
-  int
->            8:3   func             -r-   v R                              =
-  int
->
-> The reported positions of the usage of R and W are wrong,
-> and thus ./semind doesn't work:
-
-It seems to me this enhancement can be used on other macro related
-expansions as well.
-
->
->         $ ./semind add PP_POS.c
->         $ ./semind search -l PP_POS.c:10:16
->
-> With this patch:
->
->         $ ./test-dissect PP_POS.c
->            4:5                    def   v R                              =
-  int
->            4:8                    def   v W                              =
-  int
->            6:6                    def   f func                           =
-  void ( ... )
->            9:6   func             -w-   v W                              =
-  int
->           10:16  func             -r-   v R                              =
-  int
->
->         $ ./semind add PP_POS.c
->         $ ./semind search -l PP_POS.c:10:16
->         (def) PP_POS.c  4       5               int R, W;
->         (-r-) PP_POS.c  10      16      func    READ_ONCE(R)
->
-> Signed-off-by: Oleg Nesterov <oleg@redhat.com>
-> ---
->  dissect.c     | 1 +
->  options.c     | 1 +
->  options.h     | 1 +
->  pre-process.c | 8 +++++---
->  4 files changed, 8 insertions(+), 3 deletions(-)
->
-> diff --git a/dissect.c b/dissect.c
-> index a6003afa..5fed8e22 100644
-> --- a/dissect.c
-> +++ b/dissect.c
-> @@ -714,6 +714,7 @@ end:
->
->  void dissect(struct reporter *rep, struct string_list *filelist)
->  {
-> +       dissect_mode =3D 1;
-
-I don't think we need dissect_mode. I am leaning towards enabling it
-all the time, maybe except for the preprocessor only mode.
-
->         reporter =3D rep;
->
->         DO_LIST(filelist, file, do_file(file));
-> diff --git a/options.c b/options.c
-> index 6ee4d878..0f207e80 100644
-> --- a/options.c
-> +++ b/options.c
-> @@ -71,6 +71,7 @@ int dump_macro_defs =3D 0;
->  int dump_macros_only =3D 0;
->
->  int dissect_show_all_symbols =3D 0;
-> +int dissect_mode =3D 0;
->
->  unsigned long fdump_ir;
->  int fhosted =3D 1;
-> diff --git a/options.h b/options.h
-> index c2a9551a..b559254d 100644
-> --- a/options.h
-> +++ b/options.h
-> @@ -71,6 +71,7 @@ extern int dump_macro_defs;
->  extern int dump_macros_only;
->
->  extern int dissect_show_all_symbols;
-> +extern int dissect_mode;
->
->  extern unsigned long fdump_ir;
->  extern int fhosted;
-> diff --git a/pre-process.c b/pre-process.c
-> index 3fb25082..64445881 100644
-> --- a/pre-process.c
-> +++ b/pre-process.c
-> @@ -294,9 +294,11 @@ static struct token *collect_arg(struct token *prev,=
- int vararg, struct position
->                 } else if (match_op(next, ',') && !nesting && !vararg) {
->                         break;
->                 }
-> -               next->pos.stream =3D pos->stream;
-> -               next->pos.line =3D pos->line;
-> -               next->pos.pos =3D pos->pos;
-> +               if (!dissect_mode) {
-> +                       next->pos.stream =3D pos->stream;
-> +                       next->pos.line =3D pos->line;
-> +                       next->pos.pos =3D pos->pos;
-> +               }
-
-Maybe change it to "if (preprocess_only)", and fix all the validation
-error output of the checker. What do you say?
-
-Overall I feel that without this position overwrite is better to
-locate the real location of the argument of the macro. If anyone knows
-another reason we should do the position overwrite, please let me
-know.
-
-Alternatively we can also fix the preprocessor "-E" indentation
-output. Might not be worth the complexity.
+Acked-by: Chris LI <sparse@chrisli.org>
 
 Chris
 
->                 next->pos.newline =3D 0;
->                 p =3D &next->next;
->         }
-> --
-> 2.52.0
+On Wed, Dec 17, 2025 at 10:09=E2=80=AFPM Randy Dunlap <rdunlap@infradead.or=
+g> wrote:
 >
+> Chris Li is back as sparse maintainer.
 >
+> See https://git.kernel.org/pub/scm/devel/sparse/sparse.git/commit/?id=3D6=
+7f0a03cee4637e495151c48a02be642a158cbbb
+>
+> Signed-off-by: Randy Dunlap <rdunlap@infradead.org>
+> ---
+> Cc: Chris Li <sparse@chrisli.org>
+> Cc: Andrew Morton <akpm@linux-foundation.org>
+> Cc: linux-sparse@vger.kernel.org
+> ---
+>  MAINTAINERS |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> --- linux-next-20251217.orig/MAINTAINERS
+> +++ linux-next-20251217/MAINTAINERS
+> @@ -24595,7 +24595,7 @@ F:      drivers/tty/vcc.c
+>  F:     include/linux/sunserialcore.h
+>
+>  SPARSE CHECKER
+> -M:     "Luc Van Oostenryck" <luc.vanoostenryck@gmail.com>
+> +M:     Chris Li <sparse@chrisli.org>
+>  L:     linux-sparse@vger.kernel.org
+>  S:     Maintained
+>  W:     https://sparse.docs.kernel.org/
