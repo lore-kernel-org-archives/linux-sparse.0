@@ -1,125 +1,66 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from imap4.hz.codethink.co.uk (imap4.hz.codethink.co.uk [188.40.203.114])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4481C26A0D5;
-	Fri, 16 Jan 2026 11:25:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C2094394474
+	for <linux-sparse@vger.kernel.org>; Fri, 16 Jan 2026 17:58:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=188.40.203.114
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768562757; cv=none; b=ao9RG90xZ6bZqLt5uTDoizvGMefN50Z/xpL4GgFyaQ+XwtF4GqCg3WBtbZCsBJhCS7NYM8WzEpqDxj67IQl3dp/E2D3/wx6h+ybdGgDKDRjpw8KUEc3kYY2q7nBB4nDgaUEindiMCW5a2B+gd28iZgBMKFKqaz01lvoatGutG6Y=
+	t=1768586301; cv=none; b=fZYGOzTEhAnWsNsM5KzUCGEq8X5maY06VLtbgSrs6nW5PP2ltGNEn0Ziv1DYeS2MekqrfUhpAQq6bqVUUWi94DhQb9ZZx928JPfHLZ9IyE0rqtqJcsLViiCMfOe2V6vnuIyi/alCF+3vpQ36R8E8y7Y4TQW49TsEUm0LcMLNqFk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768562757; c=relaxed/simple;
-	bh=LEi9ETXfF/PjYEQ8yvNe+FYSEK3mzAJ6q3r7vMqgp2Y=;
-	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
-	 MIME-Version:Content-Type; b=fh0u03i2zMr7FshPA/MDV9w80nr+6wIPg7HRxOj1WIqVFrAvEH40pobtMzXGdM3ZhhXbvkbEDhEgktG5BH9LOO4ae99zO1hRz6G9+S4tBkHVzV8ujkmBsCEhMMYFVv190WN9PXj0MR2Zoro0D5fGCGkOsEH939v54m593n6VoCM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=iIwMRUYX; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1768586301; c=relaxed/simple;
+	bh=grDuCbkF2FqAKy0g6JQAjhr5qy/ZoND6JtJvXnSl36Y=;
+	h=From:To:Subject:Date:Message-Id:MIME-Version; b=iwnM4+XiTVkww57KmAEGNeLro78HPNZIBMPbsObQAMOduMW+OhcwGfhF+D+IjzjQ+Vypuc33QpmaDdBTcm52FDYyz/IPiaJtBGHBqJGUQvAb3/Z16WG26aIitj8/H+aVw4qALuUrlnC6WqI8PJIN3NEeI9WDbh0DzmI3XFZCzKA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=codethink.co.uk; spf=pass smtp.mailfrom=codethink.com; dkim=pass (2048-bit key) header.d=codethink.co.uk header.i=@codethink.co.uk header.b=NymYyTOg; arc=none smtp.client-ip=188.40.203.114
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=codethink.co.uk
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=codethink.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="iIwMRUYX"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 89736C116C6;
-	Fri, 16 Jan 2026 11:25:56 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1768562757;
-	bh=LEi9ETXfF/PjYEQ8yvNe+FYSEK3mzAJ6q3r7vMqgp2Y=;
-	h=From:To:Cc:Subject:In-Reply-To:References:Date:From;
-	b=iIwMRUYX5TQeqT4HOODtSJE7vj+hlzu+A/Wu4ia5w5A9vQcUBAeDqukPRxVWKiK1i
-	 EiMyLs0eg9vQTASK3Sf1cBPePFeGt07sSe+qYTyezmPAdRTMWv1/6D8A+AS4v+UmuW
-	 Emc6EjNmHcjNMCXR62jticwzBPprU2GSVTvcHT5eegRaUvdh7UC1g4Q7zQQb2fffHr
-	 aQap/6WZzZ9bu50EThCLCKg/p5fYnlGUINpur9cgeergFCLQCEpT2JnUDl2DW/7iuf
-	 35Vevz6/u1geYG17c/4cI7MOXf+mLe9ty8my9MJoocLYt7zoPr7irDSBeUAFWIPiBT
-	 Akywx6UNMS6zg==
-From: Thomas Gleixner <tglx@kernel.org>
-To: Peter Zijlstra <peterz@infradead.org>
-Cc: kernel test robot <lkp@intel.com>, Ian Rogers <irogers@google.com>,
- oe-kbuild-all@lists.linux.dev, linux-kernel@vger.kernel.org,
- x86@kernel.org, sparse@chrisli.org, linux-sparse@vger.kernel.org, Marco
- Elver <elver@google.com>
-Subject: Re: [tip:timers/vdso 12/14] net/rds/ib_cm.c:96:35: sparse: sparse:
- incorrect type in argument 1 (different modifiers)
-In-Reply-To: <87ms2e32gw.ffs@tglx>
-References: <202601150001.sKSN644a-lkp@intel.com> <87v7h23cb0.ffs@tglx>
- <20260115211120.GD831050@noisy.programming.kicks-ass.net>
- <87ms2e32gw.ffs@tglx>
-Date: Fri, 16 Jan 2026 12:25:53 +0100
-Message-ID: <87jyxh3ike.ffs@tglx>
+	dkim=pass (2048-bit key) header.d=codethink.co.uk header.i=@codethink.co.uk header.b="NymYyTOg"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=codethink.co.uk; s=imap4-20230908; h=Sender:Content-Transfer-Encoding:
+	MIME-Version:Message-Id:Date:Subject:To:From:Reply-To:Cc:In-Reply-To:
+	References; bh=grDuCbkF2FqAKy0g6JQAjhr5qy/ZoND6JtJvXnSl36Y=; b=NymYyTOgI3IBK7
+	KLWreGZeRWF4WWJAFMhA33aXr1IGPJKzLImWtt3jxpRiEoBCldaBhwAWAX3YrVtQP/MnnvWxs3qIO
+	QyzVNX1CzirbVaLezAq2hTwYy5u4pFY47+TocazrUVDnwmBvqEPcLrLNpuEyvU6yR/+kPLuTzPIHL
+	8qbemXlK8UaBVx3zwF68dzWs1sLEM8yJ7nCHw1DkN+5qChGAY+cWAS+zAxV90e5XzILt0Y9uGwIBj
+	EuyPaUznH1R/M2i6OROYeKNLh3/seIrmSaMRV/PMVSNGbqLfEOjLOgQFU0gbnTsyN4ARHejMUaCzh
+	Z2k/KRzK+w/+nnM3+t3w==;
+Received: from [167.98.27.226] (helo=rainbowdash)
+	by imap4.hz.codethink.co.uk with esmtpsa  (Exim 4.94.2 #2 (Debian))
+	id 1vgo5K-002Qln-EK; Fri, 16 Jan 2026 17:58:11 +0000
+Received: from ben by rainbowdash with local (Exim 4.99.1)
+	(envelope-from <ben@rainbowdash>)
+	id 1vgo5L-000000001mv-0lum;
+	Fri, 16 Jan 2026 17:58:11 +0000
+From: Ben Dooks <ben.dooks@codethink.co.uk>
+To: linux-sparse@vger.kernel.org,
+	sparse@chrisli.org
+Subject: add variadic format checking
+Date: Fri, 16 Jan 2026 17:58:05 +0000
+Message-Id: <20260116175809.6849-1-ben.dooks@codethink.co.uk>
+X-Mailer: git-send-email 2.37.2.352.g3c44437643
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Transfer-Encoding: 8bit
+Sender: srv_ts003@codethink.com
 
-On Fri, Jan 16 2026 at 00:01, Thomas Gleixner wrote:
-> This time I looked deeper and it seems that USE_TYPEOF_UNQUAL is not
-> set.
->
-> If I force it to be set and use a proper compiler and top of tree
-> sparse, everything seems to be happy.
->
-> Figuring that out is something for tomorrow...
+Third version with a few minor fixes, the only issues seem to be
+with the complexities of the linux-kernel which has some printk
+fun locally defined.
 
-USE_TYPEOF_UNQUAL is set _after_ the __unqual_scalar muck is
-processed...
 
-Updated fix below.
+This series (which was initially sent back in 2020) adds the
+ability to deal with __attribute__((format) and checking the
+arguments to formatted variadic functions.
 
-Thanks,
+I have been considering adding a -Wformat-linux to this as
+the kernel now has a number of extra formatting options and
+checking the type of these would be useful. An even nicer
+extension would be some way of informing the compiler/sparse
+of these at compile time (but would need to get agreement on
+how to do this with the compilers too)
 
-        tglx
----
- include/linux/compiler.h       |   10 ----------
- include/linux/compiler_types.h |   11 +++++++++++
- 2 files changed, 11 insertions(+), 10 deletions(-)
 
---- a/include/linux/compiler.h
-+++ b/include/linux/compiler.h
-@@ -231,16 +231,6 @@ void ftrace_likely_update(struct ftrace_
- 				"must be non-C-string (not NUL-terminated)")
- 
- /*
-- * Use __typeof_unqual__() when available.
-- *
-- * XXX: Remove test for __CHECKER__ once
-- * sparse learns about __typeof_unqual__().
-- */
--#if CC_HAS_TYPEOF_UNQUAL && !defined(__CHECKER__)
--# define USE_TYPEOF_UNQUAL 1
--#endif
--
--/*
-  * Define TYPEOF_UNQUAL() to use __typeof_unqual__() as typeof
-  * operator when available, to return an unqualified type of the exp.
-  */
---- a/include/linux/compiler_types.h
-+++ b/include/linux/compiler_types.h
-@@ -562,6 +562,13 @@ struct ftrace_likely_data {
- #define asm_inline asm
- #endif
- 
-+/*
-+ * Use __typeof_unqual__() when available.
-+ */
-+#if CC_HAS_TYPEOF_UNQUAL || defined(__CHECKER__)
-+# define USE_TYPEOF_UNQUAL 1
-+#endif
-+
- /* Are two types/vars the same type (ignoring qualifiers)? */
- #define __same_type(a, b) __builtin_types_compatible_p(typeof(a), typeof(b))
- 
-@@ -569,6 +576,7 @@ struct ftrace_likely_data {
-  * __unqual_scalar_typeof(x) - Declare an unqualified scalar type, leaving
-  *			       non-scalar types unchanged.
-  */
-+#ifndef USE_TYPEOF_UNQUAL
- /*
-  * Prefer C11 _Generic for better compile-times and simpler code. Note: 'char'
-  * is not type-compatible with 'signed char', and we define a separate case.
-@@ -586,6 +594,9 @@ struct ftrace_likely_data {
- 			 __scalar_type_to_expr_cases(long),		\
- 			 __scalar_type_to_expr_cases(long long),	\
- 			 default: (x)))
-+#else
-+#define __unqual_scalar_typeof(x) __typeof_unqual__(x)
-+#endif
- 
- /* Is this type a native word size -- useful for atomic operations */
- #define __native_word(t) \
