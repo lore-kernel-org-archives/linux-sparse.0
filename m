@@ -1,189 +1,171 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yw1-f180.google.com (mail-yw1-f180.google.com [209.85.128.180])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6BB6E3590D4;
-	Fri, 16 Jan 2026 18:18:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E2ADF2EA743
+	for <linux-sparse@vger.kernel.org>; Fri, 16 Jan 2026 22:55:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.180
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768587500; cv=none; b=gQG8g5JKHWoQsc6Cqtuox2djGEdBgDXMFWwzcTz8vu5YJz9+WUysI5jW77J3FL551Trst5uhAbjSLwpOmilsbom0SWCikpe904PumTZa6FFPlwF81Q77h3IbX94foVOHzL4K6lRYAgtgzbgRNLH1M6LvXLvyopvZUeL3GbtBFrI=
+	t=1768604148; cv=none; b=n7yJDq1z9JsY2uAEt2b0ajZCEKf/fUGhIy6mKxIvi+um4phfaP2TgBDYxrZ8OyR4bq3yYdDmuIyaeVuZ2lOL5XZwduRLE7/ObpYoIriLtgVr+xYaovVcvt+I8sVbKq3CvZoo2e9dm6qW9GSAdS0SkdSq7dYavdno0jkgkrKACok=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768587500; c=relaxed/simple;
-	bh=psHWMZZzmK8Ax9HtUbsQ7uTkEcJpDCl6APeRvZm0sWY=;
-	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
-	 MIME-Version:Content-Type; b=dN04xx1AcrWmUlZ48d0JaI43saO21P1mB69dVgvhceLynR2a2qdxiySJ1Ffz6kCP6ZOZmtvd78ecEu4u0tmcu7aT2hB1xuJmYhYu3Cbf5AoceCIPJVRUqIx43+ydRFjDNYhBJ3ont8DepWff1NTiVVkCclnyWQP+31rSrNvL4Es=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=MkUPm6RY; arc=none smtp.client-ip=10.30.226.201
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="MkUPm6RY"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 09DD9C116C6;
-	Fri, 16 Jan 2026 18:18:18 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1768587499;
-	bh=psHWMZZzmK8Ax9HtUbsQ7uTkEcJpDCl6APeRvZm0sWY=;
-	h=From:To:Cc:Subject:In-Reply-To:References:Date:From;
-	b=MkUPm6RYfa+GpU95PT6aF/8IO2qAxcS3uItS/9zfQUzv8fpK+6v2wuVouQdlplTXj
-	 67Ewu3u7Nilv5HwexzJC0wfAs67455PjQhVzKlGeOZRWcrj0LSxouesygSH0JpvMdb
-	 zwMkhJglH6+ZQJyLzFvtk2JPwwwiFw/cv3eHJmq3DcPCrJ346HIf5YkdDd/6qhCyKr
-	 PE4TIoQHkRCmrSiWBUpdQy/5wCotuDjOLpKqrQnWNUHr7OYReitDuCn+PGCa8VQhHz
-	 Bax48PsJ/Z96pLzwGd/4QS88TsKdTMAYtu3hNI24GTqob3Aju093TqUsGDe/sIzcP0
-	 yi3MX8BbayPww==
-From: Thomas Gleixner <tglx@kernel.org>
-To: Peter Zijlstra <peterz@infradead.org>
-Cc: kernel test robot <lkp@intel.com>, Ian Rogers <irogers@google.com>,
- oe-kbuild-all@lists.linux.dev, linux-kernel@vger.kernel.org,
- x86@kernel.org, sparse@chrisli.org, linux-sparse@vger.kernel.org, Marco
- Elver <elver@google.com>
-Subject: [PATCH] compiler: Use __typeof_unqual__() for __unqual_scalar_typeof()
-In-Reply-To: <87jyxh3ike.ffs@tglx>
-References: <202601150001.sKSN644a-lkp@intel.com> <87v7h23cb0.ffs@tglx>
- <20260115211120.GD831050@noisy.programming.kicks-ass.net>
- <87ms2e32gw.ffs@tglx> <87jyxh3ike.ffs@tglx>
-Date: Fri, 16 Jan 2026 19:18:16 +0100
-Message-ID: <87ecnp2zh3.ffs@tglx>
+	s=arc-20240116; t=1768604148; c=relaxed/simple;
+	bh=EI+vomJSLlcK5tbACYrFoaiT2JZgEfVa/iQ7Di9LIAs=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=qvdzQxCCn9lKvjZ/LfDNEJOqFsCl85mDRmbSxLup+E90eDYCdWnVosRoR2sIlQIKoTMLlGiiTgKBvWWHu7PrR48W35pHYEsF7vj68iyyxAY58yOi3C2Q+eK8l7YVQvIGt3rYua3KwULgxU2GX5hShOLAl3DFQxzRPqtbDXY4pEs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=chrisli.org; spf=pass smtp.mailfrom=chrisli.org; arc=none smtp.client-ip=209.85.128.180
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=chrisli.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=chrisli.org
+Received: by mail-yw1-f180.google.com with SMTP id 00721157ae682-78fba1a1b1eso41323097b3.1
+        for <linux-sparse@vger.kernel.org>; Fri, 16 Jan 2026 14:55:46 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1768604146; x=1769208946;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=ljWtJ4xVHY15+E8pwkVXsXiU05UPHu/DS8qQVF3BbQg=;
+        b=qHeup+yiox3k62Yar/etrqDCiYUF59ND/huimOz88tOcIe1JtSzb4ZhZS2JCCkc8xb
+         /DaSAgOYBIiRnk9hHLkgIKPPYSe2fnqroUyVwfXpdUIeFJyw053V2SY6+P9vW9wKcxzF
+         eAA+Z2XlUJV0f+2GLCGrIBPQUHbba14BdZYPcWV0cgBHn0Ng95g2olRCloPbV4nt+Jwc
+         Gt7N7gyiXo/MnBftEpaDc/1BVzu0SWTvR6GRVuVJS7OUMsJ1m0Hv9Br1+xl7LsM4ZC49
+         QtEIGdl0+2I1DNWxeZYiY3/54NMhAZ9Dv/v6AhPnFbhASa1XjFRV33FzlRWHYQfbDvzG
+         eERg==
+X-Forwarded-Encrypted: i=1; AJvYcCXJgkfFHHLEbH15qrq9Om9HFP86mzOQK7mVtsdxYQVvOgBr83zhsUqOwIOOEiypLyhIZViXqbu31mLMD0I=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzR6u2A02MYLsqGOjo+SaYvSa1ImhBOWBb2B2330x7Wj8nm0T9z
+	kMFO2hOOOd5we5URrDER3B1O04zODD1bC8wohZQwv0OcV/zYc5uTsUk28MCZukC61OvdJpJEJ5o
+	kG9WAZAR2UXNAArHbnnXbf36KarFqPZ+quJz/kSfCiA==
+X-Gm-Gg: AY/fxX7WownWjouuU68kj8NI9PiFPc/QiAarRgASLZbH9QUL5HsMhFsQ6RN5IEHRWLb
+	3yJXe1g+xrGMywgyDIeWhuOU/I3MNH5sEq1VXPOs0WNFcgSg7EDcaGuakcA9aSvKp9y4c2+C57J
+	6zQaUOoEnpbw4NtR6ksdxyNIGzjIrnm1j1y1jrq6fZof+P+bRg8fMRoXCH6DU2C1QzRqLTq2ijm
+	EMy+elEdx6L6XzlkkTP0NlDjoO5l0eKz31XYD3jfniR/vQ5R0niMKkoTkNnmfMn0geFNG4Rrzyy
+	gFL9ZD87VU8pfBtZoax2coE+80nhR3X2KIG0ZV3sRTc9kh42Oj/SFhDLqQ==
+X-Received: by 2002:a05:690c:18:b0:792:72d4:2aad with SMTP id
+ 00721157ae682-793c58afba6mr33297747b3.17.1768604145802; Fri, 16 Jan 2026
+ 14:55:45 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain
+References: <aUFhP-rIwC-iNJ5s@redhat.com>
+In-Reply-To: <aUFhP-rIwC-iNJ5s@redhat.com>
+From: Chris Li <sparse@chrisli.org>
+Date: Fri, 16 Jan 2026 14:55:34 -0800
+X-Gm-Features: AZwV_QgAYlniWMuE9dP2Wb7wWUO_ajGFE9x0COVqINxMJmBXMqn59385iakWch8
+Message-ID: <CACePvbWfwsu_gEUqfg47joLpD=UmO5Rj7hyoJFgiLzv5LyRFCw@mail.gmail.com>
+Subject: Re: [PATCH] sparse: add the new m_pos member into struct expression{EXPR_DEREF}
+To: Oleg Nesterov <oleg@redhat.com>
+Cc: Luc Van Oostenryck <lucvoo@kernel.org>, Alexey Gladkov <legion@kernel.org>, linux-sparse@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-From: Peter Zijlstra <peterz@infradead.org>
+Hi Oleg,
 
-The recent changes to get_unaligned() resulted in a new sparse warning:
+Applied to sparse-dev.
 
-   net/rds/ib_cm.c:96:35: sparse: sparse: incorrect type in argument 1 (different modifiers) @@     expected void * @@     got restricted __be64 const * @@
-   net/rds/ib_cm.c:96:35: sparse:     expected void *
-   net/rds/ib_cm.c:96:35: sparse:     got restricted __be64 const *
- 
-The updated get_unaligned_t() uses __unqual_scalar_typeof() to get an
-unqualified type. This works correctly for the compilers, but fails for
-sparse when the data type is __be64 (or any other __beNN variant).
+Chris
 
-On sparse runs (C=[12]) __beNN types are annotated with
-__attribute__((bitwise)).
 
-That annotation allows sparse to detect incompatible operations on __beNN
-variables, but it also prevents sparse from evaluating the _Generic() in
-__unqual_scalar_typeof() and map __beNN to a unqualified scalar type, so it
-ends up with the default, i.e. the original qualified type of a 'const
-__beNN' pointer. That then ends up as the first pointer argument to
-builtin_memcpy(), which obviously causes the above sparse warnings.
 
-The sparse git tree supports typeof_unqual() now, which allows to use it
-instead of the _Generic() based __unqual_scalar_typeof(). With that sparse
-correctly evaluates the unqualified type and keeps the __beNN logic intact.
+Chris
 
-The downside is that this requires a top of tree sparse build and an old
-sparse version will emit a metric ton of incomprehensible error messages
-before it dies with a segfault.
-
-Therefore implement a sanity check which validates that the checker is
-available and capable of handling typeof_unqual(). Emit a warning if not so
-the user can take informed action.
-
-[ tglx: Move the evaluation of USE_TYPEOF_UNQUAL to compiler_types.h so it is
-  	set before use and implement the sanity checker ]
-
-Reported-by: kernel test robot <lkp@intel.com>
-Signed-off-by: Peter Zijlstra <peterz@infradead.org>
-Signed-off-by: Thomas Gleixner <tglx@kernel.org>
-Closes: https://lore.kernel.org/oe-kbuild-all/202601150001.sKSN644a-lkp@intel.com/
----
- Makefile                       |    8 ++++++++
- include/linux/compiler.h       |   10 ----------
- include/linux/compiler_types.h |   11 +++++++++++
- scripts/checker-valid.sh       |   19 +++++++++++++++++++
- 4 files changed, 38 insertions(+), 10 deletions(-)
-
---- a/Makefile
-+++ b/Makefile
-@@ -1178,6 +1178,14 @@ ifdef CONFIG_CC_IS_CLANG
- KBUILD_USERLDFLAGS += --ld-path=$(LD)
- endif
- 
-+# Validate the checker is available and functional
-+ifneq ($(KBUILD_CHECKSRC), 0)
-+  ifneq ($(shell $(srctree)/scripts/checker-valid.sh $(CHECK)), 1)
-+    $(warning C=$(KBUILD_CHECKSRC) specified, but $(CHECK) is not available or not up to date)
-+    KBUILD_CHECKSRC = 0
-+  endif
-+endif
-+
- # make the checker run with the right architecture
- CHECKFLAGS += --arch=$(ARCH)
- 
---- a/include/linux/compiler.h
-+++ b/include/linux/compiler.h
-@@ -231,16 +231,6 @@ void ftrace_likely_update(struct ftrace_
- 				"must be non-C-string (not NUL-terminated)")
- 
- /*
-- * Use __typeof_unqual__() when available.
-- *
-- * XXX: Remove test for __CHECKER__ once
-- * sparse learns about __typeof_unqual__().
-- */
--#if CC_HAS_TYPEOF_UNQUAL && !defined(__CHECKER__)
--# define USE_TYPEOF_UNQUAL 1
--#endif
--
--/*
-  * Define TYPEOF_UNQUAL() to use __typeof_unqual__() as typeof
-  * operator when available, to return an unqualified type of the exp.
-  */
---- a/include/linux/compiler_types.h
-+++ b/include/linux/compiler_types.h
-@@ -562,6 +562,13 @@ struct ftrace_likely_data {
- #define asm_inline asm
- #endif
- 
-+/*
-+ * Use __typeof_unqual__() when available.
-+ */
-+#if CC_HAS_TYPEOF_UNQUAL || defined(__CHECKER__)
-+# define USE_TYPEOF_UNQUAL 1
-+#endif
-+
- /* Are two types/vars the same type (ignoring qualifiers)? */
- #define __same_type(a, b) __builtin_types_compatible_p(typeof(a), typeof(b))
- 
-@@ -569,6 +576,7 @@ struct ftrace_likely_data {
-  * __unqual_scalar_typeof(x) - Declare an unqualified scalar type, leaving
-  *			       non-scalar types unchanged.
-  */
-+#ifndef USE_TYPEOF_UNQUAL
- /*
-  * Prefer C11 _Generic for better compile-times and simpler code. Note: 'char'
-  * is not type-compatible with 'signed char', and we define a separate case.
-@@ -586,6 +594,9 @@ struct ftrace_likely_data {
- 			 __scalar_type_to_expr_cases(long),		\
- 			 __scalar_type_to_expr_cases(long long),	\
- 			 default: (x)))
-+#else
-+#define __unqual_scalar_typeof(x) __typeof_unqual__(x)
-+#endif
- 
- /* Is this type a native word size -- useful for atomic operations */
- #define __native_word(t) \
---- /dev/null
-+++ b/scripts/checker-valid.sh
-@@ -0,0 +1,19 @@
-+#!/bin/sh -eu
-+# SPDX-License-Identifier: GPL-2.0
-+
-+[ ! -x "$(command -v "$1")" ] && exit 1
-+
-+tmp_file=$(mktemp)
-+trap "rm -f $tmp_file" EXIT
-+
-+cat << EOF >$tmp_file
-+static inline int u(const int *q)
-+{
-+	__typeof_unqual__(*q) v = *q;
-+	return v;
-+}
-+EOF
-+
-+# sparse happily exits with 0 on error so validate
-+# there is none on stderr. Use awk as grep is a pain with sh -e
-+$1 $tmp_file 2>&1 | awk -v c=1 '/error/{c=0}END{print c}'
+On Tue, Dec 16, 2025 at 5:40=E2=80=AFAM Oleg Nesterov <oleg@redhat.com> wro=
+te:
+>
+> Test-case:
+>
+>         $ cat -n MEMPOS.c
+>              1  struct T {
+>              2   int mem;
+>              3  } X;
+>              4
+>              5  void func(struct T *x)
+>              6  {
+>              7   x -> mem =3D 1;
+>              8   X .  mem =3D 2;
+>              9  }
+>
+>         $ ./test-dissect MEMPOS.c | grep -F T.mem
+>            2:6                    def   m T.mem                          =
+  int
+>            7:4   func             -w-   m T.mem                          =
+  int
+>            8:4   func             -w-   m T.mem                          =
+  int
+>
+> Note that the reported position of .mem usage is wrong. This is because
+> do_expression(EXPR_DEREF) uses &expr->pos which is position of TOKEN_SPEC=
+IAL,
+> not the position of the next token (mem).
+>
+> This also breaks "semind search -l" (search by location)
+>
+>         $ ./semind add MEMPOS.c
+>         $ ./semind search -l MEMPOS.c:7:7
+>
+> reports nothing.
+>
+> With this patch:
+>
+>         $ ./test-dissect MEMPOS.c | grep -F T.mem
+>            2:6                    def   m T.mem                          =
+  int
+>            7:7   func             -w-   m T.mem                          =
+  int
+>            8:7   func             -w-   m T.mem                          =
+  int
+>
+>         $ ./semind add MEMPOS.c
+>         $ ./semind search -l MEMPOS.c:7:7
+>         (def) MEMPOS.c  2       6                int mem;
+>         (-w-) MEMPOS.c  7       7       func     x -> mem =3D 1;
+>         (-w-) MEMPOS.c  8       7       func     X .  mem =3D 2;
+>
+> Signed-off-by: Oleg Nesterov <oleg@redhat.com>
+> ---
+>  dissect.c    | 2 +-
+>  expression.c | 1 +
+>  expression.h | 1 +
+>  3 files changed, 3 insertions(+), 1 deletion(-)
+>
+> diff --git a/dissect.c b/dissect.c
+> index 9419c593..a6003afa 100644
+> --- a/dissect.c
+> +++ b/dissect.c
+> @@ -454,7 +454,7 @@ again:
+>                         p_mode =3D U_R_VAL;
+>                 p_type =3D do_expression(p_mode, expr->deref);
+>
+> -               ret =3D report_member(mode, &expr->pos, p_type,
+> +               ret =3D report_member(mode, &expr->m_pos, p_type,
+>                         lookup_member(p_type, expr->member, NULL));
+>         }
+>
+> diff --git a/expression.c b/expression.c
+> index 727e7056..b23107da 100644
+> --- a/expression.c
+> +++ b/expression.c
+> @@ -605,6 +605,7 @@ static struct token *postfix_expression(struct token =
+*token, struct expression *
+>                                 break;
+>                         }
+>                         deref->member =3D token->ident;
+> +                       deref->m_pos =3D token->pos;
+>                         token =3D token->next;
+>                         expr =3D deref;
+>                         continue;
+> diff --git a/expression.h b/expression.h
+> index 8bf40d32..ce8a29ce 100644
+> --- a/expression.h
+> +++ b/expression.h
+> @@ -202,6 +202,7 @@ struct expression {
+>                 struct /* deref_arg */ {
+>                         struct expression *deref;
+>                         struct ident *member;
+> +                       struct position m_pos;
+>                 };
+>                 // EXPR_SLICE
+>                 struct /* slice */ {
+> --
+> 2.52.0
+>
+>
