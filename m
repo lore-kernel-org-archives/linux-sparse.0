@@ -1,120 +1,89 @@
-Received: from mail-yw1-f175.google.com (mail-yw1-f175.google.com [209.85.128.175])
+Received: from mail-yw1-f179.google.com (mail-yw1-f179.google.com [209.85.128.179])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 24028322C7F
-	for <linux-sparse@vger.kernel.org>; Fri, 16 Jan 2026 23:35:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.128.175
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768606523; cv=pass; b=Xul6o+r3YkZFUS31CsvkkQoKSv8qTHp4Kv3Ryhf/4vlMmAVyx+5bbFb6g6Agk/qOdsSBztPvUOm+FKbt9PEYAoV45zz4Cl51d+IQ1SXIQtSApqScGzjGGfi2MzEydOVtrMf3B+jmyfYZH4NlKc+Epjk/MtJ4vt0T5JrOzeQg3R4=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768606523; c=relaxed/simple;
-	bh=x8FFDlF/fesOWEb5mpSebQwC7vWTQTshDMbtChx063o=;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 95A332AD16
+	for <linux-sparse@vger.kernel.org>; Sat, 17 Jan 2026 00:15:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.179
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1768608903; cv=none; b=J7NKemjOG1F0mCpm8irgfATtTl4YH3Qni40DuukZYQM0m42K0kSl6tZet4GhzxOlUWBocnBtr2ltB7CY0Vb8rl9lOmDIZAe8UF9izW1evjgLNM21zQd0t54nFWpK3HLmMX4phS3SwlOJ3PYZpIwYHmwSHD+jT3hxn4ubUuPrtLM=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1768608903; c=relaxed/simple;
+	bh=PvGhrj3J53JGX8Dgy6RpDIko+X968j99gmCT6+L/79g=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=RSi/CrJhx3AR8Ac89H47Ut+o3gncuO0m2aZB288wvlwKGPnTdbd7BtCPa+FN5mLXNEAEgHBJ7NJQphfwzP9XDlQ49p4uJzKDT6kT3iliTIOYIayvy5M9qhtKKZv13VChYgF/NFhMVsmo+h08E/v+fvFySkmjxAKG2vY2fh8IiCE=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=chrisli.org; spf=pass smtp.mailfrom=chrisli.org; arc=pass smtp.client-ip=209.85.128.175
+	 To:Cc:Content-Type; b=ajH34d+zOda+eWah4alQaOYLF8uYLH9jNavRwkqKYTD+xvySg3kWLtbXImzwfelkE0ZSL3s97yZKeJi7mlVC5RFlPY58tQR/o+weOyMWIsXIA6u3GnbygcgRXo4TkPh6IFGeEAG231zC6OgunY1tiwm6aJjabW+b1UNc2QG4RNc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=chrisli.org; spf=pass smtp.mailfrom=chrisli.org; arc=none smtp.client-ip=209.85.128.179
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=chrisli.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=chrisli.org
-Received: by mail-yw1-f175.google.com with SMTP id 00721157ae682-79275e61c2cso26397977b3.3
-        for <linux-sparse@vger.kernel.org>; Fri, 16 Jan 2026 15:35:19 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1768606517; cv=none;
-        d=google.com; s=arc-20240605;
-        b=XidWcJywgQZ0YoOBjX1Buybky1i3cfO38EI9iaX2iCAM7ayOgswrrBaxJF9i/7Fqff
-         BLwePggXGDYY8OeWa2r6CfAIMD0ZEdfEmpzHz45cZAlRAkB8Nndz+fJ/epxG0wFT9jdG
-         focsk8236PyG3qtGx4OwzLN+BvLiMKSG9xeUoXlVTI0UiSP2hrSLCQUVHhbxdVDLDMJz
-         WMQYZFyfR1yw40TESdtLZNDBXkTiWtgAPyclyN3VhjMztR/5CPrF/xnTMWaAtPHEoXRt
-         kCqRtJ23JQfwWJQyupODdAZRaBXXLCqoHUWdEVPQZ2RAeyHH6QE+ugRvWZtEAFS4kffo
-         ByOw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version;
-        bh=nVvMcHxFKWpFeIwQX6rcqpoxp4jR1OruPjaEq0/Db20=;
-        fh=tD1m01T1OfFOoE5jk7/o5JN0pgwAg25Fxt1VdK9ahVE=;
-        b=hnwCKN+QEGlOVeMpswSHEuNzjlpnUg8EBBccZMIV/eq6xks9HpVkZv7Y1OXXHMvMjj
-         88LRufp6ETSJVnUnZqzfILUA2FkOHIPTsaCKVAxw77y/HEVzXiO3Cq4YVKTIhYZEbh1C
-         WeBsi1wDyVhnRQgS89hhhI8N5AmCBRLVjCsk9XvwgJucaMhOrR/x54gbsQwJChbsHvJA
-         1+6FfC/l4vaFes2RpSK9dTuWycGNvMtRpP08N7a7bTIKN+LGY/R3KGJDAEG9Ksgev+T6
-         5Z4bzKJEU7MOJWuXeK7HC6aGLMF5GEH25i+xUFYvfSedYjkI/GnCgAhiLimFO5AeIGXT
-         wpWA==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
+Received: by mail-yw1-f179.google.com with SMTP id 00721157ae682-78d6a3c3b77so39986247b3.0
+        for <linux-sparse@vger.kernel.org>; Fri, 16 Jan 2026 16:15:02 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1768606517; x=1769211317;
+        d=1e100.net; s=20230601; t=1768608901; x=1769213701;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=nVvMcHxFKWpFeIwQX6rcqpoxp4jR1OruPjaEq0/Db20=;
-        b=Q0NPPUenojrmMp7ddqMUCFo3GjXDksdXw12NIbbzVfWC/uyCKZ+ljHTu/UxsYl5hN2
-         ozXFDIv85uvkIKL8fBzyZfzxRZMOEl9GnzavEHDZFJvdhKwj/4WJC8tcNBHykedSlCIx
-         r4w2QsNIrf7vOCZ5vkX1+A4JxN82iiZP6Zql1I5XoVkDFB+GlyttmxzerpoMtT+koIp6
-         Apbkv5xAv0lsP53EGkoPeU7dUwmQlCEFt8p3FKOt3/HuOFC7fq0WQSCdCG01HYE+cAds
-         Gw9uZEe9CvdYixZSuwhnIMzG6kQux2dArn0dRl0g/KmNYI2fVY0Q9X6nlqFqMjCuJjpk
-         HxrA==
-X-Forwarded-Encrypted: i=1; AJvYcCX7A9AASTxj2zDqg/TNOEcGyAyvfIEqIYhNVLE+VGP+AvuVW1yuMlvS0aAAu12lVV0pp47TrNfUqvkJ9Gk=@vger.kernel.org
-X-Gm-Message-State: AOJu0Ywq0ELDl1yu5LDNPYNAERE6BYQYUNXcaQ9Q/8SwOE1ITeiQRfaz
-	bBJnx33LWpkSyBinzgGLSwfi4j4ECqzWpFCrEfGg5vOEZBamiGiZEyRCfkEnQOD6bHjc/oCvBPb
-	TBKzO47Pat81hO1C1OZmJ/BKYyXbSgezG1/g6zk2lpA==
-X-Gm-Gg: AY/fxX4r3dcUn2KmdrTCvGFWkhaD8Pq5HQPOMWZorFYR7ZGwYrAkI9WpRwROLvuYmni
-	pia73hqd1t/cIFuucD04kjQKfdU1h0KiAk4wBqBFBREbJr17B7tXLqM8myFQ8fuK55hyypQiw2d
-	QVNipZUJXE4ZtAZ9+jc8aqNshDjPuSPqJwhj141CZw3sdoZ523GCLsKu1tBgB8FGJttm1OBnk9L
-	2pLt+rr3yplxH5WHdkxUX5BufDAOP1F5d0Zvb/OLq5WT96PZfVcJTai3pNNjZBRCB4E2tciTmNK
-	CeyY7ZIZ8UQL/jd3bXLarKaTI+TQAEdeVD/cZYx0rjcejVE3oze5PUntqg==
-X-Received: by 2002:a05:690c:ed3:b0:78c:10d6:1e8b with SMTP id
- 00721157ae682-793c66fed4cmr36954647b3.26.1768606517669; Fri, 16 Jan 2026
- 15:35:17 -0800 (PST)
+        bh=PvGhrj3J53JGX8Dgy6RpDIko+X968j99gmCT6+L/79g=;
+        b=uzNONq4YPHgypubewJonvrzCow6sMtUcE6ZkDZbXBhK5sB0MyAlvkHr6JuOJCaF69c
+         yb8et5W/XEQT57q38dXULarqvnjlYM/n4D/E6oCpAVOZpoq78NYluWCej8ZTmQGz6do0
+         1uILIMVu/85bjtBHGUGbH80q7Ag4maMlhJ3/BdnT/IegovJRSgtxozHUq5dHecxsPXd5
+         g6elZY+pVFVl5poeGPKOLqKHCccjFmBXaZ/QdP/+kUluA2kcQSgPaBcYp7nLhRyQCW+j
+         7nSDLklwjT2QggbKwwFX6ANPN6CdBE1qzr4JyDkdXm5H8Q1J7z3nsc7BGyTngh1nSRHd
+         vvOg==
+X-Gm-Message-State: AOJu0YwfdILz97z9N1QV21Z97yJEP4eRC537ZZfVqNKSMp4iVd72WyTl
+	1MTdOsnG19cNJl4wFUuuLpQVoBPWas5rq5AH/WO9q9edXmxfX4mBreP3f4xizNEGCK6SKqVOsqw
+	0DeGLY0UzxblIxtZhJStaIcanFYehQLiAnTYm+dy5zai7ddeb1M6O
+X-Gm-Gg: AY/fxX5BW3KK3aHP0FxsrtMrI5PoG/9BlccbAAE9aRgBsMCbyy0rrMfm/EZWOyIgDCE
+	xrsQoP5/8zsWsDUyuuYTQkuQD8YJwxdWxckPTwNMUJLRd4pF4tOvkevVxteFtVWjWU3kXgp91Rf
+	U9xZK5i75hYX6p9MBMf115v0X5W1DqKTJ9SihAOrWHDvfJmmdoqnXAHFAMy0M04mCei12ZnPzDL
+	xFFrmuHJiP/TZ5iuCKDhQBt9Tba+ItJchRDlRoYgvBuqjIl9KsrU4ddAjDQSpouAEEnFf7etr49
+	AGCENoZHtHjrIw+k2FNX5/tCzawJjPvT1aPpi6MFv07XZakZU8P6abIlXA==
+X-Received: by 2002:a05:690e:144c:b0:63f:7c9d:d378 with SMTP id
+ 956f58d0204a3-6490a5ef493mr6383170d50.5.1768608901599; Fri, 16 Jan 2026
+ 16:15:01 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20251010030348.it.784-kees@kernel.org> <20251010030610.3032147-3-kees@kernel.org>
- <47a2f0c7-c25f-4734-840b-fdefc2f3c4a9@kernel.org> <aUVIlvOSvobrdrKV@stanley.mountain>
- <bf5b9a62-a120-421e-908d-1404c42e0b60@kernel.org>
-In-Reply-To: <bf5b9a62-a120-421e-908d-1404c42e0b60@kernel.org>
+References: <20251020153918.812235-1-ben.dooks@codethink.co.uk>
+ <20251020153918.812235-2-ben.dooks@codethink.co.uk> <CACePvbVvsAPURh+jfb2Vh8cPsOzuR2HmzuD9j5Gf6GJyD2orng@mail.gmail.com>
+ <11df30dc-e1d9-4f40-a9ac-43cb1af69da0@codethink.co.uk>
+In-Reply-To: <11df30dc-e1d9-4f40-a9ac-43cb1af69da0@codethink.co.uk>
 From: Chris Li <sparse@chrisli.org>
-Date: Fri, 16 Jan 2026 15:35:06 -0800
-X-Gm-Features: AZwV_Qi7IfV4loLjy6_M4Wg9pj-bZgstydRyU-pSfKvInieL_J8lQ-37srUWiOQ
-Message-ID: <CACePvbU5Pqo=bw_j8arOq16o1JBOSwPtuMZBVozy4FV7YsSLGw@mail.gmail.com>
-Subject: Re: [PATCH v2 3/3] module: Add compile-time check for embedded NUL characters
-To: Matthieu Baerts <matttbe@kernel.org>
-Cc: Dan Carpenter <dan.carpenter@linaro.org>, Daniel Gomez <da.gomez@kernel.org>, 
-	Kees Cook <kees@kernel.org>, Rusty Russell <rusty@rustcorp.com.au>, 
-	Petr Pavlu <petr.pavlu@suse.com>, Sami Tolvanen <samitolvanen@google.com>, 
-	linux-modules@vger.kernel.org, Hans Verkuil <hverkuil+cisco@kernel.org>, 
-	Malcolm Priestley <tvboxspy@gmail.com>, Mauro Carvalho Chehab <mchehab@kernel.org>, 
-	Hans Verkuil <hverkuil@kernel.org>, =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= <u.kleine-koenig@pengutronix.de>, 
-	linux-kernel@vger.kernel.org, linux-media@vger.kernel.org, 
-	linux-hardening@vger.kernel.org, Luis Chamberlain <mcgrof@kernel.org>, 
-	linux-sparse@vger.kernel.org
+Date: Fri, 16 Jan 2026 16:14:50 -0800
+X-Gm-Features: AZwV_Qj5b0jnNuI_ip37Dasi4U-80iRMVxKht8A55Jf0X_IBN0Z6jRvVAZTuIuw
+Message-ID: <CACePvbWpTrKpFXLr4=vkVpDqhU7wd=RMOy4Wm1gAKhVtEv9=wQ@mail.gmail.com>
+Subject: Re: [PATCH RESEND2 1/4] parse: initial parsing of __attribute__((format))
+To: Ben Dooks <ben.dooks@codethink.co.uk>
+Cc: linux-sparse@vger.kernel.org, 
+	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Fri, Dec 19, 2025 at 6:59=E2=80=AFAM Matthieu Baerts <matttbe@kernel.org=
-> wrote:
+On Mon, Dec 22, 2025 at 3:49=E2=80=AFAM Ben Dooks <ben.dooks@codethink.co.u=
+k> wrote:
 >
-> Hi Dan, Daniel
->
-> On 19/12/2025 13:44, Dan Carpenter wrote:
-> > On Fri, Dec 19, 2025 at 01:29:21PM +0100, Matthieu Baerts wrote:
-> >> net/mptcp/crypto_test.c:72:1: error: bad integer constant expression
-> >> net/mptcp/crypto_test.c:72:1: error: static assertion failed: "MODULE_=
-INFO(license, ...) contains embedded NUL byte"
-> >> net/mptcp/crypto_test.c:73:1: error: bad integer constant expression
-> >> net/mptcp/crypto_test.c:73:1: error: static assertion failed: "MODULE_=
-INFO(description, ...) contains embedded NUL byte"
+> On 01/12/2025 19:23, Chris Li wrote:
+> > Hi Ben,
 > >
-> > There was a fix for that posted.  Let me ping them to see if anyone is
-> > planning to send an actual patch.
-
-Should I wait for the actual patch for sparse?
-
+> > Thanks for the patch and sorry for the late reply.
 > >
-> > https://lore.kernel.org/all/20251211175101.GA3405942@google.com/
+> > Your format attribute series work applies to the sparse-dev tree fine
+> > and "make check" runs fine as well. Thank you so much.
+> >
+> > I have some trivial coding style of feedback for you, see the comments
+> > below. Mostly just nitpicks, does not impact the coding behavior. Let
+> > me know if you want to update a new series or I can be lazy and just
+> > apply your current series.
 >
-> Thank you both for your reply! I didn't think about looking at the v1.
->
-> I confirm that Sami's patch silences the errors on my side. Thanks!
+> Thank you. I've implemented most of your parse.c/symbol.h changes now.
 
-Thanks for the report.
+Great.
+
+>
+> I am not actually back at work until 2nd-Jan 2026 so may not get
+> all the other changes sorted.
+>
+No problem. I just started catching up on my backlogs from the holiday.
 
 Chris
