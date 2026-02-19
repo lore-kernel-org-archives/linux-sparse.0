@@ -1,100 +1,94 @@
-Received: from mail-yw1-f172.google.com (mail-yw1-f172.google.com [209.85.128.172])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C2ECB34AB15
-	for <linux-sparse@vger.kernel.org>; Thu, 19 Feb 2026 17:06:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.128.172
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771520796; cv=pass; b=kwlxEfsf22SDJLVK1jPf3Yi/ChLcaDntyyBtXxSUG0p5tyHUVo/JRfb3R9KbWQifYwPx8nPdQIk5PrQfHmUlwEhJNewH99t8Uy1xakjVdBz2Wz3OjxOKFesHCKdCiB3GdDg0kz8tB45w70XfmiUKXQzrH6ifrr//VO5IMAZ0ljk=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771520796; c=relaxed/simple;
-	bh=PDL3ADfTUjQJ9baIpgOVXBhOINqlaJdo+eD/uky5pRg=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Rs+8SpEu8SBDsL9u4G0PaW3vkodCdoMxTBMz4q/KGLtFWG7X3nh68MTY6SA2qmDb++Lht7tAkWr9MgWhGhlYUFsnikkCUo5ewsgRlY7Q4eizYOhpnxfFSkiE8utXM5JWI97KFOHoxqTsvPQlJOlEKknGZhjH7Y0i5Z8iIrzUyBc=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=chrisli.org; spf=pass smtp.mailfrom=chrisli.org; arc=pass smtp.client-ip=209.85.128.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=chrisli.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=chrisli.org
-Received: by mail-yw1-f172.google.com with SMTP id 00721157ae682-797d3864d89so13124097b3.1
-        for <linux-sparse@vger.kernel.org>; Thu, 19 Feb 2026 09:06:35 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1771520795; cv=none;
-        d=google.com; s=arc-20240605;
-        b=WCbgQACtCVpc6CAyHJzg0UpMuFdQaHYpfADIHPXTIPhBitTGBEpFw1EQNf/l1dbUHo
-         HwphXSfDYlyR29AFGKCS/LM+t/tftjaHApLuupKZiCE6P9SNKUc89zAoVGxHC4yqgFQz
-         D/pm+zri1tLJdAmMqB6PEMRt7eZ9v9YeLeKdKlVJWcd0AKMC6/ja1ZDHej3UIJGhjTEv
-         8ibHFKPwGGVCYrius19rX2O/H3Cqc4slDifamdt6HQqNXNXSfp4mhEFXgLTYTeKKqG0Y
-         ts6hCUA3Z1oDzQEmOCiSqRJJQIzVGDkeDNuyH2ioyssitMv96IPp4WJXnl4sYu0LSLF1
-         63qw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version;
-        bh=PDL3ADfTUjQJ9baIpgOVXBhOINqlaJdo+eD/uky5pRg=;
-        fh=HKjhsc9gNRxUKJFQtG0+OvPkzaNKN39eMIktiHE7EeU=;
-        b=KGu3bo+wCpACuRemZqYnMcgE7fDciVplWH0NFrhYkSR3GOrO/oH3uHpJdEYjxl11P+
-         of5zsBsbVqWpTHp1hsEQThSGWBFC3eF5sQuZnbdBBvnygI95IrmuRx8G1poym1OjJm7U
-         cJGizlGr9pKNPduLlbsDntLWEq67p3GohfiKD5eeY0Dntk1T1A1o8UvRbtIotGc9iqTq
-         7cJ96vHMeUiKOzhqNF4ErD7Jinpft3Gtv86YMzrQQczSVZ+DyrMw/TuksTKTNlZkLEVS
-         5ayeexXpYsVH71qj2NinPX0Gn0F5d7+OO7LVAdoVC4sOAJ9wHHIFR7SSo/c8YcNJ0y3v
-         HSOA==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1771520795; x=1772125595;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=PDL3ADfTUjQJ9baIpgOVXBhOINqlaJdo+eD/uky5pRg=;
-        b=TUWtvcMVKULR9jjQCCsczEwRUBfsoTh0qAxb6IJDTAUNaY7MjaoTIuOGrZy+XiRz2X
-         +oGL4r9K3ZFb3jUT+aSuUQHG/1tM8N2brZF9jn9E5HSiObEPgqNYLuLPyoQ/V39hwDFV
-         eSTekcmgK8WRZ4xtiygrq3xpyvkOu3jd9y7H/zPYNm0lOBhPwJivkcaq7unRhcAvRzHW
-         keD/2nrAwQxyskVNomZyYLDK5G/b+5obzZhkiqFPQuf/OOQVSfvQA/pDihumF+sFF9Rp
-         dHdlQOB4AJHA0tsU1a2th+NybnEoct8fRF9d2pT7GKPF+aKtqYpodbAQ6G92qQ6o3Utg
-         4eKw==
-X-Forwarded-Encrypted: i=1; AJvYcCWhhHRVKio7Jh1Aiym8y38GM0w0JGCArOd1nKWdW32wz/Q4VpgthNiVxnivjYV26I2aP3mtUWRorg4L31Q=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzInE+2QA+h7FgHuxoDSlY2K1M1z9d+GYPK34bo0x5xvdomqHYj
-	ZlYU/aHT4rujbvkKjnG5PQ913Y7Y7u+8NLe4TmZcsS6LVctVHQnsS1mZ1XUnAUvn/FodwDwG1aD
-	FnxqJR7pKym0zeYYfqITe36aP5GtrU7n3XIZalomRNA==
-X-Gm-Gg: AZuq6aLnTVOJkO3nwbvOqWvKk4uyRm0CjYjyx27DY0hN47eaB8IM+ZV0ErEXgY3+xq2
-	ozzkcm5a6qj3IHzmXuy1Wk+Qas2FTwatDKXauClvc3y66tb3jwKP5nrSf5qgnwArzROjsP3D3iT
-	67CCxvTklHvxCNgRMX/5mYyECxejwiLIomIFPZkO/ks7cjeKbiu+UGLcNg51dFJFhy+mQCX0mu/
-	tyiFbPO0fXtgroIX8bsaiZVZtBSQ9MbOEtXeHwX07Fxs8RI11AFoCRIARTPsx4ISbtbrZ+gOFyr
-	yUS7/1+ibJ8TSks9rEKV2RUw+zx8/EqdOlvoiQ==
-X-Received: by 2002:a53:ac93:0:b0:64a:e3d7:58ac with SMTP id
- 956f58d0204a3-64c21a442e4mr13833516d50.9.1771520794582; Thu, 19 Feb 2026
- 09:06:34 -0800 (PST)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 14CBF2D978B;
+	Thu, 19 Feb 2026 19:20:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.18
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1771528841; cv=none; b=atozltzrcCBeObIpG70emUVN6IiGOK+TDeKqqqLFlkTbGPHtgdLBYEW6eaZMUU3Dj+g8Uk+hb0aA8mPaglZfZwGmGpcB6B6jEqnAMn6IetJZcctLjGHnA3p/f8C0da0QlKtwFDKJGGPfxn+givLaIVsyZibknyGJgHk4OpBQ7/Y=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1771528841; c=relaxed/simple;
+	bh=W7K5+4oEkwAzxwMwz/wpvg+aWYzATLdos1rcs6tXJqc=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=rGM/eXXogrsNAgB+uQkVUjqQ4qCMgSZxiE7xrBLF2dX41xwBZL3WPmoYUOg7iz4X3F1IGB1IgfI3hQfM8qFDVzPsWBh1j9GgiNPh8jY94ezmZ706VED2/DMOc48J60INeXUBOsvssOstQ/1NdZWEa0bW65bOzqsQNf7bg7mre7A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=ee7p6JgY; arc=none smtp.client-ip=198.175.65.18
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="ee7p6JgY"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1771528841; x=1803064841;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:content-transfer-encoding:in-reply-to;
+  bh=W7K5+4oEkwAzxwMwz/wpvg+aWYzATLdos1rcs6tXJqc=;
+  b=ee7p6JgYucmuCMFINGsp08nT2/RmXVa4bJvSeikq6eqmUINUN0iu7Bpy
+   XDPwj5ri+HD4GXglMsUxLHdxk3gTaj8gKDVmd/8RWbuaT6gAl4GkikpiW
+   WC4d9GOdb/vnedinjuLllLguj3qL03WR76Fgy3YZ6U3cRMszpdqc7Z8QQ
+   kW2dZwRwqfDIJak8ff9/3pDATbiYvmYZfEomRotpdb2KqLM/UDNL4psni
+   mSmDpO+RG3Wt/9snD4zyzYkGulfPY1sFN2v3Tz3fP5qQmjkQJqJlev5JG
+   U0LSsvNHx/Jk6b3dWpVGRxagSw9O26NvmEXkx5GSEJmmUS987zgX2Sw24
+   A==;
+X-CSE-ConnectionGUID: OCyRk4LMQ5eipoW7WQlOXg==
+X-CSE-MsgGUID: n9HNvXKMSQqRIqDC1urOKQ==
+X-IronPort-AV: E=McAfee;i="6800,10657,11706"; a="72668673"
+X-IronPort-AV: E=Sophos;i="6.21,300,1763452800"; 
+   d="scan'208";a="72668673"
+Received: from fmviesa010.fm.intel.com ([10.60.135.150])
+  by orvoesa110.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Feb 2026 11:20:40 -0800
+X-CSE-ConnectionGUID: H1G0/YEvR8S5+d5/zeUAQw==
+X-CSE-MsgGUID: m/QqZo0/SXSTogGd32cVbA==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.21,300,1763452800"; 
+   d="scan'208";a="213255493"
+Received: from vpanait-mobl.ger.corp.intel.com (HELO localhost) ([10.245.244.114])
+  by fmviesa010-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Feb 2026 11:20:36 -0800
+Date: Thu, 19 Feb 2026 21:20:34 +0200
+From: Andy Shevchenko <andriy.shevchenko@intel.com>
+To: Chris Li <sparse@chrisli.org>
+Cc: Daniel Gomez <da.gomez@kernel.org>, Al Viro <viro@zeniv.linux.org.uk>,
+	Sami Tolvanen <samitolvanen@google.com>,
+	linux-sparse@vger.kernel.org, Aaron Tomlin <atomlin@atomlin.com>,
+	Dan Carpenter <dan.carpenter@linaro.org>,
+	Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+	Eric Biggers <ebiggers@kernel.org>, linux-kernel@vger.kernel.org,
+	linux-modules@vger.kernel.org, "Luck, Tony" <tony.luck@intel.com>,
+	Luis Chamberlain <mcgrof@kernel.org>,
+	Petr Pavlu <petr.pavlu@suse.com>
+Subject: Re: [PATCH] builtin: mark __builtin_strlen() as integer constant
+ expression
+Message-ID: <aZdighmTJN-JaijL@smile.fi.intel.com>
+References: <20260219-fix-builtin-strlen-v1-1-3ec3efc0cda7@samsung.com>
+ <CABCJKuf8jh_yxQcR1=uMeuWOueXyoM5=L-QpTuBenRi_MZK_Gg@mail.gmail.com>
+ <aZdAxZR-c8PY_uEL@macos>
+ <CACePvbU9Dh-caC59+L7wicZF+3sMjc4NC0HEkp9cVa7qqdydow@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260219-fix-builtin-strlen-v1-1-3ec3efc0cda7@samsung.com>
- <CABCJKuf8jh_yxQcR1=uMeuWOueXyoM5=L-QpTuBenRi_MZK_Gg@mail.gmail.com> <aZdAxZR-c8PY_uEL@macos>
-In-Reply-To: <aZdAxZR-c8PY_uEL@macos>
-From: Chris Li <sparse@chrisli.org>
-Date: Thu, 19 Feb 2026 09:06:23 -0800
-X-Gm-Features: AZwV_QjdOnMgiLE4kypKeprfnuFYZTeLS_e2Pq8-K0baZPp_KSQ2fANM0QCJBe8
-Message-ID: <CACePvbU9Dh-caC59+L7wicZF+3sMjc4NC0HEkp9cVa7qqdydow@mail.gmail.com>
-Subject: Re: [PATCH] builtin: mark __builtin_strlen() as integer constant expression
-To: Daniel Gomez <da.gomez@kernel.org>
-Cc: Al Viro <viro@zeniv.linux.org.uk>, Sami Tolvanen <samitolvanen@google.com>, 
-	linux-sparse@vger.kernel.org, Aaron Tomlin <atomlin@atomlin.com>, 
-	Andy Shevchenko <andriy.shevchenko@intel.com>, Dan Carpenter <dan.carpenter@linaro.org>, 
-	Dmitry Torokhov <dmitry.torokhov@gmail.com>, Eric Biggers <ebiggers@kernel.org>, 
-	linux-kernel@vger.kernel.org, linux-modules@vger.kernel.org, 
-	"Luck, Tony" <tony.luck@intel.com>, Luis Chamberlain <mcgrof@kernel.org>, 
-	Petr Pavlu <petr.pavlu@suse.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CACePvbU9Dh-caC59+L7wicZF+3sMjc4NC0HEkp9cVa7qqdydow@mail.gmail.com>
+Organization: Intel Finland Oy - BIC 0357606-4 - c/o Alberga Business Park, 6
+ krs, Bertel Jungin Aukio 5, 02600 Espoo
 
-On Thu, Feb 19, 2026 at 9:00=E2=80=AFAM Daniel Gomez <da.gomez@kernel.org> =
-wrote:
->
-> Chris, Al,
->
-> Can you please take a look? If Al patch is the correct approach, any
-> chance you can send it and fix this?
+On Thu, Feb 19, 2026 at 09:06:23AM -0800, Chris Li wrote:
+> On Thu, Feb 19, 2026 at 9:00 AM Daniel Gomez <da.gomez@kernel.org> wrote:
+> >
+> > Can you please take a look? If Al patch is the correct approach, any
+> > chance you can send it and fix this?
+> 
+> I am asking in another thread should I pull Al's git repo instead.
+> There are a few good commits there.
 
-I am asking in another thread should I pull Al's git repo instead.
-There are a few good commits there.
+Please, pull Al's work, My colleagues and I use his version of sparse for a few
+weeks without noticing any downsides.
 
-Chris
+-- 
+With Best Regards,
+Andy Shevchenko
+
+
