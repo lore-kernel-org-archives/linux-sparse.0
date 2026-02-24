@@ -1,117 +1,119 @@
-Received: from mail-ej1-f45.google.com (mail-ej1-f45.google.com [209.85.218.45])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.17])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7ACB92C11F3
-	for <linux-sparse@vger.kernel.org>; Mon, 23 Feb 2026 18:02:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.45
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D0E3E372B32;
+	Tue, 24 Feb 2026 10:26:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.17
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771869753; cv=none; b=bMTJcOegckHcVoCN896UMqKdRaa/h23Oh/HsTIlqWQOCNGtXhFPjh85uq+Or82a0uJp32+W68Mq5gc5JIgC8nks0nv11fMxjH9V8c488byRQUsbGmqYqFpZUKrovQnNSsJxgm6tyUJI6FlhgAyAp0NrFqMcgGNdwnJhUXH2Y/Js=
+	t=1771928777; cv=none; b=kOFZ5WQAwmygWD4ta/qq+Etem0YHxoR5GNwaZSPlgZKSdZOnfc72tJ5GBwR22Z7tRTzaO4JnqcntsAbF2+QKOVS60LjKjbdEFK9OEGnwnRfvUW+vVUFMVdQ7WSjZDE6opfQtLOt9lrsZoxd68F+l+eJPxygx0XIV+uBnCumw8Rw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771869753; c=relaxed/simple;
-	bh=xTiC3o8UBeWkwj/REKtj8rs4r45t4WplAnMGVsLpKtI=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=oj6OB3Go+Hgzzb6VzseJXVe1tjRHXiBgDFb6p+L/Jyva3Cwt1w3zMs4YyU0pAwehY3hvGVXr+xiq+aTq1FnNmL/1pMX1+6rH0laVsaa+LLHycz3QSpc8m4yL321+qlrecWOXENWSF+i1Vs+/BdWVy1ykC+Tw4rNt7R21yxKRick=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org; spf=pass smtp.mailfrom=linuxfoundation.org; dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b=Iiq+Wjv7; arc=none smtp.client-ip=209.85.218.45
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linuxfoundation.org
+	s=arc-20240116; t=1771928777; c=relaxed/simple;
+	bh=T92VV6JKUnoLm55vgNtMzd98POaalEsEjInJfMjJ+XA=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=n8CgfzYQl00SOyLvU0OD0GbbRWDqCsyE6BcG/dnDBFPfs/zr9TWZrr9TuZcCCryt7bU1+tvWgRzEEc4VSCW/lFV60eH/VM2vB8o6a4NcyFpLmuqGs55aIkzX01YJ7nvwqMU2IBlf9dIFGtJK0TU429N0gSoTdUVASal4urxGaF8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=IdlO/VjY; arc=none smtp.client-ip=192.198.163.17
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="Iiq+Wjv7"
-Received: by mail-ej1-f45.google.com with SMTP id a640c23a62f3a-b8871718b00so743961266b.3
-        for <linux-sparse@vger.kernel.org>; Mon, 23 Feb 2026 10:02:31 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linux-foundation.org; s=google; t=1771869749; x=1772474549; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=owa/p92KaURjbxUzVmI/A0T7Vi/DPPaOBktW4rB8YKc=;
-        b=Iiq+Wjv7P95jAbeedDKR40RHynJt5tSdnmD5OKrFZWzoo1EpXccy1t6GiJwJaatGvO
-         AtjTDOUPLir0yTJsy1e+YEFdXc7prjbbzz71f6HsSdNtQ/65oXGkF4Tgb3DVMfDuD9xj
-         z0SFgMcp1uTekGJtxCtnx879g1CrDcFK4bgws=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1771869749; x=1772474549;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=owa/p92KaURjbxUzVmI/A0T7Vi/DPPaOBktW4rB8YKc=;
-        b=eruNzEML7kIcc48kPWMxX1Cwfs2z4di14XQzcLDlP4doZCL50KL2NqNGsF60Jg1hEI
-         h7xeUcQtut2iJE0VeQGl7UysvfdBEjp4o5EdNKP/NHNaOrB1VRmyhqrhTqxPYXbV4uOp
-         yPGT9shGdz+LIT81xc9jMVUT/IW4xGxRuWOEmpDL8Jt4aGJkV/W9wR/VrAoctjnapDS1
-         ievZY6GaAUylbi8hfaciF+MFDaohU3XRw2vtcyU5UydrD5lgS8rBeIhyAKd7wqgqOfn5
-         RgNeSGb6zOVz0pc12NlkPfDcUUtD55Ap6YB2EqfNYgmKrFyGL3xqUPeHy4SAWO+MsopH
-         tmjg==
-X-Forwarded-Encrypted: i=1; AJvYcCV18TE8HtgbFD343VC/QE/xucJKgmjpG1oBfZsJ3rFfgr3/bKh+q5OlGSir5tGm2+fn5MfLsnggIJyHKJo=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzbIkEF9VXF1ZBWfGC2UWOnOUY7Wx3ktmNrxao61qrdUJLc5sO4
-	MEprjMI2DsVR0S1dA5aFY4NBOcGiOaFF7BF+EHL4WyKPt6Tj2g5eXIhM+2mpWl2aHYW9+jVp+EZ
-	glYzY4Xo=
-X-Gm-Gg: AZuq6aKn96I4eSnso0b16ds9xdwXIkcfpeKuRhdHkWMaPQXTFiKS0cd0zwcJA9tI+AF
-	yeCdNb3XNtTdYXkeeECSLPWZHdgUZjqGpqsRuHIKydJzUjPGfSoV7AGTOEGnWctHdyBVezhGRUw
-	mKyZQHcQatORvBNanzfgkyVGCnm1XyKmJmqWZRrqKVzxI8zajJMtT7K7r0th6AthmtlBLAs9OXp
-	43YmkPAXnza8rmZcn/wvxiuVSyJvSu5KWbX5lr/ErV+uJuQMENRpWznCCZw1DLNtFNioR4mYHlZ
-	cJydkC1Z+3Cs2Nc2o81yeR7QTaKTTjo4K9fEAINEphRVInrBtM15i1lJSwW7Dv1mc2yiD40NkFR
-	2yK7rH6nnpzhfCimygTrDZcIaR/NymB2QUFjegIjqdiHVTbiEpOhGjbdDUe+f4qkYgWX4mJA5s2
-	ikC7pyspEfaQUKBFyRzbpXsVPdYd0oo30fud2hTXo5j/U5Nh8VqZJTV+1Q5RAkJOEzfA1Wg16M
-X-Received: by 2002:a17:907:9452:b0:b88:e09b:88ac with SMTP id a640c23a62f3a-b9081b492a9mr615757166b.29.1771869749412;
-        Mon, 23 Feb 2026 10:02:29 -0800 (PST)
-Received: from mail-ej1-f43.google.com (mail-ej1-f43.google.com. [209.85.218.43])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-b9084e8d0d9sm350085266b.50.2026.02.23.10.02.27
-        for <linux-sparse@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 23 Feb 2026 10:02:29 -0800 (PST)
-Received: by mail-ej1-f43.google.com with SMTP id a640c23a62f3a-b8871718b00so743939166b.3
-        for <linux-sparse@vger.kernel.org>; Mon, 23 Feb 2026 10:02:27 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCWePKdRrkS7SmIQRtVYDGM1IUjttTHq2mZxOqdb22C0wmXL0fXKg+n6wZ3sM792alhxp1nttyWBgpEOMe4=@vger.kernel.org
-X-Received: by 2002:a17:907:971b:b0:b8f:bfc9:ae11 with SMTP id
- a640c23a62f3a-b9081994d58mr497647266b.8.1771869743594; Mon, 23 Feb 2026
- 10:02:23 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="IdlO/VjY"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1771928776; x=1803464776;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:content-transfer-encoding:in-reply-to;
+  bh=T92VV6JKUnoLm55vgNtMzd98POaalEsEjInJfMjJ+XA=;
+  b=IdlO/VjYeh+Nvwtm2jZ7LEoy6420svLvRSG2I3t75hUs6R4lhg1roT7B
+   YUvmMAaXr9jlATlb6l3xyZ0l0NBCSFD5UZ4RkwcaoKtf0Oyo7lTabhLAS
+   GiFnr+ZE0Una3KNq/67VTrFWhEAeAV6iRG1eQ+JQ7AzoQwbVM6e1YRNbw
+   19BnZsqZk4h+Sx86UBz3B0EVEANBVoivUu8EpG98Tf+8X+nr3NeRJkkpN
+   4bdIGXzGQAVAkKvUts3XSfruXHlHP9pX8TIASfHpoiE0tn1xAPrMSN5YA
+   vBkgTZVrdIporRUeqsYsaQ155LVJdMheTS2S/poPBj0ypImmcPgOxVtFP
+   w==;
+X-CSE-ConnectionGUID: uCySn2bFRrSkAqJYQA33Cg==
+X-CSE-MsgGUID: aJ+19+xnTtiteCGlWv/g9g==
+X-IronPort-AV: E=McAfee;i="6800,10657,11710"; a="72849855"
+X-IronPort-AV: E=Sophos;i="6.21,308,1763452800"; 
+   d="scan'208";a="72849855"
+Received: from orviesa009.jf.intel.com ([10.64.159.149])
+  by fmvoesa111.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Feb 2026 02:26:15 -0800
+X-CSE-ConnectionGUID: zUfw9g+4RWW0du3ELCnGLg==
+X-CSE-MsgGUID: qFpfuHuhRxCGm5V7efXgPg==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.21,308,1763452800"; 
+   d="scan'208";a="215716696"
+Received: from egrumbac-mobl6.ger.corp.intel.com (HELO localhost) ([10.245.244.146])
+  by orviesa009-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Feb 2026 02:26:11 -0800
+Date: Tue, 24 Feb 2026 12:26:07 +0200
+From: Andy Shevchenko <andriy.shevchenko@intel.com>
+To: Chris Li <sparse@chrisli.org>
+Cc: Daniel Gomez <da.gomez@kernel.org>, Al Viro <viro@zeniv.linux.org.uk>,
+	Sami Tolvanen <samitolvanen@google.com>,
+	linux-sparse@vger.kernel.org, Aaron Tomlin <atomlin@atomlin.com>,
+	Dan Carpenter <dan.carpenter@linaro.org>,
+	Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+	Eric Biggers <ebiggers@kernel.org>, linux-kernel@vger.kernel.org,
+	linux-modules@vger.kernel.org, "Luck, Tony" <tony.luck@intel.com>,
+	Luis Chamberlain <mcgrof@kernel.org>,
+	Petr Pavlu <petr.pavlu@suse.com>
+Subject: Re: [PATCH] builtin: mark __builtin_strlen() as integer constant
+ expression
+Message-ID: <aZ18v6V97ROtJPkq@smile.fi.intel.com>
+References: <20260219-fix-builtin-strlen-v1-1-3ec3efc0cda7@samsung.com>
+ <CABCJKuf8jh_yxQcR1=uMeuWOueXyoM5=L-QpTuBenRi_MZK_Gg@mail.gmail.com>
+ <aZdAxZR-c8PY_uEL@macos>
+ <CACePvbU9Dh-caC59+L7wicZF+3sMjc4NC0HEkp9cVa7qqdydow@mail.gmail.com>
+ <aZdighmTJN-JaijL@smile.fi.intel.com>
+ <CACePvbWpC7o-Du=pr4Cfn-pM_XcOM1v+6cHb5mqaaEvzsvMX=Q@mail.gmail.com>
+ <aZgbw40qk2zIRpbE@smile.fi.intel.com>
+ <CACePvbU5ByoP2jZZSHYWCncNNXOQXArvyWpVcinTRag8k3-GiA@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <CANiDSCuKGUNdT4f9tOuohe2wZeP4MmooJAJn2Q=oyAWL4v9Lng@mail.gmail.com>
- <CAHk-=wgxgo8SugrnA4s=Pz0TPj32Ea0pdO=uU_N+-V6Y826spg@mail.gmail.com>
- <CAHk-=whTb01surrXakL7rgyoELuPDkqvTdh_ttNrr5rtirwopQ@mail.gmail.com> <CANiDSCsn4gctPL5ms+hCHBwFyv7wAWPCKw6Jfrk2TjMS2tNrCA@mail.gmail.com>
-In-Reply-To: <CANiDSCsn4gctPL5ms+hCHBwFyv7wAWPCKw6Jfrk2TjMS2tNrCA@mail.gmail.com>
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Date: Mon, 23 Feb 2026 10:02:07 -0800
-X-Gmail-Original-Message-ID: <CAHk-=whii0ao=uEoNocj5H56cUa_xZ5v=Hrth3K1aN1uU3XsqA@mail.gmail.com>
-X-Gm-Features: AaiRm53qnENTtDAj5Jrly9R3OZsMxgYkgrpbBWJIgd3kHLdYSvzBU4yrZ0OQ-TY
-Message-ID: <CAHk-=whii0ao=uEoNocj5H56cUa_xZ5v=Hrth3K1aN1uU3XsqA@mail.gmail.com>
-Subject: Re: Sparse not supporting kzalloc_obj() and friends
-To: Ricardo Ribalda <ribalda@chromium.org>, Richard Fitzgerald <rf@opensource.cirrus.com>, 
-	Ben Dooks <ben.dooks@codethink.co.uk>
-Cc: Al Viro <viro@zeniv.linux.org.uk>, linux-sparse@vger.kernel.org, 
-	Chris Li <chriscli@google.com>, Hans Verkuil <hverkuil@kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CACePvbU5ByoP2jZZSHYWCncNNXOQXArvyWpVcinTRag8k3-GiA@mail.gmail.com>
+Organization: Intel Finland Oy - BIC 0357606-4 - c/o Alberga Business Park, 6
+ krs, Bertel Jungin Aukio 5, 02600 Espoo
 
-On Mon, 23 Feb 2026 at 09:21, Ricardo Ribalda <ribalda@chromium.org> wrote:
->
-> I tried both smatch and sparse and both work fine with your trick.
->
-> I also tried to boot it with virtme... That also worked :)
+On Fri, Feb 20, 2026 at 11:34:29AM -0800, Chris Li wrote:
+> On Fri, Feb 20, 2026 at 12:31 AM Andy Shevchenko
+> <andriy.shevchenko@intel.com> wrote:
+> > On Fri, Feb 20, 2026 at 12:06:15AM -0800, Chris Li wrote:
+> > > On Thu, Feb 19, 2026 at 11:20 AM Andy Shevchenko
+> > > <andriy.shevchenko@intel.com> wrote:
+> > > > On Thu, Feb 19, 2026 at 09:06:23AM -0800, Chris Li wrote:
+> > > > > On Thu, Feb 19, 2026 at 9:00 AM Daniel Gomez <da.gomez@kernel.org> wrote:
+> > > > > >
+> > > > > > Can you please take a look? If Al patch is the correct approach, any
+> > > > > > chance you can send it and fix this?
+> > > > >
+> > > > > I am asking in another thread should I pull Al's git repo instead.
+> > > > > There are a few good commits there.
+> > > >
+> > > > Please, pull Al's work, My colleagues and I use his version of sparse for a few
+> > > > weeks without noticing any downsides.
+> > >
+> > > Thanks for the heads up. I just pulled Al's sparse repo.
+> >
+> > Can you also issue a new tag (say 0.6.5) so the distros can really be pushed to
+> > update the quite outdated sparse in their repos?
+> 
+> Sure. I can give it a spin this weekend and keep you posted. There is
+> one risk on my signing key, it might be expired and I need to sort
+> that out.
+> 
+> Meanwhile, please give the current sparse repo some good tests.
 
-Ok, I'll commit it.
+It seems that your tip is the same as Al's, and if it's the case
+we are testing (actually using) this for a few weeks without problems.
+Thanks!
 
-What I actually wanted to do originally was the much simpler
+-- 
+With Best Regards,
+Andy Shevchenko
 
-  #define default_gfp(...) (GFP_KERNEL,##__VA_ARGS__)
 
-but sadly it causes an endless stream of
-
-    error: left-hand operand of comma expression has no effect
-[-Werror=unused-value]
-
-and the tricks to avoid that make the "simple" trick anything but
-simple. This would seem to work:
-
-  static inline gfp_t __attribute__((unused)) GFP_DEFAULT(void)
-  { return GFP_KERNEL; }
-  #define default_gfp(...) (GFP_DEFAULT(),##__VA_ARGS__)
-
-but at that point the existing __default_gfp() macro is simpler, I feel.
-
-Oh well. That "has not effect" was very much the *point* of that
-really simple comma operator trick, but I do understand why the
-warning exists.
-
-               Linus
