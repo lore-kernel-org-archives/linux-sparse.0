@@ -1,33 +1,33 @@
 Received: from zeniv.linux.org.uk (zeniv.linux.org.uk [62.89.141.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 544C734D4E0
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 44E85349B1F
 	for <linux-sparse@vger.kernel.org>; Mon, 16 Mar 2026 07:01:14 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=62.89.141.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773644475; cv=none; b=MBFJFXlUu0BdztrTlTm4q0Ja8N/XaZ5s91hP9GNw13v9eml+TCpXHykZViuHQCS2u4cKvZUn9kILXRKrUetKUUUlhmA1y8UZY0FnjC3trhOys66i7opVjDL9WK2hApys0sP9bZoq7gZVwZ156d+xXYWnjU4ew329PUFOeVf4y7E=
+	t=1773644476; cv=none; b=R7IQGFxfxBISxF5TmHiFnxDuVWJhZkTeO9Mas36JGaC3P0Xtp0t890vJEVRlBzBGdbf8Rl+zwgOC8C3yGN4kJHDDieB49yGYbWaqYW5u+HE1mSsWQ67pYveQp7rXNqExkMcggGH4N0dD4wmfhwQL1a4DaT9iuweGsDTEOoypNew=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773644475; c=relaxed/simple;
-	bh=E6GrbsnyAhKXlqD/Ib2OFrNB63v/C/61clJcjZUGYns=;
+	s=arc-20240116; t=1773644476; c=relaxed/simple;
+	bh=B4ddSIUt2pskZuTtpl/ZICmYMc/ESTMXgSWVcjNbkns=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=EoucOVGAafigSrF4cFWr2aLqsBd8NvOjfFOq254nyPVPLiR3idrEzBmoptDAC2/5sM/+vQimyYKJJ4YpMGOcvkDG1ZqH0zLP97pmRBOW0kCVJ4P77DIBO4mTD9QmYrFF6nsNg0Dn1TTWny9hXwU/d/tpIPr47NjfOml07rl2j5U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk; spf=none smtp.mailfrom=ftp.linux.org.uk; dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b=YHCC/wx0; arc=none smtp.client-ip=62.89.141.173
+	 MIME-Version; b=iyJQOA/cZFTpGfrrnaKgFMHZ5LzCJP09jZ85vCao20gnWo6ggPi/IOXJ9vbH6CyYogXvYOrsjXg+zbIpPl4v2m/M2lCodJO87sgsisq50JrViu6bg5bRRVjHhRVUz4vJWq2pVRXF/lSq/o4fjkyMaPBqXk64f8CK8v/UbxZkUe8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk; spf=none smtp.mailfrom=ftp.linux.org.uk; dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b=CwVOEXvc; arc=none smtp.client-ip=62.89.141.173
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=ftp.linux.org.uk
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b="YHCC/wx0"
+	dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b="CwVOEXvc"
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
 	d=linux.org.uk; s=zeniv-20220401; h=Sender:Content-Transfer-Encoding:
 	MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:
 	Reply-To:Content-Type:Content-ID:Content-Description;
-	bh=wMA1TuazBwWXE1R8PvdkvPg5aaukd0s1ygGkvQBMLhA=; b=YHCC/wx0sZ+0HbKU5ikYdJRZH7
-	jh2DxL8L+CdThA0iTbu/0XCHBJY/VuLTDlxJQb7cme6pof03tqJCNJ4OEsuoNDMQsS0fgJgJqfJPZ
-	0KdUY6e8DAPZOKGaLUl/x4QNRJbqCq4mULdfSyrIRXVl2YQN7PQcaO791CKzBhb/FCIannpZE8xrv
-	Abkm1v5aDUBKJ6ZMKx+BzPkvDh5ReHUCWVG4bi9GN2X8l0YOeNCYxp5GaQ/yrRMdk1+O7G5XUJjHo
-	gsb+mebtcpEJcDL3yR4T7iWHgARkH7m2n0uFDm9WbWjrCrdWB11bC97n9XUzm3InoehKjd2dZte77
-	gUUO+ebA==;
+	bh=P5P1YfvkRyFJeC/UkzauqOhIykBVz2SMj7SR21XZYHw=; b=CwVOEXvcOTspomigbhMJlmh7in
+	A6QntF/440BPE7ujF2L27exuQ9/elg5tJyts47Cxja+jT5/5aFdUZonAHnNu8zwoTtrE0BJbniHPD
+	V2BN6qoyzw9dXQ+KNWRUsUCZskFXaNFVFoSDFvlBcUeGkPCJiGPvdOzIDnW7jLRZTb1fFgQvWuNgR
+	8LonKyG+hhp7YgUITFMKrFwyv79eLXB7CrxJnu446ByKSjcvmycYgFu6mrdgZJNK3+fcMI7kcgrtO
+	z4L+X+x1DSRmjRGHoXS0v1oWDGj85kmMrW1f6pjBXF0SQEmlIO9rdsKj2Ht0xHTpGPyMsCNGfvMx4
+	YUtdQ4Fw==;
 Received: from viro by zeniv.linux.org.uk with local (Exim 4.99.1 #2 (Red Hat Linux))
-	id 1w21zv-00000003E3p-0wBr;
+	id 1w21zv-00000003E3i-0GR5;
 	Mon, 16 Mar 2026 07:04:19 +0000
 From: Al Viro <viro@zeniv.linux.org.uk>
 To: linux-sparse@vger.kernel.org
@@ -37,9 +37,9 @@ Cc: chriscli@google.com,
 	ben.dooks@codethink.co.uk,
 	dan.carpenter@linaro.org,
 	rf@opensource.cirrus.com
-Subject: [PATCH 19/21] simplify the calling conventions of collect_arguments()
-Date: Mon, 16 Mar 2026 07:04:13 +0000
-Message-ID: <20260316070415.768839-19-viro@zeniv.linux.org.uk>
+Subject: [PATCH 18/21] merge(): saner handling of ->noexpand
+Date: Mon, 16 Mar 2026 07:04:12 +0000
+Message-ID: <20260316070415.768839-18-viro@zeniv.linux.org.uk>
 X-Mailer: git-send-email 2.53.0
 In-Reply-To: <20260316070415.768839-1-viro@zeniv.linux.org.uk>
 References: <20260316065622.GA607739@ZenIV>
@@ -53,91 +53,62 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: Al Viro <viro@ftp.linux.org.uk>
 
-Currently we call that only after having verified that macro name is
-followed by the (, with those two tokens passed as separate arguments.
-What's more, collect_arguments() already can tell the caller "don't
-expand that" if the arguments are malformed, so there's no reason not to
-move the check for opening parenthesis into collect_arguments() - that
-makes the calling conventions simpler and it does not incur any cost -
-collect_arguments() is going to be inlined into its sole caller anyway.
+We only care about noexpand for identifiers and solitary #; the latter
+can't occur in merge(), the former should just get ->noexpand set
+according to ->ident->tainted.  That eliminates the last remaining
+possibility of having expand() run into a token that has tainted
+identifier - the regular noexpand check in the caller is sufficient now.
+Should've done that all way back in 2004...
 
 Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
 ---
- pre-process.c | 24 +++++++++++-------------
- 1 file changed, 11 insertions(+), 13 deletions(-)
+ pre-process.c | 10 +---------
+ 1 file changed, 1 insertion(+), 9 deletions(-)
 
 diff --git a/pre-process.c b/pre-process.c
-index 352f02df..73f4d615 100644
+index eec0569c..352f02df 100644
 --- a/pre-process.c
 +++ b/pre-process.c
-@@ -307,16 +307,17 @@ struct arg {
- 	struct token *arg[3];
- };
+@@ -507,7 +507,7 @@ static int merge(struct token *left, struct token *right)
+ 	switch (res) {
+ 	case TOKEN_IDENT:
+ 		left->ident = built_in_ident(buffer);
+-		left->pos.noexpand = 0;
++		left->pos.noexpand = left->ident->tainted;
+ 		return 1;
  
--static int collect_arguments(struct token *start, struct symbol *sym, struct arg *args, struct token *what)
-+static int collect_arguments(struct token *what, int fixed, bool vararg, struct arg *args)
+ 	case TOKEN_NUMBER:
+@@ -529,13 +529,11 @@ static int merge(struct token *left, struct token *right)
+ 	case TOKEN_WIDE_CHAR:
+ 	case TOKEN_WIDE_STRING:
+ 		token_type(left) = res;
+-		left->pos.noexpand = 0;
+ 		left->string = right->string;
+ 		return 1;
+ 
+ 	case TOKEN_WIDE_CHAR_EMBEDDED_0 ... TOKEN_WIDE_CHAR_EMBEDDED_3:
+ 		token_type(left) = res;
+-		left->pos.noexpand = 0;
+ 		memcpy(left->embedded, right->embedded, 4);
+ 		return 1;
+ 
+@@ -812,16 +810,10 @@ static int expand(struct token **list, struct symbol *sym)
  {
--	int fixed = sym->fixed_args;
--	bool vararg = sym->vararg;
-+	struct token *start = scan_next(&what->next);
- 	struct token *next = NULL, *v = NULL;
- 	const char *err;
- 	int commas;
- 
- 	memset(args, 0, sizeof(struct arg) * (fixed + 1));
- 
-+	if (!match_op(start, '('))
-+		return 0;
- 	for (commas = 0; commas < fixed; commas++) {
- 		next = collect_arg(start, false, &what->pos);
- 		if (token_type(next) != TOKEN_SPECIAL)
-@@ -355,7 +356,7 @@ Eexcess:
- Eclosing:
- 	err = "unterminated argument list invoking";
- out:
--	sparse_error(what->pos, "%s macro \"%s\"", err, show_ident(sym->ident));
-+	sparse_error(what->pos, "%s macro \"%s\"", err, show_ident(what->ident));
- 	what->next = next;
- 	return 0;
- }
-@@ -808,23 +809,20 @@ static struct token **substitute(struct token **list, const struct token *body,
- 
- static int expand(struct token **list, struct symbol *sym)
- {
--	struct token *last;
-+	struct token *next;
+ 	struct token *last;
  	struct token *token = *list;
+-	struct ident *expanding = token->ident;
  	struct token **tail;
  	struct token *expansion = sym->expansion;
  	struct arg args[sym->fixed_args + 1];
  
--	if (sym->arglist) {
--		if (!match_op(scan_next(&token->next), '('))
--			return 1;
--		if (!collect_arguments(token->next, sym, args, token))
--			return 1;
+-	if (expanding->tainted) {
+-		token->pos.noexpand = 1;
+-		return 1;
 -	}
-+	if (sym->arglist &&
-+	    !collect_arguments(token, sym->fixed_args, sym->vararg, args))
-+		return 1;
- 
- 	if (sym->expand)
- 		return sym->expand(token, args) ? 0 : 1;
- 
--	last = token->next;
-+	next = token->next;
- 	tail = substitute(list, expansion, args);
- 	/*
- 	 * Note that it won't be eof - at least TOKEN_UNTAINT will be there.
-@@ -834,7 +832,7 @@ static int expand(struct token **list, struct symbol *sym)
- 	 */
- 	(*list)->pos.newline = token->pos.newline;
- 	(*list)->pos.whitespace = token->pos.whitespace;
--	*tail = last;
-+	*tail = next;
- 
- 	return 0;
- }
+-
+ 	if (sym->arglist) {
+ 		if (!match_op(scan_next(&token->next), '('))
+ 			return 1;
 -- 
 2.47.3
 
