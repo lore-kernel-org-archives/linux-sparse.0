@@ -1,33 +1,33 @@
 Received: from zeniv.linux.org.uk (zeniv.linux.org.uk [62.89.141.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 44E85349B1F
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A16F3226D02
 	for <linux-sparse@vger.kernel.org>; Mon, 16 Mar 2026 07:01:14 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=62.89.141.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773644476; cv=none; b=R7IQGFxfxBISxF5TmHiFnxDuVWJhZkTeO9Mas36JGaC3P0Xtp0t890vJEVRlBzBGdbf8Rl+zwgOC8C3yGN4kJHDDieB49yGYbWaqYW5u+HE1mSsWQ67pYveQp7rXNqExkMcggGH4N0dD4wmfhwQL1a4DaT9iuweGsDTEOoypNew=
+	t=1773644476; cv=none; b=fXYUql36GkWgoRE1jyC8o8pO4dl5tKExpEWCYFlpWlKZ6ZMeMQPB2FpW5R7fp8rLDB8lfvc5BaVjTTcaN9EbfDo00AnDN8oWii06gQ6vxS0L2zuQ2vg7Sz0gjIbXEekcPgfSp+g92ZmytKiNoVnTbyQdAgbtAMZhNlmhBNGn5tM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1773644476; c=relaxed/simple;
-	bh=B4ddSIUt2pskZuTtpl/ZICmYMc/ESTMXgSWVcjNbkns=;
+	bh=F9+aj+gaPicQph9cRgAc/U7LBr5vbjjMlY2wzAUGUqQ=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=iyJQOA/cZFTpGfrrnaKgFMHZ5LzCJP09jZ85vCao20gnWo6ggPi/IOXJ9vbH6CyYogXvYOrsjXg+zbIpPl4v2m/M2lCodJO87sgsisq50JrViu6bg5bRRVjHhRVUz4vJWq2pVRXF/lSq/o4fjkyMaPBqXk64f8CK8v/UbxZkUe8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk; spf=none smtp.mailfrom=ftp.linux.org.uk; dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b=CwVOEXvc; arc=none smtp.client-ip=62.89.141.173
+	 MIME-Version; b=qy2RZZZFLDYogMp8nGQfp5zk7C7kry/Xd1rqByf/ohlqys2NXjLhkY7QgYiOZbAneACTRFf3xuYWqLZOQ3TYjfhTerVEsePleP0nnq4gVYRpluNzUg9uiViwTRGgrtmx5alMa/9jWNzw08fInr6AtmRHz5hucIa+XUW2NA9zNmo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk; spf=none smtp.mailfrom=ftp.linux.org.uk; dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b=pIsfwWoB; arc=none smtp.client-ip=62.89.141.173
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=ftp.linux.org.uk
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b="CwVOEXvc"
+	dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b="pIsfwWoB"
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
 	d=linux.org.uk; s=zeniv-20220401; h=Sender:Content-Transfer-Encoding:
 	MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:
 	Reply-To:Content-Type:Content-ID:Content-Description;
-	bh=P5P1YfvkRyFJeC/UkzauqOhIykBVz2SMj7SR21XZYHw=; b=CwVOEXvcOTspomigbhMJlmh7in
-	A6QntF/440BPE7ujF2L27exuQ9/elg5tJyts47Cxja+jT5/5aFdUZonAHnNu8zwoTtrE0BJbniHPD
-	V2BN6qoyzw9dXQ+KNWRUsUCZskFXaNFVFoSDFvlBcUeGkPCJiGPvdOzIDnW7jLRZTb1fFgQvWuNgR
-	8LonKyG+hhp7YgUITFMKrFwyv79eLXB7CrxJnu446ByKSjcvmycYgFu6mrdgZJNK3+fcMI7kcgrtO
-	z4L+X+x1DSRmjRGHoXS0v1oWDGj85kmMrW1f6pjBXF0SQEmlIO9rdsKj2Ht0xHTpGPyMsCNGfvMx4
-	YUtdQ4Fw==;
+	bh=tvPn/UObuw2u1VKsfm/cqGmmIcLNmzafSFmbnXBt1tE=; b=pIsfwWoBhlO3U6u8gdsKRGDPIE
+	xoUzFyz+fg1jr3ZVGhDjxk8vm5Hp9/HRrb7lMvkYb1umISpkw19jZsrwoJLKRn/7/FvZOXYvKo4er
+	uztu/HodhuwqDjk9803d7BBSThiCYMvJPLd3/EZwK2BdsMzJtBJzak9zIDJqVYYUL2bj7O0edtqYn
+	HE/zvonYZIsZsNXoUti9sov3awFTYOw6Qr2lmZl4tcH4lLkh57tRSlx7GqKgtQYvIP2UdlX/9zRGL
+	1Tcj9+1uOuFTLcKtxeFXUya9gZfqm5udgFYfaN9edpr2enNgo0pm9RONmJL0kn1DdRnhWJMUPXtyR
+	4b5Ybniw==;
 Received: from viro by zeniv.linux.org.uk with local (Exim 4.99.1 #2 (Red Hat Linux))
-	id 1w21zv-00000003E3i-0GR5;
+	id 1w21zv-00000003E42-1PJj;
 	Mon, 16 Mar 2026 07:04:19 +0000
 From: Al Viro <viro@zeniv.linux.org.uk>
 To: linux-sparse@vger.kernel.org
@@ -37,9 +37,9 @@ Cc: chriscli@google.com,
 	ben.dooks@codethink.co.uk,
 	dan.carpenter@linaro.org,
 	rf@opensource.cirrus.com
-Subject: [PATCH 18/21] merge(): saner handling of ->noexpand
-Date: Mon, 16 Mar 2026 07:04:12 +0000
-Message-ID: <20260316070415.768839-18-viro@zeniv.linux.org.uk>
+Subject: [PATCH 21/21] substitute(): convert switch() into cascade of ifs
+Date: Mon, 16 Mar 2026 07:04:15 +0000
+Message-ID: <20260316070415.768839-21-viro@zeniv.linux.org.uk>
 X-Mailer: git-send-email 2.53.0
 In-Reply-To: <20260316070415.768839-1-viro@zeniv.linux.org.uk>
 References: <20260316065622.GA607739@ZenIV>
@@ -53,62 +53,145 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: Al Viro <viro@ftp.linux.org.uk>
 
-We only care about noexpand for identifiers and solitary #; the latter
-can't occur in merge(), the former should just get ->noexpand set
-according to ->ident->tainted.  That eliminates the last remaining
-possibility of having expand() run into a token that has tainted
-identifier - the regular noexpand check in the caller is sufficient now.
-Should've done that all way back in 2004...
+Again, better code generation that way (and I'd like to use likely()
+here); it *is* in a very hot loop.
+
+Reorder the TOKEN_... a bit (move TOKEN_UNTAINT up, so that it's less than
+TOKEN_MACRO_ARGUMENT) to get the default (and by far the most common case)
+via single comparison.
 
 Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
 ---
- pre-process.c | 10 +---------
- 1 file changed, 1 insertion(+), 9 deletions(-)
+ pre-process.c | 68 +++++++++++++++++++++++----------------------------
+ token.h       |  3 ++-
+ 2 files changed, 33 insertions(+), 38 deletions(-)
 
 diff --git a/pre-process.c b/pre-process.c
-index eec0569c..352f02df 100644
+index 728feeb3..ea199a9a 100644
 --- a/pre-process.c
 +++ b/pre-process.c
-@@ -507,7 +507,7 @@ static int merge(struct token *left, struct token *right)
- 	switch (res) {
- 	case TOKEN_IDENT:
- 		left->ident = built_in_ident(buffer);
--		left->pos.noexpand = 0;
-+		left->pos.noexpand = left->ident->tainted;
- 		return 1;
+@@ -682,34 +682,14 @@ static struct token **substitute(struct token **list, const struct token *body,
+ 	expanding->tainted = 1;
  
- 	case TOKEN_NUMBER:
-@@ -529,13 +529,11 @@ static int merge(struct token *left, struct token *right)
- 	case TOKEN_WIDE_CHAR:
- 	case TOKEN_WIDE_STRING:
- 		token_type(left) = res;
--		left->pos.noexpand = 0;
- 		left->string = right->string;
- 		return 1;
+ 	for (; !eof_token(body); body = body->next) {
+-		struct token *added, *arg;
+-		struct token **inserted_at;
+-		const struct token *t;
++		struct token *added;
  
- 	case TOKEN_WIDE_CHAR_EMBEDDED_0 ... TOKEN_WIDE_CHAR_EMBEDDED_3:
- 		token_type(left) = res;
--		left->pos.noexpand = 0;
- 		memcpy(left->embedded, right->embedded, 4);
- 		return 1;
+-		switch (token_type(body)) {
+-		case TOKEN_GNU_KLUDGE:
+-			/*
+-			 * GNU kludge: if we had <comma>##<vararg>, behaviour
+-			 * depends on whether we had enough arguments to have
+-			 * a vararg.  If we did, ## is just ignored.  Otherwise
+-			 * both , and ## are ignored.  Worse, there can be
+-			 * an arbitrary number of ##<arg> in between; if all of
+-			 * those are empty, we act as if they hadn't been there,
+-			 * otherwise we act as if the kludge didn't exist.
+-			 */
+-			t = body;
+-			if (handle_kludge(&body, args)) {
+-				if (state == Concat)
+-					state = Normal;
+-				else
+-					state = Placeholder;
+-				continue;
+-			}
+-			added = dup_token(t, base_pos);
+-			token_type(added) = TOKEN_SPECIAL;
+-			break;
++		if (token_type(body) <= TOKEN_LAST_NORMAL) {
++			added = dup_token(body, base_pos);
++		} else if (token_type(body) == TOKEN_MACRO_ARGUMENT) {
++			struct token **inserted_at;
++			struct token *arg;
  
-@@ -812,16 +810,10 @@ static int expand(struct token **list, struct symbol *sym)
- {
- 	struct token *last;
- 	struct token *token = *list;
--	struct ident *expanding = token->ident;
- 	struct token **tail;
- 	struct token *expansion = sym->expansion;
- 	struct arg args[sym->fixed_args + 1];
- 
--	if (expanding->tainted) {
--		token->pos.noexpand = 1;
--		return 1;
--	}
+-		case TOKEN_MACRO_ARGUMENT:
+ 			arg = do_argument(body, args, expanding);
+ 			if (!arg || eof_token(arg)) {
+ 				if (state == Concat)
+@@ -740,15 +720,33 @@ static struct token **substitute(struct token **list, const struct token *body,
+ 			}
+ 			state = Normal;
+ 			continue;
 -
- 	if (sym->arglist) {
- 		if (!match_op(scan_next(&token->next), '('))
- 			return 1;
+-		case TOKEN_CONCAT:
++		} else if (token_type(body) == TOKEN_CONCAT) {
+ 			if (state == Placeholder)
+ 				state = Normal;
+ 			else
+ 				state = Concat;
+ 			continue;
+-
+-		case TOKEN_VA_OPT:
++		} else if (token_type(body) == TOKEN_GNU_KLUDGE) {
++			const struct token *t = body;
++			/*
++			 * GNU kludge: if we had <comma>##<vararg>, behaviour
++			 * depends on whether we had enough arguments to have
++			 * a vararg.  If we did, ## is just ignored.  Otherwise
++			 * both , and ## are ignored.  Worse, there can be
++			 * an arbitrary number of ##<arg> in between; if all of
++			 * those are empty, we act as if they hadn't been there,
++			 * otherwise we act as if the kludge didn't exist.
++			 */
++			if (handle_kludge(&body, args)) {
++				if (state == Concat)
++					state = Normal;
++				else
++					state = Placeholder;
++				continue;
++			}
++			added = dup_token(t, base_pos);
++			token_type(added) = TOKEN_SPECIAL;
++		} else if (token_type(body) == TOKEN_VA_OPT) {
+ 			// entering va_opt?
+ 			if (!is_end_va_opt(body)) {
+ 				if (skip_va_opt(args, expanding)) {
+@@ -774,9 +772,7 @@ static struct token **substitute(struct token **list, const struct token *body,
+ 			}
+ 			list = saved_list;
+ 			state = saved_state;
+-			break;
+-
+-		case TOKEN_VA_OPT_STR:
++		} else if (token_type(body) == TOKEN_VA_OPT_STR) {
+ 			// entering #va_opt
+ 			if (!skip_va_opt(args, expanding)) {
+ 				saved_state = state;
+@@ -787,10 +783,8 @@ static struct token **substitute(struct token **list, const struct token *body,
+ 				continue;
+ 			}
+ 			added = empty_string(base_pos);
+-			break;
+-
+-		default:
+-			added = dup_token(body, base_pos);
++		} else {
++			sparse_error(body->pos, "bad token type(%d)", token_type(body));
+ 			break;
+ 		}
+ 
+diff --git a/token.h b/token.h
+index 3edf4ce1..5915d6a4 100644
+--- a/token.h
++++ b/token.h
+@@ -99,12 +99,13 @@ enum token_type {
+ 	TOKEN_SPECIAL,
+ 	TOKEN_STREAMBEGIN,
+ 	TOKEN_STREAMEND,
++	TOKEN_UNTAINT,
++	TOKEN_LAST_NORMAL = TOKEN_UNTAINT,
+ 	TOKEN_MACRO_ARGUMENT,
+ 	TOKEN_CONCAT,
+ 	TOKEN_GNU_KLUDGE,
+ 	TOKEN_VA_OPT,
+ 	TOKEN_VA_OPT_STR,
+-	TOKEN_UNTAINT,
+ 	TOKEN_IF,
+ 	TOKEN_SKIP_GROUPS,
+ 	TOKEN_ELSE,
 -- 
 2.47.3
 
