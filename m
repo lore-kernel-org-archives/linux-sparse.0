@@ -1,33 +1,33 @@
 Received: from zeniv.linux.org.uk (zeniv.linux.org.uk [62.89.141.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6D6EA349B18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 967CA349B1F
 	for <linux-sparse@vger.kernel.org>; Mon, 16 Mar 2026 07:01:12 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=62.89.141.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773644473; cv=none; b=SL++dV7v11rYeabIcvRHD1lPwC7IwTx8CwL1Q5DxSL8DX2/QLsEMe3mKJT299BSncoam2YEZh3lQxYvPPXJHPstx96MAeHD8smivXReSmiqXQJ3wTDsRaW9MgCT0J2tqHPWs073kXFXUKQURtlzknqa5D3CrG0Waa/K7jv71ujY=
+	t=1773644473; cv=none; b=JXlYoRvGx8KTIM7XEkKPRZEf4uCy4dogNfD+tHcWCpWqfcDVREx51MJfsIHNtznEsD9yEPoj+xT/SS/SrUL4VcCiyf2iTry6IkfwxDH0TRdL1L4m3ZbKmv+QfBQlfzYv8wwGq8/NvM75XEEMlYxCY3YYMVbZXDXe2XhBi5Dd3FQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1773644473; c=relaxed/simple;
-	bh=EONa4J68KQxg8RFpZXnfuBzQWWJpeSoEqN9BWy+zrlY=;
+	bh=r8fjeIE4RUby9/Uom+R1MOWJjoxk8ZfBSuSNOY++l/Y=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=Mzcdtp0T36qh+mL1kp6zP56Wu7FaxmKQpwRE3BN2pbPckyYLKgLdsljylq8VkL5C9acqALOCumlezPULAdexuiRoUMB73rGCG4Aokh1VtXB+16pgjwbC47HC9sD7YA5pZXkKapbC3CwpKtcjcW6aX2dZnDR9qJfFEbvc9S2h47Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk; spf=none smtp.mailfrom=ftp.linux.org.uk; dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b=Bpc4fy9A; arc=none smtp.client-ip=62.89.141.173
+	 MIME-Version; b=DfU/uJsKP/QmzocIhD/5frpAt1hgLoXnkkJ/UqT2P8Xyz84Kru+ujObp2QfgVP7vc+X7lzs5p0Ls7XaQvtlsLX4gCA1xJlic7jcR66bGOXsx/kMlQh7vYEJZ6w8AdewfpxBqOjG7pR2qYqhF96mY7nO/urybrUMSPyYq94DdfMs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk; spf=none smtp.mailfrom=ftp.linux.org.uk; dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b=sVfoXMHd; arc=none smtp.client-ip=62.89.141.173
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=ftp.linux.org.uk
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b="Bpc4fy9A"
+	dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b="sVfoXMHd"
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
 	d=linux.org.uk; s=zeniv-20220401; h=Sender:Content-Transfer-Encoding:
 	MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:
 	Reply-To:Content-Type:Content-ID:Content-Description;
-	bh=2MhP/h1NP3FEbuRLwJ+b16puZdt/Ewugl715srCAW4w=; b=Bpc4fy9A7FkO77fEVQYArFCFKT
-	gK4EfMSgectPTi/97EDGWGmMS6qzhQBoSwE/5SXgd/ungxP7IdjQl10QTJR5C3e8FMuXndzF62gFG
-	+wavjH7QMt4D18Tc95wr4pwRnMdF/craOqqp3uMMKSlk1uGchTYoXmoWJvJZ7wSedigo/rFvEMS5E
-	NDW1mGfevnCoVLL9BYuPgUMvrWMwwkmIacHFuKp+rWM9B+1YqVxadNutGa3sZm+qPHTRqzBHbcrLE
-	Tjh0XAhFgGQDVo1BskOR9J/3X98DOf61C+bKXQ3tydQ/zZdo4WtAtkP5aoLrNgPU3/hmHlFA0PEKy
-	ngJzXVYw==;
+	bh=WpyRoYiTKGcZWKFbXVzzPYE3TPoS9l3c+YsmRPuLOag=; b=sVfoXMHdNAH7e0q0n8JHQgUF1o
+	e/I1FKGG0ZMYqzk+ceNJaWPV818VYK1hzT+JKQ3ITdODWH7chaH2Q+Imj09szTlaUsHYishIdmLoQ
+	TTccv57InWmBD8UUGToQIFdbBjZ2mXh1ohvPK+HHwlH+MoxnsF0/0hcOhNdirY1wWvgzWv0KR5Pw2
+	OIQLTkMLNypuOxi6fqVo/9NVxwkB6J3SexTZrfeKM0typpe4I8sHmFWyEVjaBGLFWmk1ea5vlP+fa
+	5QXB2/4wx9G5x1B0OaRJe0HG+7y9WJuGfNdCtwFTRbK/yZV2kUHfDoUwPKb9GIOfHTUJSvDDxQHqj
+	sDXS7AeQ==;
 Received: from viro by zeniv.linux.org.uk with local (Exim 4.99.1 #2 (Red Hat Linux))
-	id 1w21zt-00000003E1c-0tTh;
+	id 1w21zt-00000003E1n-1kQT;
 	Mon, 16 Mar 2026 07:04:17 +0000
 From: Al Viro <viro@zeniv.linux.org.uk>
 To: linux-sparse@vger.kernel.org
@@ -37,9 +37,9 @@ Cc: chriscli@google.com,
 	ben.dooks@codethink.co.uk,
 	dan.carpenter@linaro.org,
 	rf@opensource.cirrus.com
-Subject: [PATCH 07/21] make expand_has_...() responsible for expanding its argument
-Date: Mon, 16 Mar 2026 07:04:01 +0000
-Message-ID: <20260316070415.768839-7-viro@zeniv.linux.org.uk>
+Subject: [PATCH 08/21] preparing to change argument number encoding for TOKEN_..._ARGUMENT
+Date: Mon, 16 Mar 2026 07:04:02 +0000
+Message-ID: <20260316070415.768839-8-viro@zeniv.linux.org.uk>
 X-Mailer: git-send-email 2.53.0
 In-Reply-To: <20260316070415.768839-1-viro@zeniv.linux.org.uk>
 References: <20260316065622.GA607739@ZenIV>
@@ -53,122 +53,102 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: Al Viro <viro@ftp.linux.org.uk>
 
-If we want to make expansion of arguments on-demand, we need to adjust
-->expand() calling conventions first, passing it unexpanded arguments.
-Switch create_arglist() to setting argcounts from normal=1 to quoted=1,
-provide a helper (first_arg()) that does actual expansion and make
-->expand() instances use it.  After that these fake arglists are used
-only for two things: they indicate that these macros are function-like
-and they short-circuit expand_arguments().  Once we switch to on-demand
-argument expansion, the second role will disappear and we can just use
-&eof_token_entry as ->arglist for those.
+We want to steal some bits from TOKEN_..._ARGUMENT; it's not a problem,
+seeing that payload is a 32bit number and we are *not* going to support
+many millions of arguments in macros.  For now, wrap the accesses into
+an inline helper (argnum(token)), to reduce the amount of noise in
+subsequent patches.
 
 Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
 ---
- pre-process.c                           | 17 ++++++++++++-----
- validation/preprocessor/has-attribute.c |  3 +++
- validation/preprocessor/has-builtin.c   |  3 +++
- 3 files changed, 18 insertions(+), 5 deletions(-)
+ pre-process.c | 23 ++++++++++++++---------
+ token.h       |  4 ++++
+ 2 files changed, 18 insertions(+), 9 deletions(-)
 
 diff --git a/pre-process.c b/pre-process.c
-index 17ed7f85..85662365 100644
+index 85662365..efb208e7 100644
 --- a/pre-process.c
 +++ b/pre-process.c
-@@ -2000,9 +2000,16 @@ static int handle_nondirective(struct stream *stream, struct token **line, struc
- 	return 1;
+@@ -624,11 +624,16 @@ static struct token **copy(struct token **where, struct token *list)
+ 	return where;
  }
  
-+static struct token *first_arg(struct arg *args)
++static inline int argnum(const struct token *arg)
 +{
-+	struct token *arg = args[0].arg;
-+	expand_list(&arg);
-+	return arg;
++	return arg->argnum >> ARGNUM_BITS_STOLEN;
 +}
 +
- static bool expand_has_attribute(struct token *token, struct arg *args)
+ static int handle_kludge(const struct token **p, struct arg *args)
  {
--	struct token *arg = args[0].expanded;
-+	struct token *arg = first_arg(args);
- 	struct symbol *sym;
+ 	const struct token *t = (*p)->next->next;
+ 	while (1) {
+-		struct arg *v = &args[t->argnum];
++		struct arg *v = &args[argnum(t)];
+ 		if (token_type(t->next) != TOKEN_CONCAT) {
+ 			if (v->arg) {
+ 				/* ignore the first ## */
+@@ -681,13 +686,13 @@ static struct token **substitute(struct token **list, const struct token *body,
+ 			break;
  
- 	if (token_type(arg) != TOKEN_IDENT) {
-@@ -2017,7 +2024,7 @@ static bool expand_has_attribute(struct token *token, struct arg *args)
+ 		case TOKEN_STR_ARGUMENT:
+-			arg = args[body->argnum].str;
+-			count = &args[body->argnum].n_str;
++			arg = args[argnum(body)].str;
++			count = &args[argnum(body)].n_str;
+ 			goto copy_arg;
  
- static bool expand_has_builtin(struct token *token, struct arg *args)
- {
--	struct token *arg = args[0].expanded;
-+	struct token *arg = first_arg(args);
- 	struct symbol *sym;
+ 		case TOKEN_QUOTED_ARGUMENT:
+-			arg = args[body->argnum].arg;
+-			count = &args[body->argnum].n_quoted;
++			arg = args[argnum(body)].arg;
++			count = &args[argnum(body)].n_quoted;
+ 			if (!arg || eof_token(arg)) {
+ 				if (state == Concat)
+ 					state = Normal;
+@@ -698,8 +703,8 @@ static struct token **substitute(struct token **list, const struct token *body,
+ 			goto copy_arg;
  
- 	if (token_type(arg) != TOKEN_IDENT) {
-@@ -2032,7 +2039,7 @@ static bool expand_has_builtin(struct token *token, struct arg *args)
+ 		case TOKEN_MACRO_ARGUMENT:
+-			arg = args[body->argnum].expanded;
+-			count = &args[body->argnum].n_normal;
++			arg = args[argnum(body)].expanded;
++			count = &args[argnum(body)].n_normal;
+ 			if (eof_token(arg)) {
+ 				state = Normal;
+ 				continue;
+@@ -1219,7 +1224,7 @@ static int try_arg(struct token *token, enum token_type type, struct token *argl
+ 	for (int i = 0; i < nr; i++)
+ 		arglist = arglist->next->next;
  
- static bool expand_has_extension(struct token *token, struct arg *args)
- {
--	struct token *arg = args[0].expanded;
-+	struct token *arg = first_arg(args);
- 	struct ident *ident;
- 	bool val = false;
+-	token->argnum = nr;
++	token->argnum = nr << ARGNUM_BITS_STOLEN;
+ 	token_type(token) = type;
+ 	switch (type) {
+ 	case TOKEN_MACRO_ARGUMENT:
+@@ -2356,7 +2361,7 @@ static void dump_macro(struct symbol *sym)
+ 			/* fall-through */
+ 		case TOKEN_QUOTED_ARGUMENT:
+ 		case TOKEN_MACRO_ARGUMENT:
+-			printf("%s", show_ident(args[token->argnum]));
++			printf("%s", show_ident(args[argnum(token)]));
+ 			break;
+ 		default:
+ 			printf("%s", show_token(token));
+diff --git a/token.h b/token.h
+index 5dcd8594..fe7c7fe9 100644
+--- a/token.h
++++ b/token.h
+@@ -177,6 +177,10 @@ struct argcount {
+ 	unsigned str:10;
+ };
  
-@@ -2057,7 +2064,7 @@ static bool expand_has_extension(struct token *token, struct arg *args)
- 
- static bool expand_has_feature(struct token *token, struct arg *args)
- {
--	struct token *arg = args[0].expanded;
-+	struct token *arg = first_arg(args);
- 	struct ident *ident;
- 	bool val = false;
- 
-@@ -2103,7 +2110,7 @@ static void create_arglist(struct symbol *sym, int count)
- 		token_type(id) = TOKEN_IDENT;
- 		uses = __alloc_token(0);
- 		token_type(uses) = TOKEN_ARG_COUNT;
--		uses->count.normal = 1;
-+		uses->count.quoted = 1;
- 
- 		*next = id;
- 		id->next = uses;
-diff --git a/validation/preprocessor/has-attribute.c b/validation/preprocessor/has-attribute.c
-index 3149cbfa..dd0f275e 100644
---- a/validation/preprocessor/has-attribute.c
-+++ b/validation/preprocessor/has-attribute.c
-@@ -6,6 +6,8 @@ __has_attribute()??? Quesako?
- #endif
- 
- 123 __has_attribute(nothinx) def
-+#define A packed
-+456 __has_attribute(A)
- 
- #if __has_attribute(nothinx)
- #error "not a attribute!"
-@@ -49,6 +51,7 @@ __has_attribute()??? Quesako?
- 
- "has __has_attribute(), yeah!"
- 123 0 def
-+456 1
- "ok gcc"
- "ok gcc ignore"
- "ok sparse specific"
-diff --git a/validation/preprocessor/has-builtin.c b/validation/preprocessor/has-builtin.c
-index 03272fc9..010d44bd 100644
---- a/validation/preprocessor/has-builtin.c
-+++ b/validation/preprocessor/has-builtin.c
-@@ -28,6 +28,8 @@ constant_p
- #endif
- 
- 123 __has_builtin(abc) def
-+#define A __builtin_constant_p
-+456 __has_builtin(A)
- 
++enum {
++	ARGNUM_BITS_STOLEN
++};
++
  /*
-  * check-name: has-builtin
-@@ -39,5 +41,6 @@ constant_p
- abs
- constant_p
- 123 0 def
-+456 1
-  * check-output-end
-  */
+  * This is a very common data structure, it should be kept
+  * as small as humanly possible. Big (rare) types go as
 -- 
 2.47.3
 
