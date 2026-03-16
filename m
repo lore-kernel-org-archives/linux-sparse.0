@@ -1,34 +1,34 @@
 Received: from zeniv.linux.org.uk (zeniv.linux.org.uk [62.89.141.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 40834346FC0
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6D6EA349B18
 	for <linux-sparse@vger.kernel.org>; Mon, 16 Mar 2026 07:01:12 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=62.89.141.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773644473; cv=none; b=Q/sRUqceiBGs/Mg45dgMY8wzx/hrNNK+5FcEhYhXZ8nix9Ow6MGLcPr2Ah+5Y2Om8xDJIex8Zj7AMLPDfXgwzsy61D0K1D6m4XPALvTJB/XQe/VyLZtfluTN6Zsr9nsu0qJkB+BdS9K2isGCA2ZB6iDXNUtJxNcanYKRgUrvjTk=
+	t=1773644473; cv=none; b=SL++dV7v11rYeabIcvRHD1lPwC7IwTx8CwL1Q5DxSL8DX2/QLsEMe3mKJT299BSncoam2YEZh3lQxYvPPXJHPstx96MAeHD8smivXReSmiqXQJ3wTDsRaW9MgCT0J2tqHPWs073kXFXUKQURtlzknqa5D3CrG0Waa/K7jv71ujY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1773644473; c=relaxed/simple;
-	bh=QVZRoLqsDMeY+1R3kxteBBTpHesDAZiugSpzWxGDkSg=;
+	bh=EONa4J68KQxg8RFpZXnfuBzQWWJpeSoEqN9BWy+zrlY=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=esV1DJbQtyeQ0U2pM2e6UI3SQlWj/3aNDugZpBMC3dE18yIEih++U6NMhnWFA6/2LvPIaKOVTnuUycBw8sKRvRGbNdLYWmUqee8KQBspRUmd+m8U2uC8S0IyIUN6Az2VFy0M9x35b+iTJ+O2WdY73GXEnKkpiakyy+CyOASkH80=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk; spf=none smtp.mailfrom=ftp.linux.org.uk; dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b=Jiuu5AWf; arc=none smtp.client-ip=62.89.141.173
+	 MIME-Version; b=Mzcdtp0T36qh+mL1kp6zP56Wu7FaxmKQpwRE3BN2pbPckyYLKgLdsljylq8VkL5C9acqALOCumlezPULAdexuiRoUMB73rGCG4Aokh1VtXB+16pgjwbC47HC9sD7YA5pZXkKapbC3CwpKtcjcW6aX2dZnDR9qJfFEbvc9S2h47Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk; spf=none smtp.mailfrom=ftp.linux.org.uk; dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b=Bpc4fy9A; arc=none smtp.client-ip=62.89.141.173
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zeniv.linux.org.uk
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=ftp.linux.org.uk
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b="Jiuu5AWf"
+	dkim=pass (2048-bit key) header.d=linux.org.uk header.i=@linux.org.uk header.b="Bpc4fy9A"
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
 	d=linux.org.uk; s=zeniv-20220401; h=Sender:Content-Transfer-Encoding:
 	MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:
 	Reply-To:Content-Type:Content-ID:Content-Description;
-	bh=dcExsREeoVQ1rGc9q2RjHkUAjkEvM41aFQKwcuxADkA=; b=Jiuu5AWfx895pU0EnhFEvMw8uE
-	YKmrwbZhXgcAZ6+k0cfKTQPkzcdohkro6V9y0XHc1DelW8yJJZlNIp5sirUEakKdn9xTLiH9ZdO7e
-	v6fBxOYWGUdkEit+6Ad2oiENUFnxjxwbLUuUucImprKHnaGGPb+LPSeLlD0XmRr3GHPCSsWwtHof4
-	NBTnt/2+ynHC/pBhAwdHbbtFQjcY9J05PyByikXKS8Sgf4ekH4618L8WYun4rUctaB7zOHDv9+DCQ
-	fkW6+OVmSf8FPegt2NNt8UJWZjeFdZPimrT84tiTbfVfH1hujtXxM7NKkzxjWsxX55OEFKvJe3pAY
-	QOGbwiHA==;
+	bh=2MhP/h1NP3FEbuRLwJ+b16puZdt/Ewugl715srCAW4w=; b=Bpc4fy9A7FkO77fEVQYArFCFKT
+	gK4EfMSgectPTi/97EDGWGmMS6qzhQBoSwE/5SXgd/ungxP7IdjQl10QTJR5C3e8FMuXndzF62gFG
+	+wavjH7QMt4D18Tc95wr4pwRnMdF/craOqqp3uMMKSlk1uGchTYoXmoWJvJZ7wSedigo/rFvEMS5E
+	NDW1mGfevnCoVLL9BYuPgUMvrWMwwkmIacHFuKp+rWM9B+1YqVxadNutGa3sZm+qPHTRqzBHbcrLE
+	Tjh0XAhFgGQDVo1BskOR9J/3X98DOf61C+bKXQ3tydQ/zZdo4WtAtkP5aoLrNgPU3/hmHlFA0PEKy
+	ngJzXVYw==;
 Received: from viro by zeniv.linux.org.uk with local (Exim 4.99.1 #2 (Red Hat Linux))
-	id 1w21zs-00000003E1A-3ZwK;
-	Mon, 16 Mar 2026 07:04:16 +0000
+	id 1w21zt-00000003E1c-0tTh;
+	Mon, 16 Mar 2026 07:04:17 +0000
 From: Al Viro <viro@zeniv.linux.org.uk>
 To: linux-sparse@vger.kernel.org
 Cc: chriscli@google.com,
@@ -37,9 +37,9 @@ Cc: chriscli@google.com,
 	ben.dooks@codethink.co.uk,
 	dan.carpenter@linaro.org,
 	rf@opensource.cirrus.com
-Subject: [PATCH 06/21] try_arg(): don't use arglist for argument name lookups
-Date: Mon, 16 Mar 2026 07:04:00 +0000
-Message-ID: <20260316070415.768839-6-viro@zeniv.linux.org.uk>
+Subject: [PATCH 07/21] make expand_has_...() responsible for expanding its argument
+Date: Mon, 16 Mar 2026 07:04:01 +0000
+Message-ID: <20260316070415.768839-7-viro@zeniv.linux.org.uk>
 X-Mailer: git-send-email 2.53.0
 In-Reply-To: <20260316070415.768839-1-viro@zeniv.linux.org.uk>
 References: <20260316065622.GA607739@ZenIV>
@@ -53,219 +53,122 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: Al Viro <viro@ftp.linux.org.uk>
 
-Just store them into a global array and search there.  That allows to
-get rid of mangling ... in the arglist along with the is_VA_ARGS_token()
-kludge.  For now we still need to access the arglist in try_arg(),
-but that's going away as soon as we get rid of the use counters...
-
-Added a check for duplicate argument names, while we are at it - we
-didn't do that.
+If we want to make expansion of arguments on-demand, we need to adjust
+->expand() calling conventions first, passing it unexpanded arguments.
+Switch create_arglist() to setting argcounts from normal=1 to quoted=1,
+provide a helper (first_arg()) that does actual expansion and make
+->expand() instances use it.  After that these fake arglists are used
+only for two things: they indicate that these macros are function-like
+and they short-circuit expand_arguments().  Once we switch to on-demand
+argument expansion, the second role will disappear and we can just use
+&eof_token_entry as ->arglist for those.
 
 Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
 ---
- pre-process.c                        | 90 ++++++++++++++--------------
- validation/preprocessor/bad-args.c   | 18 ++++++
- validation/preprocessor/dump-macro.c |  9 +++
- 3 files changed, 72 insertions(+), 45 deletions(-)
- create mode 100644 validation/preprocessor/bad-args.c
- create mode 100644 validation/preprocessor/dump-macro.c
+ pre-process.c                           | 17 ++++++++++++-----
+ validation/preprocessor/has-attribute.c |  3 +++
+ validation/preprocessor/has-builtin.c   |  3 +++
+ 3 files changed, 18 insertions(+), 5 deletions(-)
 
 diff --git a/pre-process.c b/pre-process.c
-index 25990dfa..17ed7f85 100644
+index 17ed7f85..85662365 100644
 --- a/pre-process.c
 +++ b/pre-process.c
-@@ -1078,16 +1078,24 @@ static int token_list_different(struct token *list1, struct token *list2)
- 	}
+@@ -2000,9 +2000,16 @@ static int handle_nondirective(struct stream *stream, struct token **line, struc
+ 	return 1;
  }
  
-+static struct ident *macro_arg_name[1024];
- static int macro_nargs = 0;
- static int macro_vararg = -1;
- static bool macro_funclike = false;
- 
- static bool macro_add_arg(struct position pos, struct ident *ident)
- {
-+	for (int i = 0; i < macro_nargs; i++) {
-+		if (ident == macro_arg_name[i])
-+			goto Edup_arg;
-+	}
- 	if (macro_nargs == 1024)
- 		goto Eargs;
--	macro_nargs++;
-+	macro_arg_name[macro_nargs++] = ident;
- 	return true;
-+Edup_arg:
-+	sparse_error(pos, "duplicate macro parameter \"%s\"", show_ident(ident));
-+	return false;
- Eargs:
- 	sparse_error(pos, "too many arguments in macro definition");
- 	return false;
-@@ -1157,8 +1165,6 @@ static struct token *parse_arguments(struct token *list)
- 
- 	if (match_op(arg, SPECIAL_ELLIPSIS)) {
- 		next = arg->next;
--		token_type(arg) = TOKEN_IDENT;
--		arg->ident = &__VA_ARGS___ident;
- 		if (!match_op(next, ')'))
- 			goto Enotclosed;
- 		if (!macro_add_arg(arg->pos, &__VA_ARGS___ident))
-@@ -1198,41 +1204,41 @@ Eva_args:
- static int try_arg(struct token *token, enum token_type type, struct token *arglist)
- {
- 	struct ident *ident = token->ident;
--	int nr;
-+	int nr, n;
- 
- 	if (!macro_funclike || token_type(token) != TOKEN_IDENT)
- 		return 0;
- 
--	arglist = arglist->next;
-+	for (nr = 0; nr < macro_nargs && macro_arg_name[nr] != ident; nr++)
-+		;
- 
--	for (nr = 0; !eof_token(arglist); nr++, arglist = arglist->next->next) {
--		if (arglist->ident == ident) {
--			struct argcount *count = &arglist->next->count;
--			int n;
-+	if (nr == macro_nargs)
-+		return 0;
- 
--			token->argnum = nr;
--			token_type(token) = type;
--			switch (type) {
--			case TOKEN_MACRO_ARGUMENT:
--				n = ++count->normal;
--				break;
--			case TOKEN_QUOTED_ARGUMENT:
--				n = ++count->quoted;
--				break;
--			default:
--				n = ++count->str;
--			}
--			if (n)
--				return nr == macro_vararg ? 2 : 1;
--			/*
--			 * XXX - need saner handling of that
--			 * (>= 1024 instances of argument)
--			 */
--			token_type(token) = TOKEN_ERROR;
--			return -1;
--		}
-+	arglist = arglist->next;
-+	for (int i = 0; i < nr; i++)
-+		arglist = arglist->next->next;
++static struct token *first_arg(struct arg *args)
++{
++	struct token *arg = args[0].arg;
++	expand_list(&arg);
++	return arg;
++}
 +
-+	token->argnum = nr;
-+	token_type(token) = type;
-+	switch (type) {
-+	case TOKEN_MACRO_ARGUMENT:
-+		n = ++arglist->next->count.normal;
-+		break;
-+	case TOKEN_QUOTED_ARGUMENT:
-+		n = ++arglist->next->count.quoted;
-+		break;
-+	default:
-+		n = ++arglist->next->count.str;
- 	}
--	return 0;
-+	if (n)
-+		return nr == macro_vararg ? 2 : 1;
-+	/*
-+	 * XXX - need saner handling of that
-+	 * (>= 1024 instances of argument)
-+	 */
-+	token_type(token) = TOKEN_ERROR;
-+	return -1;
- }
- 
- static struct token *handle_hash(struct token **p, struct token *arglist)
-@@ -2304,16 +2310,10 @@ struct token * preprocess(struct token *token)
- 	return token;
- }
- 
--static int is_VA_ARGS_token(struct token *token)
--{
--	return (token_type(token) == TOKEN_IDENT) &&
--		(token->ident == &__VA_ARGS___ident);
--}
--
- static void dump_macro(struct symbol *sym)
+ static bool expand_has_attribute(struct token *token, struct arg *args)
  {
- 	int nargs = sym->fixed_args + sym->vararg;
--	struct token *args[nargs];
-+	struct ident *args[nargs];
- 	struct token *token;
+-	struct token *arg = args[0].expanded;
++	struct token *arg = first_arg(args);
+ 	struct symbol *sym;
  
- 	printf("#define %s", show_ident(sym->ident));
-@@ -2325,13 +2325,13 @@ static void dump_macro(struct symbol *sym)
- 		for (; !eof_token(token); token = token->next) {
- 			if (token_type(token) == TOKEN_ARG_COUNT)
- 				continue;
--			if (is_VA_ARGS_token(token))
--				printf("%s...", sep);
--			else
--				printf("%s%s", sep, show_token(token));
--			args[narg++] = token;
-+			printf("%s%s", sep, show_token(token));
-+			if (token_type(token) == TOKEN_IDENT)
-+				args[narg++] = token->ident;
- 			sep = ",";
- 		}
-+		if (narg < nargs)
-+			args[narg] = &__VA_ARGS___ident;
- 		putchar(')');
- 	}
+ 	if (token_type(arg) != TOKEN_IDENT) {
+@@ -2017,7 +2024,7 @@ static bool expand_has_attribute(struct token *token, struct arg *args)
  
-@@ -2349,8 +2349,8 @@ static void dump_macro(struct symbol *sym)
- 			/* fall-through */
- 		case TOKEN_QUOTED_ARGUMENT:
- 		case TOKEN_MACRO_ARGUMENT:
--			token = args[token->argnum];
--			/* fall-through */
-+			printf("%s", show_ident(args[token->argnum]));
-+			break;
- 		default:
- 			printf("%s", show_token(token));
- 		}
-diff --git a/validation/preprocessor/bad-args.c b/validation/preprocessor/bad-args.c
-new file mode 100644
-index 00000000..3dbb6f92
---- /dev/null
-+++ b/validation/preprocessor/bad-args.c
-@@ -0,0 +1,18 @@
-+#define A(1)
-+#define B(__VA_ARGS__)
-+#define C(X,Y,X)
-+/*
-+ * check-name: macro arguments validation
-+ * check-command: sparse -E $file
-+ *
-+ * check-output-start
-+
-+
-+ * check-output-end
-+ *
-+ * check-error-start
-+preprocessor/bad-args.c:1:11: error: "1" may not appear in macro parameter list
-+preprocessor/bad-args.c:2:11: error: __VA_ARGS__ can only appear in the expansion of a C99 variadic macro
-+preprocessor/bad-args.c:3:15: error: duplicate macro parameter "X"
-+ * check-error-end
-+ */
-diff --git a/validation/preprocessor/dump-macro.c b/validation/preprocessor/dump-macro.c
-new file mode 100644
-index 00000000..46d70b34
---- /dev/null
-+++ b/validation/preprocessor/dump-macro.c
-@@ -0,0 +1,9 @@
-+#define A(X,Y,...) __VA_ARGS__,Y,X
-+/*
-+ * check-name: -dM handling of varargs
-+ * check-command: sparse -E -dM $file | tail -1
-+ *
-+ * check-output-start
-+#define A(X,Y,...) __VA_ARGS__,Y,X
-+ * check-output-end
-+ */
+ static bool expand_has_builtin(struct token *token, struct arg *args)
+ {
+-	struct token *arg = args[0].expanded;
++	struct token *arg = first_arg(args);
+ 	struct symbol *sym;
+ 
+ 	if (token_type(arg) != TOKEN_IDENT) {
+@@ -2032,7 +2039,7 @@ static bool expand_has_builtin(struct token *token, struct arg *args)
+ 
+ static bool expand_has_extension(struct token *token, struct arg *args)
+ {
+-	struct token *arg = args[0].expanded;
++	struct token *arg = first_arg(args);
+ 	struct ident *ident;
+ 	bool val = false;
+ 
+@@ -2057,7 +2064,7 @@ static bool expand_has_extension(struct token *token, struct arg *args)
+ 
+ static bool expand_has_feature(struct token *token, struct arg *args)
+ {
+-	struct token *arg = args[0].expanded;
++	struct token *arg = first_arg(args);
+ 	struct ident *ident;
+ 	bool val = false;
+ 
+@@ -2103,7 +2110,7 @@ static void create_arglist(struct symbol *sym, int count)
+ 		token_type(id) = TOKEN_IDENT;
+ 		uses = __alloc_token(0);
+ 		token_type(uses) = TOKEN_ARG_COUNT;
+-		uses->count.normal = 1;
++		uses->count.quoted = 1;
+ 
+ 		*next = id;
+ 		id->next = uses;
+diff --git a/validation/preprocessor/has-attribute.c b/validation/preprocessor/has-attribute.c
+index 3149cbfa..dd0f275e 100644
+--- a/validation/preprocessor/has-attribute.c
++++ b/validation/preprocessor/has-attribute.c
+@@ -6,6 +6,8 @@ __has_attribute()??? Quesako?
+ #endif
+ 
+ 123 __has_attribute(nothinx) def
++#define A packed
++456 __has_attribute(A)
+ 
+ #if __has_attribute(nothinx)
+ #error "not a attribute!"
+@@ -49,6 +51,7 @@ __has_attribute()??? Quesako?
+ 
+ "has __has_attribute(), yeah!"
+ 123 0 def
++456 1
+ "ok gcc"
+ "ok gcc ignore"
+ "ok sparse specific"
+diff --git a/validation/preprocessor/has-builtin.c b/validation/preprocessor/has-builtin.c
+index 03272fc9..010d44bd 100644
+--- a/validation/preprocessor/has-builtin.c
++++ b/validation/preprocessor/has-builtin.c
+@@ -28,6 +28,8 @@ constant_p
+ #endif
+ 
+ 123 __has_builtin(abc) def
++#define A __builtin_constant_p
++456 __has_builtin(A)
+ 
+ /*
+  * check-name: has-builtin
+@@ -39,5 +41,6 @@ constant_p
+ abs
+ constant_p
+ 123 0 def
++456 1
+  * check-output-end
+  */
 -- 
 2.47.3
 
