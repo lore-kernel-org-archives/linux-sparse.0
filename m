@@ -1,130 +1,101 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f54.google.com (mail-wm1-f54.google.com [209.85.128.54])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 27E92393DEB
-	for <linux-sparse@vger.kernel.org>; Sun, 10 May 2026 15:06:49 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 855CF4657E5
+	for <linux-sparse@vger.kernel.org>; Wed,  3 Jun 2026 08:41:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.54
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778425611; cv=none; b=vB0oBqY3CIhxPHrETxZZhkXThG0LElP9UGo+n38ZgY/VeCB+mQXGrHTe6brzb9HwKUocPiYR3hmEKPgbxk9YXzIAqtyRhBKF1+bx1wfz1X1tX62BavQ2D/3H7FCDsRAkuyMFRJVXlfielyQW8cOSykWHbwAGZVmuFpoZS6pdR1A=
+	t=1780476099; cv=none; b=CPCV0fasp4btYZrTnnczbKJlKBV4jf1LSrc5Mf7rsFi3EBeqA4v8asB4CB0imnzhfoJJVPKPuy4R0F1vXimR0FdVg9TLV7DzumvxjbkpYDbX10dB+y9C/6SjJD6znqkM5XU0y5eQ7Wy3/Cl85BSietN2bawSBX2EPO91TZ1QYws=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778425611; c=relaxed/simple;
-	bh=Sbsa55LVp4aV6pBQOXRahEwgXZfRV7g/3CjlAOWep+c=;
-	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
-	 Content-Disposition; b=JYVgW8cMM8G0P30xd9c9icR2TL93O8Ih4Xpb4YoaTmrQsXkvtsjHNTRo0Gu537RhJwFCM+U7CBXZQfT+QqfQw+q9znUjCxWN4sta42MG/qoKQqEPXfAVsg66VsWBmVyvazz/h1pqzIZw+9JpqA6UT+g4rhrGtA1GI3VxMVejAic=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=R/OuDhRZ; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1780476099; c=relaxed/simple;
+	bh=WaTjUjzc7nLlbEtzsjBSQFMhfPL6ITkZ3xKF5wzbD5s=;
+	h=Date:From:To:Subject:Message-ID:MIME-Version:Content-Type:
+	 Content-Disposition; b=TAOThOQqrUXCvSaRJOnMzmTqDYTJyPybfbLr5YZGHLsD3rwYsz4DTN5dHgnlajZ9LqcxtEG9UsB5vQqLED/mqXQMObmMHB+m49fxufdGDqE1JKmiqHi4001fbdvuQMDDd+Eq/5Q5uaQBOwXThUOr3KmH7PLMWWu7EuqzW34Q3y0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=cIv1cg7G; arc=none smtp.client-ip=209.85.128.54
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="R/OuDhRZ"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1778425608;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type;
-	bh=8DgzgVjvrOr+QwU2BgEUEMCiAbn8YlsQ0PtbFHS4pL8=;
-	b=R/OuDhRZdAi6JXKx8rEl4Wrvc3upUXPKCZG8sKCPROM5xL/tvmbjFZ5JUeDo8q4JTnDx/C
-	Bb4E9RkWwZD6jhWleBMmyh7YnHUuPUnW38ghXi+eaPftVTIG8mLaVJHktsAfEi+RHfmCbQ
-	U2SAtq3IQJLFmmvYAR4MsRmgd8YHnAo=
-Received: from mx-prod-mc-08.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-35-165-154-97.us-west-2.compute.amazonaws.com [35.165.154.97]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-602-yk4fQmYUMluFDb0PrbUPvw-1; Sun,
- 10 May 2026 11:06:43 -0400
-X-MC-Unique: yk4fQmYUMluFDb0PrbUPvw-1
-X-Mimecast-MFC-AGG-ID: yk4fQmYUMluFDb0PrbUPvw_1778425602
-Received: from mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.4])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mx-prod-mc-08.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 7E9411800451;
-	Sun, 10 May 2026 15:06:42 +0000 (UTC)
-Received: from fedora (unknown [10.44.48.223])
-	by mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with SMTP id A507030001BE;
-	Sun, 10 May 2026 15:06:40 +0000 (UTC)
-Received: by fedora (nbSMTP-1.00) for uid 1000
-	oleg@redhat.com; Sun, 10 May 2026 17:06:42 +0200 (CEST)
-Date: Sun, 10 May 2026 17:06:38 +0200
-From: Oleg Nesterov <oleg@redhat.com>
-To: Chris Li <sparse@chrisli.org>, Luc Van Oostenryck <lucvoo@kernel.org>
-Cc: Alexey Gladkov <legion@kernel.org>, linux-sparse@vger.kernel.org
-Subject: [PATCH] sparse/dissect: fix parsing of array designated initializers
-Message-ID: <agCe_rrtrOC-DNx2@redhat.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="cIv1cg7G"
+Received: by mail-wm1-f54.google.com with SMTP id 5b1f17b1804b1-4905529b933so98569465e9.0
+        for <linux-sparse@vger.kernel.org>; Wed, 03 Jun 2026 01:41:38 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1780476097; x=1781080897; darn=vger.kernel.org;
+        h=content-disposition:mime-version:message-id:subject:to:from:date
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=JJgXWCTxYli6+n0zYOU10br7T2rBzgeJVoJ7VY9FI48=;
+        b=cIv1cg7GsFlTqhnozuCaHYSHeaJRwams8xczh55jhW6WqsjF0ojK0XF+8w/UhPvrQI
+         VPJTUedd9Lp5KRwcp8UYYuNR1fgNOMpTlckumbAzlqVkjVErfg2HF7Mx6zxgTcGXTR5q
+         S4oLkBq5tjcBIxFa/XS1sOvqA9csOYUz5vgPKBmH1hTFnoUwHn1VY5pt/oF6ENuFfyJJ
+         8X2zvO1+VIskV0rLzyQ/2bK0Lnuxn0EGCiCdgdFLTgWdY2Z5WLyRLsD8sTmCwecjbcpY
+         lvYoegtjXklRJ0MTl8/qt/wv647yVx8X2sEyp1BBSJc7d3tplXwH8QUxGymQpBk0GWmL
+         gj+Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1780476097; x=1781080897;
+        h=content-disposition:mime-version:message-id:subject:to:from:date
+         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=JJgXWCTxYli6+n0zYOU10br7T2rBzgeJVoJ7VY9FI48=;
+        b=amLtvttxVX+5u0zQ6adv7W1Ku/XF//w4ku8IA9fbAYLjq5A6QCP+aD5K/ttq1/ff17
+         +u1KZ7q9017Ij45HiqQOPTlus1OpWSK/5I1etpcvJrOX1NpMwhMskIcDxJgfBE1pFs0d
+         jg1W1HfQ+nfEhCetW4n3BlAhu6baeP26qRKDDghkNKJnvYpeB889ijHKDlYVgtqj632V
+         I9wA+ALV3gOY2JZ2/y88SxeCf+SdiFjS4j32clk1fXADxGhs3j38WgOkoTMdC8mwYPTe
+         4oN2OzeUJRjLDazeDlv41UDE8KABaPg/79N94yPa1MocpzilgUMpZQ6lTnZByp8smJ5x
+         Z7Yw==
+X-Gm-Message-State: AOJu0YzlbpYuj5OFg4H4/Q1S1B7ejZ0HB2y7muDhVyNkVSlB7YkjaUEu
+	tH2LpRQ+Mf9iexEmEQW/LCX5KhGSQ27fD3gt3RaQYUchB8cbTFNTJenJ2o0+/Q==
+X-Gm-Gg: Acq92OF0pF+kjcPHQdLpjVi9BgCCHOfnJ9GV1SOwjhtDA1ZTkwtmOPMruUCMbGL4Szc
+	of2y+rA2Y4v38AL+/2SzDvtw6Lp6j4FRO5Tx2vN0DKCw1cGxckyxZ3qGZgp/cafNbx2eCbTXp3p
+	SBKsYJ/+u4jJAU2bxZhS5f71XCFrJ2iHGmVvm7UhLxq7NkEQsGMQ6sPcJqQyMx4iJnSJ65/ki7o
+	rb6q5ejSWctjdSMXRSDdQh6CQqayf9q8OIRC/7HsVQyn02cdJRz00liaIucSPj04G0TrL0rcuTv
+	S1t4MQgvOCq8RBgd9kB6PKkDeAf0f3btptZ8X7CIM0TXk73pKbXnn8M7+jSrgZ1GAuS+Pscp+i6
+	vJ2TBWDwBUsrr0OaZJEHP6iIZBkrx19wJc9EjPioxqApaOb8TIg7q6ZSu5eROPBwoDvBw1n02Yr
+	Tdh+iL4tB5GyHXiUqPMQ1l/Y4JNFy87Q==
+X-Received: by 2002:a05:600c:4fcc:b0:490:ae94:a7e6 with SMTP id 5b1f17b1804b1-490b5ebfc5amr40951975e9.24.1780476096779;
+        Wed, 03 Jun 2026 01:41:36 -0700 (PDT)
+Received: from localhost ([196.207.164.177])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-490b725fb1bsm35517955e9.8.2026.06.03.01.41.35
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 03 Jun 2026 01:41:36 -0700 (PDT)
+Date: Wed, 3 Jun 2026 11:41:33 +0300
+From: Dan Carpenter <error27@gmail.com>
+To: linux-sparse@vger.kernel.org
+Subject: handling cleanup attributes with a goto
+Message-ID: <ah_ovV_KtDXan8L-@stanley.mountain>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.4
-X-Mimecast-Spam-Score: 0
-X-Mimecast-MFC-PROC-ID: jZKu6DkWN-7Fvt4PevByscj0S4E0iZ3A9j6bIXw9dvQ_1778425602
-X-Mimecast-Originator: redhat.com
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 
-dissect.c fails to parse nested designated initializers that contain array
-indices. In this case do_initializer() is called recursively with type ==
-EXPR_INDEX, this later calls do_expression(EXPR_IDENTIFIER).
+If you have code like:
 
-Change the "while (m_expr->type == EXPR_IDENTIFIER)" loop to unwrap the
-EXPR_INDEX expressions as well.
+	for (i = 0; i < 10; i++) {
+		struct foo *buf __free(kfree) = NULL;
 
-Minimal test-case:
+		if (frob())
+			goto one;
 
-	struct O {
-		struct I { int mem; } ary[1];
-	} v = {
-		.ary[0].mem = 0,
-	};
+one:
+		blah(); blah(); blah();
 
-Before the patch:
+		if (frob())
+			goto two;
+	}
 
-    $ ./test-dissect TEST.c
-    1:8                    def  s O
-    2:16                   def  s I
-    2:24                   def  m I.mem                              int
-    2:31                   def  m O.ary                              struct I [1]
-    3:3                    def  v v                                  struct O
-    3:3                    -w-  v v                                  struct O
-    4:10  v                -w-  m O.ary                              struct I [1]
-    TEST.c:4:17: warning: bad expr->type: 25
+two:
+	blah(); blah(); blah();
 
-the warning comes from do_expression(), 25 is EXPR_IDENTIFIER.
-The usage of I.mem is not reported.
+The goto one won't free the buf because the label is inside the block
+but the goto two will because it's outside.
 
-After the patch:
+At first I thought I could get the scope that the label is in from
+the stmt->goto_label->label_scope but that's scope where the goto
+can be and not where the label is.  Is there a way to get the
+information about the scope where the label is?
 
-    $ ./test-dissect TEST.c
-    1:8                    def  s O
-    2:16                   def  s I
-    2:24                   def  m I.mem                              int
-    2:31                   def  m O.ary                              struct I [1]
-    3:3                    def  v v                                  struct O
-    3:3                    -w-  v v                                  struct O
-    4:10  v                -w-  m O.ary                              struct I [1]
-    4:17  v                -w-  m I.mem                              int
-
-Signed-off-by: Oleg Nesterov <oleg@redhat.com>
----
- dissect.c | 5 +++++
- 1 file changed, 5 insertions(+)
-
-diff --git a/dissect.c b/dissect.c
-index da1b63c8..796b6e4d 100644
---- a/dissect.c
-+++ b/dissect.c
-@@ -602,6 +602,11 @@ static struct symbol *do_initializer(struct symbol *type, struct expression *exp
- 							lookup_member(m_type, m_expr->expr_ident, m_atop));
- 					m_expr = m_expr->ident_expression;
- 					m_atop = NULL;
-+
-+					while (m_expr->type == EXPR_INDEX) {
-+						m_type = base_type(m_type);
-+						m_expr = m_expr->idx_expression;
-+					}
- 				}
- 
- 				if (m_atop) {
--- 
-2.52.0
-
+regards,
+dan carpenter
 
