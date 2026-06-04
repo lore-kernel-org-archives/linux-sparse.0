@@ -1,92 +1,133 @@
-Received: from mail-wr1-f47.google.com (mail-wr1-f47.google.com [209.85.221.47])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A0EF72EDD6B
-	for <linux-sparse@vger.kernel.org>; Thu,  4 Jun 2026 13:48:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.47
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2B9AE37E304
+	for <linux-sparse@vger.kernel.org>; Thu,  4 Jun 2026 13:52:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780580920; cv=none; b=fewkqCOu7ETKFBGurRg+xld1nZ9BbejstevdLCI2QIs7/MTgnyCPFr9pplSpt334RAuxm+X4hiWfttSFs5icv4IGq6um+uFT/A2KcbufM7tEe0jFPKS7AqgK16k5dx+e1flFLYvdDCKld8QNHm/56E62+JJCnzRtqcTdpCXuwBk=
+	t=1780581181; cv=none; b=g2mnZL76lM8712MayyD0k9DcwQ1jJvn/lsNiOfjUKo/v/P0tS+NypDjXkZVvS2roKFqtESCa/pornEqn/TbAazlOQuZSlP0vIJSmVwaObdVPPCdfxmpi0NN9kG4mmaPNzGerLpqk44W4Oag3HLha+OjVh/G4MJL31oTncGq60ew=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780580920; c=relaxed/simple;
-	bh=ZXQ5Ge9LbSRmIFpqQlqxYmZENvpEe1KJTb8FLoNqVMQ=;
-	h=Date:From:To:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=seyYukGUegBlvln+grdX9OhUnZKiwUuOHXdEuv27pMfPGOqPfE8s/EKg2vHcveqFzNedLOHjg2qNB9iCOhzAJshgALq3xSxHBnZ1tsnPXG1y7UCXVeYe26k0fWQyAs4EfIr/8MgOilqpQi7R3o4Szh+ieZbxDU0FPV5yDkZfkb4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=WaieMX+0; arc=none smtp.client-ip=209.85.221.47
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1780581181; c=relaxed/simple;
+	bh=jneIgYV5WuRzVycvcqDS1blrYbbHs7QesIy9djtumD8=;
+	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
+	 Content-Disposition; b=DDHgDGpmVin5ZXVJ0vum7tFMq0B62nlq9wUvkX0oRg5jMgIwVPzBQM9rUw/sk9zzvWhtM8mVKESviKy+RV3LJAcPSOLkwvZkYiIIJvDljwQr4eXVj8vKDT2WApAE38XuMtHjM5xfvkPbaHfMu37RYcTYfbrl/4KKtSEBF75v4Zg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=DXA6CYu7; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="WaieMX+0"
-Received: by mail-wr1-f47.google.com with SMTP id ffacd0b85a97d-45ef4223be7so463564f8f.2
-        for <linux-sparse@vger.kernel.org>; Thu, 04 Jun 2026 06:48:39 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1780580918; x=1781185718; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=mqfO1FwQR2do80SxAVg2jUVIr5e5+GP9564rj1Xnkcs=;
-        b=WaieMX+0EOCDjTFPMXZUAeU40VjCSdvidAVb0GeL/nA5Mk8v8NzKcsIoIXtYQ3gd7Z
-         2gqjdrhoqUxKnhFVP8rLThvUz13bMhH6+9rEB+9rvMj0eQxySeO5lN6CI5GWoC859f/N
-         SADKki19Ql3NGLOd0jibN8iJtJhiUQi1EbZWL3nMmlNOLMp0H3+Y/Cp/u0OLcUQaQRVY
-         dcaMx4zARdyZdl0bVp5iliUuKjJd0L2OSv1VQcJF34Kx93nNrSToG2clDqACyU9dZ9BK
-         s+H3mt09CljZOI2wvUeMjCKGYHWBJPMPYrHtfb5iXv8+RdqTBLmiOhqMTrdknZivvHAw
-         r+5w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1780580918; x=1781185718;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc:subject
-         :date:message-id:reply-to;
-        bh=mqfO1FwQR2do80SxAVg2jUVIr5e5+GP9564rj1Xnkcs=;
-        b=ZosOoqeIy2JIuWARCSFvZf089spGRym2GQyxC85MT4rHAoDM2nUMIoDkSnrgJgpgOM
-         +qR3omV97CMUxw7eOTlwfOHCRoQYoTQzKSulMa827zQvxCw4ZDsrOEsL+L5TB8daZlrR
-         K8VoZ2Mo1rRpWP2A0n4V9/CnbWt8fIBvq/uKcHv3BQLMpc8Nb4UIaCoiEOLHEVge/Nof
-         K/4C8U7DMYCBJWXmGOj1nBpoSH5l2WDcFyiiRFRbuFVfU/xU//RIVGv8CSfKUz04gKtt
-         2uX2LQb3spheAUJ4YuOb4ObX8QL6uL8b9SYKeo4HpT7Tzv5MHZeGuYMdb6fggWQVeBYa
-         75tw==
-X-Gm-Message-State: AOJu0Yy49NzuAhg4Ch2hXqZXjFcF4UZomBugfQwBRvVDkndaMY5P8Eju
-	BzWdHMoPKFroe4739+pXnc9TfonrXJLoEbBz7jeptNZbSoucFmMH2B30LyNWzPAP
-X-Gm-Gg: Acq92OG8A9KVemz3BleyB8lbABssw3ns/kXSYtS7OczOjW2R4PhSCxB1KUjP7LOFGJF
-	4OFi78aPhv39PQNNjRkWCb703zvowAq8pkidxBSyQxqNa5u+wYmPsSnkcGZmbR1NXDRdSIZLolJ
-	9EDuHiOj1yQ4e1zEV/JrRDxqAaOB00mye+KpPMN2cJC5i1ISR1NRzUccC+1YZsBFzNLVwiidi9v
-	HvzqgIMre0FuFY/5yRatQ5Po9E1i4Be5t6JtNCdXv97NANG+0uuvjmmDSjbZwqfExP7hJ6RxQvG
-	7Uh/iJx0+G2Obf3f19DQd5e+/68uV/PaGclxVw9O2+P2BWoWFTe1J36Y9zA3dMqYCaJpkd5abRs
-	wzjqe8Hqy1QEquZuENzEFoILq+1EuIOHcNacDSEIYw4qCL1zEYP2scLAtQqlWn3Oxkn1KYpveNG
-	oGN6Ox5fKxfaCSNXukU5UJRW30oZ5sOw==
-X-Received: by 2002:a5d:5702:0:b0:43d:775b:c9bd with SMTP id ffacd0b85a97d-460217a6ff6mr9328674f8f.10.1780580917977;
-        Thu, 04 Jun 2026 06:48:37 -0700 (PDT)
-Received: from localhost ([196.207.164.177])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-4601f2ed944sm17090390f8f.13.2026.06.04.06.48.37
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 04 Jun 2026 06:48:37 -0700 (PDT)
-Date: Thu, 4 Jun 2026 16:48:34 +0300
-From: Dan Carpenter <error27@gmail.com>
-To: linux-sparse@vger.kernel.org
-Subject: Re: declarations after a case statement
-Message-ID: <aiGCMuw3Lblnc9TA@stanley.mountain>
-References: <aiGAXJhYJoUuqB5j@stanley.mountain>
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="DXA6CYu7"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1780581179;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type;
+	bh=BvNOucMrxn0Hc6LtpskrP4iZJJk+LAXEepYejzaMARs=;
+	b=DXA6CYu7YGM8vBhtHLZGmIOiylYTyNjHZ8gGnvG5lJeJdjOPq/XQxYUkPmTVZx5J++XGZ1
+	XR4PfzyfO/Gkr8QAFqTK8ltESFnD8bBsDQA5ERL3k/qStRaREI7pmukh17ry0C2dFVCnAQ
+	DPKvlycXZa2/TXiwUSet3n8A7Er/iUY=
+Received: from mx-prod-mc-08.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-35-165-154-97.us-west-2.compute.amazonaws.com [35.165.154.97]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-495-h6iMdQAjOgG_BAIQ3jRQ_A-1; Thu,
+ 04 Jun 2026 09:52:56 -0400
+X-MC-Unique: h6iMdQAjOgG_BAIQ3jRQ_A-1
+X-Mimecast-MFC-AGG-ID: h6iMdQAjOgG_BAIQ3jRQ_A_1780581175
+Received: from mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.12])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-08.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id E42DF1800473;
+	Thu,  4 Jun 2026 13:52:54 +0000 (UTC)
+Received: from fedora (unknown [10.44.48.10])
+	by mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with SMTP id 369431955BC0;
+	Thu,  4 Jun 2026 13:52:52 +0000 (UTC)
+Received: by fedora (nbSMTP-1.00) for uid 1000
+	oleg@redhat.com; Thu,  4 Jun 2026 15:52:54 +0200 (CEST)
+Date: Thu, 4 Jun 2026 15:52:51 +0200
+From: Oleg Nesterov <oleg@redhat.com>
+To: Chris Li <sparse@chrisli.org>, Luc Van Oostenryck <lucvoo@kernel.org>
+Cc: Alexey Gladkov <legion@kernel.org>, linux-sparse@vger.kernel.org
+Subject: [PATCH] sparse/dissect: fix missing definitions for unnamed members
+ of named types
+Message-ID: <aiGDM56DNkolOPPX@redhat.com>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+X-Scanned-By: MIMEDefang 3.0 on 10.30.177.12
+X-Mimecast-Spam-Score: 0
+X-Mimecast-MFC-PROC-ID: ipMBNlyzXHWsJup2EEtew6JdD7LzB4ij2TGe16iDrBo_1780581175
+X-Mimecast-Originator: redhat.com
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <aiGAXJhYJoUuqB5j@stanley.mountain>
 
-Same thing for declaration after after a label.
+Now that the Linux kernel is built with -fms-extensions, people use
+this feature more and more often. However, dissect.c doesn't report
+the definitions of members promoted from unnamed fields of named types.
 
-$ ./smatch test.c
-test.c:5:9: error: typename in expression
-test.c:5:14: error: Expected ; at end of statement
-test.c:5:14: error: got b
-test.c:5 func() warn: statement has no effect 'char'
+This means, for example, that
 
-void func(int a)
-{
-        goto out;
-out:
-        char b;
-        b = 1;
-}
+	$ semind search -m def ns_common.ns_id
 
-regards,
-dan carpenter
+fails without this change.
+
+Minimal test-case:
+
+	union U { int i; };
+
+	struct S { union U; } v = { .i = 0 };
+
+Before the patch:
+
+   3:8                    def   s S
+   1:7                    def   s U
+   1:15                   def   m U.i                              int
+   3:23                   def   v v                                struct S
+   3:23                   -w-   v v                                struct S
+   3:30  v                -w-   m S.i                              int
+
+After the patch:
+
+   3:8                    def   s S
+   1:7                    def   s U
+   1:15                   def   m U.i                              int
+   3:19                   def   m S.i                              int
+   3:23                   def   v v                                struct S
+   3:23                   -w-   v v                                struct S
+   3:30  v                -w-   m S.i                              int
+
+Signed-off-by: Oleg Nesterov <oleg@redhat.com>
+---
+ dissect.c | 13 ++++++++++++-
+ 1 file changed, 12 insertions(+), 1 deletion(-)
+
+diff --git a/dissect.c b/dissect.c
+index 796b6e4d..04ec89ca 100644
+--- a/dissect.c
++++ b/dissect.c
+@@ -193,8 +193,19 @@ static bool deanon(struct symbol *base, struct ident *node, struct symbol *paren
+ static void report_memdef(struct symbol *sym, struct symbol *mem)
+ {
+ 	mem->kind = sym && sym->type == SYM_ENUM ? 'e' : 'm';
+-	if (sym && mem->ident)
++	if (!sym)
++		return;
++	else if (mem->ident)
+ 		reporter->r_memdef(sym, mem);
++	else {
++		struct symbol *base = mem->ctype.base_type;
++		if (base->ident == sym->ident) // deanon()'ed
++			return;
++		// base->inspected is T, we can override ->pos
++		DO_LIST(base->symbol_list, __mem,
++			__mem->pos = mem->pos;
++			report_memdef(sym, __mem));
++	}
+ }
+ 
+ static void examine_sym_node(struct symbol *node, struct symbol *parent)
+-- 
+2.52.0
+
+
