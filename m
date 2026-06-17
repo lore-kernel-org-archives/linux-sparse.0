@@ -1,101 +1,72 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from imap5.colo.codethink.co.uk (imap5.colo.codethink.co.uk [78.40.148.171])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0F5C026D4F7
-	for <linux-sparse@vger.kernel.org>; Sat, 13 Jun 2026 14:53:54 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B21EA3F0746
+	for <linux-sparse@vger.kernel.org>; Wed, 17 Jun 2026 13:58:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=78.40.148.171
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781362436; cv=none; b=S0sPdX+3PEzkbXvqMGGrZjpLhQbmEoOeX/4Wlo+OLvGSjrVhYjLciC1/pBlCmLcumprnZUTzUIjXU/0CLZHJlPj+tBzm1qaLT7dEHF+d2NxTIvgqNeedCkx6eugXPogoNMvnmSCGVjDjNRky/H9gTofZEMhUy9XZOTPc0p+E3l4=
+	t=1781704689; cv=none; b=O63QFi39AMhdwQjHJ+UCxh4dd4DtZ4Xej/36hQA6lJHDcaqVptGO7LbFeXmZiY6QXrLytVxJ+PXCga3pJui2yICIZPbwJYpcvK///8Im/Ehj3ywdQ6IBgEpZWiahcb4U0z1g98uo2hhiTNs9zU/TEUhHt7Aicbp448fauVtt2mk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781362436; c=relaxed/simple;
-	bh=yH/PHyWa8mS73SxMtevbmxL6nATaQKLrfDkkPP5vaQw=;
-	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
-	 Content-Disposition; b=Ma1985KUrvVZ4jNgL9VlLBN1E/Uqbz6OgffAaiwXgq40rS/lLNm69Dj4Q1NkfU6/Bnmb5NoZfQSz3Skle2Ieoe9/rs9doZtPBsrLvJpyxwpsUH1hbGADrmhJ5qUDsdiN36bYoNNs3JQIY9iWp4F5s7tfixvxSDf7meTxwNXxbUk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=NHjoDRGi; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1781704689; c=relaxed/simple;
+	bh=8tJ/5r6hJ4O0ESaDXYaa4ATLqtpOg11ccO/Opdm7qLE=;
+	h=Message-ID:Date:MIME-Version:To:From:Subject:Content-Type; b=GUqlrDiCNhuZ/5p1+s+liuMnUPXEl8/aO2Pg51GCF90dfH+2lnE2bEOPOO4dEvreQy//9vA22z0laX/5MZ/eJ8doP5Y/tc+1yWEeSIS4qgWodQaM5G74hMBOF1F8Fju5MUUIGv3RA3ze+hraFuvA0Jq5oD55wU43JQCz0Bizhss=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=codethink.co.uk; spf=pass smtp.mailfrom=codethink.co.uk; dkim=pass (2048-bit key) header.d=codethink.co.uk header.i=@codethink.co.uk header.b=eYeQmvV/; arc=none smtp.client-ip=78.40.148.171
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=codethink.co.uk
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=codethink.co.uk
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="NHjoDRGi"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1781362434;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type;
-	bh=Ohu5KKiOqpxpvJJ5iKLtWh/Sveu9NRoDYxVfZDnw3IM=;
-	b=NHjoDRGih5zIlyxN0NDKymgRA3BNxxN+AWnD50NvmgMyjaNFbxXLq73hI5OxHlFEREXcrW
-	qXnMnwVaAi/DTcWSqfLNq753BkpUYha5UbNSJQ1/iRqXXuu5C0GfwO9xiflG3BudrmLdUw
-	CKbGxXFwty6YMBcFkgju41QXTffE1oM=
-Received: from mx-prod-mc-06.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-35-165-154-97.us-west-2.compute.amazonaws.com [35.165.154.97]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-96-qtzNgPrzNJylrGlZhswELQ-1; Sat,
- 13 Jun 2026 10:53:52 -0400
-X-MC-Unique: qtzNgPrzNJylrGlZhswELQ-1
-X-Mimecast-MFC-AGG-ID: qtzNgPrzNJylrGlZhswELQ_1781362431
-Received: from mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.111])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mx-prod-mc-06.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 8A2701800347;
-	Sat, 13 Jun 2026 14:53:51 +0000 (UTC)
-Received: from fedora (unknown [10.44.32.13])
-	by mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with SMTP id B349F180049F;
-	Sat, 13 Jun 2026 14:53:49 +0000 (UTC)
-Received: by fedora (nbSMTP-1.00) for uid 1000
-	oleg@redhat.com; Sat, 13 Jun 2026 16:53:51 +0200 (CEST)
-Date: Sat, 13 Jun 2026 16:53:47 +0200
-From: Oleg Nesterov <oleg@redhat.com>
-To: Chris Li <sparse@chrisli.org>, Luc Van Oostenryck <lucvoo@kernel.org>
-Cc: Alexey Gladkov <legion@kernel.org>, linux-sparse@vger.kernel.org
-Subject: [PATCH] sparse: increase MAX_STRING to 4096*3
-Message-ID: <ai1u-0eA0bCn-VkM@redhat.com>
+	dkim=pass (2048-bit key) header.d=codethink.co.uk header.i=@codethink.co.uk header.b="eYeQmvV/"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=codethink.co.uk; s=imap5-20230908; h=Sender:Content-Transfer-Encoding:
+	Subject:From:To:MIME-Version:Date:Message-ID:Reply-To:Cc:In-Reply-To:
+	References; bh=4WyB4x8PhBE7H+8m0zVj35zXWd5Cr75ZPPZdZvLzahU=; b=eYeQmvV/HkKTMo
+	ABFrxETa4Muz0ic9NsSCZ05rQB1M274928/CdgpNznZsk6k0LEcZcx492UpXptwhzOCr0AW+QYMK3
+	vnR0DZZKx/M4XdQn9XrTT8DfmUurDpVQVCY1IMZhaKDrWA01qJmn684QZ8WTkYAFsehhMja081X1K
+	xyEL5onsKAqMaDpxwcZnocT8UCBMuv3GQxtjbuYxN37GZRyjS+LyL4c5pRGd+I+q+v51MKUj6PH3/
+	+tRE6dMeCaghzGdyzaqsD4lvLrXXHzrwLrBESI2PL6diAbdx2a94PBVgh4Di04mgPnLVHOeotKf+R
+	ISstvFQjQq7GXr67Gvvg==;
+Received: from [167.98.27.226] (helo=[10.35.6.194])
+	by imap5.colo.codethink.co.uk with esmtpsa  (Exim 4.94.2 #2 (Debian))
+	id 1wZqmL-00DZsi-Sx
+	for <linux-sparse@vger.kernel.org> ; Wed, 17 Jun 2026 14:58:05 +0100
+Message-ID: <ebcf4663-4c95-4b51-887c-d0c99b8b80ea@codethink.co.uk>
+Date: Wed, 17 Jun 2026 14:58:05 +0100
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.111
-X-Mimecast-Spam-Score: 0
-X-Mimecast-MFC-PROC-ID: x8waSCz6UmkPqw5aCUJTfd_gulkG_mK-a62Lhh3mNh4_1781362431
-X-Mimecast-Originator: redhat.com
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+User-Agent: Mozilla Thunderbird
+Content-Language: en-GB
+To: linux-sparse@vger.kernel.org
+From: Ben Dooks <ben.dooks@codethink.co.uk>
+Subject: segfault with latest arm64 linux kernel build
+Organization: Codethink Limited.
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Sender: ben.dooks@codethink.co.uk
 
-Sure, 12288 is just another "random" value, but with this change the
-following command
+I'm getting a fault running the sparse check on current kernel.
 
-	$ make C=2 CHECK="semind add --"
+   CC [M]  drivers/gpu/drm/msm/msm_gem.o
+   CHECK   /home/ben/linux/drivers/gpu/drm/msm/msm_gem.c
+Segmentation fault
 
-no longer emits the errors like
+The base of my tree is, however I have a pile of fixes
+on this:
 
-	./include/trace/events/vmscan.h:122:17: error: too long token expansion
+commit 4b99990cdf9560e8a071640baf19f312e6ae02f4 (origin/master, origin/HEAD)
+Merge: 9c87e61e3c57 52d4ab1ca790
+Author: Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Wed Jun 17 10:21:00 2026 +0100
 
-It is not clear why (before this change) MAX_STRING is odd. I guess this
-comes from the initial commit 7601387b02d9 ("C99 says strings should be up
-to 4095 bytes."), but I don't think this is relevant at least after another
-commit fbc8230fa8c4 ("Larger buffer size for token concatenation") which
-increased MAX_STRING to 4096*2-1. And struct string / __alloc_string() do
-not depend on the hardcoded constants anyway.
+     Merge tag 'drm-next-2026-06-17' of 
+https://gitlab.freedesktop.org/drm/kernel
 
-Signed-off-by: Oleg Nesterov <oleg@redhat.com>
----
- token.h | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/token.h b/token.h
-index 9000e0cb..720ad0c3 100644
---- a/token.h
-+++ b/token.h
-@@ -197,7 +197,7 @@ struct token {
- 	};
- };
- 
--#define MAX_STRING 8191
-+#define MAX_STRING (4096*3)
- 
- static inline struct token *containing_token(struct token **p)
- {
 -- 
-2.52.0
+Ben Dooks				http://www.codethink.co.uk/
+Senior Engineer				Codethink - Providing Genius
 
+https://www.codethink.co.uk/privacy.html
 
