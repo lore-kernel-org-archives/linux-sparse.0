@@ -1,94 +1,123 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lr2-f12.google.com (mail-lr2-f12.google.com [74.125.230.76])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 32E712F1FED;
-	Sun, 13 Sep 2026 23:13:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C6DA647607D
+	for <linux-sparse@vger.kernel.org>; Mon, 14 Sep 2026 13:53:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.230.76
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1789341207; cv=none; b=LhuKIU00hApPPlKiP8lnTo5RiuXK/2z6YbyRsy4BTqdCJVXuET2q7btNs554U+zkozcNGVHfS29pDvXaqR1GluB33i44zROQ+SouCdfOrmeQCts4Np668eXY4KdlBW0Blf8tITctPxDmytwVQXypiIDXPGfcuPU/2TF2BzVY20Y=
+	t=1789394019; cv=none; b=YcafAJC6sGbzdUdCvjE/9mgyJvKlxDoIKw27ltf6skp40t12iFtro6Vf6IIYwSFZCYmtKXLoQbPYsrj207KzIyZpxuBUQB1868G6O/GyvtEV2AzEZLDl9FkgXpAS6f/p0yxDObTlbd9oVUP3DVf7sw5zm7TuG0sc6Jd1QjihSi0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1789341207; c=relaxed/simple;
-	bh=/yFTq2TRqG0tvgEsqGrbjioo41O5Hwn6wAtodQ6dBbk=;
-	h=Date:From:To:Cc:Subject:Message-Id:In-Reply-To:References:
-	 Mime-Version:Content-Type; b=sDSLapMwcDx/+FcC/23HE/8G5iHngP/IaZY2II2WFbAm7ax0y+MMoIsqM3b01W1cJTFBsOx0SBMBpl3CyHM7QEip6dOcxd2Rxn7a4ABQPnGSNKBncCaG5dMng0Oq8uzrJpRbEsOO8IW8fMV1Q1eFN6tXRZLpc0tgQV+SpcWSbaw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b=zYcVK2v9; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1789394019; c=relaxed/simple;
+	bh=BEDapZrL6/hvvO2kXpOejmvG4ExYC83wI5Wnd+3+Nx4=;
+	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=KIZ6gIzu6EpEo8hdIXDHTJPMq8QIUPXMaGG7LezdNvgemgzvuItTXJB+aPCaR+fczJdcBkU3onKVJlhEBzkf0N5qsnPVbqRaJrsgD1cWGIfYtMOzrsn/e9z414LriS7JfEU25vtNPzi/A9b52gFXKap2FlTG2r3rdRbwHeQgMWw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=chromium.org; spf=pass smtp.mailfrom=chromium.org; dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b=X9VYh8mG; arc=none smtp.client-ip=74.125.230.76
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=chromium.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=chromium.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="zYcVK2v9"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7137E1F000FF;
-	Sun, 13 Sep 2026 23:13:25 +0000 (UTC)
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="X9VYh8mG"
+Received: by mail-lr2-f12.google.com with SMTP id 38308e7fff4ca-3a306a4f735so16076641fa.1
+        for <linux-sparse@vger.kernel.org>; Mon, 14 Sep 2026 06:53:36 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-	d=linux-foundation.org; s=korg; t=1789341205;
-	bh=ATWZYkl6gXglOV8R8lb8BXtXhjp6jIzf5yrr28mOYNs=;
-	h=Date:From:To:Cc:Subject:In-Reply-To:References;
-	b=zYcVK2v9RI+Wmrk1Pu/ODVTZVKmwrwtmA10ni+A8Df4mUkVqiqiHgZ17gT8F0Yk/e
-	 8KrNTD5UxXB/Eu3m3D9iDZNRpciGWIfhP25vAmNkLOIjZjL+U5jw/9/Hgo/5iu0TPx
-	 7VNRpXIZ9/204VZVozy6ul97EjIYHuLym7P8C5mA=
-Date: Sun, 13 Sep 2026 16:13:24 -0700
-From: Andrew Morton <akpm@linux-foundation.org>
-To: Yury Norov <ynorov@nvidia.com>
-Cc: Yury Norov <yury.norov@gmail.com>, Matthew Wilcox <willy@infradead.org>,
- "Liam R. Howlett" <liam@infradead.org>, Chris Li <sparse@chrisli.org>,
- Alice Ryhl <aliceryhl@google.com>, Andrew Ballance
- <andrewjballance@gmail.com>, linux-sparse@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-fsdevel@vger.kernel.org,
- linux-mm@kvack.org, maple-tree@lists.infradead.org
-Subject: Re: [PATCH 1/3] compiler.h: add ASSERT_STATIC_STORAGE()
-Message-Id: <20260913161324.8879b42314924d8264447f45@linux-foundation.org>
-In-Reply-To: <aqXSkthkUVJNu2FD@yury>
-References: <20260911221444.1523311-1-ynorov@nvidia.com>
-	<20260911221444.1523311-2-ynorov@nvidia.com>
-	<20260911225749.8727d23eb76b93141f08e574@linux-foundation.org>
-	<aqXSkthkUVJNu2FD@yury>
-X-Mailer: Sylpheed 3.8.0beta1 (GTK+ 2.24.33; x86_64-pc-linux-gnu)
+        d=chromium.org; s=google; t=1789394015; x=1789998815; darn=vger.kernel.org;
+        h=cc:to:content-transfer-encoding:content-type:mime-version
+         :message-id:date:subject:from:from:to:cc:subject:date:message-id
+         :reply-to:content-type;
+        bh=dBgWHSwhYz2Q4YLyQIKrQwL4mQeJ8ts96wvrrquXsvI=;
+        b=X9VYh8mG+g9Y/RJ4/6w9KieHLcPziaHyhafmXhleClFZq7w9lUJ2r2Zd8TwwxOXxWD
+         g04FTp4sssxf+XhAoGPHZ5VwSAzCdcvmV7PKA0EmGVQJKxO6nztD+ejViepnK4+h3pud
+         hYwoeq1eEILuDndIKOz80LonoQPkGuq+U8ipA=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1789394015; x=1789998815;
+        h=cc:to:content-transfer-encoding:content-type:mime-version
+         :message-id:date:subject:from:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to:content-type;
+        bh=dBgWHSwhYz2Q4YLyQIKrQwL4mQeJ8ts96wvrrquXsvI=;
+        b=LS2xyquRgItfjuJIjF79b7Flt7xz0EwH+CGIhYzmhk8qjWSMuEAmWqx6IF+N4FbeAu
+         Xl4zy+Sbr2ZuwcaGhj01+R8U84RZpyH70T9viCDW7HXVUeGPj9fr77YcjCTLCLVY5rlh
+         JA65qq98/BVeYEfofkXssLJQtJhqV9VGIRzyPE12LMzaJn0NdMv8nC5pMkEQU81G6Gfp
+         mLqI3tjMqVcN0ADjiBHoj69FyglGepQK8J+KyW5/SCpY0cWHt2sZ3ijBdtCQpD+Cm06Q
+         oUEuj/h95zbrEwChC3TeEaIjmIGIEhusjobF+s/Me8SQuf9/5R9/xAml0pygATonxpa0
+         OPNw==
+X-Forwarded-Encrypted: i=1; AKwUvBx2bPq8QkMqpOdLiF+FezVLl4xoh64unCqzKwZnrLmqalwSbP3FwVcq75d9sbzE7ZyQJhQ5vKddp2cxfaI=@vger.kernel.org
+X-Gm-Message-State: AFuF++lo3M7c72AHAM99f4GsHnFTjvnHSRfn5m1+iSNVRdbv4f+UmHAu
+	/FHKLte6eI1eysNI2yqb5h7aojp/hVA4rpdxwFTTpX7cAVf+nx6QwYiE/6SH2DA5Gw==
+X-Gm-Gg: AYBFou0KRGVAEN5VrN7L9kPuW2O0CwC/t3Ij/NI01dPrt70nrTdE7QyS68SLE+7D3KF
+	3B8WvkL41HPDgqlVjw1ziFfFp4Kn9lPP1kSl9B1BmP5uYD+SUJurhCD6p2izH7OR/eSC/vz8KuB
+	eFTYkjerkuE44r2+HGGc3IaYG1qIvKwfRcL4U7XBpYh7ZpfTu32jTUzckV2E+xvHDrDtwuv41q+
+	DM4boH0JsOKQqRYWv28xULvAyDnYciIGPuLOTBnqIZR9t5xtdlk0pMOoNA/9OpJQb4/JqVW/p8v
+	9i3udMDBqK2rJfox/tX5zihVBTVtNRKd/Up0WAYntq3YQYfIi0Fb6xWD1vd+sLEG3dmYO9GduZJ
+	4rDNv7Wuh2/nxMFKogDAnMbGRGb4eTWLhfNeCy50dMf+2+6e0lYb4dd7ajB1do5337Se/sp8r7+
+	NSD9UFTDOjat1jB3GAJf/qtLkUkmnnzbvK52GlQqdSa/1xaZ6tn/6Rzzzl0W7gc5lr8IaAFW52x
+	IevuHSTCNX1pjtWoYfMhuNNLHD/kenwlGu6QPgkqInDOm5wiQ==
+X-Received: by 2002:a05:651c:19a9:b0:3a3:115d:daf0 with SMTP id 38308e7fff4ca-3a5c885b96bmr4384971fa.6.1789394014811;
+        Mon, 14 Sep 2026 06:53:34 -0700 (PDT)
+Received: from ribalda.c.googlers.com (11.36.88.34.bc.googleusercontent.com. [34.88.36.11])
+        by smtp.gmail.com with ESMTPSA id 38308e7fff4ca-3a5a3304b38sm29433921fa.13.2026.09.14.06.53.34
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 14 Sep 2026 06:53:34 -0700 (PDT)
+From: Ricardo Ribalda <ribalda@chromium.org>
+Subject: [PATCH v2 0/2] Fix warnings with recent smatch
+Date: Mon, 14 Sep 2026 13:53:30 +0000
+Message-Id: <20260914-unqual-v2-0-60a1407a0cd4@chromium.org>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAFr8p2oC/2XMQQ6DIBCF4auYWZcGCFbtqvdoXKgMMkkVC4W0M
+ dy91G2X/8vLt0NATxjgWu3gMVEgt5aQpwomO6wzMtKlQXJ54a2sWVyfcXgwWesOsVFGCw7lvHk
+ 09D6ge1/aUng5/zncJH7rH5EE46zhUpmxFaMy3W2y3i0Ul7PzM/Q55y9C65KunwAAAA==
+X-Change-ID: 20260825-unqual-25d9ee74fd10
+To: "Paul E. McKenney" <paulmck@kernel.org>, 
+ Frederic Weisbecker <frederic@kernel.org>, 
+ Neeraj Upadhyay <neeraj.upadhyay@kernel.org>, 
+ Joel Fernandes <joelagnelf@nvidia.com>, 
+ Josh Triplett <josh@joshtriplett.org>, Boqun Feng <boqun@kernel.org>, 
+ Uladzislau Rezki <urezki@gmail.com>, Steven Rostedt <rostedt@goodmis.org>, 
+ Mathieu Desnoyers <mathieu.desnoyers@efficios.com>, 
+ Lai Jiangshan <jiangshanlai@gmail.com>, Zqiang <qiang.zhang@linux.dev>, 
+ Thomas Gleixner <tglx@kernel.org>, Ingo Molnar <mingo@redhat.com>, 
+ Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@linux.intel.com>, 
+ x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>, 
+ Chris Li <sparse@chrisli.org>, Dan Carpenter <error27@gmail.com>
+Cc: David Laight <david.laight.linux@gmail.com>, rcu@vger.kernel.org, 
+ linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org, 
+ Ricardo Ribalda <ribalda@chromium.org>
+X-Mailer: b4 0.14.3
 
-On Sat, 12 Sep 2026 18:31:03 -0400 Yury Norov <ynorov@nvidia.com> wrote:
+Recent versions of smatch preserve the address space qualifiers while
+running typeof() [1]. This has triggered tens of new sparse warnings in
+media-ci.
 
-> > 
-> > Thanks, I'll queue it.
-> > 
-> > Sashiko wants the same treatment for a few other macros:
-> > 	https://sashiko.dev/#/patchset/20260911221444.1523311-1-ynorov@nvidia.com
-> 
-> Below is the list of candidates that my AI finds relevant:
-> 
-> [long list]
-> 
-> I planned to submit this hardening for them per the relevant subsystems
-> after at least landing the ASSERT_STATIC_STORAGE() in -next.
-> 
-> If you're OK to move that material through your tree all in one,
-> I can prepare it as a single series.
+This series takes care of them following Dan's suggestion [2].
 
-People often do this by sending patches into various maintainers.  It
-can be pretty exhausting and unreliable - maintainer attentiveness
-levels vary a lot.
+[1] https://github.com/error27/smatch/commit/e53027a4e816a772403baafa83c09e4a94c1cb8f
+[2] https://lore.kernel.org/all/CANiDSCuizbMt77XfrzGPMa3Biai5TF1vcs+C5qdhYoLrP=9b3g@mail.gmail.com/
 
+Signed-off-by: Ricardo Ribalda <ribalda@chromium.org>
+---
+Changes in v2:
+- Add TYPEOF_NO_ADDRESS_SPACE() in compiler.h
+- x86: improve changelog
+- Link to v1: https://lore.kernel.org/r/20260825-unqual-v1-0-7024fb81b4f9@chromium.org
 
-Such a series is applying one concept in many places.  It's justifiable
-to do this in a single series.
+---
+Ricardo Ribalda (2):
+      rcu: Drop the address space qualifier from the dereference macros
+      x86/uaccess: Drop the address space qualifier from put_user()
 
+ arch/x86/include/asm/uaccess.h |  4 ++--
+ include/linux/compiler.h       | 17 +++++++++++++++++
+ include/linux/rcupdate.h       | 10 +++++-----
+ 3 files changed, 24 insertions(+), 7 deletions(-)
+---
+base-commit: 704340f1cd0dcef829eb62f5b48ae95a2ce17bdf
+change-id: 20260825-unqual-25d9ee74fd10
 
-It gets me shouted at, but my preferred approach is to take all of it
-into mm.git while ensuring that maintainers are cc'ed.  Results are
-among:
+Best regards,
+-- 
+Ricardo Ribalda <ribalda@chromium.org>
 
-i)   maintainer says ack.  Great, I keep the patch and upstream it
-
-ii)  maintainer merges it.  Great, I drop the mm.git copy when the
-     conflict is reported in linux-next.
-
-iii) maintainer says nothing.  Oh well, I upstream it and hope for the
-     best.
-
-     iiiA): maintainer later shouts at me.  Oh well, I did
-            my best, read your darn email.
-
-So yes, send everything to everyone and I'll do this.
