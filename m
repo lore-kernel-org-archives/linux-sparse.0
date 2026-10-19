@@ -1,69 +1,69 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=199.89.1.14
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1792432614;
-	b=TY/TjmJy+Jk/bxDIv0j1PDOXAzT3EPC74WwlTdmlTN66Rog4UT048KFeXi0EI1CnTstG
-	 gCTO4AsSyLD7oUYJ4ZDvDYAAWwILu9+5DQ0Zp1wTtvTbZzfazXmEmi5ZprBUJoGNFr4KU
-	 lnh25lasEZKb0benfc3JR5f7OK0tA9f0/0ZbnDPCfkznAqx6aPJrruDgw4hNf7a8XEKxk
-	 fqKaIeGreCV5b5Zu0kNR4kvcc4zkMf6bVyqSvr3T4iI5CDskKo6kPS1nSltfv8T6Q9yrW
-	 gVcCINOeTdaCrzAXel/6zaJigPR5NK0EuGuCAhBYu3E2l/cpkU4Mmaxr4j9dwlTXwwA==
+	t=1792432615;
+	b=v8a/wFIDtygijwWNHlESRIkK01Km8iV8BPPcWndfCIYXxMDQHpeLBl1ZHfXU9BbXMgEK
+	 g5yPHJsXiLzUupFmvVDFEs6AC/sOF1Be8a9teYNJERXNyvrS+PCJZyWvG6cOZF1W64sBp
+	 KYIjoGCDR/tVyvHvZH2ajs/GdIO08RrcLWpmoNH7oTI7gbi5vApRd8l789n8iGeYpgMvq
+	 GgWTEapkPsNws1zVIuQvC1sfrzAhoqC9hIk0DFx2W27oH+Yu1djIq4KMrf8qLbWftjiBz
+	 GVYWioerZ/8H+R+wDEF277udUYiEtsZ+ew8s2VsYUVjK9+Bz9dd8VqjAoei/48U/Kcw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1792432614;
+	a=rsa-sha256; c=relaxed/relaxed; t=1792432615;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Virus-Scanned:Received:
 	 Received:From:To:Cc:Subject:Date:Message-ID:X-Mailer:In-Reply-To:
 	 References:MIME-Version:Content-Transfer-Encoding;
-	bh=TvtJs1ARGQT5I+pscgt24p7Y1pver8t2/3x3b7AFPJc=;
-	b=xcEIl6TkR9tFhbTHd9zcLUBNj24jCjbZTkh4jwmD59rndmSY7mP7EZIRoDUF5x4Zdq8k
-	 ieVMhExVBwaLlSvgSyEVzvB2BlE0f0KJ47IdHpofz1O5M4ktAqY6bG4Cn8W+FdAaPXuYx
-	 75n25ycgV/ROaxwbaZuNldL1s+JiLJcmLt5vhj8L4ues9iATDYKJjp1t9d3H7NMKyNa+0
-	 PP6qsiteb/WvsbYUSA9SFXmU/pNKebvdAwYpjRA3cmcTBCP99mKZPnEp7SOyTwoN5ob8i
-	 YWXxw67YQCN44S0gYHt9qiHlnEI6+lfv0XR+cC4LTVaWPLky7uMpl7NwkzH0p2chzXQ==
+	bh=SPV3nbPM36HDSPJOqsi/0LDta5+Qs4FzbgL1cTG129w=;
+	b=ow6j13l3q4ViOJmsX846GgWyF0EwTGKrxhfHahXkvuNn9VENFI3WHuMzktDao9OeEiYA
+	 5n5Bb33/zw7n4kYdlbY/Nmd+HHV1bTLFxGx1PWl0a6Qi7k+MkjfFcDg6Xzv/bWATTFBFP
+	 Q7tblyNx+YMW9tuboacV5qvEjl6v3VXh/ZcTIDDhADekE63Zq/iirUzl13Ap4ZnR6vIxS
+	 d4w7NG8W39NipdzsX8CnmJoY1Uv8DZ/6/qbZfTZdiGzWybbDUoxXm0HmCYGskCBnkuUgc
+	 1efMTOqLvH6a3RtZT5Fic3PgrRajPHfH+m+gC8czlM4wDqxO3pjn6Af80C5WiCR5PLw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=acm.org;
 	spf=pass smtp.mailfrom=acm.org;
-	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=yoB+fPLp;
+	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=awODcrbC;
 	arc=none smtp.remote-ip=199.89.1.14
 Received: from 011.lax.mailroute.net (011.lax.mailroute.net [199.89.1.14])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5C73E606A31F
-	for <linux-sparse@vger.kernel.org>; Mon, 19 Oct 2026 17:56:54 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 5C73E606A31F
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0DBDB606A31C
+	for <linux-sparse@vger.kernel.org>; Mon, 19 Oct 2026 17:56:55 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 0DBDB606A31C
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=acm.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=yoB+fPLp
+	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=awODcrbC
 Received: from localhost (localhost [127.0.0.1])
-	by 011.lax.mailroute.net (Postfix) with ESMTP id 4j7jsq0lsVz1XM6J5;
+	by 011.lax.mailroute.net (Postfix) with ESMTP id 4j7jsq1sTvz1XM4Tn;
 	Mon, 19 Oct 2026 17:56:47 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=acm.org; h=
 	content-transfer-encoding:mime-version:references:in-reply-to
 	:x-mailer:message-id:date:date:subject:subject:from:from
-	:received:received; s=mr01; t=1792432605; x=1795024606; bh=TvtJs
-	1ARGQT5I+pscgt24p7Y1pver8t2/3x3b7AFPJc=; b=yoB+fPLp08LFKuF/ABhQ6
-	PCc3rcHY4LZ5yxUK45UIOR2oEe2SO/V1M27Nk5FOrYM4M7xaHvyj+DU78W6iXZsW
-	sipCq0/uM0bDpVGxHxwVrm9pt9kUKnjaNIKQWQrNNlMKgX83KWQj/GWrIucbJotJ
-	vd0Lqlm/4AG9sSYOn39/t9ErtS8b5Q84oz2F5YDzPkYNMukOa8qNrYgYX2vpWKZ4
-	oeqeqQ/+NkW/Q58GwlmqlYf3g8bvmOQedJ6k8hnsw4eeAYtPzkAtF2ncdzmmqTSt
-	nI1KPX8JxRXdX5cOnpx+fOKT06fWjoB3ytdWj/ABZb/NKvYFBClc3Ihb8awTm4qW
+	:received:received; s=mr01; t=1792432605; x=1795024606; bh=SPV3n
+	bPM36HDSPJOqsi/0LDta5+Qs4FzbgL1cTG129w=; b=awODcrbCnGB200bWgPFFz
+	0yqhPLLVEQj0bw2DEMfLJJ5KyiP4qrxZp8aH+ptgAUcKnJtVzFymRoZ7xX18Ypxl
+	BKXWjZb8q9J5wf0uIhzzJMFeROHy695aKWtWwLF/cGFEeM2m0NiAad2INaOuPGrq
+	5G04W+LexY1+RjSV0B9SSAdKrKf94D6+ZpeTKYOyyH1hNHpTaYm9XRN2NhGPoryH
+	6V9BE1kWIDyxD3g5AWRF2NkrXTA9+bK8HYEak53RYU44ulXDGsAFnwR3ZKf1PrHG
+	k8ru+Z59vvBPdDYpiLoEIE155poLhzM5kgDGMEfRIxoTYPHH2NkpM3JHyNL6C4rf
 	w==
 X-Virus-Scanned: by MailRoute
 Received: from 011.lax.mailroute.net ([127.0.0.1])
  by localhost (011.lax [127.0.0.1]) (mroute_mailscanner, port 10029) with LMTP
- id 7crdpGlrL-nh; Mon, 19 Oct 2026 17:56:45 +0000 (UTC)
+ id MsujHDAu7m4P; Mon, 19 Oct 2026 17:56:45 +0000 (UTC)
 Received: from bvanassche.c.googlers.com.com (245.199.118.34.bc.googleusercontent.com [34.118.199.245])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
 	(Authenticated sender: bvanassche@acm.org)
-	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4j7jsl5Sy5z1XM4Tn;
-	Mon, 19 Oct 2026 17:56:43 +0000 (UTC)
+	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4j7jsm3wDhz1XM4Tl;
+	Mon, 19 Oct 2026 17:56:44 +0000 (UTC)
 From: Bart Van Assche <bvanassche@acm.org>
 To: linux-sparse@vger.kernel.org
 Cc: Bart Van Assche <bvanassche@acm.org>
-Subject: [PATCH 08/20] pre-process: Avoid zero-length VLAs for parameterless macros
-Date: Mon, 19 Oct 2026 10:56:21 -0700
-Message-ID: <20261019175633.415493-9-bvanassche@acm.org>
+Subject: [PATCH 11/20] evaluate: Use bitmask helpers in evaluate_ptr_add()
+Date: Mon, 19 Oct 2026 10:56:24 -0700
+Message-ID: <20261019175633.415493-12-bvanassche@acm.org>
 X-Mailer: git-send-email 2.56.0.212.g129ede20d9-goog
 In-Reply-To: <20261019175633.415493-1-bvanassche@acm.org>
 References: <20261019175633.415493-1-bvanassche@acm.org>
@@ -78,43 +78,50 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
 
-Ensure at least one element when declaring the variable-length args[]
-arrays in expand() and dump_macro() by using nargs ? nargs : 1 instead of
-nargs.
+Include "bits.h" in evaluate.c and replace the open-coded 1ULL shifts in
+evaluate_ptr_add() with sign_bit(itype->bit_size) and
+bits_mask(bits_in_pointer).
 
-Avoid undefined behavior in C from declaring zero-length variable-length
-arrays on the stack when expanding or dumping function-like macros define=
-d
-with an empty parameter list (nargs =3D=3D 0).
+Avoid undefined shift behavior when folding constant pointer offsets whos=
+e
+integer index type has zero bit size (on invalid types) or exceeds 64 bit=
+s
+(such as __int128), or when bits_in_pointer equals 64.
 
-Fixes: 669244d22464 ("[PATCH] lazy-copy macro expansion in pre-processing=
+Fixes: fbab5f78de94 ("[PATCH] fix index conversions in evaluate_ptr_add()=
 ")
-Fixes: 9b4e30eb0baf ("teach sparse how to dump macro definitions")
 Signed-off-by: Bart Van Assche <bvanassche@acm.org>
 ---
- pre-process.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ evaluate.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/pre-process.c b/pre-process.c
-index 4e322855d600..038e019b11c9 100644
---- a/pre-process.c
-+++ b/pre-process.c
-@@ -745,7 +745,7 @@ static int expand(struct token **list, struct symbol =
-*sym)
- 	struct token **tail;
- 	struct token *expansion =3D sym->expansion;
- 	int nargs =3D sym->arglist ? sym->arglist->count.normal : 0;
--	struct arg args[nargs];
-+	struct arg args[nargs ? nargs : 1];
-=20
- 	if (expanding->tainted) {
- 		token->pos.noexpand =3D 1;
-@@ -2285,7 +2285,7 @@ static int is_VA_ARGS_token(struct token *token)
- static void dump_macro(struct symbol *sym)
- {
- 	int nargs =3D sym->arglist ? sym->arglist->count.normal : 0;
--	struct token *args[nargs];
-+	struct token *args[nargs ? nargs : 1];
- 	struct token *token;
-=20
- 	printf("#define %s", show_ident(sym->ident));
+diff --git a/evaluate.c b/evaluate.c
+index 85a6447ba3ce..988ace95abed 100644
+--- a/evaluate.c
++++ b/evaluate.c
+@@ -37,6 +37,7 @@
+ #include "evaluate.h"
+ #include "lib.h"
+ #include "allocate.h"
++#include "bits.h"
+ #include "parse.h"
+ #include "token.h"
+ #include "symbol.h"
+@@ -601,14 +602,13 @@ static struct symbol *evaluate_ptr_add(struct expre=
+ssion *expr, struct symbol *i
+ 	if (index->type =3D=3D EXPR_VALUE) {
+ 		struct expression *val =3D alloc_expression(expr->pos, EXPR_VALUE);
+ 		unsigned long long v =3D index->value, mask;
+-		mask =3D 1ULL << (itype->bit_size - 1);
++		mask =3D sign_bit(itype->bit_size);
+ 		if (v & mask)
+ 			v |=3D -mask;
+ 		else
+ 			v &=3D mask - 1;
+ 		v *=3D multiply;
+-		mask =3D 1ULL << (bits_in_pointer - 1);
+-		v &=3D mask | (mask - 1);
++		v &=3D bits_mask(bits_in_pointer);
+ 		val->value =3D v;
+ 		val->ctype =3D ssize_t_ctype;
+ 		expr->right =3D val;
