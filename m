@@ -1,69 +1,69 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=199.89.1.14
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1792432613;
-	b=1nYQXkajoYQz+zE/cX/YsPMw1irv7aKje3EmBqu5tUQfsnT77tM9LUFaYI0l8ppaqNPI
-	 +NwQJFYvzcbnSvhLXKYUWGhqdAcXSkWc67B7L5ryxqa+Hac4H2TeyBi4o9mYVoUgZNSZd
-	 CTem36Sevuck1UKCa/Jsh13NVynv+T1h+kRHX4xQIuyue4g3KUrr6oW+gJ/xEX+KFfVSa
-	 YW3NK2YFJWzknmfRwgkcAlt0pBGbc++9rwyAEtZgkvtRtMTZV4Id3vqfPAc2AKtZYPykS
-	 W4FayE0tWpegXGUEoYmgZRdF9xbyvOpVi9K0LVcvpjoR3pKj9UtZUwgon2RjRaC6DqQ==
+	t=1792432614;
+	b=SxDbHpl+Hx88ObmnFfm5SAxYFH9p6dENrOXbaG37Eb8+lrPypVNdqaaPmqc1Y17j2Aht
+	 Ci7n/0daJN7wEWOz69e1MRatZIrQMNkdL5hpCp98WUN9IcbJVxAxXpwD58pqWl9nVHMX1
+	 +vpgb7+r+e/uxLYD8yTuvNFOzEgTfZKGjU2tysKEeR+b1bWlZTVXDyDtAE2hY5G0Oimfk
+	 4WBPSKcMWKOg1Ss7JpGeIWnppuW/Bv+Yqw97qrqHunQtJBJsdz3b9hm5wQTO2fWlvj3f+
+	 YxJb/Xh0bRi3xayaduMA4n1wgWA8eW4sUar+rjUPfpdnXnE7UmydVBxmKqt5DEm1kgw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1792432613;
+	a=rsa-sha256; c=relaxed/relaxed; t=1792432614;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Virus-Scanned:Received:
 	 Received:From:To:Cc:Subject:Date:Message-ID:X-Mailer:In-Reply-To:
 	 References:MIME-Version:Content-Transfer-Encoding;
-	bh=5I6nE1cRQH6+qNDHv8dD+4vGL84txjRo3wUdq3nchBc=;
-	b=bY2utTzVqNVNUdEeZkpnkAiH0qWQoLUwtIiANXH5kfieujr8qVJ2lcmHJmp1Lr4Tl8yv
-	 3seDrKIR92PixYb9dN3TQG9mTHujhyt2uyIVvwK5AtsvUIlUBoaf9fn2D0QeWbwuNkZSX
-	 Es+Bh/spTwW2PBbjx2zrGeDpXG+mQw84cbkZbjmNkaq9PJ1hfXXMKetSOyT3621Ia8Xb1
-	 xRWL1GGmnqLsSD6n5fGCwne4te9xiLLdYv2+FTYEBWAnjLxQGMUJkFvDB8Yripj6ST5OG
-	 riQEnuxjh/7Xxjl9tuZNNyqYbRUVZCVXbW8goTFJE218SlnmXAqYHms1RyN1JZpiI4w==
+	bh=WnXyqFSz+eL5Y2f0ffR0AP1UG4Sa/toK10ZuA5Ep/7s=;
+	b=CYCHvMTIRwCrzXBhBhvjQpB6srxW4S/115sldl7o1Nc1u/XuVaLbxdFTz9pb9byeaPHp
+	 P8AVR8QTutFKSBCthWKgkTOkFBUgn34GqMPWHwUPHcCQpGLmD1ZIhrYnRb6+NUesRt7ra
+	 RWhwqJBtiAuVQRdvCo5YI0aZQ4LfhUTkt9OpaUB9Ep9qeIjuAc2Met+T+JUFdI/ezqyDM
+	 sCPFuteTlH7paYFaB/TuQ0zRg1VETKegO99RfZI4GBR1HtREQWTZupSNOcjVz6Z9ZPSAr
+	 llvaoQxHEdaNeKkgWfSnU377jLQ6h5z0nUVcx0TUrQVvVRI5RXicTSQRd8pP2hB4Dvg==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=acm.org;
 	spf=pass smtp.mailfrom=acm.org;
-	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b="RZ34TE/m";
+	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=Ps7KnEok;
 	arc=none smtp.remote-ip=199.89.1.14
 Received: from 011.lax.mailroute.net (011.lax.mailroute.net [199.89.1.14])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 78436606A31F
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A55EE606A31C
 	for <linux-sparse@vger.kernel.org>; Mon, 19 Oct 2026 17:56:53 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 78436606A31F
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org A55EE606A31C
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=acm.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=RZ34TE/m
+	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=Ps7KnEok
 Received: from localhost (localhost [127.0.0.1])
-	by 011.lax.mailroute.net (Postfix) with ESMTP id 4j7jsp5yy2z1XM6JJ;
-	Mon, 19 Oct 2026 17:56:46 +0000 (UTC)
+	by 011.lax.mailroute.net (Postfix) with ESMTP id 4j7jsq089qz1XM30y;
+	Mon, 19 Oct 2026 17:56:47 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=acm.org; h=
 	content-transfer-encoding:mime-version:references:in-reply-to
 	:x-mailer:message-id:date:date:subject:subject:from:from
-	:received:received; s=mr01; t=1792432605; x=1795024606; bh=5I6nE
-	1cRQH6+qNDHv8dD+4vGL84txjRo3wUdq3nchBc=; b=RZ34TE/mf7vR3H9EA2fz9
-	icfQUxuNcw3+BmEEO493I2C95zsHBOYh59zA0ONYYKu1CdwZCwMuV1B+YZkLREke
-	QdM/CEjaF654DYFAxSOyiTvCeyiFFKvYW9/zFtaJNdFhZqeeVeFloWPBonm/3ce7
-	Iklt/e85MQSRzCyUeq5qb4CfKqQA29dKmxQd5OZenbDThE3D5yFgPl+1yoVlxdFe
-	/HZzcNCstEYBNu0n8rnDDSIrbQNHrSyfbhzLPr59RgwN4qmXlmlGrIPE1gjCEu8u
-	fYKvo7kZbZr4GxqhSsJ1/+BR+wI9JUVkKTkJuaOH2FPYs60ZiwfYucaQlovrsJZN
-	A==
+	:received:received; s=mr01; t=1792432605; x=1795024606; bh=WnXyq
+	FSz+eL5Y2f0ffR0AP1UG4Sa/toK10ZuA5Ep/7s=; b=Ps7KnEoksCZjS/0EYVmYh
+	A7cEyqS1vP+Arlxv5esbr/wBIBpDU1Zb9tA9BRXM/ACVSeGe6ptntqBoajiCcaLW
+	G1F1Nmu8cYi2PHRUt8yCG8RZEAcCwbO96X/Gl614TTzOg5i91Z/ENdg0shyvn9d0
+	pBwQHMaGRE2IJ7r9UBE+z/ZUc5zYgFkgxWsHc9O8LTAZkPR7D2Sdt3+JMKMnFY19
+	/IJzM9WJypwhQ9nGPhdAJlySXlW/wCwH0eGCLQ5ETPOPy+YNTGK5DxC9ece8ZsyM
+	ai8vxLpiUnchztk1d8hyVFvgnsqmdKcxrIL/4HI29/wtFB/qeww+5sBwJqHCKLEs
+	w==
 X-Virus-Scanned: by MailRoute
 Received: from 011.lax.mailroute.net ([127.0.0.1])
  by localhost (011.lax [127.0.0.1]) (mroute_mailscanner, port 10029) with LMTP
- id ai4waKNGf14o; Mon, 19 Oct 2026 17:56:45 +0000 (UTC)
+ id 6Yio8y6Yg3GN; Mon, 19 Oct 2026 17:56:45 +0000 (UTC)
 Received: from bvanassche.c.googlers.com.com (245.199.118.34.bc.googleusercontent.com [34.118.199.245])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
 	(Authenticated sender: bvanassche@acm.org)
-	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4j7jsl3s7Qz1XM30y;
-	Mon, 19 Oct 2026 17:56:43 +0000 (UTC)
+	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4j7jsm2HHYz1XM6Hv;
+	Mon, 19 Oct 2026 17:56:44 +0000 (UTC)
 From: Bart Van Assche <bvanassche@acm.org>
 To: linux-sparse@vger.kernel.org
 Cc: Bart Van Assche <bvanassche@acm.org>
-Subject: [PATCH 07/20] parse: Avoid incrementing rank on invalid long real specifiers
-Date: Mon, 19 Oct 2026 10:56:20 -0700
-Message-ID: <20261019175633.415493-8-bvanassche@acm.org>
+Subject: [PATCH 10/20] target: Avoid signed overflow in bit and byte conversion helpers
+Date: Mon, 19 Oct 2026 10:56:23 -0700
+Message-ID: <20261019175633.415493-11-bvanassche@acm.org>
 X-Mailer: git-send-email 2.56.0.212.g129ede20d9-goog
 In-Reply-To: <20261019175633.415493-1-bvanassche@acm.org>
 References: <20261019175633.415493-1-bvanassche@acm.org>
@@ -78,48 +78,42 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
 
-Check whether rank is already non-zero before incrementing rank for a
-Set_Long type specifier in declaration_specifiers(), and break out of the
-loop before incrementing rank when class is CReal.
+Cast bits to unsigned int before adding bits_in_char - 1 in
+bits_to_bytes(), and widen bytes_to_bits() to accept and return long whil=
+e
+performing the multiplication by bits_in_char in unsigned long.
 
-Prevent out-of-bounds reads past the end of real_types[] when indexing
-types[class][rank] for invalid specifier combinations such as "long long
-double", where incrementing rank to 2 before breaking exceeded the valid
-[-1, 1] index range of real_types + 1.
+Prevent signed integer addition overflow in bits_to_bytes() near INT_MAX
+and prevent 32-bit signed multiplication overflow and truncation in
+bytes_to_bits() on large array offsets and sparse initializers.
 
-Fixes: 319206abe1f2 ("Rewrite and fix specifiers handling")
+Fixes: eb800bdc3791 ("Unhardcode byte size being 8 bits.")
+Fixes: b3e9d87c6a98 ("sparse: make bits_to_bytes round up instead of down=
+")
 Signed-off-by: Bart Van Assche <bvanassche@acm.org>
 ---
- parse.c | 17 ++++++++++-------
- 1 file changed, 10 insertions(+), 7 deletions(-)
+ target.h | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/parse.c b/parse.c
-index 9389079eb173..0e3e384550c5 100644
---- a/parse.c
-+++ b/parse.c
-@@ -1595,14 +1595,17 @@ static struct token *declaration_specifiers(struc=
-t token *token, struct decl_sta
- 				rank =3D -2;
- 			if (s->op->set & (Set_Short|Set_Float)) {
- 				rank =3D -1;
--			} else if (s->op->set & Set_Long && rank++) {
--				if (class =3D=3D CReal) {
--					specifier_conflict(token->pos,
--							   Set_Vlong,
--							   &double_ident);
--					break;
-+			} else if (s->op->set & Set_Long) {
-+				if (rank) {
-+					if (class =3D=3D CReal) {
-+						specifier_conflict(token->pos,
-+								   Set_Vlong,
-+								   &double_ident);
-+						break;
-+					}
-+					seen |=3D Set_Vlong;
- 				}
--				seen |=3D Set_Vlong;
-+				rank++;
- 			}
- 		}
- 		token =3D token->next;
+diff --git a/target.h b/target.h
+index 92b8af9169d7..0b21702c45f1 100644
+--- a/target.h
++++ b/target.h
+@@ -143,12 +143,12 @@ void target_init(void);
+=20
+ static inline int bits_to_bytes(int bits)
+ {
+-	return bits >=3D 0 ? (bits + bits_in_char - 1) / bits_in_char : -1;
++	return bits >=3D 0 ? ((unsigned int)bits + bits_in_char - 1) / bits_in_=
+char : -1;
+ }
+=20
+-static inline int bytes_to_bits(int bytes)
++static inline long bytes_to_bits(long bytes)
+ {
+-	return bytes * bits_in_char;
++	return (unsigned long)bytes * bits_in_char;
+ }
+=20
+ static inline unsigned long array_element_offset(unsigned long base_bits=
+, int idx)
