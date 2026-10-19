@@ -1,69 +1,69 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=199.89.1.14
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
 	t=1792432617;
-	b=FaEm2cFz01hiAOsLOCzidOEgOf93uknSqucI8R/xUPOy3Y0GZoJ9jXgnER7F2UIBfPIb
-	 uDqgYo7D9I0IiGo5YdTlqu0+UW0hNRxyaxy35X+zWOaLBZOGfajDVQ/JWNlCW2sKyHHgY
-	 tR50+XFqqlJZz6X83gveErNtTWsDwr+30T3VV9RifNHBWhfDoo0MXAnkVDVwrqeT/19MO
-	 nfZZJd/bH1y4IruHrMsd+cKNsefutEqRgxwTt9yQVwAaGLj7HPbm3TMNYASpHyu7VtF25
-	 MHMH6LL3SUIs+M63bWh/FNvZ42UaKVQK6bO9h5Rh3dL5vyWC2cQI9GBQJMtCeTjVScg==
+	b=N6NSubvnqQHEG1Wm5HWLORzlQow9rKCw7okeOnZt8vR3c1TpgmLCPhOHDm6FwTfuDxUj
+	 g5Fv4JL6erDxmYhHvhSJoXS69PZi1EBHtjzzuQT4GDG/x4BXz8OHCNsTWwQShc1wd63ht
+	 ZKpzxFdl2tPUopZzTRBCKJAkUHy6kT1UVFtAczQ3vFOSBMOeWpSmGikillogOv0vC5rig
+	 w/5asefbi9IZRu5QCQFB6HEJF33N52G5wCBlK/iHVbiHymvDG1ZBSyGe/jPwyjSz7Khpo
+	 nxiMow5dblR9OiekIlqUpYNcNpcZItm6YNAlOXaFvw1g/2CUMwIGSWY6tumQJx9J4fQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
 	a=rsa-sha256; c=relaxed/relaxed; t=1792432617;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Virus-Scanned:Received:
 	 Received:From:To:Cc:Subject:Date:Message-ID:X-Mailer:In-Reply-To:
 	 References:MIME-Version:Content-Transfer-Encoding;
-	bh=YHD1vvnVw5T97cutN0Z3Ms/DvuDnyWeMfpQ1N4g8Yrs=;
-	b=jXpzlOXDo+zMBq/tYILX0QOGFTOvGWiy7sjcYue6LmIYEVIKYF94Izxt8XPxuY+0Uf+a
-	 2fhw9BWrxZKDDRRAnlU+YFSAutX4LB22UNsraHPbMaeePJ6K3OB+V2Jka8WuiXnp6Z1cW
-	 JKnxs3paW8zn0pW/mWo0ExwjwDdjCvr5WO2blX9shDUbMQ0FhHzTTNdSLNK2HPohWIT56
-	 Qgu+TmZDJ/k/44eWeOXVZHyBahgjfF8vGcfo0q3BOxrDspFI0UVUF6A31UzksgFDqSCmv
-	 7AVgEoBh+sEhtglVWZVgsTzFZ+8BichUQoAAl00Bk+LA35Pz/Azx/JIRBoulNHY4TUw==
+	bh=HYQWmZllDuRCgFKi0kDJF8fwFNXIgQAStj4Vi2xbENY=;
+	b=fzBE4rlsreAiJHkCQakWIwszLaa20PQeQJKOMaA4JPkiVgbBx+GUbfPILWj5vZ3LHWCA
+	 wb7gyEg01hfI63iy+m/gduOjE8xO/nJpUmmwgOYLWC8Onu9tmwm2b4LfLFFGo/l4AtRJ+
+	 uk1yjgeTxITA6Md9+o+07Oe34NcXAlv4YhWr8jcDMmroRgzLkx5N99pBkfHJDVu4AtKPT
+	 lTq34+oWPzVtccU5eiPMWHpEhit/rfUNv5hEC0MFoVPZO++ZPQivACZgE7WoQBsyyZfAG
+	 kO3jYsIC7xEwk+abB92gAvsfVXsoXMmsCG3C/SpObUvX0anSWuUXAwfdBnLVjtOpEjw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=acm.org;
 	spf=pass smtp.mailfrom=acm.org;
-	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=Op4qoxo4;
+	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=2lJp3JiS;
 	arc=none smtp.remote-ip=199.89.1.14
 Received: from 011.lax.mailroute.net (011.lax.mailroute.net [199.89.1.14])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9DD3E606A327
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BCC72606A31D
 	for <linux-sparse@vger.kernel.org>; Mon, 19 Oct 2026 17:56:56 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 9DD3E606A327
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org BCC72606A31D
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=acm.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=Op4qoxo4
+	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=2lJp3JiS
 Received: from localhost (localhost [127.0.0.1])
-	by 011.lax.mailroute.net (Postfix) with ESMTP id 4j7jsr3F0mz1XM6JQ;
+	by 011.lax.mailroute.net (Postfix) with ESMTP id 4j7jsr4pGwz1XM30g;
 	Mon, 19 Oct 2026 17:56:48 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=acm.org; h=
 	content-transfer-encoding:mime-version:references:in-reply-to
 	:x-mailer:message-id:date:date:subject:subject:from:from
-	:received:received; s=mr01; t=1792432606; x=1795024607; bh=YHD1v
-	vnVw5T97cutN0Z3Ms/DvuDnyWeMfpQ1N4g8Yrs=; b=Op4qoxo4t2zBIxdqaDSYR
-	TYeEx8EmKiCOov69qutbgY0Z6gKZM8s+8Bxc2XxgGqH0mId7WQc0EURj1/1j0yS0
-	CgVsPkg9SNoxB3KMCQBO8RCI+x+N4TZ0oyOXbSMjC5Dmjd/XfHdqcsdG/AIYbetX
-	8nbrdJTg64wuyHUKyznT7mdPCDbocHVmhyBi+KlWbek4AVNpilxoqaN7xRyFgFxS
-	GnbzRGSZpxm5yaRsWh37HVTTzswJaq+H/O5D8noDVWOmHR6SRAk+u5omeZO+uKv4
-	lsPe3Zz3tl7QP7uQTzV1Rp3LlpwG4YEdPIy/90WDBpi7795VJJJmag08cIn+T7fh
+	:received:received; s=mr01; t=1792432606; x=1795024607; bh=HYQWm
+	ZllDuRCgFKi0kDJF8fwFNXIgQAStj4Vi2xbENY=; b=2lJp3JiS1npiyjBr7RHuo
+	aLDw7uWvWbnoafjUtG73T1Z7Vl1qOmRFE5wToTw89YsPwZFQrRpvpGQz9HL8BG3z
+	j/l7G8g42yqMTkUJYHxQP1csUTpEcfXHNaQZmaRktClAsruo38HOmZy5PXmHu2HQ
+	k1rzdMS4GyFZp9hu0+kwyu4qNez3tKu4WaUUU3mwdkUO11R7FHeJujqYzN3bX8nQ
+	Zqpyr69XHOScioGaHHSb39ytD+woM/cgv5MpfSYqXn/3jZtfdT788Qn7SWVwWqYT
+	FT1P+hES94/hI5Yv3R2yQP6x+Q7YovOSif57SI+GufWX1vKRC2uWqqApwKT4f68B
 	Q==
 X-Virus-Scanned: by MailRoute
 Received: from 011.lax.mailroute.net ([127.0.0.1])
  by localhost (011.lax [127.0.0.1]) (mroute_mailscanner, port 10029) with LMTP
- id 2HLOHw8DTLRR; Mon, 19 Oct 2026 17:56:46 +0000 (UTC)
+ id VX6yswr3zFQ9; Mon, 19 Oct 2026 17:56:46 +0000 (UTC)
 Received: from bvanassche.c.googlers.com.com (245.199.118.34.bc.googleusercontent.com [34.118.199.245])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
 	(Authenticated sender: bvanassche@acm.org)
-	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4j7jsn6B8lz1XM30g;
-	Mon, 19 Oct 2026 17:56:45 +0000 (UTC)
+	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4j7jsp0l2Yz1XM30r;
+	Mon, 19 Oct 2026 17:56:46 +0000 (UTC)
 From: Bart Van Assche <bvanassche@acm.org>
 To: linux-sparse@vger.kernel.org
 Cc: Bart Van Assche <bvanassche@acm.org>
-Subject: [PATCH 16/20] llvm: Stop calling LLVMConstGEP2() for string literals
-Date: Mon, 19 Oct 2026 10:56:29 -0700
-Message-ID: <20261019175633.415493-17-bvanassche@acm.org>
+Subject: [PATCH 17/20] llvm: Free leaked allocations and LLVM objects
+Date: Mon, 19 Oct 2026 10:56:30 -0700
+Message-ID: <20261019175633.415493-18-bvanassche@acm.org>
 X-Mailer: git-send-email 2.56.0.212.g129ede20d9-goog
 In-Reply-To: <20261019175633.415493-1-bvanassche@acm.org>
 References: <20261019175633.415493-1-bvanassche@acm.org>
@@ -78,47 +78,105 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
 
-Return the string global variable directly in get_sym_value() when
-compiling with LLVM 15 or later instead of passing it to
-LLVMConstGEP2() with zero indices, and restrict the indices array
-definition to LLVM 14 and earlier.
+Include <stdlib.h> in sparse-llvm.c, free arg_type after calling
+LLVMFunctionType() in sym_func_type(), free args after emitting the call
+instruction in output_op_call(), call LLVMDisposeBuilder() at the end of
+output_fn(), and jump to a cleanup label when die_if_error is set in
+main() so LLVMDisposeModule() executes before returning.
 
-Avoid the LLVMConstGEP2() deprecation warning on LLVM 24 and omit the
-redundant zero-offset constant GEP call because LLVM 15 and later use
-opaque pointers (ptr) and fold zero-offset constant GEPs back to the
-underlying global variable.
+Prevent memory leaks of temporary argument arrays, per-function LLVM IR
+builders, and the LLVM module during both normal compilation and error
+exits under LeakSanitizer.
 
-Fixes: 0544c547682b ("llvm: fix LLVM 15 deprecation warnings")
+Fixes: 45a6fbff8250 ("sparse, llvm: Initial commit")
+Fixes: 404705a0c86d ("sparse, llvm: implement OP_CALL")
+Fixes: 064c4adfb5fd ("sparse, llvm: Function pointer code generation")
+Fixes: 469e5d6ea335 ("sparse, llvm: die if error")
 Signed-off-by: Bart Van Assche <bvanassche@acm.org>
 ---
- sparse-llvm.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ sparse-llvm.c | 19 +++++++++++++++----
+ 1 file changed, 15 insertions(+), 4 deletions(-)
 
 diff --git a/sparse-llvm.c b/sparse-llvm.c
-index 90a931b76a0e..1155c2341251 100644
+index 1155c2341251..70e0ff6f58a4 100644
 --- a/sparse-llvm.c
 +++ b/sparse-llvm.c
-@@ -311,7 +311,9 @@ static LLVMValueRef get_sym_value(LLVMModuleRef modul=
-e, struct symbol *sym)
- 		case EXPR_STRING: {
- 			const char *s =3D expr->string->data;
- 			size_t len =3D expr->string->length;
-+#if LLVM_VERSION_MAJOR <=3D 14
- 			LLVMValueRef indices[] =3D { LLVMConstInt(LLVMInt64Type(), 0, 0), LLV=
-MConstInt(LLVMInt64Type(), 0, 0) };
-+#endif
- 			LLVMValueRef data;
+@@ -10,6 +10,7 @@
 =20
- 			data =3D LLVMAddGlobal(module, LLVMArrayType(LLVMInt8Type(), len), ".=
-str");
-@@ -320,7 +322,7 @@ static LLVMValueRef get_sym_value(LLVMModuleRef modul=
-e, struct symbol *sym)
- 			LLVMSetInitializer(data, LLVMConstString(s, len, true));
+ #include <stdbool.h>
+ #include <stdio.h>
++#include <stdlib.h>
+ #include <unistd.h>
+ #include <string.h>
+ #include <assert.h>
+@@ -53,6 +54,7 @@ static LLVMTypeRef sym_func_type(struct symbol *sym)
+ 	int n_arg =3D symbol_list_size(sym->arguments);
+ 	LLVMTypeRef *arg_type =3D calloc(n_arg, sizeof(LLVMTypeRef));
+ 	LLVMTypeRef ret_type =3D func_return_type(sym);
++	LLVMTypeRef fn_type;
+ 	struct symbol *arg;
+ 	int idx =3D 0;
 =20
- #if LLVM_VERSION_MAJOR > 14
--			result =3D LLVMConstGEP2(LLVMTypeOf(data), data, indices, ARRAY_SIZE(=
-indices));
-+			result =3D data;
- #else
- 			result =3D LLVMConstGEP(data, indices, ARRAY_SIZE(indices));
+@@ -62,7 +64,9 @@ static LLVMTypeRef sym_func_type(struct symbol *sym)
+ 		arg_type[idx++] =3D symbol_type(arg_sym);
+ 	} END_FOR_EACH_PTR(arg);
+=20
+-	return LLVMFunctionType(ret_type, arg_type, n_arg, sym->variadic);
++	fn_type =3D LLVMFunctionType(ret_type, arg_type, n_arg, sym->variadic);
++	free(arg_type);
++	return fn_type;
+ }
+=20
+ static LLVMTypeRef sym_array_type(struct symbol *sym)
+@@ -858,6 +862,7 @@ static void output_op_call(struct function *fn, struc=
+t instruction *insn)
+ 	(void) fntype;
+ 	target =3D LLVMBuildCall(fn->builder, func, args, n_arg, name);
  #endif
++	free(args);
+=20
+ 	insn->target->priv =3D target;
+ }
+@@ -1223,6 +1228,8 @@ static void output_fn(LLVMModuleRef module, struct =
+entrypoint *ep)
+ 			} END_FOR_EACH_PTR(phi);
+ 		} END_FOR_EACH_PTR(insn);
+ 	} END_FOR_EACH_PTR(bb);
++
++	LLVMDisposeBuilder(function.builder);
+ }
+=20
+ static LLVMValueRef output_data(LLVMModuleRef module, struct symbol *sym=
+)
+@@ -1372,6 +1379,7 @@ int main(int argc, char **argv)
+ 	struct string_list *filelist =3D NULL;
+ 	struct symbol_list *symlist;
+ 	LLVMModuleRef module;
++	int ret =3D 0;
+ 	char *file;
+=20
+ 	symlist =3D sparse_initialize(argc, argv, &filelist);
+@@ -1383,8 +1391,10 @@ int main(int argc, char **argv)
+=20
+ 	FOR_EACH_PTR(filelist, file) {
+ 		symlist =3D sparse(file);
+-		if (die_if_error)
+-			return 1;
++		if (die_if_error) {
++			ret =3D 1;
++			goto out;
++		}
+ 		compile(module, symlist);
+ 	} END_FOR_EACH_PTR(file);
+=20
+@@ -1392,8 +1402,9 @@ int main(int argc, char **argv)
+=20
+ 	LLVMWriteBitcodeToFD(module, STDOUT_FILENO, 0, 0);
+=20
++out:
+ 	LLVMDisposeModule(module);
+=20
+ 	report_stats();
+-	return 0;
++	return ret;
+ }
