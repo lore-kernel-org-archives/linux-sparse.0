@@ -1,69 +1,69 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=199.89.1.14
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
 	t=1792432613;
-	b=MveWz7SG5dxsRbwO1aVkJch3H8iKmOPaL0EkW9Mal/F55KiXLGcz/15k3tZbs8LSBKEP
-	 Iiz+37Bn/6mLwlzRPIEnv7mV3pqDsJcgV97bnUDhdE+phwhxPFNVdy/V6OteoUTcVTZm9
-	 aI6TWjdkh1oaAjcd9Gagbl6diDSjyDSH2nmtaqEiujk73ITrLg24XgyoMwOQTHCajwOk8
-	 niCfHcLuSMc/6fox4Hj8/wmsMtzQoV2RBBqwcR+IJLlVXka6rBQDmGLviutnNyERapo4p
-	 WDE9ktjSiSc0hqGVzH70mZ/IoPa1zOoVgo6x4UR9Czu017JjsFMnfl2pEplrLyQzufg==
+	b=1nYQXkajoYQz+zE/cX/YsPMw1irv7aKje3EmBqu5tUQfsnT77tM9LUFaYI0l8ppaqNPI
+	 +NwQJFYvzcbnSvhLXKYUWGhqdAcXSkWc67B7L5ryxqa+Hac4H2TeyBi4o9mYVoUgZNSZd
+	 CTem36Sevuck1UKCa/Jsh13NVynv+T1h+kRHX4xQIuyue4g3KUrr6oW+gJ/xEX+KFfVSa
+	 YW3NK2YFJWzknmfRwgkcAlt0pBGbc++9rwyAEtZgkvtRtMTZV4Id3vqfPAc2AKtZYPykS
+	 W4FayE0tWpegXGUEoYmgZRdF9xbyvOpVi9K0LVcvpjoR3pKj9UtZUwgon2RjRaC6DqQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
 	a=rsa-sha256; c=relaxed/relaxed; t=1792432613;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Virus-Scanned:Received:
 	 Received:From:To:Cc:Subject:Date:Message-ID:X-Mailer:In-Reply-To:
 	 References:MIME-Version:Content-Transfer-Encoding;
-	bh=LJZBHa6gvijy9qGTJ6Z05VRWdhPXa3CcahZz8NRMcDM=;
-	b=XmPqs61TD6lrFjTZbYtdJvxUbCF5Zn7mpw8TlSVLS3Zg6qSls5aJetSy98dlHjbbrZ72
-	 9PpihowDvQ4I227amhbQb5V1anxnPIy/0YiDWlSQrJhROjO45Qnua8FRW3yTmnBFqYIeX
-	 M92q9iyROtb0oZHZvePK37KD+PYm0LKGrk1rzda436HGt/zbMR6K2MhrWoAd4y7cqgTwL
-	 3kTzL6f22xLLfAnQZeyG1IAMixpswU3HsbvpHmTCgbh5+NchYzViajnZkR/KELC85vaze
-	 AMvkXFTOFchw6S1C9Cu9iiBQnNzbxTtcQxtjJjlzoQ1CyonGad6irbJ8J8l+IqOvt8Q==
+	bh=5I6nE1cRQH6+qNDHv8dD+4vGL84txjRo3wUdq3nchBc=;
+	b=bY2utTzVqNVNUdEeZkpnkAiH0qWQoLUwtIiANXH5kfieujr8qVJ2lcmHJmp1Lr4Tl8yv
+	 3seDrKIR92PixYb9dN3TQG9mTHujhyt2uyIVvwK5AtsvUIlUBoaf9fn2D0QeWbwuNkZSX
+	 Es+Bh/spTwW2PBbjx2zrGeDpXG+mQw84cbkZbjmNkaq9PJ1hfXXMKetSOyT3621Ia8Xb1
+	 xRWL1GGmnqLsSD6n5fGCwne4te9xiLLdYv2+FTYEBWAnjLxQGMUJkFvDB8Yripj6ST5OG
+	 riQEnuxjh/7Xxjl9tuZNNyqYbRUVZCVXbW8goTFJE218SlnmXAqYHms1RyN1JZpiI4w==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=acm.org;
 	spf=pass smtp.mailfrom=acm.org;
-	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=JIS+f6bZ;
+	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b="RZ34TE/m";
 	arc=none smtp.remote-ip=199.89.1.14
 Received: from 011.lax.mailroute.net (011.lax.mailroute.net [199.89.1.14])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CF1C7606A31C
-	for <linux-sparse@vger.kernel.org>; Mon, 19 Oct 2026 17:56:52 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org CF1C7606A31C
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 78436606A31F
+	for <linux-sparse@vger.kernel.org>; Mon, 19 Oct 2026 17:56:53 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 78436606A31F
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=acm.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=JIS+f6bZ
+	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=RZ34TE/m
 Received: from localhost (localhost [127.0.0.1])
-	by 011.lax.mailroute.net (Postfix) with ESMTP id 4j7jsp4b8tz1XM6JH;
+	by 011.lax.mailroute.net (Postfix) with ESMTP id 4j7jsp5yy2z1XM6JJ;
 	Mon, 19 Oct 2026 17:56:46 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=acm.org; h=
 	content-transfer-encoding:mime-version:references:in-reply-to
 	:x-mailer:message-id:date:date:subject:subject:from:from
-	:received:received; s=mr01; t=1792432605; x=1795024606; bh=LJZBH
-	a6gvijy9qGTJ6Z05VRWdhPXa3CcahZz8NRMcDM=; b=JIS+f6bZhCSCKElGTV6bK
-	J9vNBMZeFF+VRL+WrAxxmhW47Avj8weiT5pqDaNiCmuFkzHk90p15v9KZv6msEwZ
-	MH/omANqlUj6xaz4VhsKi7YWTv0adUMGNSmTYSTIGn+C9/3hmCtm22BM9K9RQxoy
-	J0ijsNvSgzgV2tuS+CWWK9vYFLJqqj03Rx9+W0B/Tn0zYu5J7Y5aLLfWFX7Go8t6
-	U4FsXN6p/h+t5u8i+xA2OIe4NlqugRHZsUv0URwykBuE8TUSpVmUvlLNM1HmiyGl
-	gQwabsusIQsgwmGcfTYhjZJ3WsY3j5wfwHN5wFqdNmk3ovpL5LBEQW3/+mzlXxtA
-	w==
+	:received:received; s=mr01; t=1792432605; x=1795024606; bh=5I6nE
+	1cRQH6+qNDHv8dD+4vGL84txjRo3wUdq3nchBc=; b=RZ34TE/mf7vR3H9EA2fz9
+	icfQUxuNcw3+BmEEO493I2C95zsHBOYh59zA0ONYYKu1CdwZCwMuV1B+YZkLREke
+	QdM/CEjaF654DYFAxSOyiTvCeyiFFKvYW9/zFtaJNdFhZqeeVeFloWPBonm/3ce7
+	Iklt/e85MQSRzCyUeq5qb4CfKqQA29dKmxQd5OZenbDThE3D5yFgPl+1yoVlxdFe
+	/HZzcNCstEYBNu0n8rnDDSIrbQNHrSyfbhzLPr59RgwN4qmXlmlGrIPE1gjCEu8u
+	fYKvo7kZbZr4GxqhSsJ1/+BR+wI9JUVkKTkJuaOH2FPYs60ZiwfYucaQlovrsJZN
+	A==
 X-Virus-Scanned: by MailRoute
 Received: from 011.lax.mailroute.net ([127.0.0.1])
  by localhost (011.lax [127.0.0.1]) (mroute_mailscanner, port 10029) with LMTP
- id bfmZiHynLT_w; Mon, 19 Oct 2026 17:56:45 +0000 (UTC)
+ id ai4waKNGf14o; Mon, 19 Oct 2026 17:56:45 +0000 (UTC)
 Received: from bvanassche.c.googlers.com.com (245.199.118.34.bc.googleusercontent.com [34.118.199.245])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
 	(Authenticated sender: bvanassche@acm.org)
-	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4j7jsl2F35z1XM30w;
+	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4j7jsl3s7Qz1XM30y;
 	Mon, 19 Oct 2026 17:56:43 +0000 (UTC)
 From: Bart Van Assche <bvanassche@acm.org>
 To: linux-sparse@vger.kernel.org
 Cc: Bart Van Assche <bvanassche@acm.org>
-Subject: [PATCH 06/20] c2xml: Use an unsigned shift in examine_modifiers()
-Date: Mon, 19 Oct 2026 10:56:19 -0700
-Message-ID: <20261019175633.415493-7-bvanassche@acm.org>
+Subject: [PATCH 07/20] parse: Avoid incrementing rank on invalid long real specifiers
+Date: Mon, 19 Oct 2026 10:56:20 -0700
+Message-ID: <20261019175633.415493-8-bvanassche@acm.org>
 X-Mailer: git-send-email 2.56.0.212.g129ede20d9-goog
 In-Reply-To: <20261019175633.415493-1-bvanassche@acm.org>
 References: <20261019175633.415493-1-bvanassche@acm.org>
@@ -78,31 +78,48 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
 
-Replace the signed integer shift expression 1 << i with (1UL << i) in
-examine_modifiers() when testing bits in sym->ctype.modifiers across
-indices 0 through 31.
+Check whether rank is already non-zero before incrementing rank for a
+Set_Long type specifier in declaration_specifiers(), and break out of the
+loop before incrementing rank when class is CReal.
 
-Avoid shifting a signed 32-bit int value into its sign bit when i is 31,
-eliminating undefined signed left-shift behavior in C and matching the
-unsigned long type of sym->ctype.modifiers.
+Prevent out-of-bounds reads past the end of real_types[] when indexing
+types[class][rank] for invalid specifier combinations such as "long long
+double", where incrementing rank to 2 before breaking exceeded the valid
+[-1, 1] index range of real_types + 1.
 
-Fixes: f744a1419d92 ("add c2xml program")
+Fixes: 319206abe1f2 ("Rewrite and fix specifiers handling")
 Signed-off-by: Bart Van Assche <bvanassche@acm.org>
 ---
- c2xml.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ parse.c | 17 ++++++++++-------
+ 1 file changed, 10 insertions(+), 7 deletions(-)
 
-diff --git a/c2xml.c b/c2xml.c
-index 1a24c3a8120a..519769f72a71 100644
---- a/c2xml.c
-+++ b/c2xml.c
-@@ -149,7 +149,7 @@ static void examine_modifiers(struct symbol *sym, xml=
-NodePtr node)
-=20
- 	/*iterate over the 32 bit bitfield*/
- 	for (i=3D0; i < 32; i++) {
--		if ((sym->ctype.modifiers & 1<<i) && modifiers[i])
-+		if ((sym->ctype.modifiers & (1UL << i)) && modifiers[i])
- 			newProp(node, modifiers[i], "1");
- 	}
- }
+diff --git a/parse.c b/parse.c
+index 9389079eb173..0e3e384550c5 100644
+--- a/parse.c
++++ b/parse.c
+@@ -1595,14 +1595,17 @@ static struct token *declaration_specifiers(struc=
+t token *token, struct decl_sta
+ 				rank =3D -2;
+ 			if (s->op->set & (Set_Short|Set_Float)) {
+ 				rank =3D -1;
+-			} else if (s->op->set & Set_Long && rank++) {
+-				if (class =3D=3D CReal) {
+-					specifier_conflict(token->pos,
+-							   Set_Vlong,
+-							   &double_ident);
+-					break;
++			} else if (s->op->set & Set_Long) {
++				if (rank) {
++					if (class =3D=3D CReal) {
++						specifier_conflict(token->pos,
++								   Set_Vlong,
++								   &double_ident);
++						break;
++					}
++					seen |=3D Set_Vlong;
+ 				}
+-				seen |=3D Set_Vlong;
++				rank++;
+ 			}
+ 		}
+ 		token =3D token->next;
