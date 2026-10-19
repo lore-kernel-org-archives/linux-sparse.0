@@ -1,69 +1,72 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=199.89.1.14
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1792432611;
-	b=fMxdzq5ri06dvImM92P9zq6qwWHJ9G2w+VTumhzBSQkrkxHTGCvMCXbF6ZDmqNeR3oIM
-	 9js5oYSLepICTFNDJTTGn/qs5RWB69GRo/uK5seUxQyp72WzzoW73FchtkxQnnQWuRPPf
-	 2RTPmiACuRicZ1t+T4iyP4pH/UjjHqQiG98632iyHowl5nhuTvqnjOv2SRePCZKpX67JO
-	 9ywqqOBkXiPyYzNiBrZTdR4NsI4r/KciUsodhz+LuVHJqKE17qhJmEEPqd4Yk5vPm378i
-	 qeCtfubi1IEIbKCvzbnoqn/uxMF1FBw14w5H14FBzUHm11xfauXo08p8HVcwtaKwq3A==
+	t=1792432612;
+	b=o1UM5ocPVwq9LMuMo92whPLM/7VA1iDeyujzTixKVQm4LRCSz6Bc1EhU0/xYQZi3JXsu
+	 kkAq9FAIHqdqim9On4HKr3xYzLjt9nxC6i7iVmQPvDFpjQI++mErqGzkeKxfAhtsHhBBI
+	 5DMDoIxxSii7ow16iK7sCXFRcHJDCUCFq5URaEhgNNmJ0IvR/S+B+q7+l9WaTYSVTM0vl
+	 xR7rO+ozxlRFkNsL5q0F+MuPPxEh3art2ELUNuHw1//Y7kpR+mp51WXviWxJk7ciUQSqu
+	 Qz70PptdUoor0QFO26wGT5kOntjIn4Pk/MBf9wNCyYIV2GYlJzA6WyesOo07TyCq0zw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1792432611;
+	a=rsa-sha256; c=relaxed/relaxed; t=1792432612;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Virus-Scanned:Received:
-	 Received:From:To:Cc:Subject:Date:Message-ID:X-Mailer:MIME-Version:
-	 Content-Transfer-Encoding;
-	bh=KMAK/rNUOVr2zqy0EVlOgOMipbYPebuodUM+eloBnWs=;
-	b=rTOnWUuXyoLhrNMv/w0KzzXiKwbQiZCQ0ZbeNFCuULn5H4fLp14FYFumYMyzMm6Cr+Ds
-	 9j0JeBxshDzASqLfknTup1/sshfcZVjBA8torYFJiN8wUfLMHaFT40IyGwEHQycqj9PQz
-	 yeuN2S0qVMEwtPkgREZKoLtFMLXKmwPNR5rbWBj0bH8HKlMEfwO+QA4ix6yIiaS/1xFWp
-	 53M9t5QigsPBjbMQ4BHCnRG88vOASQdItzForpGXRj9G0A+kZoR/ZDAl8OjGYsO7O5/LG
-	 YrQwHDwQdQKoPGdSFO1yuBkkEt4O5KuD/vDJAIRFcrDitlXwxi4k3aoImB6eUQAy++A==
+	 Received:From:To:Cc:Subject:Date:Message-ID:X-Mailer:In-Reply-To:
+	 References:MIME-Version:Content-Transfer-Encoding;
+	bh=O74b0zaJiBy9pbR1A6GrNxAyLKlyg1PUDTmkPeBPHNU=;
+	b=eowm0/10Z4Q+CWMzlkkEsAKaQ8dh0TewObaJ7zQjFELVIqx/3+SZ8wqPKtlVigeFb9D+
+	 Jv/KAlPRyEkpswix4KibErANIIWacNLA93hw/BqexeFhTuyJy36ikMflxX21Oyj5Xbu9a
+	 L8OAR4cY+mJjMRSG1674TffrfiyHrHKNu7Vve0jmSWgq0ysPHfARLYjglaArDsxraghoZ
+	 Qct/X5vtOCB9/1mxihkhByvIgBjdWtKI9MJnIZRMnS9pyzCJAGXTFEk9PVkH+QV87QBY3
+	 n3+USBLK1YzhQm8fvntBQzfONSTaGJkxbJsoMcVnDzdC5s+IpRLfsH82jX4HTqBNwSA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=acm.org;
 	spf=pass smtp.mailfrom=acm.org;
-	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=WnCX5s4B;
+	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=YAFva3L5;
 	arc=none smtp.remote-ip=199.89.1.14
 Received: from 011.lax.mailroute.net (011.lax.mailroute.net [199.89.1.14])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D9945606A31D
-	for <linux-sparse@vger.kernel.org>; Mon, 19 Oct 2026 17:56:50 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org D9945606A31D
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E31F2606A31D
+	for <linux-sparse@vger.kernel.org>; Mon, 19 Oct 2026 17:56:51 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org E31F2606A31D
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=acm.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=WnCX5s4B
+	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=YAFva3L5
 Received: from localhost (localhost [127.0.0.1])
-	by 011.lax.mailroute.net (Postfix) with ESMTP id 4j7jsm2s2Pz1XM6J4;
-	Mon, 19 Oct 2026 17:56:44 +0000 (UTC)
+	by 011.lax.mailroute.net (Postfix) with ESMTP id 4j7jsn4wFmz1XM6JB;
+	Mon, 19 Oct 2026 17:56:45 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=acm.org; h=
-	content-transfer-encoding:mime-version:x-mailer:message-id:date
-	:date:subject:subject:from:from:received:received; s=mr01; t=
-	1792432601; x=1795024602; bh=KMAK/rNUOVr2zqy0EVlOgOMipbYPebuodUM
-	+eloBnWs=; b=WnCX5s4BnvihShRgVOEfkium2QZjbWpe9IvXbRNq3dwx7Coz++e
-	5DhkZFNhH6qZJlBx6GGlHSUcrOx+LTMPwHpof/Cj/RGDI5n5rGQ7w046BE0qfJ3K
-	yk5ONNICpBKLJSwazZMu98HSgoZcAPpM5ZvtgF/zd6xs0zsD3s265y+5eauQi3hR
-	ytnJTePRa99fj8XQWy/U/sEmQ8m2mpILyE/oVnBiUfb3mNiNKoJac893BCusez85
-	eqJeoAnJrSG46VFjgQxP/NNlWuUecct7NCAOioWZcaKYecpLiOMb8eTCr+GU8RFD
-	LVr48OEUbVGFDGDBJiL2sxiJMhBkzEQiCuQ==
+	content-transfer-encoding:mime-version:references:in-reply-to
+	:x-mailer:message-id:date:date:subject:subject:from:from
+	:received:received; s=mr01; t=1792432604; x=1795024605; bh=O74b0
+	zaJiBy9pbR1A6GrNxAyLKlyg1PUDTmkPeBPHNU=; b=YAFva3L5c5K3hzoHGDoYV
+	5WegcgwGzgiaZ7+3wxs1mXza8yK9LVFp/EENMUGmF5SK2T4LtYfFdSIFQcSlGoLL
+	BFmrpusFhhUKO2K8qv1bdJRaflsZZrCZcWcyx00Xrj82GN8OWepcMDiFTA6Vg3Oy
+	mfk93+jw+Unchohv0C6RrSM0lOGJ/nO68xFh7RbzZVM6FDPRTQNE5mQa4H3cBFsF
+	uyAauhdnIVfFoVYyxI4CfMCxrlHlAgTPpLm8br4vjrufDt/UArcuDhxxIXm77uyi
+	CDVz4x7pT5Xzox67tKxnENxKueF+OQ35lQzSVqUJ5vydlAYojTwTadb2Y/UfBBAZ
+	g==
 X-Virus-Scanned: by MailRoute
 Received: from 011.lax.mailroute.net ([127.0.0.1])
  by localhost (011.lax [127.0.0.1]) (mroute_mailscanner, port 10029) with LMTP
- id S0PCJAyJDJa2; Mon, 19 Oct 2026 17:56:41 +0000 (UTC)
+ id 0NCw6Xf6WBwA; Mon, 19 Oct 2026 17:56:44 +0000 (UTC)
 Received: from bvanassche.c.googlers.com.com (245.199.118.34.bc.googleusercontent.com [34.118.199.245])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
 	(Authenticated sender: bvanassche@acm.org)
-	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4j7jsj5kGDz1XM4Tl;
-	Mon, 19 Oct 2026 17:56:41 +0000 (UTC)
+	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4j7jsk5W8Pz1XM30n;
+	Mon, 19 Oct 2026 17:56:42 +0000 (UTC)
 From: Bart Van Assche <bvanassche@acm.org>
 To: linux-sparse@vger.kernel.org
 Cc: Bart Van Assche <bvanassche@acm.org>
-Subject: [PATCH 00/20] Sanitizer fixes, LLVM updates, and CI workflow
-Date: Mon, 19 Oct 2026 10:56:13 -0700
-Message-ID: <20261019175633.415493-1-bvanassche@acm.org>
+Subject: [PATCH 04/20] storage: Free hash table entries when freeing storage
+Date: Mon, 19 Oct 2026 10:56:17 -0700
+Message-ID: <20261019175633.415493-5-bvanassche@acm.org>
 X-Mailer: git-send-email 2.56.0.212.g129ede20d9-goog
+In-Reply-To: <20261019175633.415493-1-bvanassche@acm.org>
+References: <20261019175633.415493-1-bvanassche@acm.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Post: <mailto:linux-sparse@vger.kernel.org>
@@ -75,105 +78,46 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
 
-Hi,
+Free allocated hash table entries when freeing storage structures in
+storage.c to prevent memory leaks during storage teardown.
 
-Please help with reviewing these sparse patches.
+Signed-off-by: Bart Van Assche <bvanassche@acm.org>
+---
+ storage.c | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
 
-This patch series updates the Sparse maintainer and mirror documentation,
-fixes undefined behavior and memory leaks reported by sanitizers, updates
-the LLVM backend for recent LLVM releases, adds support for empty attribu=
-te
-argument lists, and introduces a GitHub Actions CI workflow:
-
-- Patch 1 updates the maintainer history in Documentation/index.rst from
-  the git changelog and points the GitHub mirror link to
-  https://github.com/bvanassche/sparse.
-- Patches 2-14 fix memory leaks, out-of-bounds array reads, null member
-  accesses, inactive union member reads, zero-length VLAs, signed integer
-  overflows, and out-of-range bit shifts across ptrlist, bitmask helpers,
-  storage management, builtin declarations, c2xml, parsing, preprocessing=
-,
-  target size conversions, evaluation, linearization, constant folding, a=
-nd
-  IR simplification so Sparse runs cleanly under ASan, LSan, and UBSan.
-- Patches 15-17 and 19 update sparsec and sparse-llvm for modern LLVM
-  versions and LeakSanitizer cleanliness. sparsec emits object files
-  directly via 'llc -filetype=3Dobj' instead of piping assembly to 'as', =
-and
-  sparse-llvm avoids deprecated LLVMConstGEP2() calls on LLVM 15+, uses a=
-n
-  explicit LLVMContextRef instead of the deprecated global context, and
-  disposes allocated arrays, IR builders, and LLVM modules on exit.
-- Patch 18 teaches the parser to accept empty attribute argument lists su=
-ch
-  as __attribute__((nonnull())), matching GCC and Clang and avoiding pars=
-e
-  errors on Linux kernel headers.
-- Patch 20 adds a GitHub Actions workflow and CI scripts that build Spars=
-e
-  and run 'make check' in both regular mode and ASan + UBSan mode to catc=
-h
-  regressions, memory errors, and undefined behavior automatically.
-
-If nobody objects I plan to push these changes to the kernel.org sparse g=
-it
-repository by the end of this week.
-
-Thanks,
-
-Bart.
-
-Bart Van Assche (19):
-  doc: Update maintainer and mirror information
-  ptrlist: Guard against null list in ptrlist operations
-  bits: Guard against out-of-bounds bit shifts in bitmask helpers
-  storage: Free hash table entries when freeing storage
-  builtin: Bound argument array iteration in declare_builtin()
-  c2xml: Use an unsigned shift in examine_modifiers()
-  parse: Avoid incrementing rank on invalid long real specifiers
-  pre-process: Avoid zero-length VLAs for parameterless macros
-  pre-process: Avoid reading token->string on non-string tokens
-  target: Avoid signed overflow in bit and byte conversion helpers
-  evaluate: Use bitmask helpers in evaluate_ptr_add()
-  linearize: Use bits_mask() in linearize_bitfield_insert()
-  expand: Avoid undefined shifts and signed overflow in constant folding
-  simplify: Avoid undefined shifts and signed overflow in simplification
-  sparsec: Emit object files directly with llc -filetype=3Dobj
-  llvm: Stop calling LLVMConstGEP2() for string literals
-  llvm: Free leaked allocations and LLVM objects
-  llvm: Use explicit LLVMContextRef instead of global context
-  ci: Add a GitHub Actions workflow and CI scripts
-
-Dmitry Ilvokhin (1):
-  parse: Accept an empty attribute argument list
-
- .github/workflows/build.yml          | 36 +++++++++++
- Documentation/index.rst              | 11 ++--
- bitmap.h                             |  2 +-
- bits.h                               | 12 ++--
- builtin.c                            |  2 +-
- builtin.h                            |  1 -
- c2xml.c                              |  2 +-
- ci/build.sh                          | 22 +++++++
- ci/install.sh                        | 24 +++++++
- ci/test.sh                           |  3 +
- evaluate.c                           |  6 +-
- expand.c                             | 52 ++++++---------
- linearize.c                          |  2 +-
- parse.c                              | 34 ++++++----
- pre-process.c                        | 10 +--
- ptrlist.c                            | 47 ++++++++++----
- ptrlist.h                            | 14 ++--
- simplify.c                           | 53 ++++++++-------
- sparse-llvm.c                        | 96 ++++++++++++++++++----------
- sparsec                              |  2 +-
- storage.c                            | 10 ++-
- target.h                             |  6 +-
- validation/attribute-nonnull-empty.c | 12 ++++
- 23 files changed, 310 insertions(+), 149 deletions(-)
- create mode 100644 .github/workflows/build.yml
- create mode 100755 ci/build.sh
- create mode 100755 ci/install.sh
- create mode 100755 ci/test.sh
- create mode 100644 validation/attribute-nonnull-empty.c
-
+diff --git a/storage.c b/storage.c
+index 6fc6e3d7085f..160d424ee1f6 100644
+--- a/storage.c
++++ b/storage.c
+@@ -159,12 +159,18 @@ static void vrfy_storage(struct storage_hash_list *=
+*listp)
+=20
+ void free_storage(void)
+ {
++	struct storage_hash_list *all =3D NULL;
+ 	int i;
+=20
+ 	for (i =3D 0; i < MAX_STORAGE_HASH; i++) {
+-		vrfy_storage(storage_hash_table + i);
++		struct storage_hash *entry;
++		FOR_EACH_PTR(storage_hash_table[i], entry) {
++			add_ptr_list(&all, entry);
++		} END_FOR_EACH_PTR(entry);
+ 		free_ptr_list(storage_hash_table + i);
+ 	}
++	vrfy_storage(&all);
++	free_ptr_list(&all);
+ }
+=20
+ const char *show_storage(struct storage *s)
+@@ -208,7 +214,7 @@ static struct storage * combine_storage(struct storag=
+e *src, struct storage *dst
+=20
+ 	/* Mark it unused */
+ 	src->type =3D REG_BAD;
+-	src->users =3D NULL;
++	free_ptr_list(&src->users);
+ 	return dst;
+ }
+=20
