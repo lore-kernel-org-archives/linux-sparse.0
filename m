@@ -1,71 +1,134 @@
-Received: from relay.hostedemail.com (smtprelay0013.hostedemail.com [216.40.44.13])
+Received: from mail.ilvokhin.com (mail.ilvokhin.com [178.62.254.231])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0DCD054705F;
-	Wed, 30 Sep 2026 19:59:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=216.40.44.13
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A76AE1A275
+	for <linux-sparse@vger.kernel.org>; Mon, 19 Oct 2026 12:16:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=178.62.254.231
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1790798357; cv=none; b=m1spJKc6eNKQ8iydnSyUdm9403RETMmR7kIUUlT0i5K6T8wF1+dpaOfpYlH94lai/iXB5OdjCAl5J3cmxSWjNhDSz9yHT2TuEr/H+lJXX1x8FKCUahf5QxcKEBHOqjhUEZjXXBQBwx8K4FBcnFVwdtiPcZT3vXGg+c0MFVfYs6M=
+	t=1792412189; cv=none; b=pXmNljuSQ/jgh+JHnQUT3KD1hsaZgPmx1dVN7j272Ik3bZ5TvjSvsANRRLaJDjmMtv1IDcQ3ESxoHoSHuhqdwcDktM0wh+oDmM/7XgplZuzDAl0kI1P2hsrchmtF0SvLi0ShWLhjz7VUqTD4VgEyNeMGN5DMpLm6iZdykW8i/zU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1790798357; c=relaxed/simple;
-	bh=JCzuZUM76r47/VUOZi0wd5OB3cm0cpp7HAOzj6q0k3Y=;
-	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=W6kyUN0Zq6wwPwiXFJzKtc1mibBxMIhuFesrjr8Ny1lJ5L5TUlgvkO+EgVAGEaU3Vcl78RNbOQwgzhjWeYHN2yJoHgMjyJkiOPNRdi4JhYZxZ0LWQKVEamtFXRscpJZkIcoJLmQJjjDHwOHv4gmCU0A3ljJ5YftuxANxAPIdUXQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=goodmis.org; spf=pass smtp.mailfrom=goodmis.org; dkim=pass (1024-bit key) header.d=goodmis.org header.i=@goodmis.org header.b=IYqZa4V4; arc=none smtp.client-ip=216.40.44.13
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=goodmis.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=goodmis.org
+	s=arc-20240116; t=1792412189; c=relaxed/simple;
+	bh=rmBunQBFp+1QL9mmqeDcIuq+Nieaxx/qv3UB6s/lLn0=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=Ivyk6W/BFDn/ECUoj9/moODW4NNOfoYY/rmlZB85lEltat45iuu/K3hZN4btMNUUEqKVG/qUZSUFkjo8vkNoPoG4fn7o3bj40iH39Brfsz1qs8rxvYqXiGmysqLlfsmfbyIZeuYLv3m4zylSjVdrT70dYEcjZXyIhObkKVWAs3s=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ilvokhin.com; spf=pass smtp.mailfrom=ilvokhin.com; dkim=pass (1024-bit key) header.d=ilvokhin.com header.i=@ilvokhin.com header.b=1ccRZFkg; arc=none smtp.client-ip=178.62.254.231
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=ilvokhin.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ilvokhin.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=goodmis.org header.i=@goodmis.org header.b="IYqZa4V4"
-Received: from omf09.hostedemail.com (lb01a-stub [10.200.18.249])
-	by unirelay05.hostedemail.com (Postfix) with ESMTP id CD79C401EA;
-	Wed, 30 Sep 2026 19:59:07 +0000 (UTC)
-Received: from [HIDDEN] (Authenticated sender: rostedt@goodmis.org) by omf09.hostedemail.com (Postfix) with ESMTPA id 13F0620028;
-	Wed, 30 Sep 2026 19:59:04 +0000 (UTC)
-Date: Wed, 30 Sep 2026 15:59:01 -0400
-From: Steven Rostedt <rostedt@goodmis.org>
-To: nanshuaibo <nanshuaibo811@163.com>
-Cc: Masami Hiramatsu <mhiramat@kernel.org>, Mathieu Desnoyers
- <mathieu.desnoyers@efficios.com>, Chris Li <sparse@chrisli.org>,
- linux-trace-kernel@vger.kernel.org, linux-kernel@vger.kernel.org,
- linux-sparse@vger.kernel.org
-Subject: Re: [PATCH] tracing: Make branch profiler counters atomic
-Message-ID: <20260930155901.6cb8f18f@fedora>
-In-Reply-To: <20260930030728.1144418-1-nanshuaibo811@163.com>
-References: <20260930030728.1144418-1-nanshuaibo811@163.com>
-X-Mailer: Claws Mail 4.4.0 (GTK 3.24.52; x86_64-redhat-linux-gnu)
+	dkim=pass (1024-bit key) header.d=ilvokhin.com header.i=@ilvokhin.com header.b="1ccRZFkg"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ilvokhin.com;
+	s=mail; t=1792412180;
+	bh=tKWddZHFRQqEACtGax7J2gSAs8orBwxSZ4ySsPvUf5k=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=1ccRZFkgqkvDg/s1MAG54ZupU2eIQSUIVi1hpwEIvilxNrOQuxXUEHsDUv5DGW84r
+	 8eQshNzQJ3AyNsinHWx1I03IgH6Jg8tpvw0g00G/gG6BTDNzn3PfWFdvlHSAhJj3Jz
+	 vzeaXYI4w1p4cK8I0EakTfMf/h1NM4bgEMLwWbY8=
+Received: from shell.ilvokhin.com (shell.ilvokhin.com [138.68.190.75])
+	(Authenticated sender: d@ilvokhin.com)
+	by mail.ilvokhin.com (Postfix) with ESMTPSA id 0457AFB812;
+	Mon, 19 Oct 2026 12:16:19 +0000 (UTC)
+Date: Mon, 19 Oct 2026 12:16:16 +0000
+From: Dmitry Ilvokhin <d@ilvokhin.com>
+To: Chris Li <sparse@chrisli.org>
+Cc: linux-sparse@vger.kernel.org, Dan Carpenter <error27@gmail.com>
+Subject: Re: [PATCH] accept an empty attribute argument list
+Message-ID: <atYKEM2RE72WZFBi@shell.ilvokhin.com>
+References: <20260605113045.483498-1-d@ilvokhin.com>
 Precedence: bulk
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Subscribe: <mailto:linux-sparse+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-X-Rspamd-Server: rspamout01
-X-Rspamd-Queue-Id: 13F0620028
-X-Stat-Signature: 6u691wjcud81zra5kckdat1cnsicpqpf
-X-Session-Marker: 726F737465647440676F6F646D69732E6F7267
-X-Session-ID: U2FsdGVkX1+PYHKQr4C+fg7B35RPDkqsrXD1gS8CcbY=
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=goodmis.org; h=date:from:to:cc:subject:message-id:in-reply-to:references:mime-version:content-type:content-transfer-encoding; s=dkim1; bh=jqwjuI2ZMTqfAUuoUNReCHhPu1OCmfrg2qPHGa/vWpQ=; b=IYqZa4V4tRqmsBgz6jHlnGznzdqOFVzH7/miekD0DvFjdvTjh51UKPbu6F9Q4q5bY2TrQR9BggMqBiz4mo58jVqdFe/QyNWYYTML/z+DnArV8btjLfgGrncZPh2VJDbo8AuqHa28AdDedZS5+wvQ0RCMNXRVZH4VpPSlc2Ch/wU=
-X-HE-Tag: 1790798344-34956
-X-HE-Meta: U2FsdGVkX1+YBuFE00jxhYGVkXo4Qp3flpjllPDDR6oJiC50gjg9S8JvRbPGrnqGFoxC7vXkorQ5XSauaS0/FiVuwjyL+i1rnhAH6fRJ9PqFQCjwAOiyG+agsnCdGeC/GvSP91O+ENKhm9irKVOL0SdQ8fnAg+AAuO/B9d6a9d+6381uKv2lXa463W23CYtrWZxNx7obGGdggoRUbHch0gzcZ2nV7NSPEheVWk1f/9iTRoGSe06epmAQFT6yhpwQ+OCfV8VJQhxnQ3q1pzlNwxqjZOye1skzoZ8LP9DH6BxUHf5XwLJOnE65oSBm2UbkLvG8lX4cXRt7AiXQ5X7WI/vH2HoSyJ3A
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260605113045.483498-1-d@ilvokhin.com>
 
-On Wed, 30 Sep 2026 11:07:28 +0800
-nanshuaibo <nanshuaibo811@163.com> wrote:
-
-> The branch profiler updates its static counters from arbitrary contexts. Concurrent updates can race and lose counts. KCSAN reports a data race between ftrace_likely_update() invocations.
+On Fri, Jun 05, 2026 at 11:30:45AM +0000, Dmitry Ilvokhin wrote:
+> GCC and clang accept an empty argument list for attributes, e.g.
+> __attribute__((nonnull())), and treat it the same as the bare
+> __attribute__((nonnull)). sparse instead rejects it with
+> "an expression is expected before ')'".
 > 
-> Use relaxed compiler atomic operations for the counters. The profiler metadata is defined in compiler_types.h, before the kernel atomic API is available. The counters do not order accesses to other data.
+> ignore_attribute() and recover_unknown_attribute() consume the optional
+> argument list with parens_expression(), which requires a non-empty
+> expression, so an empty () is rejected. The bare form is fine because it
+> takes no parentheses and skips that path.
 > 
-> Also use atomic loads when reading the counters for tracefs output and sorting, so readers do not race with atomic writers.
+> This turned up in the Linux kernel: the cleanup.h guard macros expand
+> __nonnull_args() to __attribute__((__nonnull__())).
 > 
-> Tested on x86_64 QEMU/KVM with KCSAN and CONFIG_PROFILE_ANNOTATED_BRANCHES=y. The baseline reports the race in ftrace_likely_update(); it is not reported after this change.
+>   https://lore.kernel.org/all/aiJi0WcYE8FZt-jO@stanley.mountain/
+> 
+> Reported-by: Dan Carpenter <error27@gmail.com>
+> Signed-off-by: Dmitry Ilvokhin <d@ilvokhin.com>
+> ---
+>  parse.c                              | 17 +++++++++++++----
+>  validation/attribute-nonnull-empty.c | 12 ++++++++++++
+>  2 files changed, 25 insertions(+), 4 deletions(-)
+>  create mode 100644 validation/attribute-nonnull-empty.c
+> 
+> diff --git a/parse.c b/parse.c
+> index 9389079e..3b380156 100644
+> --- a/parse.c
+> +++ b/parse.c
+> @@ -1106,8 +1106,13 @@ static struct token *autotype_specifier(struct token *token, struct symbol *sym,
+>  static struct token *ignore_attribute(struct token *token, struct symbol *attr, struct decl_state *ctx)
+>  {
+>  	struct expression *expr = NULL;
+> -	if (match_op(token, '('))
+> -		token = parens_expression(token, &expr, "in attribute");
+> +	if (match_op(token, '(')) {
+> +		/* Accept an empty argument list, e.g. __attribute__((nonnull())) */
+> +		if (match_op(token->next, ')'))
+> +			token = token->next->next;
+> +		else
+> +			token = parens_expression(token, &expr, "in attribute");
+> +	}
+>  	return token;
+>  }
+>  
+> @@ -1362,8 +1367,12 @@ static struct token *recover_unknown_attribute(struct token *token)
+>  	if (Wunknown_attribute)
+>  		warning(token->pos, "unknown attribute '%s'", show_ident(token->ident));
+>  	token = token->next;
+> -	if (match_op(token, '('))
+> -		token = parens_expression(token, &expr, "in attribute");
+> +	if (match_op(token, '(')) {
+> +		if (match_op(token->next, ')'))
+> +			token = token->next->next;
+> +		else
+> +			token = parens_expression(token, &expr, "in attribute");
+> +	}
+>  	return token;
+>  }
+>  
+> diff --git a/validation/attribute-nonnull-empty.c b/validation/attribute-nonnull-empty.c
+> new file mode 100644
+> index 00000000..c4021f61
+> --- /dev/null
+> +++ b/validation/attribute-nonnull-empty.c
+> @@ -0,0 +1,12 @@
+> +/*
+> + * An empty attribute argument list, like __attribute__((nonnull())), is
+> + * accepted by GCC and Clang (equivalent to the bare __attribute__((nonnull)))
+> + * and must be parsed by sparse too.
+> + */
+> +extern void *bare (void *d, const void *s) __attribute__((nonnull));
+> +extern void *empty(void *d, const void *s) __attribute__((nonnull()));
+> +extern void *args (void *d, const void *s) __attribute__((nonnull(1, 2)));
+> +
+> +/*
+> + * check-name: attribute with empty argument list
+> + */
+> -- 
+> 2.53.0-Meta
+>
 
-FYI, Change log lines should be capped at 76 characters except for cut
-and pasted output.
+Friendly ping on the patch.
 
-That said, NAK to the patch. The branch profile is a best effort and
-known to be racy. It's to find where branches are most traveled, Their
-exact numbers are not meaningful. No need for atomic operations.
+Recently, I had some time to migrate raw __attribute__((nonnull)) usages
+to __nonnull_args() in Linux kernel, but then remembered Sparse still
+can't parse it properly.
 
--- Steve
+I can re-spin the patch if it is a preferred.
