@@ -1,69 +1,69 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=199.89.1.14
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1792432618;
-	b=K+9XPoVlDV35mEhHnb62r4StJM4GlX6z+kMYQh13dd6dJRxhsgO7uCDM3BZX0IoYJRbL
-	 nX0ShGZ5aVgyQFrYFOTonOggZs9QthLI8Xh9VfhfeBDOmk/o3NgrmmgSVgnANecJ9g0wN
-	 FWEjvbcDPkxZs48mQE4kmx3JpR6UAd1owvd+Ev0F6YKSM3C0+AAzvPPHL2ufj1Gu8G1r6
-	 IXpVVVSU4vuxuUe0D8IHNmbkwUqgBdbsXo9AgU8LyNDQm1LvxIKh/n6TzItf2qVCxZc6M
-	 fnX34OhH+y+Y8SUj+zemy4x2Le7M7UTJ3jb4Ws66hz3Y7a93o0jf5g6DmBi5nGj/nVg==
+	t=1792432613;
+	b=hHVr7D3tzzky+ieTlvuiW7+Qn2nr9MA4MUbIuAE5iNEJCYJTgPjwjXGp3rr9K0dLGPYU
+	 nI44DKFsX78LdofVJBfs8/hYlJYcZblt6sgqT4QsY33F4D8ZKmjo1/SZNmqTy4yFr9M5z
+	 /GYEvHEgO1BRY1otFYiyau5elXdPog6L1EQCJqRRjr0qyq0md2cZlps97n0JitVQW26k6
+	 HLRUcE++po3rMfp3JmlIW5IvQdsmlwoq7qCE9s7dW96d3hFPCK6IHzlCgr36Ks0o3QCUP
+	 siV14x3Vyky0VVJOGnMAHNV31EekjYc5zxyCoDAtfrumKdJBboH0ZtajpmrS6BQV5nQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1792432618;
+	a=rsa-sha256; c=relaxed/relaxed; t=1792432613;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Virus-Scanned:Received:
 	 Received:From:To:Cc:Subject:Date:Message-ID:X-Mailer:In-Reply-To:
 	 References:MIME-Version:Content-Transfer-Encoding;
-	bh=n1fMMsiTBt3tSZsaFi1jfXoK71mX1UFs06jxynojM7k=;
-	b=IlQwbKGJJmS9FTobp5vRIn/sX9Nnz+AFBFV9n4BkAogielOTEsS1cqV4uepHw+DOhJVe
-	 3hTAkqQcdfFxA4aL75VCQ7LK3MXdbOuYgsiF3iXK3Et8JrJ4QDsBfLrhizDeGktwnEMzS
-	 iZ9DjNOqSs9DJWjuv9l8bAf8QaghGRbeYooz1aetMko/usomdzzjKiEUw9RhzCAsFKxQ3
-	 BdOsNYHe/gDEz+xXdApF/w7QZlcD7pxKMWJcfeQKra+xsQnMBzOuiury+LgnDHpl+dnxi
-	 1TpaZvpV54V2R9SCpF+k55ELe/YGvFXkOXJZSZSPqPi19baRDxASdz50nYCdOFQ/LrQ==
+	bh=hsvGYhXwnhury2sooNDNZza4G0AWNuGEg+T/2spEHCo=;
+	b=U+qmI/tSpk7LKfXBhapRHk9jjNFGdDeNF9f/Z5jKa0R9rbhIABIUu/niftgekoWM5sRP
+	 kRDI6fhBv7PFMhH+8aq5JdzCaIIPwlT7mWyAaragLYrGXd47HCZKhuHN57+ZNbeJSR9KP
+	 3qcPEuK8A3h1pqO7UGfUFSrvfeabuURLnGOEA6gAO4d2akFCKtbQB+QTMf1H85+n1CLKi
+	 39kI5MspPkec98dLCNK6gb2ZPZ9xtIOsLvPMEpUxj5ONYhM8i3Z7HMuyzx9eMiNNbbsp6
+	 6caSQLxtm0xK3slDMPqMk4MHkiv+GIgsHdaGSPkmvz69QMrnqUJcHoN1Mv1g5/yx7Bg==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=acm.org;
 	spf=pass smtp.mailfrom=acm.org;
-	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=t3tYVv6u;
+	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=ju01UNFY;
 	arc=none smtp.remote-ip=199.89.1.14
 Received: from 011.lax.mailroute.net (011.lax.mailroute.net [199.89.1.14])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 90FBF606A31C
-	for <linux-sparse@vger.kernel.org>; Mon, 19 Oct 2026 17:56:57 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 90FBF606A31C
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9A7DD606A319
+	for <linux-sparse@vger.kernel.org>; Mon, 19 Oct 2026 17:56:52 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 9A7DD606A319
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=acm.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=t3tYVv6u
+	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=ju01UNFY
 Received: from localhost (localhost [127.0.0.1])
-	by 011.lax.mailroute.net (Postfix) with ESMTP id 4j7jss2zqpz1XM30r;
-	Mon, 19 Oct 2026 17:56:49 +0000 (UTC)
+	by 011.lax.mailroute.net (Postfix) with ESMTP id 4j7jsn5gxMz1XM30n;
+	Mon, 19 Oct 2026 17:56:45 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=acm.org; h=
 	content-transfer-encoding:mime-version:references:in-reply-to
 	:x-mailer:message-id:date:date:subject:subject:from:from
-	:received:received; s=mr01; t=1792432607; x=1795024608; bh=n1fMM
-	siTBt3tSZsaFi1jfXoK71mX1UFs06jxynojM7k=; b=t3tYVv6uEl6rGPwWVWdCY
-	WX34Y7HsnJbZiR8wP/1n4C90rtm0/de/EG882DWm6rgiX69PVcFqZ04wOMfFdV6B
-	aBOfg2gZ+IwQCVA39KtXw2IihiLH6bKup14cG9R/dG+36+W8i52uFSOUM3CDfWIj
-	gdiJNscgV52wox5yOGK4XeqmixxFtvcplCfwOX8PSRNGGPl+FQNH+jWi1igZAXPo
-	pXSP8SCXGfAjcvLWOM0gD2hdvfJPqA5UgyjWxwfcEW0TmAD9DWnHN0Tvc7GBddWM
-	Jd0bJIo63Fk9UkY/O619a9T3v56ZjyzbQP/CFVT2SHgYFGs/+9pIjzqC43vdBzIb
-	A==
+	:received:received; s=mr01; t=1792432603; x=1795024604; bh=hsvGY
+	hXwnhury2sooNDNZza4G0AWNuGEg+T/2spEHCo=; b=ju01UNFYXcgdKZKuZLiNe
+	7PBXx4AZWuc/ke41ygge6/FGpdmiPvBrutC/BcnuzN3//cKEpGcFr2mMXABxgRyS
+	di33h0+UaDiToJIV/tnm8XqI+nkOxi1rw/JPWPVNf9dBFkY7ezT4ZzbszbjN3r/E
+	MdHHEczjHa+iGJ3ayEXG6HaT6Y/WOhojlv0vVspV71LA8QhNfm3rVgMDWxskOOEn
+	9HEesVu29qfgR+SAyGkUxuexu6YSEdaw5JHmZooq8n+O8eF7GGICkDfWORwUWxAG
+	Lxj+3SgUBV+84PWICwcvqHvMWTI6/ADtg45QeZXgCER+slvX5mgG0VTLtbM4env2
+	g==
 X-Virus-Scanned: by MailRoute
 Received: from 011.lax.mailroute.net ([127.0.0.1])
  by localhost (011.lax [127.0.0.1]) (mroute_mailscanner, port 10029) with LMTP
- id 1EAyfqjz9CjK; Mon, 19 Oct 2026 17:56:47 +0000 (UTC)
+ id eoRHwKlwabeV; Mon, 19 Oct 2026 17:56:43 +0000 (UTC)
 Received: from bvanassche.c.googlers.com.com (245.199.118.34.bc.googleusercontent.com [34.118.199.245])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
 	(Authenticated sender: bvanassche@acm.org)
-	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4j7jsq0T0Zz1XM6Hv;
-	Mon, 19 Oct 2026 17:56:46 +0000 (UTC)
+	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4j7jsk2JR7z1XM30g;
+	Mon, 19 Oct 2026 17:56:42 +0000 (UTC)
 From: Bart Van Assche <bvanassche@acm.org>
 To: linux-sparse@vger.kernel.org
 Cc: Bart Van Assche <bvanassche@acm.org>
-Subject: [PATCH 20/20] ci: Add a GitHub Actions workflow and CI scripts
-Date: Mon, 19 Oct 2026 10:56:33 -0700
-Message-ID: <20261019175633.415493-21-bvanassche@acm.org>
+Subject: [PATCH 02/20] ptrlist: Guard against null list in ptrlist operations
+Date: Mon, 19 Oct 2026 10:56:15 -0700
+Message-ID: <20261019175633.415493-3-bvanassche@acm.org>
 X-Mailer: git-send-email 2.56.0.212.g129ede20d9-goog
 In-Reply-To: <20261019175633.415493-1-bvanassche@acm.org>
 References: <20261019175633.415493-1-bvanassche@acm.org>
@@ -78,139 +78,143 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
 
-Add a GitHub Actions workflow and supporting scripts to build and test
-sparse automatically. Catch regressions in sparse and use
-AddressSanitizer and UndefinedBehaviorSanitizer to detect memory errors
-and undefined behavior.
-
-- .github/workflows/build.yml: Build and test sparse on ubuntu-latest in
-  regular and asan mode. Run on push and pull request events and allow
-  manual runs via workflow_dispatch.
-- ci/install.sh: Install the packages required to build and test sparse.
-- ci/build.sh: Build sparse with parallel make. If MODE=3Dasan, pass ASan
-  and UBSan compiler and linker flags. Fail for unknown modes.
-- ci/test.sh: Run the sparse test suite via 'make check'.
+Guard against null list pointers before accessing list->rm in ptrlist.h
+and ptrlist.c to eliminate undefined behavior and UBSan null member
+access traps.
 
 Signed-off-by: Bart Van Assche <bvanassche@acm.org>
 ---
- .github/workflows/build.yml | 36 ++++++++++++++++++++++++++++++++++++
- ci/build.sh                 | 22 ++++++++++++++++++++++
- ci/install.sh               | 24 ++++++++++++++++++++++++
- ci/test.sh                  |  3 +++
- 4 files changed, 85 insertions(+)
- create mode 100644 .github/workflows/build.yml
- create mode 100755 ci/build.sh
- create mode 100755 ci/install.sh
- create mode 100755 ci/test.sh
+ ptrlist.c | 47 +++++++++++++++++++++++++++++++++--------------
+ ptrlist.h | 14 ++++++++++----
+ 2 files changed, 43 insertions(+), 18 deletions(-)
 
-diff --git a/.github/workflows/build.yml b/.github/workflows/build.yml
-new file mode 100644
-index 000000000000..62d9512fdf9e
---- /dev/null
-+++ b/.github/workflows/build.yml
-@@ -0,0 +1,36 @@
-+# See also https://docs.github.com/en/actions/learn-github-actions/workf=
-low-syntax-for-github-actions
-+
-+name: Build
-+
-+on:
-+  push:
-+  pull_request:
-+  workflow_dispatch:
-+
-+jobs:
-+  build:
-+    runs-on: ${{ matrix.os }}
-+
-+    strategy:
-+      fail-fast: false
-+      matrix:
-+        include:
-+          - os: ubuntu-latest
-+            mode: regular
-+          - os: ubuntu-latest
-+            mode: asan
-+
-+    env:
-+      MODE: ${{ matrix.mode }}
-+
-+    steps:
-+    - uses: actions/checkout@main
-+
-+    - name: install
-+      run: sudo bash -c "MODE=3D$MODE ci/install.sh"
-+
-+    - name: build
-+      run: ci/build.sh
-+
-+    - name: test
-+      run: ci/test.sh
-diff --git a/ci/build.sh b/ci/build.sh
-new file mode 100755
-index 000000000000..a155671dbb8b
---- /dev/null
-+++ b/ci/build.sh
-@@ -0,0 +1,22 @@
-+#!/bin/bash
-+
-+set -eu
-+
-+scriptdir=3D"$(dirname "$0")"
-+
-+echo "compiler path: $(type -p "${CC:-gcc}")"
-+nproc=3D$(nproc)
-+case "$MODE" in
-+    asan)
-+	ASAN_FLAGS=3D"-fsanitize=3Daddress,pointer-compare,pointer-subtract,und=
-efined"
-+	CFLAGS=3D"-O1 -g ${ASAN_FLAGS} -fno-omit-frame-pointer"
-+	LDFLAGS=3D"${ASAN_FLAGS}"
-+	make -s -j"${nproc}" CFLAGS=3D"${CFLAGS}" LDFLAGS=3D"${LDFLAGS}"
-+	;;
-+    regular)
-+	make -s -j"${nproc}"
-+	;;
-+    *)
-+	exit 1
-+	;;
-+esac
-diff --git a/ci/install.sh b/ci/install.sh
-new file mode 100755
-index 000000000000..7024c3812fab
---- /dev/null
-+++ b/ci/install.sh
-@@ -0,0 +1,24 @@
-+#!/bin/bash
-+
-+set -eu
-+
-+packages=3D(
-+    bc
-+    bison
-+    build-essential
-+    dwarves
-+    flex
-+    libelf-dev
-+    libgtk-3-dev
-+    libsqlite3-dev
-+    libssl-dev
-+    llvm-dev
-+    make
-+    pahole
-+    perl
-+    pkg-config
-+)
-+apt-get update
-+for p in "${packages[@]}"; do
-+    apt-get install -qq -o=3DDpkg::Use-Pty=3D0 -y "$p"
-+done
-diff --git a/ci/test.sh b/ci/test.sh
-new file mode 100755
-index 000000000000..a057cba051d0
---- /dev/null
-+++ b/ci/test.sh
-@@ -0,0 +1,3 @@
-+#!/bin/bash
-+
-+make check
+diff --git a/ptrlist.c b/ptrlist.c
+index c5766002e7ef..29fea6a35c70 100644
+--- a/ptrlist.c
++++ b/ptrlist.c
+@@ -165,19 +165,21 @@ void *ptr_list_nth_entry(struct ptr_list *list, uns=
+igned int idx)
+ int linearize_ptr_list(struct ptr_list *head, void **arr, int max)
+ {
+ 	int nr =3D 0;
+-	if (head && max > 0) {
++	if (head && max >=3D 0) {
+ 		struct ptr_list *list =3D head;
+=20
+ 		do {
+-			int i =3D list->nr;
+-			nr +=3D i;
+-			if (max =3D=3D 0)
+-				continue;
+-			if (i > max)=20
+-				i =3D max;
+-			memcpy(arr, list->list, i*sizeof(void *));
+-			arr +=3D i;
+-			max -=3D i;
++			int i;
++			for (i =3D 0; i < list->nr; i++) {
++				void *ptr =3D list->list[i];
++				if (list->rm && !ptr)
++					continue;
++				nr++;
++				if (max > 0) {
++					*arr++ =3D ptr;
++					max--;
++				}
++			}
+ 		} while ((list =3D list->next) !=3D head);
+ 	}
+ 	return nr;
+@@ -247,6 +249,15 @@ void split_ptr_list_head(struct ptr_list *head)
+ 	newlist->nr =3D nr;
+ 	memcpy(newlist->list, head->list + old, nr * sizeof(void *));
+ 	memset(head->list + old, 0xf0, nr * sizeof(void *));
++	if (head->rm) {
++		int i, rm =3D 0;
++		for (i =3D 0; i < nr; i++) {
++			if (!newlist->list[i])
++				rm++;
++		}
++		newlist->rm =3D rm;
++		head->rm -=3D rm;
++	}
+ }
+=20
+ ///
+@@ -409,10 +420,18 @@ void * delete_ptr_list_last(struct ptr_list **head)
+=20
+ 	if (!first)
+ 		return NULL;
+-	last =3D first->prev;
+-	if (last->nr)
+-		ptr =3D last->list[--last->nr];
+-	if (last->nr <=3D0) {
++	while ((last =3D first->prev)->nr =3D=3D 0) {
++		if (last =3D=3D first) {
++			*head =3D NULL;
++			__free_ptrlist(last);
++			return NULL;
++		}
++		first->prev =3D last->prev;
++		last->prev->next =3D first;
++		__free_ptrlist(last);
++	}
++	ptr =3D last->list[--last->nr];
++	if (last->nr <=3D 0) {
+ 		first->prev =3D last->prev;
+ 		last->prev->next =3D first;
+ 		if (last =3D=3D first)
+diff --git a/ptrlist.h b/ptrlist.h
+index 5a3dcbeb97ae..89f15d53fa13 100644
+--- a/ptrlist.h
++++ b/ptrlist.h
+@@ -11,7 +11,7 @@
+  */
+=20
+ /* Silly type-safety check ;) */
+-#define CHECK_TYPE(head,ptr)		(void)(&(ptr) =3D=3D &(head)->list[0])
++#define CHECK_TYPE(head,ptr)		(void)sizeof(&(ptr) =3D=3D &(head)->list[0=
+])
+ #define PTRLIST_TYPE(head)		__typeof__((head)->list[0])
+ #define VRFY_PTR_LIST(head)		(void)(sizeof((head)->list[0]))
+=20
+@@ -163,15 +163,19 @@ extern void __free_ptr_list(struct ptr_list **);
+=20
+=20
+ #define PTR_NEXT(ptr, __head, __list, __nr, PTR_ENTRY)			\
+-	do {								\
++	for (;;) {							\
+ 		if (__nr < __list->nr) {				\
+ 			ptr =3D PTR_ENTRY(__list,__nr);			\
+ 			__nr++;						\
++			if (__list->rm && !ptr)				\
++				continue;				\
+ 			break;						\
+ 		}							\
+ 		ptr =3D NULL;						\
+ 		__nr =3D 0;						\
+-	} while ((__list =3D __list->next) !=3D __head)			\
++		if ((__list =3D __list->next) =3D=3D __head)			\
++			break;						\
++	}			\
+=20
+ #define DO_PREPARE(head, ptr, __head, __list, __nr, PTR_ENTRY)		\
+ 	do {								\
+@@ -224,7 +228,7 @@ extern void __free_ptr_list(struct ptr_list **);
+ 	__typeof__(head) __list =3D __head;				\
+ 	__typeof__(head) __name =3D __head;				\
+ 	int __nr;							\
+-	if (!head)							\
++	if (!__head)							\
+ 		break;							\
+ 	do {								\
+ 		__list =3D __list->prev;					\
+@@ -255,6 +259,8 @@ extern void __free_ptr_list(struct ptr_list **);
+ 	__inside##new:							\
+ 		while (--__newnr >=3D 0) {				\
+ 			new =3D PTR_ENTRY(__newlist,__newnr);		\
++			if (__newlist->rm && !new)			\
++				continue;		\
+=20
+ #define DO_THIS_ADDRESS(ptr, __head, __list, __nr)			\
+ 	(&__list->list[__nr])
