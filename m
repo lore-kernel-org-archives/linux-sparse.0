@@ -1,72 +1,54 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=90.155.50.34
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793190833;
-	b=etH0gc8OZM9e0RYGmEOp3V6hrjNZk4BtJxua7fexReKnAhktaSA/GRueHdkdQWmyDaGJ
-	 7TzJ2AVXKY+OpLgT2e5+telIi3qyi4mgzIqh5rtDo2vhH+nXnFtL/ZFdgGxHPoABvfhUT
-	 9LMn0JfjjwiEoOF2IkvHqiYVEqIvaX3DOeziJNrf87IbeL0uWy7zA5W0z/3EMdLFeAahO
-	 kZnaEqmNlbinQXFT0/eo/ajh8arAn6PhK1ifgjabSfk1Lat7PminrJsZrT0s94bpAnOiO
-	 yfMEF7SsYLLR+hmlmJHgcleTEbobmPsR7Z7SbyIHdOvhlncqwC8NgU3C3Njmb80UM+g==
+	t=1793748104;
+	b=fOCvktYrgy0aO+LG7rZ2eyEc6dReUfVSqjqd3v+Xoit3aIWmDba3NZOV2Kg0B69iqCiT
+	 6klGDmTWQjHJ5UlZnFxFu2aR21yUql5B8V16Luq5prvhaSumHUVkQyuCKLBMiqpUvo9BR
+	 LZTv0X1mcMNBRXcYH2JKce9GJjZ5c1canAc+QkSNq8qmAYVb6Cv3JHdanzQUMJYUpG4de
+	 HMiVMScdqnjmuV/vNPVlj8ghzohfCkp7sySNNF5RZ0LctHTFl7HKMADU8MsfPBhIl/eaB
+	 rj4apMesR36Q+AfJqavwSTCPoWlpwOAo1S+1ObdDBjBQaG+6sAYEWkd29M1B+5z9XIg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793190833;
-	h=DMARC-Filter:DKIM-Signature:Received:Received:Date:From:To:Cc:
-	 Subject:Message-ID:References:MIME-Version:Content-Type:
-	 Content-Disposition:In-Reply-To;
-	bh=WMoRfpkzjo+kxzqaZnu+n0oPg+0cBm0W+fYTzt9xvJM=;
-	b=K4SU+Tg4bN2R9CcKgqKzVVrkSmXp4Tp+hAcPiYweFDdFSTA+2zzq3FjQOA0vW5OLQE8c
-	 stC4tVy9+J22ADgwJJh1Gwhl0aDyURVppYO9vufn3gHtoBixsmaoBL55lKXUGWKlKHKK2
-	 m1BhCt7uDfIIbaollvcwMJKkIgkAS6XX6UzAA+fvJUQV2RlZ+aLqWlUPcMioVCMYgmZTL
-	 bZaJ9yIPLgJ3ah4XnOQGs76MPU+KBB1ziQptcHKR4BQ3n1nMzTd0jBG9S/GNLSXIGstCo
-	 RfUpPCvSGpvec/DrP9osxHJWkoIDozo2mu7CW1Jyq44ZHHrnOBFvxgMGOl7kuIDauEA==
+	a=rsa-sha256; c=relaxed/relaxed; t=1793748104;
+	h=Received:DKIM-Signature:Date:From:To:Cc:Subject:Message-ID:
+	 References:MIME-Version:Content-Type:Content-Disposition:In-Reply-To;
+	bh=1BLBzDgyH4D0f7Nlpo8pZW2IwEta3qwghWOoH3Ds6Cc=;
+	b=TqAfv0a3JFNDITYH2zPC4NY3thcaFefT1UzAQ5QFmyx2v4O5uzhhYfFGK0mKp+IfkpXO
+	 Pb0t3WXfWyntRrFVYyf5VMOduKhW+DcQS5Z4LUqG+lpMIcogljEcr2G4Lbz5qdu+DWQBu
+	 1ptaeJB/MBx0A7i43shFlZWkgIEcHnK0vOfLKskWtffivIjHIIau4xTlXLX3CkKw6REwa
+	 xu145zyXlGWW4M/rbgkKVnQM8W3vuXEejL7azBS8atl/6A4ShVjTYgfKcGX3MANbWCRD4
+	 UZmburq+kNTKuOoBlYX6VuTvre9hcOOgzBCAs0VRswRYR6Aha1cz1jJ+apm0kAw8ILw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=infradead.org;
-	spf=pass smtp.mailfrom=infradead.org;
-	dkim=pass header.d=infradead.org header.i=@infradead.org header.a=rsa-sha256 header.s=casper.20170209 header.b=jq0iAutx;
-	arc=none smtp.remote-ip=90.155.50.34
-Received: from casper.infradead.org (casper.infradead.org [90.155.50.34])
+	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=PYj8xxwJ;
+	arc=none smtp.remote-ip=100.103.45.18
+Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
+	 key-exchange X25519 server-signature ECDSA (prime256v1))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 56CC2606A31A;
-	Wed, 28 Oct 2026 12:33:52 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 56CC2606A31A
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=infradead.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6F155606A31B;
+	Tue,  3 Nov 2026 23:21:44 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=infradead.org header.i=@infradead.org header.a=rsa-sha256 header.s=casper.20170209 header.b=jq0iAutx
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
-	References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=WMoRfpkzjo+kxzqaZnu+n0oPg+0cBm0W+fYTzt9xvJM=; b=jq0iAutxytuvAawK7WINQARGoT
-	X2MepMdn+xPfgVJs/KFJbzRJWgZm1zasPGW5gu2Pcce0E0H24Q2vcJOMCWulX9GkERDvvStwroz7X
-	Jh3Q8KCz5l5nyskkh2Y9FDhP9JlfQK/44TL5EUZ7YrJK1w4hjYy8gw+gAJbVFkvqK4+OOdnEfKtFy
-	l11xc+AyKyFA/rF3oRy7Jj8E6KpBpq804dtDkLj9CaVaNx7HrQJzPdVj55bG8K08LoyMd0daHqNy8
-	3o5ure+t/IIQz3iXuDvFC0hjqoS63wj2jrLgUEtjMxEoBik224g5ERoh/hDrQr1fo7nYMDsjjJ4zq
-	9qGAKtKA==;
-Received: from 77-249-17-252.cable.dynamic.v4.ziggo.nl ([77.249.17.252] helo=noisy.programming.kicks-ass.net)
-	by casper.infradead.org with esmtpsa (Exim 4.100.1 #2 (Red Hat Linux))
-	id 1xM2qj-00000003RA4-186T;
-	Wed, 28 Oct 2026 12:33:49 +0000
-Received: by noisy.programming.kicks-ass.net (Postfix, from userid 1000)
-	id D115930120E; Wed, 28 Oct 2026 13:33:48 +0100 (CET)
-Date: Wed, 28 Oct 2026 13:33:48 +0100
-From: Peter Zijlstra <peterz@infradead.org>
-To: cyridge@proton.me
-Cc: x86@kernel.org, Thomas Gleixner <tglx@kernel.org>,
-	Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
-	Dave Hansen <dave.hansen@linux.intel.com>,
-	Chris Li <sparse@chrisli.org>,
-	Nick Desaulniers <ndesaulniers@google.com>,
-	Bill Wendling <morbo@google.com>,
-	Justin Stitt <justinstitt@google.com>,
-	"H. Peter Anvin" <hpa@zytor.com>,
-	Nathan Chancellor <nathan@kernel.org>,
-	Sami Tolvanen <samitolvanen@google.com>,
-	Kees Cook <kees@kernel.org>, llvm@lists.linux.dev,
-	linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org
-Subject: Re: [PATCH v2] x86/kcfi: Don't emit KCFI_REFERENCE() in modules
-Message-ID: <20261028123348.GQ2668564@noisy.programming.kicks-ass.net>
-References: <20261027-kcfi-reference-modules-v2-1-3a3247f15806@proton.me>
+	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=PYj8xxwJ
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 823BF1F00919;
+	Tue,  3 Nov 2026 23:21:42 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1793748104;
+	bh=1BLBzDgyH4D0f7Nlpo8pZW2IwEta3qwghWOoH3Ds6Cc=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=PYj8xxwJb91gicJm4gm1fLpxTfeGOHsa7btTMWJ8JZvODnqrZOMK2RfIQM45vswyT
+	 Fm0yJKs4JVWZK+MgMlbkwtI8xkocRo1ysuwYChJLSqbGBXLUx/U2yT3Dn//jKPG5Ye
+	 Xk5ImbQhvwp2mbmuB16t1wHu4rM1r/DXzctyP7SEOICHqkz9phuSZfXTE/04B0Ifpj
+	 rvrWs9nCWUb6DAg+LzaWJnIPSzibubPF2PR14XZbTCkfEZBd3sI0dS6ZuXUIEccaAD
+	 3ZuP5pFxlYfR5D+JMEJYbTgdDA+r4tUVsSgMQRXDulSvkSm5fe+//nf1+i6jqGmsY3
+	 TRoy5+HZhJFzg==
+Date: Wed, 4 Nov 2026 00:21:39 +0100
+From: Alejandro Colomar <alx+linux-hardening@kernel.org>
+To: Andy Shevchenko <andriy.shevchenko@intel.com>, 
+	Chris Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org
+Cc: Alejandro Colomar <alx@kernel.org>, Kees Cook <kees@kernel.org>, 
+	linux-hardening@vger.kernel.org, Andy Shevchenko <andy@kernel.org>
+Subject: Re: [PATCH v1 0/2] Simplify implementation of strscpy()
+Message-ID: <auprDNQJl90tLBrQ@devuan>
+References: <cover.1793712214.git.alx@kernel.org>
+ <auoxn2Pe10D4HPKm@ashevche-desk.local>
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Post: <mailto:linux-sparse@vger.kernel.org>
@@ -76,54 +58,98 @@ List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-sparse+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="oi66qub5e35lwsy5"
 Content-Disposition: inline
-In-Reply-To: <20261027-kcfi-reference-modules-v2-1-3a3247f15806@proton.me>
+In-Reply-To: <auoxn2Pe10D4HPKm@ashevche-desk.local>
 
-On Tue, Oct 27, 2026 at 03:29:21PM -0700, Ridge Lomont via B4 Relay wrote:
-> From: Ridge Lomont <cyridge@proton.me>
-> 
-> KCFI_REFERENCE() takes the address of a symbol so that the compiler
-> emits its __kcfi_typeid_ symbol, which the SYM_TYPED_FUNC_START()
-> assembly implementing it needs. It is used from arch/x86 headers for
-> __clear_pages_unrolled(), copy_page(), __memset() and __memmove(), and
-> all of that assembly is built into vmlinux.
-> 
-> Modules include the same headers, so with CONFIG_CFI=y every module
-> also gets an __ADDRESSABLE() reference to each of these symbols in
-> .discard.addressable. This serves no purpose there, and since
-> __clear_pages_unrolled() is EXPORT_SYMBOL_GPL, modpost now rejects any
-> GPL-incompatible module that includes <linux/mm.h>:
-> 
->   ERROR: modpost: GPL-incompatible module repro.ko uses GPL-only
->   symbol '__clear_pages_unrolled'
-> 
-> even though the module never uses the symbol. This makes OpenZFS
-> impossible to build against CFI kernels; its configure checks fail
-> in the same way and are misreported as CONFIG_DEBUG_LOCK_ALLOC.
-> 
-> scripts/module.lds.S does not help here: modpost checks <module>.o
-> before the final link, and even after it the discarded section only
-> loses its relocations, the undefined symbols stay in .symtab, where
-> the module loader resolves them with the same license check.
-> 
-> Only emit the reference when building vmlinux.
-> 
-> Tested on x86_64 with clang 23.1.3 and CONFIG_CFI=y, with both
-> CONFIG_LTO_CLANG_FULL=y (the configuration from the Fixes: commit) and
-> CONFIG_LTO_CLANG_THIN=y: vmlinux links without warnings and still contains
-> __kcfi_typeid___clear_pages_unrolled, __kcfi_typeid_copy_page,
-> __kcfi_typeid___memset and __kcfi_typeid___memmove. It boots in QEMU
-> with no CFI failures. A minimal module with MODULE_LICENSE("Proprietary")
-> including <linux/mm.h> fails modpost before this change and builds and
-> loads after it. OpenZFS builds against a CFI kernel with this change,
-> and its pool, encryption, checksum and send/recv operations run
-> without CFI failures, in QEMU and on a desktop with CFI enforcing.
-> 
-> Fixes: 9b041a4b66b3 ("x86/mm: Ensure clear_page() variants always have __kcfi_typeid_ symbols")
-> Link: https://github.com/openzfs/zfs/issues/18092
-> Assisted-by: LLM
-> Signed-off-by: Ridge Lomont <cyridge@proton.me>
-> Acked-by: Nathan Chancellor <nathan@kernel.org>
 
-Thanks!
+--oi66qub5e35lwsy5
+Content-Type: text/plain; protected-headers=v1; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+From: Alejandro Colomar <alx+linux-hardening@kernel.org>
+To: Andy Shevchenko <andriy.shevchenko@intel.com>, 
+	Chris Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org
+Cc: Alejandro Colomar <alx@kernel.org>, Kees Cook <kees@kernel.org>, 
+	linux-hardening@vger.kernel.org, Andy Shevchenko <andy@kernel.org>
+Subject: Re: [PATCH v1 0/2] Simplify implementation of strscpy()
+Message-ID: <auprDNQJl90tLBrQ@devuan>
+References: <cover.1793712214.git.alx@kernel.org>
+ <auoxn2Pe10D4HPKm@ashevche-desk.local>
+MIME-Version: 1.0
+In-Reply-To: <auoxn2Pe10D4HPKm@ashevche-desk.local>
+
+Hi Andy,
+
+> Date: 2026-11-03 21:10:23+0200
+> From: Andy Shevchenko <andriy.shevchenko@intel.com>
+>
+> On Tue, Nov 03, 2026 at 02:27:08PM +0100, Alejandro Colomar wrote:
+> >=20
+> > Here's a simpler implementation of the default arguments in strscpy(9).
+> > It avoids having to build concatenated names, the ignored '...' in
+> > __strscpy0, counting arguments, etc.  It's replaced by a quite simple
+> > macro that takes two arguments, and picks the last non-empty one.
+> >=20
+> > It requires a C23 feature, but it's supported as a GNU extension in
+> > GNU C11 mode, and was implemented a long time ago, so it should be fine.
+>=20
+> Yes and no.
+> See 551d44200152 ("default_gfp(): avoid using the "newfangled" __VA_OPT__=
+ trick")
+> for the details.
+
+Hmmmm, so sparse is a problem.  DEFARG() cannot be implemented with
+##__VA_ARGS__ (I believe), so I think this is frozen until sparse is
+improved to add support for __VA_OPT__.
+
+The implementation in that commit you pointed takes advantage of the
+fact that the default value is hard-coded in the macro, and the macro
+has zero fixed parameters, which makes it work, but if you add one fixed
+parameter (which we need for a generic DEFARG() macro), then it doesn't
+work.  GCC's ## is quite limited compared to __VA_OPT__().
+
+I've CCed the sparse matinainer and mailing list.  Let's see if they can
+add support for __VA_OPT__().
+
+> So far NAK from me.
+
+Makes sense.  Thanks for the review!
+
+
+Have a lovely night!
+Alex
+
+>=20
+> --=20
+> With Best Regards,
+> Andy Shevchenko
+>=20
+>=20
+>=20
+
+--=20
+<https://www.alejandro-colomar.es>
+
+--oi66qub5e35lwsy5
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEES7Jt9u9GbmlWADAi64mZXMKQwqkFAmrqbH0ACgkQ64mZXMKQ
+wqkllw/+MNLFZy2UY09IjzXaCkcbHoGv9kywCSe8aJVa7WVh33CZtBb4cZQ2LwbH
+hoJV7PWzfZZVR6xn7/l6igHw3T/d8IE7dO0EPj8iMdiUr5gRaBONZPo/H9Cz7aNa
+C710oEaUDYVzYyt3+dMkFE3YPNuwQKqDrY7uxUOZVYENc/o4Nck57MMdknWA+wU1
+e7N4lzoWp+xelXPKpW7HE2D/D1IUOc6lkicka/QNkk9PhzofUMKxj8+MUFJth480
+tAi3D5VAkQV6vypgGawZP/BHHQDxgaExzGbUK2mkTH9PhrzqmLPr3AzA+4sFzD9Y
+7Yg68UT/ZJhbD571HfnW/MxqpOIHZscKZd2c0pDDnO0KWSCAiw8OAoOLx+GizGen
+SpkZokhOiLg9AN9ySPHGyYFzlUsOnzJZTXx0Lk/8IEpodhc6sFsTK7EcE0Tg0g1I
+Ic1/ZoiuDzJQUwj42jVFQMbz+no1EduHY1lo/43nNU6RQFU7yL0tDSH7sFAPMnDw
+qsBymtD0UhHPZ/Ltqt2JzZJg5LFaFgFdsgDMuOX4WAKr+niRTv9P3cEn55aqqroE
+gMwdkpwkCt1aLCalkujcjnxeWnfcyu++CFjdyCKJqlPnvzt4LE1qVVYx5wLTwZ30
+FkwhxIlQYy0JtJVZFRJYxvAsWoOSfyq9pFMUmMqRBFPtNspA4nQ=
+=/std
+-----END PGP SIGNATURE-----
+
+--oi66qub5e35lwsy5--
