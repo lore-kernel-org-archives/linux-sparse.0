@@ -1,70 +1,70 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=199.89.1.14
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794256436;
-	b=bpbKCXdG6PCr7qfvy2Eazlo/48EE88VVXFaDqCXWE8Uenwc38gohdccDZNrJ6pKqFQwl
-	 Jij4uToKi2TC2dagFfDTOZvjov3IRc6ZH2DpBfFHI9gQf5lP0pqv3dJYDoPnQPPqqROLv
-	 L7bgIZ60JPefRxQ/l2hNMTss0KFqLqt1tlwrgFXHmFC/aaWpsqjtZ2XLggxYV5xVUi87a
-	 NP7XCBzHJRSMG1iZC9rXPZ3jn+gSXDxiIaMch4t1Uj4XS+qFVKMUwQ7odID81XJO03kTK
-	 6s34dtm/WlY65WDJrAZZkYaYK6P5PSLpIsI3vjBWBckR5b/nRKjaNo8Q6DXOj00tSDw==
+	t=1794256437;
+	b=4ysme5Cn/tcLJKnwmSHV35583nkZZI7MblNo6nIuKU8Hds1vfSCU60QAds3Zjg5gafGJ
+	 rKeFLtsPa/jlik3MzUHpjCsdwfGZ4A7DgJg595yf/o261Ha86kRraQziHpOaZbC4oT9hi
+	 StZ9AaigIlKWhbIWnnL5tLqzhRGg7BPm0z8BnlTPX7ky4imesfTF7o7ayj20U64e7WaQ4
+	 60cGKyD6Nkcgw51mtOPpYX0Ips6KrKXXZtKuan3sXrH3F6S7hX3RtkvSuLvTvgHGVz5lg
+	 l/9gWBGMO/lIwEw+uZ5JX4v4tcZoH2iWe8V2JaJe45sONQEIkGvpyfK5Tt+8glFfAwQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794256436;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794256437;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Virus-Scanned:Received:
 	 Received:From:To:Cc:Subject:Date:Message-ID:X-Mailer:In-Reply-To:
 	 References:MIME-Version:Content-Transfer-Encoding;
-	bh=Go4KUPFVEM09Z19vVz/BZGVFeRzdMUdInvW9lVLJtvM=;
-	b=kzgDLyMgZVva0UFjgR8esQSUO2B12mnFuaxCLYcZvjfOOyh0GtnGOeSp8hbDEk5HXUbk
-	 QIIDT7fpmsUc8pvF8bOVR1kgbxeQ6220EXEqBjpmzyp3X2RcsdhWWsJtTtO5hghrUEwMo
-	 fsNWDh8NNoSPYqu7uYzScVXzESk+vLFdDQWHl+5KXEmakG1Q/VKq3tlf1DLzxZFe1sD7G
-	 xdGZdNrYwRn/EURDn/rJsG2H9zfGRqJW0/5NGxftSoyIcZ2+WJjQp44RLgRot61LdRvGf
-	 vfNFXQwTRyIP5c3OQWtUu8CiRWUNyfrm40lxSRMxR6qhjr3cCDk2Rj3V92zXc25waIA==
+	bh=3nIWFbb+rhSQ+EJiO5bdSjQvrFP8ALVerIXH7bE+v7o=;
+	b=Ngf7g6cPNV/cU7gMq7UPTrOM3PR0pfvC5nEzLc2m02mEnnZAXhxG70inQ7iIidnoTHxi
+	 ZdohwAuEJs1txQDJE9YXy9cRQ+tGhCpddvcCqSswxkw3AEKefwWN96a76cl0Ue1yeBw3D
+	 auJV7K/Vey9t77qD2jN3/e6/COs8kFy4ACiEQv1IuTgypcjx1SNf8ntVcVEHdufs0ONAh
+	 VvDrjOAnvHcEmPHUndu1zzCWHX/peqZs7Tk7kU1NrnXWDrz6tAcI74DTWa1S1wdog+1/Y
+	 pf/fmw5F//VCNkzC0YJ6wxNyKDfBTFaH79kAkcEjI2/pE5mObBHDlVRPKpRtlecJWsQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=acm.org;
 	spf=pass smtp.mailfrom=acm.org;
-	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=kDPjurER;
+	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=JnrNAETF;
 	arc=none smtp.remote-ip=199.89.1.14
 Received: from 011.lax.mailroute.net (011.lax.mailroute.net [199.89.1.14])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 52211606A326
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C5FDC606A325
 	for <linux-sparse@vger.kernel.org>; Mon,  9 Nov 2026 20:33:56 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 52211606A326
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org C5FDC606A325
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=acm.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=kDPjurER
+	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=JnrNAETF
 Received: from localhost (localhost [127.0.0.1])
-	by 011.lax.mailroute.net (Postfix) with ESMTP id 4jNhMJ0wr4z1XMYJK;
+	by 011.lax.mailroute.net (Postfix) with ESMTP id 4jNhMJ2Mzjz1XMYJV;
 	Mon,  9 Nov 2026 20:33:48 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=acm.org; h=
 	content-transfer-encoding:mime-version:references:in-reply-to
 	:x-mailer:message-id:date:date:subject:subject:from:from
-	:received:received; s=mr01; t=1794256418; x=1796848419; bh=Go4KU
-	PFVEM09Z19vVz/BZGVFeRzdMUdInvW9lVLJtvM=; b=kDPjurERfIW6DHhbaW48N
-	DTNyeLBv0PYzRnECdjka6oncmGNh3DGJc0PFsMkGFXWNp8cZRs/4gURo8j/xtIyT
-	md/rJKzIypTb3LSFyg8DNAYc97369SubjxwWiLqYF3cstMl1L13zvhZKPTm9WNJq
-	77AR5U/xzK7HgET1ESYo+hK5TOu6hwnb0O/7bMYTsV1vMPFRjePy3OlPCc0RqBlT
-	VH3NKH0wSC/AzNavu7DBBS89lF5p3pC+xI69ee/P9ZQH3V2TvlwdWleurbF+SRkw
-	32Y37szFE0okc7pzNSFvNc6mKQ7KCBPKqb++GB5eSSDabYh2isBKqWiuj0nXxPPa
-	A==
+	:received:received; s=mr01; t=1794256420; x=1796848421; bh=3nIWF
+	bb+rhSQ+EJiO5bdSjQvrFP8ALVerIXH7bE+v7o=; b=JnrNAETFCbVw9C7ZoqUdZ
+	f4ff05KmJCQtf7nG3jntKiDTd7Sg4i7nblZbfROnpxPF5ecthvMvtmx7W17M2nYJ
+	8x82gKFWoBHqF3naRzCKQz2HY68JEks0MuGLmXdPdP3UrkUy+BXL1+t6eDFIZRt9
+	nXKCZKINCpYnsQLvokr8+Gjk7hFKwyCOZlIhrqwl9O4nuHxELpG1zIvr2dC0Tyjp
+	6yrY10Po+QUwZw99KIieC1RwGp7z63YFr01Fa0ClhZVfEFOr7mcPYwlEaxt9pxNC
+	03pfSnGI4sVHhB7OIZCKT31HCT0UQvO+TRhwDh/XWi6MCabpjR1conGFmtlHu2yX
+	g==
 X-Virus-Scanned: by MailRoute
 Received: from 011.lax.mailroute.net ([127.0.0.1])
  by localhost (011.lax [127.0.0.1]) (mroute_mailscanner, port 10029) with LMTP
- id SNjp3iaPaH5T; Mon,  9 Nov 2026 20:33:38 +0000 (UTC)
+ id 08Xhiwr35X8m; Mon,  9 Nov 2026 20:33:40 +0000 (UTC)
 Received: from bvanassche.c.googlers.com.com (57.237.82.34.bc.googleusercontent.com [34.82.237.57])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
 	(Authenticated sender: bvanassche@acm.org)
-	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4jNhM629N9z1XMYJV;
-	Mon,  9 Nov 2026 20:33:38 +0000 (UTC)
+	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4jNhM828jLz1XMfrl;
+	Mon,  9 Nov 2026 20:33:40 +0000 (UTC)
 From: Bart Van Assche <bvanassche@acm.org>
 To: linux-sparse@vger.kernel.org
 Cc: Linus Torvalds <torvalds@linux-foundation.org>,
 	Bart Van Assche <bvanassche@acm.org>
-Subject: [PATCH 63/73] enum: Support __attribute__((packed)) on enumeration types
-Date: Mon,  9 Nov 2026 12:32:49 -0800
-Message-ID: <20261109203259.362845-64-bvanassche@acm.org>
+Subject: [PATCH 72/73] evaluate: Accept conditional expressions with only one void side
+Date: Mon,  9 Nov 2026 12:32:58 -0800
+Message-ID: <20261109203259.362845-73-bvanassche@acm.org>
 X-Mailer: git-send-email 2.56.0.506.g506a7eabc5-goog
 In-Reply-To: <20261109203259.362845-1-bvanassche@acm.org>
 References: <20261109203259.362845-1-bvanassche@acm.org>
@@ -79,579 +79,447 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
 
-Support GCC/Clang __attribute__((packed)) on enumeration types so
-packed enums select the narrowest integer type fitting their range:
-- Define get_enum_base_type() and record the enumerator range on the
-  enum symbol so prefix and postfix packed attributes shrink the enum
-  size and alignment.
-- Preserve sym->packed across subsequent tag lookups with '|=3D' instead
-  of '=3D'.
-- Warn when both 'packed' and 'aligned' attributes are applied to an
-  enum type since Clang and GCC treat that combination differently, and
-  diagnose array element types whose size is not a multiple of their
-  alignment in examine_array_type().
-- Avoid overwriting invalid (&bad_ctype), incomplete, bitwise
-  (SYM_RESTRICT), mode-attributed, or C23 fixed-underlying-type enums.
-- Add regression tests in validation/enum-packed.c.
+Accept conditional expressions in which exactly one of the second and
+third operands has complete type void as a GNU extension matching GCC
+and Clang: give the expression type void, evaluate the non-void operand
+only for its side effects, warn only under -Wpedantic, and avoid
+emitting zero-sized phi nodes in linearize_conditional().
+
+Support Linux kernel macros such as STA_ASSIGN in net/mac80211/trace.h
+and nfs_errorf() in fs/nfs/internal.h without false "incompatible types
+in conditional expression" errors while continuing to diagnose uses of
+the void result value.
+
+Update validation/cond-err-expand.c and add validation/cond-one-void.c
+and validation/cond-one-void-pedantic.c.
 
 Signed-off-by: Bart Van Assche <bvanassche@acm.org>
 ---
- parse.c                  | 92 +++++++++++++++++-----------------------
- symbol.c                 | 87 ++++++++++++++++++++++++++++++++++---
- symbol.h                 | 10 +++++
- validation/enum-packed.c | 85 +++++++++++++++++++++++++++++++++++++
- 4 files changed, 214 insertions(+), 60 deletions(-)
- create mode 100644 validation/enum-packed.c
+ evaluate.c                          | 113 ++++++++++++++++++----------
+ expand.c                            |  17 ++++-
+ linearize.c                         |  19 +++++
+ validation/cond-err-expand.c        |   9 ---
+ validation/cond-one-void-pedantic.c |  39 ++++++++++
+ validation/cond-one-void.c          |  47 ++++++++++++
+ validation/linear/cond-one-void.c   |  24 ++++++
+ 7 files changed, 217 insertions(+), 51 deletions(-)
+ create mode 100644 validation/cond-one-void-pedantic.c
+ create mode 100644 validation/cond-one-void.c
+ create mode 100644 validation/linear/cond-one-void.c
 
-diff --git a/parse.c b/parse.c
-index b686d2d55c36..3235274e6659 100644
---- a/parse.c
-+++ b/parse.c
-@@ -891,6 +891,8 @@ static struct token *struct_union_enum_specifier(enum=
- type type,
- 				sym->rank =3D underlying->rank;
- 			}
- 			token =3D handle_attributes(token, &attr);
-+			sym->packed |=3D attr.packed;
-+			sym->has_aligned |=3D attr.has_aligned;
- 			if (!match_op(token, '{')) {
- 				ctx->opaque_fixed_enum =3D 1;
- 				ctx->opaque_fixed_enum_pos =3D colon_pos;
-@@ -972,6 +974,8 @@ static struct token *struct_union_enum_specifier(enum=
- type type,
- 		return token;
- 	}
+diff --git a/evaluate.c b/evaluate.c
+index 6e1be32f929f..927c4f35d831 100644
+--- a/evaluate.c
++++ b/evaluate.c
+@@ -1421,6 +1421,37 @@ static struct symbol *evaluate_conditional_express=
+ion(struct expression *expr)
 =20
-+	sym->packed |=3D attr.packed;
-+	sym->has_aligned |=3D attr.has_aligned;
- 	token =3D parse(token->next, sym);
- 	token =3D expect(token, '}', "at end of specifier");
- 	sym->defined =3D 1;
-@@ -979,7 +983,11 @@ static struct token *struct_union_enum_specifier(enu=
-m type type,
- 	attr.ctype.base_type =3D sym;
- 	token =3D handle_attributes(token, &attr);
- 	apply_ctype(token->pos, &sym->ctype, &attr.ctype);
--	sym->packed =3D attr.packed;
-+	sym->packed |=3D attr.packed;
-+	sym->has_aligned |=3D attr.has_aligned;
-+	if (sym->type =3D=3D SYM_ENUM && sym->packed && sym->has_aligned)
-+		warning(sym->pos,
-+			"Clang and GCC treat 'packed' and 'aligned' attributes on enum types =
-differently");
- 	if (attr.designated_init) {
- 		if (sym->type =3D=3D SYM_STRUCT)
- 			sym->designated_init =3D 1;
-@@ -1006,6 +1014,16 @@ static struct token *struct_union_enum_specifier(e=
-num type type,
- 			sym->rank =3D mtype->rank;
- 		}
- 	}
-+	if (sym->type =3D=3D SYM_ENUM && sym->packed && !sym->fixed_type &&
-+	    !sym->has_mode && sym->ctype.base_type &&
-+	    is_int_type(sym->ctype.base_type)) {
-+		struct symbol *base =3D get_enum_base_type(sym->range, 1);
-+		if (base && base !=3D &bad_ctype) {
-+			sym->ctype.base_type =3D base;
-+			sym->ctype.modifiers &=3D ~MOD_SIGNEDNESS;
-+			sym->ctype.modifiers |=3D (base->ctype.modifiers & MOD_SIGNEDNESS);
+ 	lclass =3D classify_type(ltype, &ltype);
+ 	rclass =3D classify_type(rtype, &rtype);
++
++	/*
++	 * GNU extension supported by gcc and clang: if exactly one of the
++	 * second and third operands has type void, the result has type void
++	 * and the other operand is only evaluated for its side effects.
++	 * ISO C forbids this [6.5.15(3)].
++	 */
++	if ((ltype =3D=3D &void_ctype) !=3D (rtype =3D=3D &void_ctype)) {
++		struct symbol *other_type =3D (ltype =3D=3D &void_ctype) ? rtype : lty=
+pe;
++
++		if (!valid_type(other_type)) {
++			expr->flags =3D CEF_NONE;
++			expr->ctype =3D &bad_ctype;
++			return NULL;
 +		}
++		if (other_type =3D=3D &incomplete_ctype || other_type->bit_size < 0 ||
++		    ((other_type->type =3D=3D SYM_STRUCT || other_type->type =3D=3D SY=
+M_UNION) &&
++		     !other_type->defined)) {
++			expression_error(expr, "expression has incomplete type '%s'",
++					 show_typename(other_type));
++			return NULL;
++		}
++		if (Wpedantic)
++			warning(expr->pos, "ISO C forbids conditional expression with only on=
+e void side");
++		if (expr->cond_true)
++			*cond =3D cast_to(*cond, &void_ctype);
++		expr->cond_false =3D cast_to(expr->cond_false, &void_ctype);
++		ctype =3D &void_ctype;
++		goto out;
 +	}
++
+ 	if (lclass & rclass & TYPE_NUM) {
+ 		ctype =3D usual_conversions('?', *cond, expr->cond_false,
+ 					  lclass, rclass, ltype, rtype);
+@@ -3127,7 +3158,8 @@ static void check_constexpr_scalar_init(struct expr=
+ession *orig,
+ 		}
+ 		tmp =3D *orig;
+ 		if (!is_null_pointer_constant(&tmp) &&
+-		    !(((sclass & TYPE_PTR) || is_nullptr_type(stype)) && is_zero_const=
+ant(&tmp)))
++		    !(((sclass & TYPE_PTR) || is_nullptr_type(stype)) &&
++		      is_zero_constant(&tmp)))
+ 			sparse_error(orig->pos,
+ 				     "constexpr pointer initializer is not null");
+ 		return;
+@@ -3309,7 +3341,6 @@ static int handle_initializer(struct expression **e=
+p, int nested,
+ 		struct expression orig;
 =20
- 	sym->endpos =3D token->pos;
-=20
-@@ -1045,24 +1063,6 @@ static struct token *union_specifier(struct token =
-*token, struct symbol *sym, st
- 	return struct_union_enum_specifier(SYM_UNION, token, ctx, parse_union_d=
-eclaration);
- }
-=20
--///
--// safe right shift
--//
--// This allow to use a shift amount as big (or bigger)
--// than the width of the value to be shifted, in which case
--// the result is, of course, 0.
--static unsigned long long rshift(unsigned long long val, unsigned int n)
--{
--	if (n >=3D (sizeof(val) * 8))
--		return 0;
--	return val >> n;
--}
+ 		e =3D handle_scalar(e, nested, class, ctype);
 -
--struct range {
--	long long		neg;
--	unsigned long long	pos;
--};
--
- static void update_range(struct range *range, unsigned long long uval, s=
-truct symbol *vtype)
- {
- 	long long sval =3D uval;
-@@ -1076,24 +1076,6 @@ static void update_range(struct range *range, unsi=
-gned long long uval, struct sy
+ 		if (!e)
+ 			return 0;
+ 		*ep =3D e;
+@@ -3323,11 +3354,11 @@ static int handle_initializer(struct expression *=
+*ep, int nested,
+ 		 * shall be constant expressions or a string literal [6.7.8(4)].
+ 		 */
+ 		mods |=3D ctype->ctype.modifiers;
+-		if (mods & MOD_CONSTEXPR)
++		if (mods & MOD_CONSTEXPR) {
+ 			check_constexpr_scalar_init(&orig, ctype);
+-		else if ((mods & (MOD_TOPLEVEL | MOD_STATIC | MOD_TLS)) &&
+-			 valid_type(ctype->ctype.base_type) &&
+-			 !(e->flags & (CEF_ACE | CEF_ADDR))) {
++		} else if ((mods & (MOD_TOPLEVEL | MOD_STATIC | MOD_TLS)) &&
++			   valid_type(ctype->ctype.base_type) &&
++			   !(e->flags & (CEF_ACE | CEF_ADDR))) {
+ 			if (standard >=3D STANDARD_C23)
+ 				sparse_error(e->pos, "non-constant initializer for static object");
+ 			else if (Wconstexpr_not_const)
+@@ -4187,6 +4218,41 @@ void check_duplicates(struct symbol *sym)
  	}
  }
 =20
--static int type_is_ok(struct symbol *type, struct range range)
--{
--	int shift =3D type->bit_size;
--	int is_unsigned =3D type->ctype.modifiers & MOD_UNSIGNED;
--
--	if (!is_unsigned)
--		shift--;
--	if (rshift(range.pos, shift))
--		return 0;
--	if (range.neg =3D=3D 0)
--		return 1;
--	if (is_unsigned)
--		return 0;
--	if (rshift(~range.neg, shift))
--		return 0;
--	return 1;
--}
--
- static struct range type_range(struct symbol *type)
++static void evaluate_cleanup(struct symbol *sym)
++{
++	struct expression *var_expr, *addr_expr, *fn_expr, *call;
++
++	if (!sym->cleanup || sym->cleanup->type !=3D EXPR_SYMBOL)
++		return;
++
++	if (sym->ctype.modifiers & (MOD_TOPLEVEL | MOD_STATIC | MOD_EXTERN)) {
++		sparse_error(sym->pos, "cleanup attribute may only be applied to local=
+ variables");
++		sym->cleanup =3D NULL;
++		return;
++	}
++
++	var_expr =3D alloc_expression(sym->pos, EXPR_SYMBOL);
++	var_expr->symbol =3D sym;
++	var_expr->symbol_name =3D sym->ident;
++	evaluate_expression(var_expr);
++
++	addr_expr =3D alloc_expression(sym->pos, EXPR_PREOP);
++	addr_expr->op =3D '&';
++	addr_expr->unop =3D var_expr;
++	evaluate_expression(addr_expr);
++
++	fn_expr =3D alloc_expression(sym->cleanup->pos, EXPR_SYMBOL);
++	fn_expr->symbol =3D sym->cleanup->symbol;
++	fn_expr->symbol_name =3D sym->cleanup->symbol_name;
++
++	call =3D alloc_expression(sym->pos, EXPR_CALL);
++	call->fn =3D fn_expr;
++	add_expression(&call->args, addr_expr);
++	evaluate_call(call);
++
++	sym->cleanup =3D call;
++}
++
+ static bool check_constexpr_vm_type(struct symbol *type)
  {
- 	struct range range;
-@@ -1315,20 +1297,9 @@ static struct token *parse_enum_declaration(struct=
- token *token, struct symbol *
- 			base_type =3D &bad_ctype;
- 		} else if (!is_int_type(base_type))
- 			;
--		else if (type_is_ok(&uint_ctype, range))
--			base_type =3D &uint_ctype;
--		else if (type_is_ok(&int_ctype, range))
--			base_type =3D &int_ctype;
--		else if (type_is_ok(&ulong_ctype, range))
--			base_type =3D &ulong_ctype;
--		else if (type_is_ok(&long_ctype, range))
--			base_type =3D &long_ctype;
--		else if (type_is_ok(&ullong_ctype, range))
--			base_type =3D &ullong_ctype;
--		else if (type_is_ok(&llong_ctype, range))
--			base_type =3D &llong_ctype;
- 		else
--			base_type =3D &bad_ctype;
-+			base_type =3D get_enum_base_type(range, parent->packed);
-+		parent->range =3D range;
- 		parent->ctype.base_type =3D base_type;
- 		parent->ctype.modifiers |=3D
- 			(base_type->ctype.modifiers & MOD_UNSIGNED);
-@@ -1491,10 +1462,9 @@ static struct token *ignore_attribute(struct token=
- *token, struct symbol *attr,
+ 	while (type) {
+@@ -4236,41 +4302,6 @@ static bool has_invalid_constexpr_qualifiers(struc=
+t symbol *type)
+ 	return false;
+ }
 =20
- static struct token *attribute_packed(struct token *token, struct symbol=
- *attr, struct decl_state *ctx)
- {
--	if (!ctx->ctype.alignment) {
-+	if (!ctx->ctype.alignment)
- 		ctx->ctype.alignment =3D 1;
--		ctx->packed =3D 1;
+-static void evaluate_cleanup(struct symbol *sym)
+-{
+-	struct expression *var_expr, *addr_expr, *fn_expr, *call;
+-
+-	if (!sym->cleanup || sym->cleanup->type !=3D EXPR_SYMBOL)
+-		return;
+-
+-	if (sym->ctype.modifiers & (MOD_TOPLEVEL | MOD_STATIC | MOD_EXTERN)) {
+-		sparse_error(sym->pos, "cleanup attribute may only be applied to local=
+ variables");
+-		sym->cleanup =3D NULL;
+-		return;
 -	}
-+	ctx->packed =3D 1;
- 	return token;
- }
-=20
-@@ -1513,6 +1483,7 @@ static struct token *attribute_aligned(struct token=
- *token, struct symbol *attr,
- 		return token;
- 	} else if (alignment > ctx->ctype.alignment)
- 		ctx->ctype.alignment =3D alignment;
-+	ctx->has_aligned =3D 1;
- 	return token;
- }
-=20
-@@ -2004,6 +1975,8 @@ static struct token *declaration_specifiers(struct =
-token *token, struct decl_sta
- 			seen |=3D Set_S | Set_T;
- 			ctx->ctype.base_type =3D s->ctype.base_type;
- 			apply_ctype(token->pos, &ctx->ctype, &s->ctype);
-+			if (s->ctype.alignment > ctx->typedef_alignment)
-+				ctx->typedef_alignment =3D s->ctype.alignment;
- 			token =3D token->next;
- 			continue;
- 		}
-@@ -2422,12 +2395,14 @@ static struct token *direct_declarator(struct tok=
-en *token, struct decl_state *c
- 	} else if (match_op(token, '(') &&
- 	    is_nested(token, &next, ctx->prefer_abstract)) {
- 		struct symbol *base_type =3D ctype->base_type;
-+		unsigned int saved_td_align =3D ctx->typedef_alignment;
- 		if (token->next !=3D next)
- 			next =3D handle_attributes(token->next, ctx);
- 		token =3D declarator(next, ctx);
- 		token =3D expect(token, ')', "in nested declarator");
- 		while (ctype->base_type !=3D base_type)
- 			ctype =3D &ctype->base_type->ctype;
-+		ctx->typedef_alignment =3D saved_td_align;
- 		p =3D NULL;
- 	}
-=20
-@@ -2459,6 +2434,7 @@ static struct token *direct_declarator(struct token=
- *token, struct decl_state *c
- 		return token;
- 	}
-=20
-+	bool saw_array =3D false;
- 	while (match_op(token, '[') && !match_c23_attribute(token)) {
- 		struct symbol *array;
- 		array =3D alloc_indirect_symbol(token->pos, ctype, SYM_ARRAY);
-@@ -2466,9 +2442,12 @@ static struct token *direct_declarator(struct toke=
-n *token, struct decl_state *c
- 		token =3D expect(token, ']', "in abstract_array_declarator");
- 		array->endpos =3D token->pos;
- 		ctype =3D &array->ctype;
-+		saw_array =3D true;
- 		if (match_c23_attribute(token))
- 			token =3D handle_attributes(token, ctx);
- 	}
-+	if (saw_array && ctx->typedef_alignment > ctype->alignment)
-+		ctype->alignment =3D ctx->typedef_alignment;
- 	return token;
- }
-=20
-@@ -2485,6 +2464,7 @@ static struct token *pointer(struct token *token, s=
-truct decl_state *ctx)
- 		ctx->ctype.as =3D NULL;
- 		ctx->ctype.contexts =3D NULL;
- 		ctx->ctype.alignment =3D 0;
-+		ctx->typedef_alignment =3D 0;
-=20
- 		token =3D handle_qualifiers(token->next, ctx);
- 		ctx->ctype.base_type->endpos =3D token->pos;
-@@ -2553,6 +2533,7 @@ static struct token *declaration_list(struct token =
-*token, struct symbol_list **
- 	struct decl_state ctx =3D {.prefer_abstract =3D 0};
- 	struct ctype saved;
- 	unsigned long mod;
-+	unsigned int saved_td_align;
-=20
- 	token =3D declaration_specifiers(token, &ctx);
- 	if (ctx.opaque_fixed_enum)
-@@ -2560,10 +2541,12 @@ static struct token *declaration_list(struct toke=
-n *token, struct symbol_list **
- 			     "'enum' underlying type may not be specified here");
- 	mod =3D decl_modifiers(&ctx);
- 	saved =3D ctx.ctype;
-+	saved_td_align =3D ctx.typedef_alignment;
- 	for (;;) {
- 		struct symbol *decl =3D alloc_symbol(token->pos, SYM_NODE);
- 		ctx.cleanup =3D NULL;
- 		ctx.ident_modifiers =3D 0;
-+		ctx.typedef_alignment =3D saved_td_align;
- 		ctx.ident =3D &decl->ident;
-=20
- 		token =3D declarator(token, &ctx);
-@@ -3801,6 +3784,7 @@ struct token *external_declaration(struct token *to=
-ken, struct symbol_list **lis
- 	struct decl_state ctx =3D { .ident =3D &ident };
- 	struct ctype saved;
- 	unsigned long saved_f_modifiers;
-+	unsigned int saved_td_align;
- 	struct symbol *base_type;
- 	unsigned long mod;
- 	int is_typedef;
-@@ -3840,6 +3824,7 @@ struct token *external_declaration(struct token *to=
-ken, struct symbol_list **lis
-=20
- 	saved =3D ctx.ctype;
- 	saved_f_modifiers =3D ctx.f_modifiers;
-+	saved_td_align =3D ctx.typedef_alignment;
- 	token =3D declarator(token, &ctx);
- 	token =3D handle_asm_name(token, &ctx);
- 	token =3D handle_attributes(token, &ctx);
-@@ -4108,6 +4093,7 @@ struct token *external_declaration(struct token *to=
-ken, struct symbol_list **lis
- 		ctx.cleanup =3D NULL;
- 		ctx.ident_modifiers =3D 0;
- 		ctx.f_modifiers =3D saved_f_modifiers;
-+		ctx.typedef_alignment =3D saved_td_align;
- 		token =3D handle_attributes(token, &ctx);
- 		token =3D declarator(token, &ctx);
- 		token =3D handle_asm_name(token, &ctx);
-diff --git a/symbol.c b/symbol.c
-index d4b945d9e161..69fb0670c341 100644
---- a/symbol.c
-+++ b/symbol.c
-@@ -352,6 +352,7 @@ static struct symbol * examine_array_type(struct symb=
-ol *sym)
- 	struct symbol *base_type =3D examine_base_type(sym);
- 	unsigned long bit_size =3D -1, alignment;
- 	struct expression *array_size =3D sym->array_size;
-+	int elem_size;
-=20
- 	if (!base_type)
- 		return sym;
-@@ -376,8 +377,13 @@ static struct symbol * examine_array_type(struct sym=
-bol *sym)
- 	if (has_flexible_array(base_type) && Wflexible_array_array)
- 		warning(sym->pos, "array of flexible structures");
- 	alignment =3D base_type->ctype.alignment;
--	if (!sym->ctype.alignment)
-+	if (!sym->ctype.alignment || sym->ctype.alignment < alignment)
- 		sym->ctype.alignment =3D alignment;
-+	elem_size =3D bits_to_bytes(base_type->bit_size);
-+	if (elem_size > 0 && sym->ctype.alignment &&
-+	    (elem_size % sym->ctype.alignment))
-+		sparse_error(sym->pos,
-+			     "size of array element is not a multiple of its alignment");
- 	sym->bit_size =3D bit_size;
- 	return sym;
- }
-@@ -587,25 +593,92 @@ static struct symbol * examine_node_type(struct sym=
-bol *sym)
- 	return sym;
- }
-=20
-+static unsigned long long rshift(unsigned long long val, unsigned int n)
-+{
-+	if (n >=3D (sizeof(val) * 8))
-+		return 0;
-+	return val >> n;
-+}
-+
-+static int type_is_ok(struct symbol *type, struct range range)
-+{
-+	int shift =3D type->bit_size;
-+	int is_unsigned =3D type->ctype.modifiers & MOD_UNSIGNED;
-+
-+	if (!is_unsigned)
-+		shift--;
-+	if (rshift(range.pos, shift))
-+		return 0;
-+	if (range.neg =3D=3D 0)
-+		return 1;
-+	if (is_unsigned)
-+		return 0;
-+	if (rshift(~range.neg, shift))
-+		return 0;
-+	return 1;
-+}
-+
-+struct symbol *get_enum_base_type(struct range range, int packed)
-+{
-+	if (packed) {
-+		if (type_is_ok(&uchar_ctype, range))
-+			return &uchar_ctype;
-+		if (type_is_ok(&schar_ctype, range))
-+			return &schar_ctype;
-+		if (type_is_ok(&ushort_ctype, range))
-+			return &ushort_ctype;
-+		if (type_is_ok(&short_ctype, range))
-+			return &short_ctype;
-+	}
-+	if (type_is_ok(&uint_ctype, range))
-+		return &uint_ctype;
-+	if (type_is_ok(&int_ctype, range))
-+		return &int_ctype;
-+	if (type_is_ok(&ulong_ctype, range))
-+		return &ulong_ctype;
-+	if (type_is_ok(&long_ctype, range))
-+		return &long_ctype;
-+	if (type_is_ok(&ullong_ctype, range))
-+		return &ullong_ctype;
-+	if (type_is_ok(&llong_ctype, range))
-+		return &llong_ctype;
-+	return &bad_ctype;
-+}
-+
- static struct symbol *examine_enum_type(struct symbol *sym)
+-
+-	var_expr =3D alloc_expression(sym->pos, EXPR_SYMBOL);
+-	var_expr->symbol =3D sym;
+-	var_expr->symbol_name =3D sym->ident;
+-	evaluate_expression(var_expr);
+-
+-	addr_expr =3D alloc_expression(sym->pos, EXPR_PREOP);
+-	addr_expr->op =3D '&';
+-	addr_expr->unop =3D var_expr;
+-	evaluate_expression(addr_expr);
+-
+-	fn_expr =3D alloc_expression(sym->cleanup->pos, EXPR_SYMBOL);
+-	fn_expr->symbol =3D sym->cleanup->symbol;
+-	fn_expr->symbol_name =3D sym->cleanup->symbol_name;
+-
+-	call =3D alloc_expression(sym->pos, EXPR_CALL);
+-	call->fn =3D fn_expr;
+-	add_expression(&call->args, addr_expr);
+-	evaluate_call(call);
+-
+-	sym->cleanup =3D call;
+-}
+-
+ static struct symbol *evaluate_symbol(struct symbol *sym)
  {
--	struct symbol *base_type =3D examine_base_type(sym);
-+	struct symbol *base_type;
-+	unsigned long alignment;
-+
-+	if (sym->packed && !sym->fixed_type && !sym->has_mode &&
-+	    sym->ctype.base_type && is_int_type(sym->ctype.base_type) &&
-+	    sym->ctype.base_type !=3D &incomplete_ctype) {
-+		base_type =3D get_enum_base_type(sym->range, 1);
-+		if (base_type && base_type !=3D &bad_ctype) {
-+			sym->ctype.base_type =3D base_type;
-+			sym->ctype.modifiers &=3D ~MOD_SIGNEDNESS;
-+			sym->ctype.modifiers |=3D (base_type->ctype.modifiers & MOD_SIGNEDNES=
-S);
+ 	struct symbol *base_type;
+diff --git a/expand.c b/expand.c
+index 5c3777ff3a23..1888effa4e37 100644
+--- a/expand.c
++++ b/expand.c
+@@ -850,6 +850,7 @@ static int expand_conditional(struct expression *expr=
+)
+=20
+ 	cond_cost =3D expand_expression(cond);
+ 	if (cond->type =3D=3D EXPR_VALUE) {
++		struct symbol *ctype =3D expr->ctype;
+ 		unsigned flags =3D expr->flags;
+ 		if (!cond->value && !cond->value_hi)
+ 			valt =3D valf;
+@@ -860,13 +861,27 @@ static int expand_conditional(struct expression *ex=
+pr)
+ 		expr->flags =3D flags;
+ 		if (expr->type =3D=3D EXPR_VALUE)
+ 			expr->taint |=3D cond->taint;
++		if (ctype =3D=3D &void_ctype && expr->ctype !=3D &void_ctype) {
++			if (expr->type =3D=3D EXPR_VALUE || expr->type =3D=3D EXPR_FVALUE) {
++				expr->type =3D EXPR_VALUE;
++				expr->value =3D 0;
++				expr->ctype =3D &void_ctype;
++			} else {
++				struct expression *sub =3D alloc_expression(expr->pos, expr->type);
++				*sub =3D *expr;
++				expr->type =3D EXPR_CAST;
++				expr->ctype =3D &void_ctype;
++				expr->cast_type =3D &void_ctype;
++				expr->cast_expression =3D sub;
++			}
 +		}
-+	}
-+	base_type =3D examine_base_type(sym);
-=20
- 	sym->ctype.modifiers |=3D (base_type->ctype.modifiers & MOD_SIGNEDNESS)=
-;
--	if (sym->fixed_type || sym->has_mode) {
-+	if (sym->fixed_type || sym->packed || sym->has_mode) {
- 		if (base_type =3D=3D &bool_ctype)
- 			sym->bit_size =3D bits_to_bytes(bits_in_bool) * bits_in_char;
- 		else
- 			sym->bit_size =3D base_type->bit_size;
--		sym->ctype.alignment =3D base_type->ctype.alignment;
-+		alignment =3D base_type->ctype.alignment;
- 	} else {
- 		sym->bit_size =3D bits_in_enum;
- 		if (base_type->bit_size > sym->bit_size)
- 			sym->bit_size =3D base_type->bit_size;
--		sym->ctype.alignment =3D enum_alignment;
--		if (base_type->ctype.alignment > sym->ctype.alignment)
--			sym->ctype.alignment =3D base_type->ctype.alignment;
-+		alignment =3D enum_alignment;
-+		if (base_type->ctype.alignment > alignment)
-+			alignment =3D base_type->ctype.alignment;
+ 		return cost;
  	}
-+	if (sym->ctype.alignment < alignment)
-+		sym->ctype.alignment =3D alignment;
- 	sym->rank =3D base_type->rank;
- 	return sym;
- }
-diff --git a/symbol.h b/symbol.h
-index aa180ac4f514..691213a0b454 100644
---- a/symbol.h
-+++ b/symbol.h
-@@ -87,6 +87,11 @@ enum keyword {
- 	KW_EXACT	=3D 1 << 9,
- };
 =20
-+struct range {
-+	long long		neg;
-+	unsigned long long	pos;
-+};
+ 	cost =3D expand_expression(valt);
+ 	cost +=3D expand_expression(valf);
+=20
+-	if (cost < SELECT_COST) {
++	if (expr->ctype !=3D &void_ctype && cost < SELECT_COST) {
+ 		expr->type =3D EXPR_SELECT;
+ 		cost -=3D BRANCH_COST - 1;
+ 	}
+diff --git a/linearize.c b/linearize.c
+index 9d36415551d6..9dc2fecfe731 100644
+--- a/linearize.c
++++ b/linearize.c
+@@ -1699,6 +1699,14 @@ static pseudo_t linearize_short_conditional(struct=
+ entrypoint *ep, struct expres
+ 	bb_false =3D alloc_basic_block(ep, expr_false->pos);
+ 	merge =3D alloc_basic_block(ep, expr->pos);
+=20
++	if (expr->ctype =3D=3D &void_ctype || type_size(expr->ctype) <=3D 0) {
++		linearize_cond_branch(ep, cond, merge, bb_false);
++		set_activeblock(ep, bb_false);
++		linearize_expression(ep, expr_false);
++		set_activeblock(ep, merge);
++		return VOID;
++	}
 +
- struct context {
- 	struct expression *context;
- 	unsigned int in, out;
-@@ -112,10 +117,12 @@ struct decl_state {
- 	unsigned long f_modifiers;		// function attributes
- 	unsigned long ident_modifiers;		// declarator-id C23 attributes
- 	unsigned long storage_class;
-+	unsigned int typedef_alignment;
- 	unsigned char prefer_abstract;
- 	unsigned char autotype;
- 	unsigned char forced;
- 	unsigned char packed;
-+	unsigned char has_aligned;
- 	unsigned char has_auto;
- 	unsigned char has_alignas;
- 	unsigned char is_constexpr;
-@@ -215,6 +222,7 @@ struct symbol {
- 			unsigned int underspecified : 1;
- 			unsigned int c23_auto : 1;
- 			unsigned int has_mode : 1;
-+			unsigned int has_aligned : 1;
- 			int		rank:3;	// arithmetic's rank
- 			struct expression *array_size;
- 			struct ctype ctype;
-@@ -225,6 +233,7 @@ struct symbol {
- 			struct symbol_list *inline_symbol_list;
- 			struct expression *initializer;
- 			struct expression *cleanup;
-+			struct range range;
- 			struct entrypoint *ep;
- 			struct symbol *definition;
- 		};
-@@ -373,6 +382,7 @@ extern void bind_symbol_with_scope(struct symbol *, s=
-truct ident *, enum namespa
- extern struct symbol *strip_array_qualifiers(struct symbol *);
- extern struct symbol *examine_symbol_type(struct symbol *);
- extern struct symbol *examine_pointer_target(struct symbol *);
-+extern struct symbol *get_enum_base_type(struct range range, int packed)=
-;
- extern const char *show_as(struct ident *as);
- extern const char *show_typename(struct symbol *sym);
- extern const char *builtin_typename(struct symbol *sym);
-diff --git a/validation/enum-packed.c b/validation/enum-packed.c
+ 	src1 =3D linearize_expression(ep, cond);
+ 	phi1 =3D alloc_phi(ep->active, src1, expr->ctype);
+ 	add_branch(ep, src1, merge, bb_false);
+@@ -1728,6 +1736,17 @@ static pseudo_t linearize_conditional(struct entry=
+point *ep, struct expression *
+=20
+ 	linearize_cond_branch(ep, cond, bb_true, bb_false);
+=20
++	if (expr->ctype =3D=3D &void_ctype || type_size(expr->ctype) <=3D 0) {
++		set_activeblock(ep, bb_true);
++		linearize_expression(ep, expr_true);
++		add_goto(ep, merge);
++
++		set_activeblock(ep, bb_false);
++		linearize_expression(ep, expr_false);
++		set_activeblock(ep, merge);
++		return VOID;
++	}
++
+ 	set_activeblock(ep, bb_true);
+ 	src1 =3D linearize_expression(ep, expr_true);
+ 	phi1 =3D alloc_phi(ep->active, src1, expr->ctype);
+diff --git a/validation/cond-err-expand.c b/validation/cond-err-expand.c
+index b52624bc9de5..f24235a22e68 100644
+--- a/validation/cond-err-expand.c
++++ b/validation/cond-err-expand.c
+@@ -17,15 +17,6 @@ void bar(void)
+  * check-name: cond-err-expand.c
+  * check-command: test-linearize -Wno-decl $file
+  *
+- * check-error-start
+-cond-err-expand.c:8:11: error: incompatible types in conditional express=
+ion (different base types):
+-cond-err-expand.c:8:11:    int
+-cond-err-expand.c:8:11:    void
+-cond-err-expand.c:13:11: error: incompatible types in conditional expres=
+sion (different base types):
+-cond-err-expand.c:13:11:    void
+-cond-err-expand.c:13:11:    int
+- * check-error-end
+- *
+  * check-output-ignore
+  * check-output-excludes: call.* __builtin_constant_p
+  */
+diff --git a/validation/cond-one-void-pedantic.c b/validation/cond-one-vo=
+id-pedantic.c
 new file mode 100644
-index 000000000000..4d1ba40a2781
+index 000000000000..f91254f52c04
 --- /dev/null
-+++ b/validation/enum-packed.c
-@@ -0,0 +1,85 @@
-+/*
-+ * Check that __attribute__((packed)) on enums selects the smallest
-+ * integer type that can hold all enumerator values.
-+ */
++++ b/validation/cond-one-void-pedantic.c
+@@ -0,0 +1,39 @@
++void *f(void);
++void g(void);
++int h(void);
++extern void *p;
 +
-+enum e_u8 {
-+	U8_0 =3D 0,
-+	U8_1 =3D 200,
-+} __attribute__((packed));
++static void test(int c)
++{
++	c ? f() : g();
++	c ? g() : h();
++	c ? 1 : g();
++	c ? p : g();
++	p ?: g();
++	c ? g() : (void)0;		// both sides void: always OK
++	(void)(c ? h() : g());
++}
 +
-+enum e_s8 {
-+	S8_0 =3D -10,
-+	S8_1 =3D 100,
-+} __attribute__((packed));
-+
-+enum __attribute__((packed)) e_u16 {
-+	U16_0 =3D 0,
-+	U16_1 =3D 1000,
-+};
-+
-+enum e_s16 {
-+	S16_0 =3D -1000,
-+	S16_1 =3D 50,
-+} __attribute__((__packed__));
-+
-+enum e_u32 {
-+	U32_0 =3D 0,
-+	U32_1 =3D 70000,
-+} __attribute__((packed));
-+
-+_Static_assert(sizeof(enum e_u8) =3D=3D 1, "e_u8 size");
-+_Static_assert(_Alignof(enum e_u8) =3D=3D 1, "e_u8 align");
-+_Static_assert(sizeof(enum e_s8) =3D=3D 1, "e_s8 size");
-+_Static_assert(_Alignof(enum e_s8) =3D=3D 1, "e_s8 align");
-+
-+_Static_assert(sizeof(enum e_u16) =3D=3D 2, "e_u16 size");
-+_Static_assert(_Alignof(enum e_u16) =3D=3D 2, "e_u16 align");
-+_Static_assert(sizeof(enum e_s16) =3D=3D 2, "e_s16 size");
-+_Static_assert(_Alignof(enum e_s16) =3D=3D 2, "e_s16 align");
-+
-+_Static_assert(sizeof(enum e_u32) =3D=3D 4, "e_u32 size");
-+
-+/* Subsequent tag lookups must not clear the packed flag */
-+static enum e_u8 var_u8;
-+static enum e_u16 var_u16;
-+_Static_assert(sizeof(var_u8) =3D=3D 1, "var_u8 size");
-+_Static_assert(sizeof(var_u16) =3D=3D 2, "var_u16 size");
-+
-+enum __attribute__((aligned(2), packed)) e_aligned_packed {
-+	AP_0 =3D 0,
-+};
-+_Static_assert(sizeof(enum e_aligned_packed) =3D=3D 1, "e_aligned_packed=
- size");
-+_Static_assert(_Alignof(enum e_aligned_packed) =3D=3D 2, "e_aligned_pack=
-ed align");
-+
-+static enum e_aligned_packed bad_enum_arr[2];
-+typedef char __attribute__((aligned(2))) aligned_char;
-+static aligned_char bad_char_arr[2];
-+static aligned_char *ok_char_ptr_arr[2];
-+__attribute__((aligned(16))) static char ok_aligned_arr[2];
-+static enum e_u8 ok_u8_arr[4];
-+
-+enum __attribute__((packed, mode(__SI__))) e_packed_si {
-+	PSI_0 =3D 0,
-+};
-+_Static_assert(sizeof(enum e_packed_si) =3D=3D 4, "mode overrides packed=
-");
-+
-+enum __attribute__((packed)) e_fixed_packed : int {
-+	EFP_0 =3D 0,
-+};
-+_Static_assert(sizeof(enum e_fixed_packed) =3D=3D sizeof(int),
-+	       "fixed type overrides packed");
-+
-+_Static_assert(sizeof(U8_0) =3D=3D sizeof(int), "enumerator has int size=
-");
-+_Static_assert(sizeof(S8_0) =3D=3D sizeof(int), "enumerator has int size=
-");
++static int use_value(int c)
++{
++	int x =3D c ? h() : g();		// KO: void value used
++	return x;
++}
 +
 +/*
-+ * check-name: packed enum support
-+ * check-command: sparse $file
++ * check-name: cond-one-void-pedantic
++ * check-command: sparse -Wpedantic $file
 + *
 + * check-error-start
-+enum-packed.c:49:42: warning: Clang and GCC treat 'packed' and 'aligned'=
- attributes on enum types differently
-+enum-packed.c:55:42: error: size of array element is not a multiple of i=
-ts alignment
-+enum-packed.c:57:33: error: size of array element is not a multiple of i=
-ts alignment
++cond-one-void-pedantic.c:8:11: warning: ISO C forbids conditional expres=
+sion with only one void side
++cond-one-void-pedantic.c:9:11: warning: ISO C forbids conditional expres=
+sion with only one void side
++cond-one-void-pedantic.c:10:11: warning: ISO C forbids conditional expre=
+ssion with only one void side
++cond-one-void-pedantic.c:11:11: warning: ISO C forbids conditional expre=
+ssion with only one void side
++cond-one-void-pedantic.c:12:11: warning: ISO C forbids conditional expre=
+ssion with only one void side
++cond-one-void-pedantic.c:14:18: warning: ISO C forbids conditional expre=
+ssion with only one void side
++cond-one-void-pedantic.c:19:19: warning: ISO C forbids conditional expre=
+ssion with only one void side
++cond-one-void-pedantic.c:19:19: warning: incorrect type in initializer (=
+different base types)
++cond-one-void-pedantic.c:19:19:    expected int x
++cond-one-void-pedantic.c:19:19:    got void
 + * check-error-end
++ */
+diff --git a/validation/cond-one-void.c b/validation/cond-one-void.c
+new file mode 100644
+index 000000000000..6034dbb218a9
+--- /dev/null
++++ b/validation/cond-one-void.c
+@@ -0,0 +1,47 @@
++void *f(void);
++void g(void);
++int h(void);
++extern void *p;
++
++static void test(int c)
++{
++	c ? f() : g();
++	c ? g() : h();
++	c ? 1 : g();
++	c ? p : g();
++	p ?: g();
++	1 ?: g();
++	0 ?: g();
++	c ? g() : (void)0;		// both sides void: always OK
++	(void)(c ? h() : g());
++}
++
++struct empty {};
++struct incomplete;
++extern struct empty emp;
++extern struct incomplete inc;
++
++static int use_value(int c)
++{
++	int x =3D c ? h() : g();		// KO: void value used
++	int y =3D 1 ?: g();		// KO: void value used
++	c ? (void)0 : emp;		// OK: complete empty struct
++	c ? (void)0 : inc;		// KO: incomplete type
++	return x + y;
++}
++
++/*
++ * check-name: cond-one-void
++ * check-description: Like gcc and clang, accept conditional expressions
++ *	with only one void side and give these type void.
++ *
++ * check-error-start
++cond-one-void.c:26:19: warning: incorrect type in initializer (different=
+ base types)
++cond-one-void.c:26:19:    expected int x
++cond-one-void.c:26:19:    got void
++cond-one-void.c:27:19: warning: incorrect type in initializer (different=
+ base types)
++cond-one-void.c:27:19:    expected int y
++cond-one-void.c:27:19:    got void
++cond-one-void.c:29:11: error: expression has incomplete type 'struct inc=
+omplete'
++ * check-error-end
++ */
+diff --git a/validation/linear/cond-one-void.c b/validation/linear/cond-o=
+ne-void.c
+new file mode 100644
+index 000000000000..6c962809736f
+--- /dev/null
++++ b/validation/linear/cond-one-void.c
+@@ -0,0 +1,24 @@
++void *f(void);
++void g(void);
++int h(void);
++
++void test_cond_void_ir(int c, void *p)
++{
++	c ? f() : g();
++	c ? g() : h();
++	c ? 1 : g();
++	p ?: g();
++	1 ?: g();
++	0 ?: g();
++}
++
++/*
++ * check-name: cond-one-void-linearize
++ * check-command: test-linearize -Wno-decl $file
++ *
++ * check-output-ignore
++ * check-output-excludes: VOID
++ * check-output-excludes: phi\\.
++ * check-output-excludes: phisrc\\.
++ * check-output-excludes: select\\.
 + */
