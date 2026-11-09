@@ -1,54 +1,73 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=100.103.45.18
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=199.89.1.14
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1793748104;
-	b=fOCvktYrgy0aO+LG7rZ2eyEc6dReUfVSqjqd3v+Xoit3aIWmDba3NZOV2Kg0B69iqCiT
-	 6klGDmTWQjHJ5UlZnFxFu2aR21yUql5B8V16Luq5prvhaSumHUVkQyuCKLBMiqpUvo9BR
-	 LZTv0X1mcMNBRXcYH2JKce9GJjZ5c1canAc+QkSNq8qmAYVb6Cv3JHdanzQUMJYUpG4de
-	 HMiVMScdqnjmuV/vNPVlj8ghzohfCkp7sySNNF5RZ0LctHTFl7HKMADU8MsfPBhIl/eaB
-	 rj4apMesR36Q+AfJqavwSTCPoWlpwOAo1S+1ObdDBjBQaG+6sAYEWkd29M1B+5z9XIg==
+	t=1794256406;
+	b=EH62J7IoPeDK/92b1yno+xGt9hoPTkpOtkAkiX1NGFCfOwMah8QbP9W2wbD/gDCk6USg
+	 F/1IScYNUUYQJpB2HvDMzoZ1laDspJ9QWhNhIodvGHpGMblLo3ckiD07ZQlb6pwUldF7x
+	 Q5l5Jkeymz9GYxvbMgu+WcLQroWQgrOgAJol4Nmhn812uSqfotftjI+wSkZBe3FQVnU+4
+	 Yg9k85B11FwfHT19WORbMfgPHaNyzY0O+2kc24qRnGZU1nTNgOh0FcwMs2w7YiTqBZsv/
+	 TPsRanzMu5HGVzIf8QUU/YN3NLojjWYzFkhq1F2JclAQ1AMEoaRzisrfcCB635MDyNQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1793748104;
-	h=Received:DKIM-Signature:Date:From:To:Cc:Subject:Message-ID:
-	 References:MIME-Version:Content-Type:Content-Disposition:In-Reply-To;
-	bh=1BLBzDgyH4D0f7Nlpo8pZW2IwEta3qwghWOoH3Ds6Cc=;
-	b=TqAfv0a3JFNDITYH2zPC4NY3thcaFefT1UzAQ5QFmyx2v4O5uzhhYfFGK0mKp+IfkpXO
-	 Pb0t3WXfWyntRrFVYyf5VMOduKhW+DcQS5Z4LUqG+lpMIcogljEcr2G4Lbz5qdu+DWQBu
-	 1ptaeJB/MBx0A7i43shFlZWkgIEcHnK0vOfLKskWtffivIjHIIau4xTlXLX3CkKw6REwa
-	 xu145zyXlGWW4M/rbgkKVnQM8W3vuXEejL7azBS8atl/6A4ShVjTYgfKcGX3MANbWCRD4
-	 UZmburq+kNTKuOoBlYX6VuTvre9hcOOgzBCAs0VRswRYR6Aha1cz1jJ+apm0kAw8ILw==
+	a=rsa-sha256; c=relaxed/relaxed; t=1794256406;
+	h=DMARC-Filter:Received:DKIM-Signature:X-Virus-Scanned:Received:
+	 Received:From:To:Cc:Subject:Date:Message-ID:X-Mailer:In-Reply-To:
+	 References:MIME-Version:Content-Transfer-Encoding;
+	bh=vMCI9uuCpf+rsuGNk3OH4dtS9kOF0ELS1K/3IjT41a8=;
+	b=GFPCHC0PoR1Z0JDGiQ0gdtjFAAIf8IS9Fqt8J/H54zGM5YJHKtGwfPZtdBax20gYXcdo
+	 +QoChvgQMWdMaYQXCVl4npNLbJfONj4XtauszCDiuEwXbz+jhHF2GegBTTOP/49prcP3I
+	 AU4tz/yeD3XF7g/8TGOe0cw9joQVkyvE+b7wtlSJPUqCXX7ecLBgV8X+U175rJxXh/Ei4
+	 uIPdqTkKoe7P0fh9ny6coBnp4kN4l0zdK3lfuceNqcd3gIYg3HnLVKnwZKfrh2bVG9SDP
+	 iR/Y41H1gBL0t0ffleXnqS2MFFQiqWbN9YQ/7LZqrXP2u2hc1PnD7VdM6jAh80KnDGA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dkim=pass header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=PYj8xxwJ;
-	arc=none smtp.remote-ip=100.103.45.18
-Received: from smtp.kernel.org (quasi.space.kernel.org [100.103.45.18])
+	dmarc=pass header.from=acm.org;
+	spf=pass smtp.mailfrom=acm.org;
+	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b="whKsqm/2";
+	arc=none smtp.remote-ip=199.89.1.14
+Received: from 011.lax.mailroute.net (011.lax.mailroute.net [199.89.1.14])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (prime256v1))
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6F155606A31B;
-	Tue,  3 Nov 2026 23:21:44 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2AC2C606A326
+	for <linux-sparse@vger.kernel.org>; Mon,  9 Nov 2026 20:33:25 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 2AC2C606A326
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=acm.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256 header.s=k20260515 header.b=PYj8xxwJ
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 823BF1F00919;
-	Tue,  3 Nov 2026 23:21:42 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1793748104;
-	bh=1BLBzDgyH4D0f7Nlpo8pZW2IwEta3qwghWOoH3Ds6Cc=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=PYj8xxwJb91gicJm4gm1fLpxTfeGOHsa7btTMWJ8JZvODnqrZOMK2RfIQM45vswyT
-	 Fm0yJKs4JVWZK+MgMlbkwtI8xkocRo1ysuwYChJLSqbGBXLUx/U2yT3Dn//jKPG5Ye
-	 Xk5ImbQhvwp2mbmuB16t1wHu4rM1r/DXzctyP7SEOICHqkz9phuSZfXTE/04B0Ifpj
-	 rvrWs9nCWUb6DAg+LzaWJnIPSzibubPF2PR14XZbTCkfEZBd3sI0dS6ZuXUIEccaAD
-	 3ZuP5pFxlYfR5D+JMEJYbTgdDA+r4tUVsSgMQRXDulSvkSm5fe+//nf1+i6jqGmsY3
-	 TRoy5+HZhJFzg==
-Date: Wed, 4 Nov 2026 00:21:39 +0100
-From: Alejandro Colomar <alx+linux-hardening@kernel.org>
-To: Andy Shevchenko <andriy.shevchenko@intel.com>, 
-	Chris Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org
-Cc: Alejandro Colomar <alx@kernel.org>, Kees Cook <kees@kernel.org>, 
-	linux-hardening@vger.kernel.org, Andy Shevchenko <andy@kernel.org>
-Subject: Re: [PATCH v1 0/2] Simplify implementation of strscpy()
-Message-ID: <auprDNQJl90tLBrQ@devuan>
-References: <cover.1793712214.git.alx@kernel.org>
- <auoxn2Pe10D4HPKm@ashevche-desk.local>
+	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=whKsqm/2
+Received: from localhost (localhost [127.0.0.1])
+	by 011.lax.mailroute.net (Postfix) with ESMTP id 4jNhLs4GXcz1XM0nl;
+	Mon,  9 Nov 2026 20:33:25 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=acm.org; h=
+	content-transfer-encoding:mime-version:references:in-reply-to
+	:x-mailer:message-id:date:date:subject:subject:from:from
+	:received:received; s=mr01; t=1794256404; x=1796848405; bh=vMCI9
+	uuCpf+rsuGNk3OH4dtS9kOF0ELS1K/3IjT41a8=; b=whKsqm/29C0q8ZZ/XUNEM
+	ywFCJfLaRPRzACdn9btDfMsuNq57z0G5ywbGTex7/5CaV0R8bSwjKakDGp6Bum0l
+	CPiLfpq3n4qyPMpD4TDOKTote+4JWmcg5Q63413+HSU3W2eHTv2msOiIXZltZqNK
+	Xtx+0N1Fvd6kQAzLwlhE0aeljzT7dxwnbu5e1gbzbs4fe0z1Q1Zwhy+si98Ma4cI
+	kCSP5icYURpdkpNtW8XMDa93sX1uiwMzAOJPTIRss+mpG7CKLWePXOxP5GFW1w7y
+	LMipFK8W+aFv//pqA8GFahzQsud6bn0OxYrLqQRYJVrK+mbKuNVn933mcjGg+++k
+	g==
+X-Virus-Scanned: by MailRoute
+Received: from 011.lax.mailroute.net ([127.0.0.1])
+ by localhost (011.lax [127.0.0.1]) (mroute_mailscanner, port 10029) with LMTP
+ id 4HmK52V7q11z; Mon,  9 Nov 2026 20:33:24 +0000 (UTC)
+Received: from bvanassche.c.googlers.com.com (57.237.82.34.bc.googleusercontent.com [34.82.237.57])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	(Authenticated sender: bvanassche@acm.org)
+	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4jNhLr3Nthz1XM6J7;
+	Mon,  9 Nov 2026 20:33:24 +0000 (UTC)
+From: Bart Van Assche <bvanassche@acm.org>
+To: linux-sparse@vger.kernel.org
+Cc: Linus Torvalds <torvalds@linux-foundation.org>,
+	Bart Van Assche <bvanassche@acm.org>
+Subject: [PATCH 01/73] Makefile: Pass '--' to rm in clean target to handle dash-prefixed files
+Date: Mon,  9 Nov 2026 12:31:47 -0800
+Message-ID: <20261109203259.362845-2-bvanassche@acm.org>
+X-Mailer: git-send-email 2.56.0.506.g506a7eabc5-goog
+In-Reply-To: <20261109203259.362845-1-bvanassche@acm.org>
+References: <20261109203259.362845-1-bvanassche@acm.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Post: <mailto:linux-sparse@vger.kernel.org>
@@ -58,98 +77,28 @@ List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-sparse+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="oi66qub5e35lwsy5"
-Content-Disposition: inline
-In-Reply-To: <auoxn2Pe10D4HPKm@ashevche-desk.local>
-
-
---oi66qub5e35lwsy5
-Content-Type: text/plain; protected-headers=v1; charset=utf-8
-Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
-From: Alejandro Colomar <alx+linux-hardening@kernel.org>
-To: Andy Shevchenko <andriy.shevchenko@intel.com>, 
-	Chris Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org
-Cc: Alejandro Colomar <alx@kernel.org>, Kees Cook <kees@kernel.org>, 
-	linux-hardening@vger.kernel.org, Andy Shevchenko <andy@kernel.org>
-Subject: Re: [PATCH v1 0/2] Simplify implementation of strscpy()
-Message-ID: <auprDNQJl90tLBrQ@devuan>
-References: <cover.1793712214.git.alx@kernel.org>
- <auoxn2Pe10D4HPKm@ashevche-desk.local>
-MIME-Version: 1.0
-In-Reply-To: <auoxn2Pe10D4HPKm@ashevche-desk.local>
 
-Hi Andy,
+Pass '--' to rm in the clean target so that stray files starting with a
+hyphen (such as '-.o') are not interpreted as command-line options by
+rm.
 
-> Date: 2026-11-03 21:10:23+0200
-> From: Andy Shevchenko <andriy.shevchenko@intel.com>
->
-> On Tue, Nov 03, 2026 at 02:27:08PM +0100, Alejandro Colomar wrote:
-> >=20
-> > Here's a simpler implementation of the default arguments in strscpy(9).
-> > It avoids having to build concatenated names, the ignored '...' in
-> > __strscpy0, counting arguments, etc.  It's replaced by a quite simple
-> > macro that takes two arguments, and picks the last non-empty one.
-> >=20
-> > It requires a C23 feature, but it's supported as a GNU extension in
-> > GNU C11 mode, and was implemented a long time ago, so it should be fine.
->=20
-> Yes and no.
-> See 551d44200152 ("default_gfp(): avoid using the "newfangled" __VA_OPT__=
- trick")
-> for the details.
+Fixes: 86eb97a3c2df ("Makefile: stop cleaning files we didn't make...")
+Signed-off-by: Bart Van Assche <bvanassche@acm.org>
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Hmmmm, so sparse is a problem.  DEFARG() cannot be implemented with
-##__VA_ARGS__ (I believe), so I think this is frozen until sparse is
-improved to add support for __VA_OPT__.
-
-The implementation in that commit you pointed takes advantage of the
-fact that the default value is hard-coded in the macro, and the macro
-has zero fixed parameters, which makes it work, but if you add one fixed
-parameter (which we need for a generic DEFARG() macro), then it doesn't
-work.  GCC's ## is quite limited compared to __VA_OPT__().
-
-I've CCed the sparse matinainer and mailing list.  Let's see if they can
-add support for __VA_OPT__().
-
-> So far NAK from me.
-
-Makes sense.  Thanks for the review!
-
-
-Have a lovely night!
-Alex
-
->=20
-> --=20
-> With Best Regards,
-> Andy Shevchenko
->=20
->=20
->=20
-
---=20
-<https://www.alejandro-colomar.es>
-
---oi66qub5e35lwsy5
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEES7Jt9u9GbmlWADAi64mZXMKQwqkFAmrqbH0ACgkQ64mZXMKQ
-wqkllw/+MNLFZy2UY09IjzXaCkcbHoGv9kywCSe8aJVa7WVh33CZtBb4cZQ2LwbH
-hoJV7PWzfZZVR6xn7/l6igHw3T/d8IE7dO0EPj8iMdiUr5gRaBONZPo/H9Cz7aNa
-C710oEaUDYVzYyt3+dMkFE3YPNuwQKqDrY7uxUOZVYENc/o4Nck57MMdknWA+wU1
-e7N4lzoWp+xelXPKpW7HE2D/D1IUOc6lkicka/QNkk9PhzofUMKxj8+MUFJth480
-tAi3D5VAkQV6vypgGawZP/BHHQDxgaExzGbUK2mkTH9PhrzqmLPr3AzA+4sFzD9Y
-7Yg68UT/ZJhbD571HfnW/MxqpOIHZscKZd2c0pDDnO0KWSCAiw8OAoOLx+GizGen
-SpkZokhOiLg9AN9ySPHGyYFzlUsOnzJZTXx0Lk/8IEpodhc6sFsTK7EcE0Tg0g1I
-Ic1/ZoiuDzJQUwj42jVFQMbz+no1EduHY1lo/43nNU6RQFU7yL0tDSH7sFAPMnDw
-qsBymtD0UhHPZ/Ltqt2JzZJg5LFaFgFdsgDMuOX4WAKr+niRTv9P3cEn55aqqroE
-gMwdkpwkCt1aLCalkujcjnxeWnfcyu++CFjdyCKJqlPnvzt4LE1qVVYx5wLTwZ30
-FkwhxIlQYy0JtJVZFRJYxvAsWoOSfyq9pFMUmMqRBFPtNspA4nQ=
-=/std
------END PGP SIGNATURE-----
-
---oi66qub5e35lwsy5--
+diff --git a/Makefile b/Makefile
+index e172758b8b09..4d2700f5cad3 100644
+--- a/Makefile
++++ b/Makefile
+@@ -288,7 +288,7 @@ validation/%: $(PROGRAMS) FORCE
+=20
+=20
+ clean: clean-check
+-	@rm -f *.[oa] .*.d $(PROGRAMS) version.h
++	@rm -f -- *.[oa] .*.d $(PROGRAMS) version.h
+ clean-check:
+ 	@echo "  CLEAN"
+ 	@find validation/ \( -name "*.c.output.*" \
