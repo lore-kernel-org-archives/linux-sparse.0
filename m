@@ -1,70 +1,70 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=199.89.1.14
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
 	t=1794256435;
-	b=CbzZo6Vt9KNK+JY69B/8ctiC4h1Ywll9VEYKrOzcrn7ha2QVnz1GRRgYNPp8ZpMFeEQT
-	 /4c8P9LL3hDQrhWmxvPowfcbeIf11s1wStUaNzMT9NgFS2IndHSlFE4GsLOgMPC+XlluM
-	 CfTk6GEU+B12u2YMXhf4d8uIYs9aFYRw4XRFm1qnMVJNqBPvw+0J88nF26Qct611Wdcxm
-	 S1G062IhO3aTE2IMG1/kC5pwr9QvC97UrRfA2OtebPOiQxF65czE3rh42ol/SpWPhkrnV
-	 h/TjQ/qcoJG3TOuiDgNjFlByDonXWPARkQ6qUjXmlQvIhLo4TAGsVKQ3dCq3sBtUSnQ==
+	b=Zi/Z++oP/EYhX20YlW3OgwPSmWNNVcXzJ73gzZmtHU/TyIE/ERRfDKQLFMYwDpVESqDM
+	 okZJiuJ3pj2wqoMJRp68UxCWi8DGP30iTlUV1PFRAhb1VaEwXmNtNnUIA5tLHKIh9Fq6i
+	 RGYVOLhwRizaRV3HtJnoyZuXmmDaED9Svum3ZeWeEitxUlXbfGYQk+MS9Wqzrax7QpV83
+	 xKx90ouqWwwUogowLRf9cp6a/78ChfUwUaaq6nZyuVSMc0EDw9WJkeTxVxitZlnNPXKqt
+	 NRJfsGWC1xJ4JOwQn3c2Nx58hLf+xzuV2tHj1RRmqwBPiJ/q052cm2hBfV6H/QEm26Q==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
 	a=rsa-sha256; c=relaxed/relaxed; t=1794256435;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Virus-Scanned:Received:
 	 Received:From:To:Cc:Subject:Date:Message-ID:X-Mailer:In-Reply-To:
 	 References:MIME-Version:Content-Transfer-Encoding;
-	bh=cFzzwqkT6aGjpDLFHBEsDDaK8ZYcn9pMCM13EZzyhvk=;
-	b=pswqQ6Xn9voINdAHQ/Dimb+KMIsyj9iETrcVa7gCg85irwjsbCLSFkgAV7h5ObxpWFyR
-	 JRkUefCruodcihZAIS7+VsMgZ1OAWKvIzxydcpWicHvwghwW2hHUNqTNu/ErOcO4eaXR/
-	 LDGnruIVRa5rIHNGQfTkTnW6TsI8bv5pxJU5QbDijk7eWlEMNEp8OFia6ue38dMLxDw3F
-	 DtS0e0T5PWFj+deVMH0/woV6rLkzzKScjtunlX00eSAlEbJyTU9OYif3sMClMjJXYPiPS
-	 K53FWVOq0Tdxl7/oL6F6OjwdDkauR7dr93txaFtMLT1QsV5PaY93hfODzvoDvZrXGPw==
+	bh=EQuri2RcPVGIrgW8jf4hjF/4wK/KGwQlcALCG7uw6y8=;
+	b=ylnlBHVfZxgA6FtzlYyMRG4P5sab/ZCjOY9zN8jzFuzEDLCpgjer3zTnbipCETA0xF7t
+	 jLzq/LFngQf1dkMjiiCIt+dCNDvyJ8o2+M3hbiYqcVDPqO+xTz2P00QEe/qLTYx0kp8s6
+	 Hkx7+u7cfko0KQL0g6vbQ8++tXSvGfGHjCrHOMyBl/Yru0MJhE3YydXGdnm3wfg1PJ+2H
+	 YfXeB5GXcIgq3bFaQwNIr7LO2gGrqlwC35beaqdRtXLqJkFC5pzDKfz6ya9Ugfe3sHevH
+	 E1+hS3zVcBXI/51jdu5hP0ksuTYl+NWkRwcvpVgEIYRYBNC7wIXa2eYzLnImecvSmzQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=acm.org;
 	spf=pass smtp.mailfrom=acm.org;
-	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=wAjAL0o3;
+	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=3u9mXNLg;
 	arc=none smtp.remote-ip=199.89.1.14
 Received: from 011.lax.mailroute.net (011.lax.mailroute.net [199.89.1.14])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6C500606A32A
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 82BE9606A325
 	for <linux-sparse@vger.kernel.org>; Mon,  9 Nov 2026 20:33:54 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 6C500606A32A
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 82BE9606A325
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=acm.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=wAjAL0o3
+	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=3u9mXNLg
 Received: from localhost (localhost [127.0.0.1])
-	by 011.lax.mailroute.net (Postfix) with ESMTP id 4jNhMH0yT8z1XM5kD;
+	by 011.lax.mailroute.net (Postfix) with ESMTP id 4jNhMH28Lmz1XMG4K;
 	Mon,  9 Nov 2026 20:33:47 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=acm.org; h=
 	content-transfer-encoding:mime-version:references:in-reply-to
 	:x-mailer:message-id:date:date:subject:subject:from:from
-	:received:received; s=mr01; t=1794256417; x=1796848418; bh=cFzzw
-	qkT6aGjpDLFHBEsDDaK8ZYcn9pMCM13EZzyhvk=; b=wAjAL0o3LxW6Qx9AINeYH
-	VK/jv46XRQBzezIjusW2Xpeas9PlyTDceekFmRJE72dYyAbIy35KksoggqlohZgi
-	eCK5HArdlGGW4SpUYOEksrk4wlJ79NLOSVOPosAsRPlI4VsjfL5nl120uImvIBcv
-	chMRdTsa+uiOTr6PuiQcBMEW4EEH+8A/gIoNwotk9IXKXnl7HFkIzsCxDwh3CRzo
-	IyD26QgxaSyrhDsrdmStui6NBIuW6zXqMUUybGH8IVpqGyGTmwxNGkFUaZRdufPV
-	3/FmjE+cq0+7LYBiRdjWN8Sq/uzUrDVUTfBI76EPc5XseO+UDWA8QFeSnmkRGlAG
+	:received:received; s=mr01; t=1794256418; x=1796848419; bh=EQuri
+	2RcPVGIrgW8jf4hjF/4wK/KGwQlcALCG7uw6y8=; b=3u9mXNLgrbGX+9pgz2BeY
+	osnUq6yXTAVDsaA2K3HMHE5dAJSqw9m6Xa6srTfOzBjh4uSKvJGMRl/WXzWwAjYR
+	spm+tSk1CgOlLis9+e3OCL5fcRKE3lXQ1grWpKxoWReYRHgZ7o+e3Z9oFcyDZfW8
+	Nnd7mSTzRTNhaRNj6jHIw4GsTTMhD1u8rBkdnBelxzvDzOLxEvoPFG0WPjSP9fT9
+	HKjqai7cXGJzjB91vBWWPCvq23rdjGMSHVxR4V9Oi5Q0pJIfdlPrbHu274V0Ihb+
+	ko0CLKpDtRoTzmuMAlM47CZVpJj7evwNQJxMkJsIRkGcmHctTnjEQZoq9dqBOQhK
 	g==
 X-Virus-Scanned: by MailRoute
 Received: from 011.lax.mailroute.net ([127.0.0.1])
  by localhost (011.lax [127.0.0.1]) (mroute_mailscanner, port 10029) with LMTP
- id Kg1qofjSFKFj; Mon,  9 Nov 2026 20:33:37 +0000 (UTC)
+ id GNBNLHDr3X3l; Mon,  9 Nov 2026 20:33:38 +0000 (UTC)
 Received: from bvanassche.c.googlers.com.com (57.237.82.34.bc.googleusercontent.com [34.82.237.57])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
 	(Authenticated sender: bvanassche@acm.org)
-	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4jNhM42HMxz1XMYJN;
+	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4jNhM43s8Bz1XMG4F;
 	Mon,  9 Nov 2026 20:33:36 +0000 (UTC)
 From: Bart Van Assche <bvanassche@acm.org>
 To: linux-sparse@vger.kernel.org
 Cc: Linus Torvalds <torvalds@linux-foundation.org>,
 	Bart Van Assche <bvanassche@acm.org>
-Subject: [PATCH 54/73] c23: Support empty initializer braces {}
-Date: Mon,  9 Nov 2026 12:32:40 -0800
-Message-ID: <20261109203259.362845-55-bvanassche@acm.org>
+Subject: [PATCH 55/73] preprocessor: Add support for __has_embed
+Date: Mon,  9 Nov 2026 12:32:41 -0800
+Message-ID: <20261109203259.362845-56-bvanassche@acm.org>
 X-Mailer: git-send-email 2.56.0.506.g506a7eabc5-goog
 In-Reply-To: <20261109203259.362845-1-bvanassche@acm.org>
 References: <20261109203259.362845-1-bvanassche@acm.org>
@@ -79,502 +79,646 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
 
-Support empty initializer braces '{}' for scalar, pointer, nullptr_t,
-aggregate, union, and variable-length array objects and compound literals
-in C23 mode per ISO C23 6.7.11:
-- Synthesize zero/null scalar initializers in handle_scalar() without
-  emitting spurious nested scalar-brace warnings, and keep warning under
-  -Wpedantic before C23.
-- Preserve runtime bounds on VLA empty initializers ('int vla[n] =3D {}')
-  and reject empty initializers for incomplete arrays ('int a[] =3D {}')
-  and incomplete structs or unions.
-- Lower empty aggregate and null-pointer static initializers cleanly in
-  linearize and sparse-llvm.
+Add support for the C23 __has_embed preprocessor operator to check resour=
+ce
+availability and parameters prior to inclusion via #embed. Predefine the
+__STDC_EMBED_NOT_FOUND__, __STDC_EMBED_FOUND__, and __STDC_EMBED_EMPTY__
+constants to allow portable feature detection in preprocessor expressions=
+.
 
 Signed-off-by: Bart Van Assche <bvanassche@acm.org>
 ---
- evaluate.c                           |  23 +++++-
- linearize.c                          |   2 +-
- parse.c                              |   5 ++
- sparse-llvm.c                        | 114 +++++++++++++++++++--------
- symbol.c                             |   6 ++
- validation/backend/c23-empty-init.c  |  24 ++++++
- validation/c23-auto-error.c          |   5 +-
- validation/c23-constexpr-error.c     |   2 +-
- validation/c23-empty-init-error.c    |  19 +++++
- validation/c23-empty-init-pedantic.c |  14 ++++
- validation/c23-empty-init.c          |  64 +++++++++++++++
- 11 files changed, 239 insertions(+), 39 deletions(-)
- create mode 100644 validation/backend/c23-empty-init.c
- create mode 100644 validation/c23-empty-init-error.c
- create mode 100644 validation/c23-empty-init-pedantic.c
- create mode 100644 validation/c23-empty-init.c
+ ident-list.h                            |   9 +
+ pre-process.c                           | 445 +++++++++++++++++++++++-
+ predefine.c                             |   3 +
+ validation/preprocessor/c23-has-embed.c |  69 ++++
+ 4 files changed, 522 insertions(+), 4 deletions(-)
+ create mode 100644 validation/preprocessor/c23-has-embed.c
 
-diff --git a/evaluate.c b/evaluate.c
-index 43ad5f59b860..f40e35773639 100644
---- a/evaluate.c
-+++ b/evaluate.c
-@@ -2987,7 +2987,8 @@ static int is_string_literal(struct expression **v)
-  * an effect of screwup).  In case of anything not legal, we are definit=
-ely
-  * having an effect of screwup, so just fail and let the caller warn.
-  */
--static struct expression *handle_scalar(struct expression *e, int nested=
-)
-+static struct expression *handle_scalar(struct expression *e, int nested=
-,
-+					int class, struct symbol *ctype)
- {
- 	struct expression *v =3D NULL, *p;
- 	int count =3D 0;
-@@ -3001,6 +3002,19 @@ static struct expression *handle_scalar(struct exp=
-ression *e, int nested)
- 			v =3D p;
- 		count++;
- 	} END_FOR_EACH_PTR(p);
-+	if (count =3D=3D 0) {
-+		if (standard >=3D STANDARD_C23) {
-+			v =3D alloc_const_expression(e->pos, 0);
-+			if (class & TYPE_PTR)
-+				v->ctype =3D &null_ctype;
-+			else if (is_nullptr_type(ctype)) {
-+				v->ctype =3D &nullptr_ctype;
-+				v->flags =3D CEF_ADDR;
-+			}
-+			return v;
-+		}
-+		return NULL;
-+	}
- 	if (count !=3D 1)
- 		return NULL;
- 	switch(v->type) {
-@@ -3202,7 +3216,7 @@ static int handle_initializer(struct expression **e=
-p, int nested,
- 	if (!(class & TYPE_COMPOUND)) {
- 		struct expression orig;
+diff --git a/ident-list.h b/ident-list.h
+index bc5df947913a..f51f2048f5ca 100644
+--- a/ident-list.h
++++ b/ident-list.h
+@@ -84,6 +84,15 @@ __IDENT(__FUNCTION___ident, "__FUNCTION__", 0);
+ __IDENT(__PRETTY_FUNCTION___ident, "__PRETTY_FUNCTION__", 0);
+ __IDENT(__has_include_ident, "__has_include", 0);
+ __IDENT(__has_include_next_ident, "__has_include_next", 0);
++__IDENT(__has_embed_ident, "__has_embed", 0);
++IDENT(limit);
++IDENT(prefix);
++IDENT(suffix);
++IDENT(if_empty);
++__IDENT(__limit___ident, "__limit__", 0);
++__IDENT(__prefix___ident, "__prefix__", 0);
++__IDENT(__suffix___ident, "__suffix__", 0);
++__IDENT(__if_empty___ident, "__if_empty__", 0);
 =20
--		e =3D handle_scalar(e, nested);
-+		e =3D handle_scalar(e, nested, class, ctype);
-=20
- 		if (!e)
- 			return 0;
-@@ -3302,6 +3316,11 @@ static void evaluate_initializer(struct symbol *ct=
-ype, struct expression **ep)
- {
- 	struct symbol *type;
- 	int class =3D classify_type(ctype, &type);
-+	if ((type->type =3D=3D SYM_STRUCT || type->type =3D=3D SYM_UNION) &&
-+	    (type->bit_size < 0 || !type->endpos.line)) {
-+		expression_error(*ep, "initializer for incomplete type");
-+		return;
-+	}
- 	if (!handle_initializer(ep, 0, class, ctype, 0))
- 		expression_error(*ep, "invalid initializer");
+ /* Sparse commands */
+ IDENT_RESERVED(__context__);
+diff --git a/pre-process.c b/pre-process.c
+index aac194cf4c01..e8b3511c225e 100644
+--- a/pre-process.c
++++ b/pre-process.c
+@@ -764,6 +764,7 @@ static struct token **substitute(struct token **list,=
+ const struct token *body,
  }
-diff --git a/linearize.c b/linearize.c
-index 4179aea03af1..268466f07886 100644
---- a/linearize.c
-+++ b/linearize.c
-@@ -2003,7 +2003,7 @@ static pseudo_t linearize_one_symbol(struct entrypo=
-int *ep, struct symbol *sym)
- 	sym->initialized =3D 1;
- 	ad.address =3D symbol_pseudo(ep, sym);
 =20
--	if (sym->initializer && !is_scalar_type(sym)) {
-+	if (sym->initializer && !is_scalar_type(sym) && sym->bit_size > 0) {
- 		// default zero initialization [6.7.9.21]
- 		// FIXME: this init the whole aggregate while
- 		// only the existing fields need to be initialized.
-diff --git a/parse.c b/parse.c
-index 13b8cf5d43c1..f49b3f188c69 100644
---- a/parse.c
-+++ b/parse.c
-@@ -3456,6 +3456,11 @@ struct token *initializer(struct expression **tree=
-, struct token *token)
- 		}
+ static bool parse_has_include(struct token **list, int how);
++static bool parse_has_embed(struct token **list);
 =20
- 		token =3D initializer_list(&expr->expr_list, token->next);
-+		if (ptr_list_empty((struct ptr_list *)expr->expr_list)) {
-+			if (standard < STANDARD_C23 && Wpedantic)
-+				warning(expr->pos,
-+					"ISO C forbids empty initializer braces before C23");
-+		}
- 		return expect(token, '}', "at end of initializer");
+ static void reject_outside_directive(struct token *token)
+ {
+@@ -805,7 +806,8 @@ static int expand(struct token **list, struct symbol =
+*sym)
  	}
- 	return assignment_expression(token, tree);
-diff --git a/sparse-llvm.c b/sparse-llvm.c
-index c7055238ff88..f3f6b7e01171 100644
---- a/sparse-llvm.c
-+++ b/sparse-llvm.c
-@@ -309,6 +309,8 @@ static const char *pseudo_name(pseudo_t pseudo, char =
-*buf)
- 	return buf;
+=20
+ 	if (expanding =3D=3D &__has_include_ident ||
+-	    expanding =3D=3D &__has_include_next_ident) {
++	    expanding =3D=3D &__has_include_next_ident ||
++	    expanding =3D=3D &__has_embed_ident) {
+ 		bool ok;
+=20
+ 		if (!in_cond_expr) {
+@@ -814,8 +816,10 @@ static int expand(struct token **list, struct symbol=
+ *sym)
+ 		}
+ 		if (expanding =3D=3D &__has_include_ident)
+ 			ok =3D parse_has_include(list, 0);
+-		else
++		else if (expanding =3D=3D &__has_include_next_ident)
+ 			ok =3D parse_has_include(list, 1);
++		else
++			ok =3D parse_has_embed(list);
+ 		if (!ok)
+ 			replace_with_bool(token, 0);
+ 		return 0;
+@@ -1099,7 +1103,7 @@ static bool collect_angle_filename(struct token **n=
+ext_p, char *buf,
+ 	struct token *t =3D *next_p;
+ 	char *ptr =3D buf;
+=20
+-	while (!eof_token(t) && !match_op(t, '>')) {
++	while (!eof_token(t =3D scan_next(&t)) && !match_op(t, '>')) {
+ 		const char *s =3D (token_type(t) =3D=3D TOKEN_STRING) ?
+ 					t->string->data :
+ 					show_token(t);
+@@ -1123,7 +1127,7 @@ static bool collect_angle_filename(struct token **n=
+ext_p, char *buf,
+ 		sparse_error(pos, "empty filename");
+ 		return false;
+ 	}
+-	*next_p =3D t->next;
++	*next_p =3D scan_next(&t->next);
+ 	return true;
  }
 =20
-+static LLVMValueRef output_data(LLVMModuleRef module, struct symbol *sym=
-);
-+
- static LLVMValueRef get_sym_value(LLVMModuleRef module, struct symbol *s=
-ym)
- {
- 	const char *name =3D show_ident(sym->ident);
-@@ -1250,6 +1252,83 @@ static void output_fn(LLVMModuleRef module, struct=
- entrypoint *ep)
- 	LLVMDisposeBuilder(function.builder);
+@@ -1231,6 +1235,432 @@ err:
+ 	return false;
  }
 =20
-+static LLVMValueRef expr_to_const_val(LLVMModuleRef module, struct symbo=
-l *sym,
-+				      struct expression *initializer)
++static void replace_with_int(struct token *token, int val)
 +{
-+	LLVMTypeRef dtype =3D symbol_type(sym);
++	static const char *const digits[] =3D { "0", "1", "2" };
++	token_type(token) =3D TOKEN_NUMBER;
++	token->number =3D (val >=3D 0 && val <=3D 2) ? digits[val] : "0";
++}
 +
-+	if (!initializer)
-+		return LLVMConstNull(dtype);
++#define MAX_EMBED_SIZE (16 * 1024 * 1024)
 +
-+	switch (initializer->type) {
-+	case EXPR_VALUE:
-+		return constant_value(initializer->value, dtype);
-+	case EXPR_FVALUE:
-+		return LLVMConstReal(dtype, initializer->fvalue);
-+	case EXPR_SYMBOL: {
-+		struct symbol *isym =3D initializer->symbol;
++enum embed_param_kind {
++	EMBED_PARAM_NONE =3D 0,
++	EMBED_PARAM_LIMIT =3D 1 << 0,
++	EMBED_PARAM_PREFIX =3D 1 << 1,
++	EMBED_PARAM_SUFFIX =3D 1 << 2,
++	EMBED_PARAM_IF_EMPTY =3D 1 << 3,
++};
 +
-+		if (!isym->ident) {
-+			if (!isym->aux) {
-+				expand_symbol(isym);
-+				isym->aux =3D output_data(module, isym);
-+			}
-+			return isym->aux;
++static enum embed_param_kind classify_embed_param(struct ident *id)
++{
++	if (id =3D=3D &limit_ident || id =3D=3D &__limit___ident)
++		return EMBED_PARAM_LIMIT;
++	if (id =3D=3D &prefix_ident || id =3D=3D &__prefix___ident)
++		return EMBED_PARAM_PREFIX;
++	if (id =3D=3D &suffix_ident || id =3D=3D &__suffix___ident)
++		return EMBED_PARAM_SUFFIX;
++	if (id =3D=3D &if_empty_ident || id =3D=3D &__if_empty___ident)
++		return EMBED_PARAM_IF_EMPTY;
++	return EMBED_PARAM_NONE;
++}
++
++static struct token *dup_token_range(struct token *start, struct token *=
+end)
++{
++	struct token *head =3D &eof_token_entry;
++	struct token **tail =3D &head;
++	struct token *p;
++
++	if (!start || !end)
++		return &eof_token_entry;
++	for (p =3D start;; p =3D p->next) {
++		struct token *t =3D __alloc_token(0);
++		*t =3D *p;
++		*tail =3D t;
++		tail =3D &t->next;
++		if (p =3D=3D end)
++			break;
++	}
++	*tail =3D &eof_token_entry;
++	return head;
++}
++
++static bool eval_embed_limit_expr(struct position pos, struct token *pst=
+art,
++				  struct token *pend,
++				  unsigned long long *limit_val)
++{
++	struct token *copy =3D dup_token_range(pstart, pend);
++	struct expression *expr =3D NULL;
++	long long sval;
++
++	if (eof_token(copy)) {
++		sparse_error(pos, "expected expression in #embed limit");
++		return false;
++	}
++	in_cond_expr++;
++	expand_list(&copy);
++	for (struct token *t =3D copy; !eof_token(t); t =3D t->next) {
++		if (token_type(t) !=3D TOKEN_IDENT)
++			continue;
++		if (standard >=3D STANDARD_C23 && t->ident =3D=3D &true_ident) {
++			replace_with_bool(t, 1);
++		} else if (standard >=3D STANDARD_C23 &&
++			   t->ident =3D=3D &false_ident) {
++			replace_with_bool(t, 0);
++		} else if (t->ident =3D=3D &defined_ident) {
++			in_cond_expr--;
++			sparse_error(t->pos,
++				     "'defined' cannot appear in #embed limit");
++			return false;
++		} else {
++			token_type(t) =3D TOKEN_ZERO_IDENT;
 +		}
-+		LLVMValueRef gv =3D LLVMGetNamedGlobal(module, show_ident(isym->ident)=
-);
-+		if (!gv)
-+			gv =3D output_data(module, isym);
-+		return gv;
 +	}
-+	case EXPR_STRING: {
-+		const char *s =3D initializer->string->data;
-+		size_t len =3D initializer->string->length;
-+
-+		return const_string(s, len);
++	in_cond_expr--;
++	copy =3D constant_expression(copy, &expr);
++	if (!expr || !eof_token(copy)) {
++		sparse_error(pos, "invalid #embed limit");
++		return false;
 +	}
-+	case EXPR_INITIALIZER: {
-+		if (ptr_list_empty((struct ptr_list *)initializer->expr_list))
-+			return LLVMConstNull(dtype);
-+		if (is_array_type(sym)) {
-+			struct symbol *arr =3D sym->type =3D=3D SYM_NODE ? sym->ctype.base_ty=
-pe : sym;
-+			struct symbol *elem_sym =3D arr->ctype.base_type;
-+			LLVMTypeRef elem_type =3D symbol_type(elem_sym);
-+			unsigned int elem_bytes =3D bits_to_bytes(elem_sym->bit_size);
-+			unsigned int nr =3D elem_bytes ? bits_to_bytes(sym->bit_size) / elem_=
-bytes : 0;
-+			struct expression *entry;
-+			LLVMValueRef *vals;
-+			LLVMValueRef res;
-+			unsigned int i;
++	sval =3D get_expression_value(expr);
++	if (!expr->ctype || expr->type !=3D EXPR_VALUE)
++		return false;
++	if (sval < 0 && !(expr->ctype->ctype.modifiers & MOD_UNSIGNED)) {
++		sparse_error(expr->pos, "negative #embed limit");
++		return false;
++	}
++	*limit_val =3D (unsigned long long)sval;
++	return true;
++}
 +
-+			if (!nr)
-+				return LLVMConstNull(dtype);
-+			vals =3D calloc(nr, sizeof(*vals));
-+			for (i =3D 0; i < nr; i++)
-+				vals[i] =3D LLVMConstNull(elem_type);
-+			FOR_EACH_PTR(initializer->expr_list, entry) {
-+				if (entry->type =3D=3D EXPR_POS) {
-+					unsigned int idx =3D entry->init_offset / elem_bytes;
-+					if (idx < nr) {
-+						LLVMValueRef v =3D expr_to_const_val(module, elem_sym,
-+										   entry->init_expr);
-+						if (v)
-+							vals[idx] =3D v;
++static int test_embed_file(const char *path, const char *filename,
++			   int has_limit, unsigned long long limit_val,
++			   unsigned long long *size)
++{
++	int fd;
++	struct stat st;
++	size_t plen =3D strlen(path);
++	size_t flen =3D strlen(filename);
++	char fullname[PATH_MAX];
++
++	if (plen + flen + 2 > sizeof(fullname))
++		return 0;
++	memcpy(fullname, path, plen);
++	if (plen && path[plen - 1] !=3D '/') {
++		fullname[plen] =3D '/';
++		plen++;
++	}
++	memcpy(fullname + plen, filename, flen + 1);
++	fd =3D open(fullname, O_RDONLY | O_NONBLOCK);
++	if (fd < 0)
++		return 0;
++	if (fstat(fd, &st) < 0 || S_ISDIR(st.st_mode)) {
++		close(fd);
++		return 0;
++	}
++	if (S_ISREG(st.st_mode)) {
++		unsigned long long eff =3D st.st_size;
++
++		close(fd);
++		if (has_limit && limit_val < eff)
++			eff =3D limit_val;
++		if (eff > MAX_EMBED_SIZE)
++			return 0;
++		*size =3D eff;
++		return 1;
++	}
++	if (S_ISCHR(st.st_mode)) {
++		unsigned char b;
++		ssize_t r;
++
++		if (has_limit && limit_val =3D=3D 0) {
++			close(fd);
++			*size =3D 0;
++			return 1;
++		}
++		if (has_limit && limit_val > MAX_EMBED_SIZE) {
++			close(fd);
++			return 0;
++		}
++		r =3D read(fd, &b, 1);
++		close(fd);
++		if (r =3D=3D 0) {
++			*size =3D 0;
++			return 1;
++		}
++		if (r > 0 && has_limit) {
++			*size =3D 1;
++			return 1;
++		}
++		return 0;
++	}
++	close(fd);
++	return 0;
++}
++
++static int check_has_embed(struct stream *stream, const char *filename,
++			   int expect, int has_limit,
++			   unsigned long long limit_val,
++			   unsigned long long *size)
++{
++	const char **path;
++
++	/* Absolute path? */
++	if (filename[0] =3D=3D '/')
++		return test_embed_file("", filename, has_limit, limit_val,
++				       size);
++
++	set_stream_include_path(stream);
++	path =3D expect ? angle_includepath : quote_includepath;
++	if (!path)
++		return 0;
++	while (*path !=3D NULL) {
++		if (test_embed_file(*path++, filename, has_limit, limit_val,
++				    size))
++			return 1;
++	}
++	return 0;
++}
++
++static bool parse_has_embed(struct token **list)
++{
++	struct token *token =3D *list;
++	struct token *lparen =3D scan_next(&token->next);
++	struct token *next;
++	struct token *params, **param_p, *rparen, *after_rparen;
++	struct stream *stream =3D input_streams + token->pos.stream;
++	char filename[PATH_MAX];
++	int expect =3D 0;
++	int val =3D 0;
++	unsigned long long filesize =3D 0;
++	int has_limit =3D 0;
++	unsigned long long limit_val =3D ~0ULL;
++	unsigned int seen_params =3D 0;
++	int supported =3D 1;
++
++	if (!match_op(lparen, '(')) {
++		sparse_error(token->pos, "expected '(' after %s",
++			     show_token(token));
++		return false;
++	}
++	next =3D scan_next(&lparen->next);
++	if (match_op(next, '<')) {
++		expect =3D '>';
++		next =3D next->next;
++		if (!collect_angle_filename(&next, filename, sizeof(filename),
++					    token->pos))
++			goto err;
++	} else if (token_type(next) =3D=3D TOKEN_STRING) {
++		if (!extract_string_filename(&next, filename, sizeof(filename)))
++			goto err;
++	} else {
++		struct token **p =3D &lparen->next;
++		int depth =3D 1;
++
++		rparen =3D scan_next(p);
++		while (!eof_token(rparen)) {
++			if (match_op(rparen, '('))
++				depth++;
++			else if (match_op(rparen, ')') && !--depth)
++				break;
++			p =3D &rparen->next;
++			rparen =3D scan_next(p);
++		}
++		if (!match_op(rparen, ')')) {
++			sparse_error(rparen->pos, "expected ')'");
++			token->next =3D rparen;
++			return false;
++		}
++		*p =3D &eof_token_entry;
++		expand_list(&lparen->next);
++		p =3D &lparen->next;
++		while (!eof_token(*p))
++			p =3D &(*p)->next;
++		*p =3D rparen;
++		next =3D lparen->next;
++		if (match_op(next, '<')) {
++			expect =3D '>';
++			next =3D next->next;
++			if (!collect_angle_filename(&next, filename,
++						    sizeof(filename),
++						    token->pos))
++				goto err;
++		} else if (token_type(next) =3D=3D TOKEN_STRING) {
++			if (!extract_string_filename(&next, filename,
++						     sizeof(filename)))
++				goto err;
++		} else {
++			sparse_error(next->pos,
++				     "expected \"FILENAME\" or <FILENAME>");
++			goto err;
++		}
++	}
++
++	/* Isolate optional parameters before matching ')' */
++	params =3D next;
++	{
++		struct token **p =3D &params;
++		int depth =3D 1;
++
++		rparen =3D scan_next(p);
++		while (!eof_token(rparen)) {
++			if (match_op(rparen, '('))
++				depth++;
++			else if (match_op(rparen, ')') && !--depth)
++				break;
++			p =3D &rparen->next;
++			rparen =3D scan_next(p);
++		}
++		if (!match_op(rparen, ')')) {
++			sparse_error(rparen->pos, "expected ')'");
++			token->next =3D rparen;
++			return false;
++		}
++		after_rparen =3D rparen->next;
++		*p =3D &eof_token_entry;
++	}
++
++	param_p =3D &params;
++	while (!eof_token(next =3D scan_next(param_p))) {
++		if (token_type(next) =3D=3D TOKEN_IDENT) {
++			struct ident *id;
++			struct position id_pos;
++			enum embed_param_kind kind;
++
++			if (!expand_one_symbol(param_p))
++				continue;
++			next =3D *param_p;
++			if (token_type(next) !=3D TOKEN_IDENT) {
++				supported =3D 0;
++				param_p =3D &next->next;
++				continue;
++			}
++			id =3D next->ident;
++			id_pos =3D next->pos;
++			if (match_op(next->next, ':') &&
++			    match_op(next->next->next, ':')) {
++				struct token *attr =3D next->next->next->next;
++
++				if (token_type(attr) !=3D TOKEN_IDENT) {
++					sparse_error(attr->pos,
++						     "identifier expected");
++					token->next =3D after_rparen;
++					return false;
++				}
++				supported =3D 0;
++				next =3D attr->next;
++				if (match_op(next, '(')) {
++					int depth =3D 1;
++
++					next =3D next->next;
++					while (!eof_token(next) && depth > 0) {
++						if (match_op(next, '('))
++							depth++;
++						else if (match_op(next, ')'))
++							depth--;
++						next =3D next->next;
 +					}
 +				}
-+			} END_FOR_EACH_PTR(entry);
-+			res =3D LLVMConstArray(elem_type, vals, nr);
-+			free(vals);
-+			return res;
++				param_p =3D &next;
++				continue;
++			}
++
++			kind =3D classify_embed_param(id);
++			if (kind !=3D EMBED_PARAM_NONE) {
++				struct token *pstart, *pend =3D NULL;
++				int depth =3D 1;
++
++				if (seen_params & kind) {
++					sparse_error(
++						id_pos,
++						"duplicate embed parameter '%s'",
++						show_ident(id));
++					token->next =3D after_rparen;
++					return false;
++				}
++				seen_params |=3D kind;
++
++				next =3D scan_next(&next->next);
++				if (!match_op(next, '(')) {
++					sparse_error(
++						id_pos,
++						"expected '(' after '%s'",
++						show_ident(id));
++					token->next =3D after_rparen;
++					return false;
++				}
++				pstart =3D next->next;
++				next =3D next->next;
++				while (!eof_token(next) && depth > 0) {
++					if (match_op(next, '('))
++						depth++;
++					else if (match_op(next, ')') &&
++						 !--depth)
++						break;
++					pend =3D next;
++					next =3D next->next;
++				}
++				if (!match_op(next, ')')) {
++					sparse_error(id_pos, "expected ')'");
++					token->next =3D after_rparen;
++					return false;
++				}
++				next =3D next->next;
++				if (kind =3D=3D EMBED_PARAM_LIMIT) {
++					if (!eval_embed_limit_expr(
++						    id_pos, pstart, pend,
++						    &limit_val)) {
++						token->next =3D after_rparen;
++						return false;
++					}
++					has_limit =3D 1;
++				}
++				param_p =3D &next;
++				continue;
++			}
++
++			/* Unknown non-prefixed parameter */
++			supported =3D 0;
++			next =3D scan_next(&next->next);
++			if (match_op(next, '(')) {
++				int depth =3D 1;
++
++				next =3D next->next;
++				while (!eof_token(next) && depth > 0) {
++					if (match_op(next, '('))
++						depth++;
++					else if (match_op(next, ')'))
++						depth--;
++					next =3D next->next;
++				}
++			}
++			param_p =3D &next;
++			continue;
 +		}
-+		warning(initializer->pos, "can't initialize type: %s", show_typename(s=
-ym));
-+		return NULL;
++		supported =3D 0;
++		param_p =3D &next->next;
 +	}
-+	default:
-+		warning(initializer->pos, "can't initialize type: %s", show_typename(s=
-ym));
-+		return NULL;
++
++	if (!supported) {
++		val =3D 0;
++	} else if (!check_has_embed(stream, filename, expect, has_limit,
++				    limit_val, &filesize)) {
++		val =3D 0;
++	} else if (filesize =3D=3D 0 || (has_limit && limit_val =3D=3D 0)) {
++		val =3D 2;
++	} else {
++		val =3D 1;
 +	}
++
++	replace_with_int(token, val);
++	token->next =3D after_rparen;
++	return true;
++
++err:
++	token->next =3D skip_balanced_parens(lparen);
++	return false;
 +}
 +
- static LLVMValueRef output_data(LLVMModuleRef module, struct symbol *sym=
-)
+ static int free_preprocessor_line(struct token *token)
  {
- 	struct expression *initializer =3D sym->initializer;
-@@ -1257,40 +1336,7 @@ static LLVMValueRef output_data(LLVMModuleRef modu=
-le, struct symbol *sym)
- 	LLVMValueRef data;
- 	const char *name;
+ 	while (token_type(token) !=3D TOKEN_EOF) {
+@@ -1933,6 +2363,12 @@ static int expression_value(struct token **where)
+ 				replace_with_bool(p, 0);
+ 				break;
+ 			}
++			if (p->ident =3D=3D &__has_embed_ident) {
++				if (parse_has_embed(list))
++					continue;
++				replace_with_bool(p, 0);
++				break;
++			}
+ 			if (!expand_one_symbol(list))
+ 				continue;
+ 			if (token_type(p) !=3D TOKEN_IDENT)
+@@ -2598,6 +3034,7 @@ static void init_preprocessor(void)
+ 		{ "__has_feature", NULL, expand_has_feature },
+ 		{ "__has_include", NULL, NULL },
+ 		{ "__has_include_next", NULL, NULL },
++		{ "__has_embed", NULL, NULL },
+ 	};
 =20
--	if (initializer) {
--		switch (initializer->type) {
--		case EXPR_VALUE:
--			initial_value =3D constant_value(initializer->value, symbol_type(sym)=
-);
--			break;
--		case EXPR_FVALUE:
--			initial_value =3D LLVMConstReal(symbol_type(sym), initializer->fvalue=
-);
--			break;
--		case EXPR_SYMBOL: {
--			struct symbol *sym =3D initializer->symbol;
--
--			initial_value =3D LLVMGetNamedGlobal(module, show_ident(sym->ident));
--			if (!initial_value)
--				initial_value =3D output_data(module, sym);
--			break;
--		}
--		case EXPR_STRING: {
--			const char *s =3D initializer->string->data;
--			size_t len =3D initializer->string->length;
--
--			initial_value =3D const_string(s, len);
--			break;
--		}
--		default:
--			warning(initializer->pos, "can't initialize type: %s", show_typename(=
-sym));
--			initial_value =3D NULL;
--			break;
--		}
--	} else {
--		LLVMTypeRef type =3D symbol_type(sym);
--
--		initial_value =3D LLVMConstNull(type);
--	}
--
-+	initial_value =3D expr_to_const_val(module, sym, initializer);
- 	if (!initial_value)
- 		return NULL;
+ 	for (i =3D 0; i < ARRAY_SIZE(normal); i++) {
+diff --git a/predefine.c b/predefine.c
+index d6ab0785abad..5639fc6862e3 100644
+--- a/predefine.c
++++ b/predefine.c
+@@ -123,6 +123,9 @@ void predefined_macros(void)
+ 		predefine("__STDC_NO_COMPLEX__", 1, "1");
+ 		predefine("__STDC_NO_THREADS__", 1, "1");
+ 	}
++	predefine("__STDC_EMBED_NOT_FOUND__", 1, "0");
++	predefine("__STDC_EMBED_FOUND__", 1, "1");
++	predefine("__STDC_EMBED_EMPTY__", 1, "2");
 =20
-diff --git a/symbol.c b/symbol.c
-index 28fa12352569..270e91d9c480 100644
---- a/symbol.c
-+++ b/symbol.c
-@@ -569,6 +569,12 @@ static struct symbol * examine_node_type(struct symb=
-ol *sym)
- 			struct symbol *node_type =3D base_type->ctype.base_type;
- 			int count =3D count_array_initializer(node_type, initializer);
-=20
-+			if (standard >=3D STANDARD_C23 &&
-+			    initializer->type =3D=3D EXPR_INITIALIZER &&
-+			    ptr_list_empty((struct ptr_list *)initializer->expr_list))
-+				sparse_error(sym->pos,
-+					     "empty initializer for incomplete array");
-+
- 			if (node_type && node_type->bit_size >=3D 0)
- 				bit_size =3D implicit_array_size(sym, count);
- 		}
-diff --git a/validation/backend/c23-empty-init.c b/validation/backend/c23=
--empty-init.c
+ 	predefine("__CHAR_BIT__", 1, "%d", bits_in_char);
+ 	if (funsigned_char)
+diff --git a/validation/preprocessor/c23-has-embed.c b/validation/preproc=
+essor/c23-has-embed.c
 new file mode 100644
-index 000000000000..e8741bd5d79a
+index 000000000000..8ae7bb1d081f
 --- /dev/null
-+++ b/validation/backend/c23-empty-init.c
-@@ -0,0 +1,24 @@
-+typedef typeof(nullptr) nullptr_t;
++++ b/validation/preprocessor/c23-has-embed.c
+@@ -0,0 +1,69 @@
++#if defined(__has_embed)
++int has_macro =3D 1;
++#endif
 +
-+struct s {
-+	int a;
-+	void *p;
-+};
++#if __has_embed("options.h") =3D=3D __STDC_EMBED_FOUND__
++int found_options =3D 1;
++#endif
 +
-+static nullptr_t g_np =3D {};
-+static void *g_ptr =3D {};
-+static struct s g_s =3D {};
++#if __has_embed("options.h" limit(0)) =3D=3D __STDC_EMBED_EMPTY__
++int limit_zero_empty =3D 1;
++#endif
 +
-+int test_vla_empty(int n);
-+int test_vla_empty(int n)
-+{
-+	int vla[n] =3D {};
-+	return vla[0] + g_s.a + (g_np !=3D nullptr) + (g_ptr !=3D nullptr);
-+}
++#if __has_embed("options.h" __limit__(0)) =3D=3D __STDC_EMBED_EMPTY__
++int dunder_limit_zero_empty =3D 1;
++#endif
++
++#if __has_embed("options.h" limit(5)) =3D=3D __STDC_EMBED_FOUND__
++int limit_five_found =3D 1;
++#endif
++
++#if __has_embed("nonexistent_embed_12345.bin") =3D=3D __STDC_EMBED_NOT_F=
+OUND__
++int not_found =3D 1;
++#endif
++
++#if __has_embed("options.h" prefix(1) suffix(2)) =3D=3D __STDC_EMBED_FOU=
+ND__ && \
++    __has_embed("options.h" __prefix__(1) __suffix__(2) __if_empty__(3))=
+ =3D=3D \
++	__STDC_EMBED_FOUND__
++int standard_params =3D 1;
++#endif
++
++#if __has_embed("options.h" unknown_vendor::param(1)) =3D=3D \
++	__STDC_EMBED_NOT_FOUND__
++int unknown_param =3D 1;
++#endif
++
++#define HAS_EMB __has_embed
++#if HAS_EMB("options.h") =3D=3D __STDC_EMBED_FOUND__
++int aliased_has_embed =3D 1;
++#endif
++
++#if __has_embed("/dev/null") =3D=3D __STDC_EMBED_EMPTY__
++int dev_null_empty =3D 1;
++#endif
++
++#if __has_embed("options.h" limit(1ULL << 63)) =3D=3D __STDC_EMBED_FOUND=
+__ && \
++    __has_embed("options.h" limit(0xffffffffffffffffULL)) =3D=3D \
++	__STDC_EMBED_FOUND__
++int large_unsigned_limit =3D 1;
++#endif
 +
 +/*
-+ * check-name: backend-c23-empty-init
-+ * check-command: sparse-llvm-dis -m64 -std=3Dc23 -Wno-vla $file
-+ * check-output-ignore
-+ * check-output-contains: define i32 @test_vla_empty(
-+ */
-diff --git a/validation/c23-auto-error.c b/validation/c23-auto-error.c
-index b88ebd37d2d9..16d9c85beb40 100644
---- a/validation/c23-auto-error.c
-+++ b/validation/c23-auto-error.c
-@@ -28,10 +28,12 @@ void block_errors(void)
- 	int bad_cast =3D (auto)1;
- 	_Atomic(auto) bad_atomic =3D 1;
- 	auto braced =3D { 1 };
-+	auto empty =3D {};
- 	(void)bad_sz;
- 	(void)bad_cast;
- 	(void)bad_atomic;
- 	(void)braced;
-+	(void)empty;
- }
-=20
- /*
-@@ -56,6 +58,7 @@ c23-auto-error.c:29:16: error: Trying to use reserved w=
-ord 'auto' as identifier
- c23-auto-error.c:29:23: error: Expected ; at end of declaration
- c23-auto-error.c:29:23: error: got bad_atomic
- c23-auto-error.c:30:14: error: auto requires a scalar initializer expres=
-sion
-+c23-auto-error.c:31:14: error: auto requires a scalar initializer expres=
-sion
- c23-auto-error.c:2:15: error: invalid initializer
- c23-auto-error.c:7:13: error: underspecified symbol 'self' used in its o=
-wn initializer
- c23-auto-error.c:9:18: error: underspecified symbol 'self_expr' used in =
-its own initializer
-@@ -63,6 +66,6 @@ c23-auto-error.c:10:23: error: underspecified symbol 's=
-elf_sz' used in its own i
- c23-auto-error.c:10:16: error: cannot size expression
- c23-auto-error.c:25:31: error: underspecified symbol 'shadow' used in it=
-s own initializer
- c23-auto-error.c:27:22: error: cannot size expression
--c23-auto-error.c:33:15: error: undefined identifier 'bad_atomic'
-+c23-auto-error.c:34:15: error: undefined identifier 'bad_atomic'
-  * check-error-end
-  */
-diff --git a/validation/c23-constexpr-error.c b/validation/c23-constexpr-=
-error.c
-index 41ee86d7ae63..370f2409c99a 100644
---- a/validation/c23-constexpr-error.c
-+++ b/validation/c23-constexpr-error.c
-@@ -50,7 +50,7 @@ void assign_and_vla_test(int n)
- 	constexpr int arr[2] =3D { 1, 2 };
- 	arr[0] =3D 3;
-=20
--	constexpr int (*vla)[n] =3D nullptr;
-+	constexpr int vla[n] =3D {};
- 	(void)vla;
- }
-=20
-diff --git a/validation/c23-empty-init-error.c b/validation/c23-empty-ini=
-t-error.c
-new file mode 100644
-index 000000000000..b5f39174e1e4
---- /dev/null
-+++ b/validation/c23-empty-init-error.c
-@@ -0,0 +1,19 @@
-+static int inc_arr[] =3D {};
-+
-+struct inc_struct;
-+
-+static void bad_init(void)
-+{
-+	struct inc_struct x =3D {};
-+	(void)x;
-+}
-+
-+/*
-+ * check-name: c23-empty-init-error
-+ * check-command: sparse -std=3Dc23 $file
++ * check-name: c23-has-embed
++ * check-command: sparse -std=3Dc23 -E -I.. $file
 + *
-+ * check-error-start
-+c23-empty-init-error.c:1:12: error: empty initializer for incomplete arr=
-ay
-+c23-empty-init-error.c:7:31: error: initializer for incomplete type
-+ * check-error-end
-+ */
-diff --git a/validation/c23-empty-init-pedantic.c b/validation/c23-empty-=
-init-pedantic.c
-new file mode 100644
-index 000000000000..19dfb769f16b
---- /dev/null
-+++ b/validation/c23-empty-init-pedantic.c
-@@ -0,0 +1,14 @@
-+struct s {
-+	int a;
-+};
++ * check-output-start
 +
-+static struct s s =3D {};
-+
-+/*
-+ * check-name: c23 empty initializer pedantic warning
-+ * check-command: sparse -std=3Dc11 -Wpedantic $file
-+ *
-+ * check-error-start
-+c23-empty-init-pedantic.c:5:21: warning: ISO C forbids empty initializer=
- braces before C23
-+ * check-error-end
-+ */
-diff --git a/validation/c23-empty-init.c b/validation/c23-empty-init.c
-new file mode 100644
-index 000000000000..8af4ddf86e42
---- /dev/null
-+++ b/validation/c23-empty-init.c
-@@ -0,0 +1,64 @@
-+struct s {
-+	int a;
-+	void *ptr;
-+};
-+
-+struct nested {
-+	struct s inner;
-+	int arr[2];
-+};
-+
-+union u {
-+	int a;
-+	char *p;
-+};
-+
-+enum e {
-+	E0,
-+	E1,
-+};
-+
-+typedef typeof(nullptr) nullptr_t;
-+
-+static int i =3D {};
-+static float f =3D {};
-+static double d =3D {};
-+static void *p =3D {};
-+static bool b =3D {};
-+static nullptr_t np =3D {};
-+static enum e ge =3D {};
-+static struct s s =3D {};
-+static struct s s2 =3D { {}, {} };
-+static struct nested ns =3D { {}, {} };
-+static union u u =3D {};
-+static int arr[3] =3D {};
-+
-+static constexpr int ci =3D {};
-+static constexpr bool cb =3D {};
-+static_assert(ci =3D=3D 0, "ci");
-+static_assert(cb =3D=3D false, "cb");
-+
-+static int test(int n)
-+{
-+	int local_i =3D {};
-+	void *local_p =3D {};
-+	struct s local_s =3D {};
-+	int local_arr[2] =3D {};
-+	int vla[n] =3D {};
-+	int cl_i =3D (int){};
-+	struct s cl_s =3D (struct s){};
-+	int *cl_arr =3D (int [3]){};
-+
-+	(void)local_p;
-+	(void)local_s;
-+	(void)cl_s;
-+	return local_i + local_arr[0] + vla[0] + cl_i + cl_arr[0] +
-+	       i + (int)f + (int)d + (p !=3D nullptr) + b + (np !=3D nullptr) +
-+	       ge + s.a + s2.a + (s2.ptr !=3D nullptr) +
-+	       ns.inner.a + u.a + arr[0];
-+}
-+
-+/*
-+ * check-name: c23 empty initializer braces
-+ * check-command: sparse -std=3Dc23 -pedantic -Wno-vla $file
++int has_macro =3D 1;
++int found_options =3D 1;
++int limit_zero_empty =3D 1;
++int dunder_limit_zero_empty =3D 1;
++int limit_five_found =3D 1;
++int not_found =3D 1;
++int standard_params =3D 1;
++int unknown_param =3D 1;
++int aliased_has_embed =3D 1;
++int dev_null_empty =3D 1;
++int large_unsigned_limit =3D 1;
++ * check-output-end
 + */
