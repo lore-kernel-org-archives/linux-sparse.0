@@ -1,70 +1,70 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=199.89.1.14
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
 	t=1794256430;
-	b=vJ3G1WPJnEtsf04/ttkM7Gfi+MHoEYU5wjdbBmEw/EEl6eZ0aWSvDlMjd+vJIlxfFvD1
-	 I0uYXh/l9wBtUfaCpFfQ3Jl6GNdStizWTsFIpAGzZzHnQaRrUwmEvr7fuTBgjeZ+/Vgyw
-	 7xqz1fASsBTQDF5WqZmPFD+uTQsC6TCz2rnXdTYd5sXaK9M/BqHutxCDaH7GhcjuqksKK
-	 OXEWMIcvy1nlcXuBg5go8MvCAWB25o4Vh4ttn374nL0+84Ev66CSgqOy/wS6+ii2JxRcD
-	 d9nEOf11PXAVAkV3GajEAr3zOPavLv+i9GkMyLwJHwWSFUc1mWPAp01nWbNwcVG408g==
+	b=uTdvV9G7rYRnetTDVTuD6dZ7dZK19Zw7hTnEiftK9VcpDWqcp+WMGkH523JDKaYgBZU2
+	 44WmPXgmcYb1b0IVGMyA72+6F/kp4GVud97zS6xQ6K+2eKkpzV3SyjMV81aNS6nXzm/Nz
+	 7HcQYMZLUFSMQLRNB+g99qUEb5+zYo+E2lHWsuNDJYMtviSL7na+xg87MTYwT5ZcTTtkb
+	 KDYHSKrVLt5UD9cHrcb0Et0cnuXYTGp1mRcTjtdDRY+MkBIXGtwp0kXBtjmOczBj426Fa
+	 dnmT0OkEo/Q/EnJrYu7J8eZkgJO9LssfJ3U1Aedm5k4Jk0bvyVsACWOk7gfn4725eFw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
 	a=rsa-sha256; c=relaxed/relaxed; t=1794256430;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Virus-Scanned:Received:
 	 Received:From:To:Cc:Subject:Date:Message-ID:X-Mailer:In-Reply-To:
 	 References:MIME-Version:Content-Transfer-Encoding;
-	bh=Ini2qkSITqJ8t/n3b52NZm/KmkXlqpcg9Gk5vE7IL1w=;
-	b=svsrCTGI0stKP37X4jFDN5AnzIvBtwEXgjZ0QrEaKPegq6v96IQI182IarpEN3tEtQfG
-	 XQYL+oPyNt/szIAV/kkTE6uTP6Eg/1qF4sBsfDYv/Q8NcCBs3VP8qCsaI49PUfShAJqi6
-	 htXKfSU0CdytPkr3ys3OOtLjcAVRd5WC1vSmpSeNC49KfR3QKWof7DXmXY2fPlMs4nX8A
-	 cBNJJHFTL81JAtkmhorsPn/ik6qQMzwYvZed/lY4UGb8qqGLgbjurrjMrweHSp2bGAiN0
-	 52iJVjkyc0xXRbr51nEhGsrr1FXwkz0FKhtRfrQNmAXZ05l0O7pi5rhA0+/nt7FMivg==
+	bh=jp6XtKKEghuCtcdv2XmqhPkn9OpVaRn3SmhSjpiJhzM=;
+	b=ulA3WCXqHp/HjlPx1UKn1HY3ntNGQQi4uZfq1kUTNYad0pHaqhos10nltlIIdUPw6lsr
+	 SLbYZ9/7FePWQUwr1sXVWO6jT5P6CVEcreKMzd70tzKRQe/cl95yy7XazYUJyR2JeKKrQ
+	 RdVwqGRE4bir+sWJgwR5IvU0C3Nlwle3l+l/0qTwRdYMWcm7/Tj1AHg006szh3uB7ibBk
+	 f3fS+bzRRghCzWyBWTT2PqmG9FHQuPuT3DZRcafGPnTpUXDFhQo0isPrcSsE+9k1ESUBm
+	 0AW0UP0F/3sYK1fylNQpr0z1scE/buxD1vEywiQ8j25uTgUhD95q7H2ts3bhTSb4pEw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=acm.org;
 	spf=pass smtp.mailfrom=acm.org;
-	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=CMcdEKnR;
+	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=q86nQpf2;
 	arc=none smtp.remote-ip=199.89.1.14
 Received: from 011.lax.mailroute.net (011.lax.mailroute.net [199.89.1.14])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A9E80606A31C
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E5AD4606A326
 	for <linux-sparse@vger.kernel.org>; Mon,  9 Nov 2026 20:33:49 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org A9E80606A31C
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org E5AD4606A326
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=acm.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=CMcdEKnR
+	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=q86nQpf2
 Received: from localhost (localhost [127.0.0.1])
-	by 011.lax.mailroute.net (Postfix) with ESMTP id 4jNhMC5sjSz1XMG49;
+	by 011.lax.mailroute.net (Postfix) with ESMTP id 4jNhMC72lvz1XLyhl;
 	Mon,  9 Nov 2026 20:33:43 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=acm.org; h=
 	content-transfer-encoding:mime-version:references:in-reply-to
 	:x-mailer:message-id:date:date:subject:subject:from:from
-	:received:received; s=mr01; t=1794256420; x=1796848421; bh=Ini2q
-	kSITqJ8t/n3b52NZm/KmkXlqpcg9Gk5vE7IL1w=; b=CMcdEKnRL+KIRIuMBHPbH
-	o3loc+28WlsSok4D9MjJVk2incmydml3BpEggUnXFuf0GAK20CZ8MLfOk0li72Dq
-	AHGs97k2R/uvMV28y8DAuC9qT5IMhDcDXaU0dfkar/b43fYqgYRlEGL/QduNiFWk
-	7Vq0WO4xlJFrBd+HCR2OMgl3EQZxcHCjYzm1oOSl3GUnZHjG7Eg5ToRSGarkCMDL
-	oM5Nf8M5H7zVY36dWJ91FwlhjfcuIT0ZvdWHDCGN9A8QT0fs9Lunjh4IDZsJY3yU
-	bP7Z2i+eEgaD437DvCVjdWPnkDpVTxwvYeEbAMdaoJ/KFkfQEpv91PmRecCdEiKK
+	:received:received; s=mr01; t=1794256418; x=1796848419; bh=jp6Xt
+	KKEghuCtcdv2XmqhPkn9OpVaRn3SmhSjpiJhzM=; b=q86nQpf2sKjUuGpaufWZt
+	NjpZRdXnXVYc72mo/fSJSs3uTYl/eYJGMbrBvXOHi2+LXzipv9Bw9HQY6ZwQp3uj
+	Gxtl6cmdeuVPylF9V/R8vP8UDqg1JrFNRh53btmngMfuEWYuo+KiUmGsD8D9J+BY
+	LmCRCMTTh88C9gnLpG6SvdmP9fnpcKomgHR8qzm9i5hysc4PgXurtQTKYh25IwcX
+	FHL2Z/LlAsJDFwx90Mm5qYMdgi5wNFAAKP+98AKbL0FhxMw0v3fAvmupKXb0w+Hc
+	MR3MrAiqAYWxXNLs8zaWjNZXKvaNDPSvTO1S271TpM8tNYPMMTr3E1VJ3BRJ6Quk
 	w==
 X-Virus-Scanned: by MailRoute
 Received: from 011.lax.mailroute.net ([127.0.0.1])
  by localhost (011.lax [127.0.0.1]) (mroute_mailscanner, port 10029) with LMTP
- id o8zAQQY-BsrU; Mon,  9 Nov 2026 20:33:40 +0000 (UTC)
+ id CYQfcxX62SBL; Mon,  9 Nov 2026 20:33:38 +0000 (UTC)
 Received: from bvanassche.c.googlers.com.com (57.237.82.34.bc.googleusercontent.com [34.82.237.57])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
 	(Authenticated sender: bvanassche@acm.org)
-	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4jNhM83l6nz1XMfrm;
-	Mon,  9 Nov 2026 20:33:40 +0000 (UTC)
+	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4jNhM60bBFz1XM0nj;
+	Mon,  9 Nov 2026 20:33:38 +0000 (UTC)
 From: Bart Van Assche <bvanassche@acm.org>
 To: linux-sparse@vger.kernel.org
 Cc: Linus Torvalds <torvalds@linux-foundation.org>,
 	Bart Van Assche <bvanassche@acm.org>
-Subject: [PATCH 73/73] ci: Add Linux kernel GitHub Actions workflow and build script
-Date: Mon,  9 Nov 2026 12:32:59 -0800
-Message-ID: <20261109203259.362845-74-bvanassche@acm.org>
+Subject: [PATCH 62/73] enum: Support machine mode attributes on enumeration types
+Date: Mon,  9 Nov 2026 12:32:48 -0800
+Message-ID: <20261109203259.362845-63-bvanassche@acm.org>
 X-Mailer: git-send-email 2.56.0.506.g506a7eabc5-goog
 In-Reply-To: <20261109203259.362845-1-bvanassche@acm.org>
 References: <20261109203259.362845-1-bvanassche@acm.org>
@@ -79,92 +79,237 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
 
-Add a GitHub Actions workflow and helper script to build the Linux
-kernel with sparse under AddressSanitizer and UndefinedBehaviorSanitizer
-so regressions not covered by the validation suite are caught on a large
-real-world C codebase:
-- .github/workflows/build-linux-kernel-with-sparse.yml: Run on push,
-  pull_request, daily schedule, and workflow_dispatch with read-only
-  repository contents permissions.
-- ci/build-linux-kernel-with-sparse.sh: Clean and build sparse in asan
-  mode, clone ../linux-kernel or upstream torvalds/linux.git, neutralize
-  non-core __CHECKER__ guards, and run a defconfig C=3D1 kernel check wit=
-h
-  detect_invalid_pointer_pairs=3D2 and halt_on_error=3D1.
+Support GCC machine mode attributes (such as mode(__byte__)) on both
+enum declarations and enum type definitions:
+- Apply prefix and postfix mode attributes on enum definitions to the
+  enum's underlying type, size, alignment, and rank when no C23 fixed
+  underlying type is present.
+- Inspect underlying SYM_NODE and SYM_ENUM signedness in to_*_mode()
+  so unsigned enums preserve unsignedness when converted to a mode.
+- Expand validation/enum+mode.c and remove check-known-to-fail.
 
 Signed-off-by: Bart Van Assche <bvanassche@acm.org>
 ---
- .../build-linux-kernel-with-sparse.yml        | 28 +++++++++++++++++++
- ci/build-linux-kernel-with-sparse.sh          | 23 +++++++++++++++
- 2 files changed, 51 insertions(+)
- create mode 100644 .github/workflows/build-linux-kernel-with-sparse.yml
- create mode 100755 ci/build-linux-kernel-with-sparse.sh
+ parse.c                | 84 ++++++++++++++++++++++++++++++------------
+ symbol.c               |  2 +-
+ symbol.h               |  1 +
+ validation/enum+mode.c | 26 ++++++++++++-
+ 4 files changed, 87 insertions(+), 26 deletions(-)
 
-diff --git a/.github/workflows/build-linux-kernel-with-sparse.yml b/.gith=
-ub/workflows/build-linux-kernel-with-sparse.yml
-new file mode 100644
-index 000000000000..a7566c4d8082
---- /dev/null
-+++ b/.github/workflows/build-linux-kernel-with-sparse.yml
-@@ -0,0 +1,28 @@
-+# See also https://docs.github.com/en/actions/learn-github-actions/workf=
-low-syntax-for-github-actions
+diff --git a/parse.c b/parse.c
+index d89f60113152..b686d2d55c36 100644
+--- a/parse.c
++++ b/parse.c
+@@ -992,6 +992,20 @@ static struct token *struct_union_enum_specifier(enu=
+m type type,
+ 		else
+ 			warning(token->pos, "attribute __transparent_union__ applied to non-u=
+nion type");
+ 	}
++	if (sym->type =3D=3D SYM_ENUM && attr.mode && attr.mode->to_mode &&
++	    !sym->fixed_type && sym->ctype.base_type &&
++	    is_int_type(sym->ctype.base_type)) {
++		struct symbol *mtype =3D attr.mode->to_mode(sym);
++		if (mtype) {
++			sym->ctype.base_type =3D mtype;
++			sym->has_mode =3D 1;
++			sym->ctype.modifiers &=3D ~MOD_SIGNEDNESS;
++			sym->ctype.modifiers |=3D (mtype->ctype.modifiers & MOD_SIGNEDNESS);
++			sym->bit_size =3D mtype->bit_size;
++			sym->ctype.alignment =3D mtype->ctype.alignment;
++			sym->rank =3D mtype->rank;
++		}
++	}
+=20
+ 	sym->endpos =3D token->pos;
+=20
+@@ -1599,62 +1613,86 @@ static struct token *attribute_address_space(stru=
+ct token *token, struct symbol
+ 	return token;
+ }
+=20
++static inline bool is_int_or_enum(struct symbol *ctype)
++{
++	if (!ctype)
++		return false;
++	if (ctype->type =3D=3D SYM_ENUM)
++		return true;
++	if (ctype->ctype.base_type =3D=3D &int_type)
++		return true;
++	if (ctype->type =3D=3D SYM_NODE && ctype->ctype.base_type &&
++	    (ctype->ctype.base_type->type =3D=3D SYM_ENUM ||
++	     ctype->ctype.base_type->ctype.base_type =3D=3D &int_type))
++		return true;
++	return false;
++}
 +
-+name: Build Linux kernel with sparse
++static inline bool is_unsigned_mode_type(struct symbol *ctype)
++{
++	if (!ctype)
++		return false;
++	if (ctype->type =3D=3D SYM_NODE || ctype->type =3D=3D SYM_ENUM)
++		examine_symbol_type(ctype);
++	while (ctype && (ctype->type =3D=3D SYM_NODE || ctype->type =3D=3D SYM_=
+ENUM)) {
++		if (ctype->ctype.modifiers & MOD_UNSIGNED)
++			return true;
++		if (ctype->ctype.modifiers & MOD_SIGNED)
++			return false;
++		ctype =3D ctype->ctype.base_type;
++	}
++	return ctype && (ctype->ctype.modifiers & MOD_UNSIGNED);
++}
 +
-+on:
-+  push:
-+  pull_request:
-+  schedule:
-+    - cron: '0 0 * * *'
-+  workflow_dispatch:
+ static struct symbol *to_QI_mode(struct symbol *ctype)
+ {
+-	if (ctype->ctype.base_type !=3D &int_type)
++	if (!is_int_or_enum(ctype))
+ 		return NULL;
+-	if (ctype =3D=3D &char_ctype)
+-		return ctype;
+-	return ctype->ctype.modifiers & MOD_UNSIGNED ? &uchar_ctype
+-						     : &schar_ctype;
++	if (cbase_type(ctype) =3D=3D &char_ctype)
++		return &char_ctype;
++	return is_unsigned_mode_type(ctype) ? &uchar_ctype : &schar_ctype;
+ }
+=20
+ static struct symbol *to_HI_mode(struct symbol *ctype)
+ {
+-	if (ctype->ctype.base_type !=3D &int_type)
++	if (!is_int_or_enum(ctype))
+ 		return NULL;
+-	return ctype->ctype.modifiers & MOD_UNSIGNED ? &ushort_ctype
+-						     : &sshort_ctype;
++	return is_unsigned_mode_type(ctype) ? &ushort_ctype : &sshort_ctype;
+ }
+=20
+ static struct symbol *to_SI_mode(struct symbol *ctype)
+ {
+-	if (ctype->ctype.base_type !=3D &int_type)
++	if (!is_int_or_enum(ctype))
+ 		return NULL;
+-	return ctype->ctype.modifiers & MOD_UNSIGNED ? &uint_ctype
+-						     : &sint_ctype;
++	return is_unsigned_mode_type(ctype) ? &uint_ctype : &sint_ctype;
+ }
+=20
+ static struct symbol *to_DI_mode(struct symbol *ctype)
+ {
+-	if (ctype->ctype.base_type !=3D &int_type)
++	if (!is_int_or_enum(ctype))
+ 		return NULL;
+-	return ctype->ctype.modifiers & MOD_UNSIGNED ? &ullong_ctype
+-						     : &sllong_ctype;
++	return is_unsigned_mode_type(ctype) ? &ullong_ctype : &sllong_ctype;
+ }
+=20
+ static struct symbol *to_TI_mode(struct symbol *ctype)
+ {
+-	if (ctype->ctype.base_type !=3D &int_type)
++	if (!is_int_or_enum(ctype))
+ 		return NULL;
+-	return ctype->ctype.modifiers & MOD_UNSIGNED ? &uint128_ctype
+-						     : &sint128_ctype;
++	return is_unsigned_mode_type(ctype) ? &uint128_ctype : &sint128_ctype;
+ }
+=20
+ static struct symbol *to_pointer_mode(struct symbol *ctype)
+ {
+-	if (ctype->ctype.base_type !=3D &int_type)
++	if (!is_int_or_enum(ctype))
+ 		return NULL;
+-	return ctype->ctype.modifiers & MOD_UNSIGNED ? uintptr_ctype
+-						     :  intptr_ctype;
++	return is_unsigned_mode_type(ctype) ? uintptr_ctype : intptr_ctype;
+ }
+=20
+ static struct symbol *to_word_mode(struct symbol *ctype)
+ {
+-	if (ctype->ctype.base_type !=3D &int_type)
++	if (!is_int_or_enum(ctype))
+ 		return NULL;
+-	return ctype->ctype.modifiers & MOD_UNSIGNED ? &ulong_ctype
+-						     : &slong_ctype;
++	return is_unsigned_mode_type(ctype) ? &ulong_ctype : &slong_ctype;
+ }
+=20
+ static struct token *attribute_mode(struct token *token, struct symbol *=
+attr, struct decl_state *ctx)
+diff --git a/symbol.c b/symbol.c
+index 721dd1e81ae5..d4b945d9e161 100644
+--- a/symbol.c
++++ b/symbol.c
+@@ -592,7 +592,7 @@ static struct symbol *examine_enum_type(struct symbol=
+ *sym)
+ 	struct symbol *base_type =3D examine_base_type(sym);
+=20
+ 	sym->ctype.modifiers |=3D (base_type->ctype.modifiers & MOD_SIGNEDNESS)=
+;
+-	if (sym->fixed_type) {
++	if (sym->fixed_type || sym->has_mode) {
+ 		if (base_type =3D=3D &bool_ctype)
+ 			sym->bit_size =3D bits_to_bytes(bits_in_bool) * bits_in_char;
+ 		else
+diff --git a/symbol.h b/symbol.h
+index bb063dc622e0..aa180ac4f514 100644
+--- a/symbol.h
++++ b/symbol.h
+@@ -214,6 +214,7 @@ struct symbol {
+ 			unsigned int kr_args : 1;
+ 			unsigned int underspecified : 1;
+ 			unsigned int c23_auto : 1;
++			unsigned int has_mode : 1;
+ 			int		rank:3;	// arithmetic's rank
+ 			struct expression *array_size;
+ 			struct ctype ctype;
+diff --git a/validation/enum+mode.c b/validation/enum+mode.c
+index 182af1895d49..cfd037e8617b 100644
+--- a/validation/enum+mode.c
++++ b/validation/enum+mode.c
+@@ -3,6 +3,7 @@ enum e { ZERO, ONE, TWO };
+ struct s {
+ 	enum e __attribute__ ((mode(__byte__))) b;
+ 	enum e __attribute__ ((mode(__word__))) w;
++	enum e __attribute__ ((mode(__DI__))) d;
+ 	enum e __attribute__ ((mode(__TI__))) t;
+ };
+=20
+@@ -10,9 +11,30 @@ static struct s s;
+=20
+ _Static_assert(sizeof(s.b) =3D=3D 1, "");
+ _Static_assert(sizeof(s.w) =3D=3D sizeof(long), "");
+-_Static_assert(sizeof(s.t) =3D=3D sizeof(long long), "");
++_Static_assert(sizeof(s.d) =3D=3D sizeof(long long), "");
++_Static_assert(sizeof(s.t) =3D=3D 16, "");
 +
-+permissions:
-+  contents: read
++typedef enum { M_ZERO, M_ONE } __attribute__((mode(__byte__))) byte_enum=
+_t;
++_Static_assert(sizeof(byte_enum_t) =3D=3D 1, "typedef anon enum mode");
++_Static_assert((byte_enum_t)-1 > 0, "unsigned enum mode stays unsigned")=
+;
 +
-+jobs:
-+  build:
-+    runs-on: ubuntu-latest
++typedef enum tagged_m { TM_0, TM_1 } __attribute__((mode(__byte__))) tag=
+ged_byte_t;
++_Static_assert(sizeof(tagged_byte_t) =3D=3D 1, "typedef tagged enum mode=
+");
++_Static_assert(sizeof(enum tagged_m) =3D=3D 1, "tagged enum itself gets =
+mode");
 +
-+    steps:
-+    - uses: actions/checkout@main
++enum __attribute__((mode(__HI__))) hi_enum { HI_0 =3D -1, HI_1 =3D 1 };
++_Static_assert(sizeof(enum hi_enum) =3D=3D 2, "prefix mode on enum");
++_Static_assert((enum hi_enum)-1 < 0, "signed enum mode stays signed");
 +
-+    - name: install
-+      run: sudo ci/install.sh
++enum post_qi { PQ_0 =3D 0, PQ_1 =3D 200 } __attribute__((mode(__QI__)));
++_Static_assert(sizeof(enum post_qi) =3D=3D 1, "postfix mode on enum");
++_Static_assert((enum post_qi)-1 > 0, "postfix QI mode unsigned");
 +
-+    - name: build Linux kernel with sparse
-+      run: |
-+        sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
-+        ci/build-linux-kernel-with-sparse.sh
-diff --git a/ci/build-linux-kernel-with-sparse.sh b/ci/build-linux-kernel=
--with-sparse.sh
-new file mode 100755
-index 000000000000..7e3505634d95
---- /dev/null
-+++ b/ci/build-linux-kernel-with-sparse.sh
-@@ -0,0 +1,23 @@
-+#!/bin/bash
-+
-+set -euo pipefail
-+
-+make clean
-+export MODE=3Dasan
-+ci/build.sh
-+
-+rm -rf linux-kernel
-+if [ -e ../linux-kernel ]; then
-+    git clone ../linux-kernel linux-kernel
-+else
-+    git clone --depth=3D3 https://git.kernel.org/pub/scm/linux/kernel/gi=
-t/torvalds/linux.git linux-kernel
-+fi
-+cd linux-kernel
-+# Make most __CHECKER__ checks ineffective.
-+{ git grep -lw __CHECKER__ || [ $? -eq 1 ]; } |
-+    { grep -vE '^arch/|^include/linux/compiler|^include/uapi/linux/types=
-.h|^include/linux/bug.h' || [ $? -eq 1 ]; } |
-+    xargs -r -d '\n' sed -i 's/__CHECKER__/___CHECKER___/g'
-+make defconfig
-+export ASAN_OPTIONS=3Ddetect_invalid_pointer_pairs=3D2
-+export UBSAN_OPTIONS=3Dhalt_on_error=3D1
-+make -sj"$(nproc)" C=3D1 CHECK=3D"${PWD}/../sparse"
++typedef enum { UE_0 =3D 0, UE_1 =3D 1 } uenum_t;
++static uenum_t __attribute__((mode(__byte__))) ub;
++_Static_assert(sizeof(ub) =3D=3D 1, "typedef var mode size");
++_Static_assert((typeof(ub))-1 > 0, "typedef var mode unsigned");
+=20
+ /*
+  * check-name: enum+mode
+- * check-known-to-fail
+  */
