@@ -1,70 +1,70 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=199.89.1.14
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
 	t=1794256433;
-	b=vVl527p/a+Miyfq8/3+51c76hdQ8dg68HTRhz1dWt/NfF8WzQe6olabXPUKrgcplm7ad
-	 su2CTFqsgu8dspvzPgcLv2HMs6fZg/KdL0Ug2reKTD25unPN8wZXTplTSRMVMbSSBqLKo
-	 L5OzOhGk6m2m3SkqxIhIRcJkgtwUpTiB1nezjvH01KVtFK624XrCtRSWwD5UBMF788eb+
-	 KI7m5dnBk3XeVCPw4ql9gBm+PwQJgCpdGJustXkR3Z5I0u87mGy4IIzgiBZDz0/FAOjWL
-	 bhkqYyIARZSNHrNgo3ifW/BoUtYpUZzJo8vl0nWisIdHNoIvwY784SgBBbz5SzK38Qw==
+	b=hIL9JO3rtJHSx7StMulpxKPJLKaHjAWFsoVKuT4saRZnrrJc32gFpUaoknjNsBCliXp2
+	 lBxl4RYSIEpe8LFiMyYoXcumofMFVC+H8gRssgh3gmRhVtT3yWmKqIIkqLGzh8QohAot7
+	 Ss2c2HvsXoptK+hJ/UP50bG3wweB5jmoq0qyGMgrs6zJKgFt0yDOMvOo4oPHkEyyFT1E2
+	 CBA08v4Mx1aa4TZXDgGhqEGAQYeiWpw5YC3S0b3d7fbo9Mm13ag7h5CqdVKkt9Fg7wWgX
+	 Au35yXd04aJxnxFwc7aVNzJiZ2HyEvBbsj6BKOD+z/OKJLQ2JkSwCbjV6fEimDLYzFQ==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
 	a=rsa-sha256; c=relaxed/relaxed; t=1794256433;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Virus-Scanned:Received:
 	 Received:From:To:Cc:Subject:Date:Message-ID:X-Mailer:In-Reply-To:
 	 References:MIME-Version:Content-Transfer-Encoding;
-	bh=vodV/bpT8NhZ1bz2GXrf7lHRrHnOCFWm7KGm38tCy1I=;
-	b=XRwS/kiq66drxNnAxsYAaBqrkXp89Wzkv+k3Kb918/NbfOouDSwqCwSereRTvO6x9VsZ
-	 m0V5Ft6N380BwsFxCjlThmCjO7++utYgt54WqC40kOG5kRV7KM3o+Qq8pI0UnDItDDxPd
-	 ASXjhkoJ3en2Em4jdY9Be5FFUf5MweUGO9S4GA3SBgUTv7frWDCqcIV0ymIF3YtqBCGMV
-	 oPwACrCmZFib9vx4kyRKLBGjLJ0ObEvvJVsXgNQ+9avF5hlAD2oOIpasU/NxjzyV8LTb4
-	 QHWxhc/6TYjtmFNGbYkXtZt+tx4Xe39xIWTNDcnWCwvcx/WwaoeCvRkAAH3xvpbSTOg==
+	bh=oBgvQNX6zrNeL8js37ExuztxIOS5BcTBEjM+8qNWfDw=;
+	b=yJ3922GqyhRtVt4rcbvegIeT/o3tjlsekxA6mAtvoICv0P4rd+ZMefNYbMmkW7cqokZ8
+	 16+Dct+rMDO6CcLfUCfH0gqOMZFv3axH2yd7ZunndVJrtUZbpEBhTdowLkAKxal2D/uJu
+	 E3RFJufu3DsG9guH7Q9bSjmvMLDVVEMADa7Aqzx11kJPATIyG/gBptBKfpeSXIDmoYsUa
+	 OuBYtsgC6Ox9/XNSBE4yz4YyljIWOIKkCBTpHP4tSRqOak3K7fb8kXmk/3OmQ9ly/aUVn
+	 M310IZiWold51p+P9GG2hr1feDNiyAyj8zp9z4QmIbcuQtC1EcQUWtL9XJpPs/UCFIw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=acm.org;
 	spf=pass smtp.mailfrom=acm.org;
-	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=Mfwrvc3o;
+	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=g5pMYf09;
 	arc=none smtp.remote-ip=199.89.1.14
 Received: from 011.lax.mailroute.net (011.lax.mailroute.net [199.89.1.14])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 697B3606A31C
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D697D606A325
 	for <linux-sparse@vger.kernel.org>; Mon,  9 Nov 2026 20:33:52 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 697B3606A31C
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org D697D606A325
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=acm.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=Mfwrvc3o
+	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=g5pMYf09
 Received: from localhost (localhost [127.0.0.1])
-	by 011.lax.mailroute.net (Postfix) with ESMTP id 4jNhMF4B4qz1XMYJS;
+	by 011.lax.mailroute.net (Postfix) with ESMTP id 4jNhMF5RnGz1XMFxH;
 	Mon,  9 Nov 2026 20:33:45 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=acm.org; h=
 	content-transfer-encoding:mime-version:references:in-reply-to
 	:x-mailer:message-id:date:date:subject:subject:from:from
-	:received:received; s=mr01; t=1794256412; x=1796848413; bh=vodV/
-	bpT8NhZ1bz2GXrf7lHRrHnOCFWm7KGm38tCy1I=; b=Mfwrvc3oToptbW3UQvwUi
-	jc115XHp//5MJ1Yl6hTm5uCXMTLkdyLrx13z0iOztefFdHs4+VrsQffpSBN99P/X
-	43HnTvcp/07Uv7fBCR0UgkNgO3UDoJyZUTS8lrAu64jjqUGiHXZ4gmsruMGjxRKO
-	RAaSQ/femef/lTJrGZpmaD66DIdB4Ud4GMlIRgBZDFo+2Fi9GiRqLqLrAnCTE5NB
-	E52/uP+n10FINVjK5G8U5I689jlEYraqOWRWm7AOBFlJSlpA/G94nZV8dzAhB6+U
-	uxc9z8+8V9S225JfZ1G0vWSVPBOk9LGKOox2fPlu1xpxT0v7uIagvG2FJAW0iDjI
+	:received:received; s=mr01; t=1794256416; x=1796848417; bh=oBgvQ
+	NX6zrNeL8js37ExuztxIOS5BcTBEjM+8qNWfDw=; b=g5pMYf095GloP7c7RpsiT
+	HzCQgxzDyNe/XCDAUyWrxHapKFvCedW+kvDHoMoe9bN9k2i0U6Xjhra24FBpx960
+	xK7pK2hm5aRKy9PElxYj6iXfcm2fPpVCiVyXQp97P2Syo2HvokLeEv/orkvPmnXy
+	3Mn3ldjYIWmUlEJVBW/O5Qa1Wh+Gkxh4nsx6TJhNE17Y4+XsjYePuUDTLxLfH04h
+	p9ta/e9WQ+mhy8l7MwD9XWxbWdpzaRN6y+nCdavImnr/uzI9qVCfipyBYSuwoRu0
+	fQ6j+qzscOCJWKfS827bq4GyAJheXIVcO9NhUmLC6EmRRiEKZ6MMjuARHNsogC7V
 	g==
 X-Virus-Scanned: by MailRoute
 Received: from 011.lax.mailroute.net ([127.0.0.1])
  by localhost (011.lax [127.0.0.1]) (mroute_mailscanner, port 10029) with LMTP
- id fWYi0QECRpjV; Mon,  9 Nov 2026 20:33:32 +0000 (UTC)
+ id 6RvdzoYYEhkT; Mon,  9 Nov 2026 20:33:36 +0000 (UTC)
 Received: from bvanassche.c.googlers.com.com (57.237.82.34.bc.googleusercontent.com [34.82.237.57])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
 	(Authenticated sender: bvanassche@acm.org)
-	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4jNhLw0PRyz1XMFxH;
-	Mon,  9 Nov 2026 20:33:28 +0000 (UTC)
+	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4jNhM270gFz1XMYJl;
+	Mon,  9 Nov 2026 20:33:34 +0000 (UTC)
 From: Bart Van Assche <bvanassche@acm.org>
 To: linux-sparse@vger.kernel.org
 Cc: Linus Torvalds <torvalds@linux-foundation.org>,
 	Bart Van Assche <bvanassche@acm.org>
-Subject: [PATCH 17/73] simplify: Prevent overflow on LLONG_MIN negation and fix simplifications
-Date: Mon,  9 Nov 2026 12:32:03 -0800
-Message-ID: <20261109203259.362845-18-bvanassche@acm.org>
+Subject: [PATCH 48/73] c23: Support labels before declarations and at block ends
+Date: Mon,  9 Nov 2026 12:32:34 -0800
+Message-ID: <20261109203259.362845-49-bvanassche@acm.org>
 X-Mailer: git-send-email 2.56.0.506.g506a7eabc5-goog
 In-Reply-To: <20261109203259.362845-1-bvanassche@acm.org>
 References: <20261109203259.362845-1-bvanassche@acm.org>
@@ -79,771 +79,481 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
 
-Avoid undefined integer overflow and invalid IR transformations in
-linearize.h and simplify.c:
-- Check that operand and instruction sizes do not exceed 64 bits before
-  evaluating 64-bit constant simplifications or calling eval_op() and
-  eval_unop().
-- Use bits_mask(), sign_extend(), and zero_extend() instead of open-coded
-  64-bit shifts to avoid undefined shift overflow on 64-bit types.
-- Check for null pseudo pointers in DEF_OPCODE(), canonical_order(), and
-  simplification helpers before dereferencing operands.
-- Update CFG edges and phi sources accurately in simplify_cgoto().
-- Add regression test validation/optim/simplify-memops-ssa-fixes.c.
+Allow named, case, and default labels (including chained labels) to
+precede declarations and closing '}' braces inside compound statements
+per ISO C23 6.8.1 and 6.8.2:
+- Handle label chains at the block-item level in statement_list() by
+  attaching a synthesized empty statement when a label precedes a
+  declaration, static_assert, or '}', and emit pedantic warnings in
+  pre-C23 modes.
+- Keep substatements of selection and iteration statements restricted to
+  true statements in statement() so invalid forms such as
+  'if (c) int x =3D 1;' and '{ if (c) lbl: }' are rejected cleanly.
+- Recognize labels whose identifier shadows an outer typedef name.
 
 Signed-off-by: Bart Van Assche <bvanassche@acm.org>
 ---
- linearize.h                                  |   2 +-
- simplify.c                                   | 225 ++++++++++++++-----
- validation/optim/simplify-memops-ssa-fixes.c | 103 +++++++++
- 3 files changed, 278 insertions(+), 52 deletions(-)
- create mode 100644 validation/optim/simplify-memops-ssa-fixes.c
+ parse.c                          | 206 ++++++++++++++++++++++---------
+ validation/c23-labels-error.c    |  48 +++++++
+ validation/c23-labels-gnu.c      |  15 +++
+ validation/c23-labels-pedantic.c |  15 +++
+ validation/c23-labels.c          |  67 ++++++++++
+ 5 files changed, 296 insertions(+), 55 deletions(-)
+ create mode 100644 validation/c23-labels-error.c
+ create mode 100644 validation/c23-labels-gnu.c
+ create mode 100644 validation/c23-labels-pedantic.c
+ create mode 100644 validation/c23-labels.c
 
-diff --git a/linearize.h b/linearize.h
-index cac6082fc886..3412494edbef 100644
---- a/linearize.h
-+++ b/linearize.h
-@@ -187,7 +187,7 @@ struct basic_block {
- // and OP_BADOP if not. It also assigns the defining instruction
- // to ``DEF``.
- #define DEF_OPCODE(DEF, SRC)	\
--	(((SRC)->type =3D=3D PSEUDO_REG && (DEF =3D (SRC)->def)) ? DEF->opcode =
-: OP_BADOP)
-+	(((SRC) && (SRC)->type =3D=3D PSEUDO_REG && (DEF =3D (SRC)->def)) ? DEF=
-->opcode : OP_BADOP)
+diff --git a/parse.c b/parse.c
+index 78ad5f09e2ad..1e91825f8d38 100644
+--- a/parse.c
++++ b/parse.c
+@@ -62,8 +62,6 @@ static declarator_t autotype_specifier;
+ static struct token *parse_if_statement(struct token *token, struct stat=
+ement *stmt);
+ static struct token *parse_return_statement(struct token *token, struct =
+statement *stmt);
+ static struct token *parse_loop_iterator(struct token *token, struct sta=
+tement *stmt);
+-static struct token *parse_default_statement(struct token *token, struct=
+ statement *stmt);
+-static struct token *parse_case_statement(struct token *token, struct st=
+atement *stmt);
+ static struct token *parse_switch_statement(struct token *token, struct =
+statement *stmt);
+ static struct token *parse_for_statement(struct token *token, struct sta=
+tement *stmt);
+ static struct token *parse_while_statement(struct token *token, struct s=
+tatement *stmt);
+@@ -315,11 +313,9 @@ static struct symbol_op loop_iter_op =3D {
+ };
 =20
+ static struct symbol_op default_op =3D {
+-	.statement =3D parse_default_statement,
+ };
 =20
- static inline void add_bb(struct basic_block_list **list, struct basic_b=
-lock *bb)
-diff --git a/simplify.c b/simplify.c
-index f20b6f1a9881..2ddaf1c619a8 100644
---- a/simplify.c
-+++ b/simplify.c
-@@ -57,7 +57,7 @@
- // check if a pseudo is a power of 2
- static inline bool is_pow2(pseudo_t src)
- {
--	if (src->type !=3D PSEUDO_VAL)
-+	if (!src || src->type !=3D PSEUDO_VAL)
- 		return false;
- 	return is_power_of_2(src->value);
- }
-@@ -315,6 +315,9 @@ static void kill_asm(struct instruction *insn)
- 	FOR_EACH_PTR(insn->asm_rules->inputs, con) {
- 		kill_use(&con->pseudo);
- 	} END_FOR_EACH_PTR(con);
-+	FOR_EACH_PTR(insn->asm_rules->outputs, con) {
-+		kill_use(&con->pseudo);
-+	} END_FOR_EACH_PTR(con);
- }
+ static struct symbol_op case_op =3D {
+-	.statement =3D parse_case_statement,
+ };
 =20
- ///
-@@ -428,7 +431,7 @@ void remove_dead_insns(struct entrypoint *ep)
-=20
- static inline int constant(pseudo_t pseudo)
- {
--	return pseudo->type =3D=3D PSEUDO_VAL;
-+	return pseudo && pseudo->type =3D=3D PSEUDO_VAL;
+ static struct symbol_op switch_op =3D {
+@@ -2518,32 +2514,6 @@ static struct token *parse_if_statement(struct tok=
+en *token, struct statement *s
+ 	return statement(token->next, &stmt->if_false);
  }
 =20
- ///
-@@ -444,7 +447,7 @@ static inline pseudo_t is_same_op(pseudo_t src, int o=
-p, unsigned osize)
+-static inline struct token *case_statement(struct token *token, struct s=
+tatement *stmt)
+-{
+-	stmt->type =3D STMT_CASE;
+-	token =3D expect(token, ':', "after default/case");
+-	add_case_statement(stmt);
+-	if (match_op(token, '}')) {
+-		warning(token->pos, "statement expected after case label");
+-		stmt->case_statement =3D alloc_statement(token->pos, STMT_NONE);
+-		return token;
+-	}
+-	return statement(token, &stmt->case_statement);
+-}
+-
+-static struct token *parse_case_statement(struct token *token, struct st=
+atement *stmt)
+-{
+-	token =3D parse_expression(token->next, &stmt->case_expression);
+-	if (match_op(token, SPECIAL_ELLIPSIS))
+-		token =3D parse_expression(token->next, &stmt->case_to);
+-	return case_statement(token, stmt);
+-}
+-
+-static struct token *parse_default_statement(struct token *token, struct=
+ statement *stmt)
+-{
+-	return case_statement(token->next, stmt);
+-}
+-
+ static struct token *parse_loop_iterator(struct token *token, struct sta=
+tement *stmt)
  {
- 	struct instruction *def;
-=20
--	if (src->type !=3D PSEUDO_REG)
-+	if (!src || src->type !=3D PSEUDO_REG)
- 		return NULL;
- 	def =3D src->def;
- 	if (def->opcode !=3D op)
-@@ -582,7 +585,7 @@ static int swap_select(struct instruction *out, struc=
-t instruction *in, pseudo_t
-=20
- static inline int def_opcode(pseudo_t p)
- {
--	if (p->type !=3D PSEUDO_REG)
-+	if (!p || p->type !=3D PSEUDO_REG)
- 		return OP_BADOP;
- 	return p->def->opcode;
- }
-@@ -629,12 +632,18 @@ static unsigned int operand_size(struct instruction=
- *insn, pseudo_t pseudo)
- static pseudo_t eval_op(int op, unsigned size, pseudo_t src1, pseudo_t s=
-rc2)
- {
- 	/* FIXME! Verify signs and sizes!! */
--	long long left =3D src1->value;
--	long long right =3D src2->value;
-+	long long left;
-+	long long right;
- 	unsigned long long ul, ur;
- 	long long res;
- 	unsigned long long mask, bits;
-=20
-+	if (!size || size > 64)
-+		return NULL;
-+
-+	left =3D src1->value;
-+	right =3D src2->value;
-+
- 	mask =3D sign_bit(size);
- 	bits =3D bits_mask(size);
-=20
-@@ -670,7 +679,7 @@ static pseudo_t eval_op(int op, unsigned size, pseudo=
-_t src1, pseudo_t src2)
- 	case OP_DIVS:
- 		if (!right)
- 			goto undef;
--		if (left =3D=3D mask && right =3D=3D -1)
-+		if (ul =3D=3D mask && right =3D=3D -1)
- 			goto undef;
- 		res =3D left / right;
- 		break;
-@@ -682,7 +691,7 @@ static pseudo_t eval_op(int op, unsigned size, pseudo=
-_t src1, pseudo_t src2)
- 	case OP_MODS:
- 		if (!right)
- 			goto undef;
--		if (left =3D=3D mask && right =3D=3D -1)
-+		if (ul =3D=3D mask && right =3D=3D -1)
- 			goto undef;
- 		res =3D left % right;
- 		break;
-@@ -1136,10 +1145,14 @@ static int simplify_seteq_setne(struct instructio=
-n *insn, long long value)
- 		return REPEAT_CSE;
-=20
- 	case OP_SEXT:
-+		if (!def->orig_type)
-+			break;
- 		if (value && (def->orig_type->bit_size =3D=3D 1))
- 			break;
- 		/* Fall through */
- 	case OP_ZEXT:
-+		if (!def->orig_type)
-+			break;
- 		// Convert:
- 		//	*ext.m	%s <- (1) %a
- 		//	setne.1 %r <- %s, $0
-@@ -1149,7 +1162,8 @@ static int simplify_seteq_setne(struct instruction =
-*insn, long long value)
- 		insn->itype =3D def->orig_type;
- 		return replace_pseudo(insn, &insn->src1, def->src);
- 	case OP_TRUNC:
--		if (!one_use(old))
-+		if (!one_use(old) || !def->orig_type ||
-+		    def->orig_type->bit_size > 64 || def->size >=3D 64)
- 			break;
- 		// convert
- 		//	trunc.n	%s <- (o) %a
-@@ -1159,6 +1173,7 @@ static int simplify_seteq_setne(struct instruction =
-*insn, long long value)
- 		//	setne.m %r <- %s, $0
- 		// and same for setne/eq ... 0/1
- 		osize =3D def->size;
-+		insn->itype =3D def->orig_type;
- 		def->opcode =3D OP_AND;
- 		def->type =3D def->orig_type;
- 		def->size =3D def->type->bit_size;
-@@ -1208,12 +1223,16 @@ static int simplify_unsigned_zero_compare(struct =
-instruction *insn, int result)
- static int simplify_compare_constant(struct instruction *insn, long long=
- value)
- {
- 	unsigned size =3D insn->itype->bit_size;
--	unsigned long long bits =3D bits_mask(size);
-+	unsigned long long bits;
- 	struct instruction *def;
- 	pseudo_t src1, src2;
- 	unsigned int osize;
- 	int changed =3D 0;
-=20
-+	if (!size || size > 64)
-+		return 0;
-+	bits =3D bits_mask(size);
-+
- 	switch (insn->opcode) {
- 	case OP_SET_LT:
- 		if (!value)
-@@ -1457,6 +1476,8 @@ static int simplify_compare_constant(struct instruc=
-tion *insn, long long value)
- 		}
- 		break;
- 	case OP_TRUNC:
-+		if (!def->orig_type || def->orig_type->bit_size > 64 || size >=3D 64)
-+			break;
- 		osize =3D def->orig_type->bit_size;
- 		switch (insn->opcode) {
- 		case OP_SET_EQ: case OP_SET_NE:
-@@ -1547,7 +1568,12 @@ static int simplify_const_rightadd(struct instruct=
-ion *def, struct instruction *
- 	switch (def->opcode) {
- 	case OP_SUB:
- 		if (constant(def->src1)) { // (C - y) + D --> eval(C+D) - y
--			pseudo_t val =3D eval_op(OP_ADD, size, def->src1, src2);
-+			pseudo_t val;
-+			if (size > 64)
-+				break;
-+			val =3D eval_op(OP_ADD, size, def->src1, src2);
-+			if (!val)
-+				break;
- 			insn->opcode =3D OP_SUB;
- 			use_pseudo(insn, def->src2, &insn->src2);
- 			return replace_pseudo(insn, &insn->src1, val);
-@@ -1560,9 +1586,13 @@ static int simplify_const_rightadd(struct instruct=
-ion *def, struct instruction *
- static int simplify_constant_rightside(struct instruction *insn)
- {
- 	long long value =3D insn->src2->value;
--	unsigned long long bits =3D bits_mask(insn->size);
-+	unsigned long long bits;
- 	int changed =3D 0;
-=20
-+	if (insn->size > 64)
-+		return 0;
-+	bits =3D bits_mask(insn->size);
-+
- 	switch (insn->opcode) {
- 	case OP_OR:
- 		if ((value & bits) =3D=3D bits)
-@@ -1632,13 +1662,24 @@ static int simplify_const_leftsub(struct instruct=
-ion *insn, struct instruction *
- 	switch (def->opcode) {
- 	case OP_ADD:
- 		if (constant(def->src2)) { // C - (y + D) --> eval(C-D) - y
--			insn->src1 =3D eval_op(OP_SUB, size, src1, def->src2);
-+			pseudo_t val;
-+			if (size > 64)
-+				break;
-+			val =3D eval_op(OP_SUB, size, src1, def->src2);
-+			if (!val)
-+				break;
-+			insn->src1 =3D val;
- 			return replace_pseudo(insn, &insn->src2, def->src1);
- 		}
- 		break;
- 	case OP_SUB:
- 		if (constant(def->src1)) { // C - (D - z) --> z + eval(C-D)
--			pseudo_t val =3D eval_op(OP_SUB, size, src1, def->src1);
-+			pseudo_t val;
-+			if (size > 64)
-+				break;
-+			val =3D eval_op(OP_SUB, size, src1, def->src1);
-+			if (!val)
-+				break;
- 			insn->opcode =3D OP_ADD;
- 			use_pseudo(insn, def->src2, &insn->src1);
- 			return replace_pseudo(insn, &insn->src2, val);
-@@ -1650,7 +1691,11 @@ static int simplify_const_leftsub(struct instructi=
-on *insn, struct instruction *
-=20
- static int simplify_constant_leftside(struct instruction *insn)
- {
--	long long value =3D insn->src1->value;
-+	long long value;
-+
-+	if (!insn->src1 || !insn->src2 || insn->size > 64)
-+		return 0;
-+	value =3D insn->src1->value;
-=20
- 	switch (insn->opcode) {
- 	case OP_ADD: case OP_OR: case OP_XOR:
-@@ -1717,6 +1762,8 @@ static int simplify_binop_same_args(struct instruct=
-ion *insn, pseudo_t arg)
-=20
- static int simplify_binop(struct instruction *insn)
- {
-+	if (!insn->src1 || !insn->src2)
-+		return 0;
- 	if (constant(insn->src1)) {
- 		if (constant(insn->src2))
- 			return simplify_constant_binop(insn);
-@@ -1753,8 +1800,12 @@ static int switch_pseudo(struct instruction *insn1=
-, pseudo_t *pp1, struct instru
- //	* VOID, UNDEF and PHI are uninteresting (but VOID should have type 0)
- static int canonical_order(pseudo_t p1, pseudo_t p2)
- {
--	int t1 =3D p1->type;
--	int t2 =3D p2->type;
-+	int t1, t2;
-+
-+	if (!p1 || !p2)
-+		return 1;
-+	t1 =3D p1->type;
-+	t2 =3D p2->type;
-=20
- 	/* symbol/constants on the right */
- 	if (t1 < t2)
-@@ -1793,7 +1844,7 @@ static int canonicalize_compare(struct instruction =
-*insn)
-=20
- static inline int simple_pseudo(pseudo_t pseudo)
- {
--	return pseudo->type =3D=3D PSEUDO_VAL || pseudo->type =3D=3D PSEUDO_SYM=
-;
-+	return pseudo && (pseudo->type =3D=3D PSEUDO_VAL || pseudo->type =3D=3D=
- PSEUDO_SYM);
+ 	struct symbol *target =3D lookup_symbol(token->ident, NS_ITERATOR);
+@@ -2646,46 +2616,129 @@ static struct token *handle_label_attributes(str=
+uct token *token, struct symbol
+ 	return token;
  }
 =20
- ///
-@@ -1820,7 +1871,7 @@ static inline bool can_move_to(pseudo_t src, struct=
- instruction *dst)
-=20
- 	if (!one_use(dst->target))
- 		return false;
--	if (src->type !=3D PSEUDO_REG)
-+	if (!src || src->type !=3D PSEUDO_REG)
- 		return true;
-=20
- 	def =3D src->def;
-@@ -1851,8 +1902,14 @@ static int simplify_associative_binop(struct instr=
-uction *insn)
- 	if (!simple_pseudo(def->src2))
- 		return 0;
- 	if (constant(def->src2) && constant(insn->src2)) {
-+		pseudo_t val;
-+		if (insn->size > 64)
-+			return 0;
-+		val =3D eval_op(insn->opcode, insn->size, insn->src2, def->src2);
-+		if (!val)
-+			return 0;
- 		// (x # C) # K --> x # eval(C # K)
--		insn->src2 =3D eval_op(insn->opcode, insn->size, insn->src2, def->src2=
-);
-+		insn->src2 =3D val;
- 		return replace_pseudo(insn, &insn->src1, def->src1);
- 	}
-=20
-@@ -1873,12 +1930,12 @@ static int simplify_add_one_side(struct instructi=
-on *insn, pseudo_t *p1, pseudo_
- 	switch (DEF_OPCODE(def, src1)) {
- 	case OP_MUL:
- 		if (DEF_OPCODE(defr, *p2) =3D=3D OP_MUL) {
--			if (defr->src2 =3D=3D def->src2 && can_move_to(def->src2, defr)) {
-+			if (defr->src2 =3D=3D def->src2 && can_move_to(def->src1, defr)) {
- 				// ((x * z) + (y * z)) into ((x + y) * z)
- 				swap_insn(insn, defr, def->src1, defr->src1, def->src2);
- 				return REPEAT_CSE;
- 			}
--			if (defr->src1 =3D=3D def->src1 && can_move_to(def->src1, defr)) {
-+			if (defr->src1 =3D=3D def->src1 && can_move_to(def->src2, defr)) {
- 				// ((z * x) + (z * y)) into ((x + y) * z)
- 				swap_insn(insn, defr, def->src2, defr->src2, def->src1);
- 				return REPEAT_CSE;
-@@ -1991,12 +2048,12 @@ static int simplify_and_one_side(struct instructi=
-on *insn, pseudo_t *p1, pseudo_
- 		break;
- 	case OP_OR:
- 		if (DEF_OPCODE(defr, *p2) =3D=3D OP_OR) {
--			if (defr->src2 =3D=3D def->src2 && can_move_to(def->src2, defr)) {
-+			if (defr->src2 =3D=3D def->src2 && can_move_to(def->src1, defr)) {
- 				// ((x | z) & (y | z)) into ((x & y) | z)
- 				swap_insn(insn, defr, def->src1, defr->src1, def->src2);
- 				return REPEAT_CSE;
- 			}
--			if (defr->src1 =3D=3D def->src1 && can_move_to(def->src1, defr)) {
-+			if (defr->src1 =3D=3D def->src1 && can_move_to(def->src2, defr)) {
- 				// ((z | x) & (z | y)) into ((x & y) | z)
- 				swap_insn(insn, defr, def->src2, defr->src2, def->src1);
- 				return REPEAT_CSE;
-@@ -2035,12 +2092,12 @@ static int simplify_ior_one_side(struct instructi=
-on *insn, pseudo_t *p1, pseudo_
- 	switch (DEF_OPCODE(def, src1)) {
- 	case OP_AND:
- 		if (DEF_OPCODE(defr, *p2) =3D=3D OP_AND) {
--			if (defr->src2 =3D=3D def->src2 && can_move_to(def->src2, defr)) {
-+			if (defr->src2 =3D=3D def->src2 && can_move_to(def->src1, defr)) {
- 				// ((x & z) | (y & z)) into ((x | y) & z)
- 				swap_insn(insn, defr, def->src1, defr->src1, def->src2);
- 				return REPEAT_CSE;
- 			}
--			if (defr->src1 =3D=3D def->src1 && can_move_to(def->src1, defr)) {
-+			if (defr->src1 =3D=3D def->src1 && can_move_to(def->src2, defr)) {
- 				// ((z & x) | (z & y)) into ((x | y) & z)
- 				swap_insn(insn, defr, def->src2, defr->src2, def->src1);
- 				return REPEAT_CSE;
-@@ -2053,6 +2110,8 @@ static int simplify_ior_one_side(struct instruction=
- *insn, pseudo_t *p1, pseudo_
- 		}
- 		break;
- 	case OP_NOT:
-+		if (insn->size > 64)
-+			break;
- 		if (def->src =3D=3D *p2)
- 			return replace_with_value(insn, bits_mask(insn->size));
- 		break;
-@@ -2089,12 +2148,12 @@ static int simplify_xor_one_side(struct instructi=
-on *insn, pseudo_t *p1, pseudo_
- 	switch (DEF_OPCODE(def, src1)) {
- 	case OP_AND:
- 		if (DEF_OPCODE(defr, *p2) =3D=3D OP_AND) {
--			if (defr->src2 =3D=3D def->src2 && can_move_to(def->src2, defr)) {
-+			if (defr->src2 =3D=3D def->src2 && can_move_to(def->src1, defr)) {
- 				// ((x & z) ^ (y & z)) into ((x ^ y) & z)
- 				swap_insn(insn, defr, def->src1, defr->src1, def->src2);
- 				return REPEAT_CSE;
- 			}
--			if (defr->src1 =3D=3D def->src1 && can_move_to(def->src1, defr)) {
-+			if (defr->src1 =3D=3D def->src1 && can_move_to(def->src2, defr)) {
- 				// ((z & x) ^ (z & y)) into ((x ^ y) & z)
- 				swap_insn(insn, defr, def->src2, defr->src2, def->src1);
- 				return REPEAT_CSE;
-@@ -2107,6 +2166,8 @@ static int simplify_xor_one_side(struct instruction=
- *insn, pseudo_t *p1, pseudo_
- 		}
- 		break;
- 	case OP_NOT:
-+		if (insn->size > 64)
-+			break;
- 		if (def->src =3D=3D *p2)
- 			return replace_with_value(insn, bits_mask(insn->size));
- 		break;
-@@ -2137,8 +2198,11 @@ static int simplify_xor(struct instruction *insn)
-=20
- static int simplify_constant_unop(struct instruction *insn)
- {
--	long long val =3D insn->src1->value;
--	unsigned long long res, mask;
-+	unsigned long long val =3D insn->src1->value;
-+	unsigned long long res;
++static bool is_label_token(struct token *token)
++{
++	struct token *p =3D token;
++	struct symbol *s;
 +
-+	if (!insn->size || insn->size > 64)
-+		return 0;
-=20
- 	switch (insn->opcode) {
- 	case OP_NOT:
-@@ -2148,18 +2212,24 @@ static int simplify_constant_unop(struct instruct=
-ion *insn)
- 		res =3D -(unsigned long long)val;
- 		break;
- 	case OP_SEXT:
--		mask =3D sign_bit(insn->orig_type->bit_size);
--		if (val & mask)
--			val |=3D ~bits_mask(insn->orig_type->bit_size);
--		/* fall through */
-+		if (!insn->orig_type || insn->orig_type->bit_size > 64)
-+			return 0;
-+		res =3D sign_extend(val, insn->orig_type->bit_size);
-+		break;
- 	case OP_ZEXT:
-+		if (!insn->orig_type || insn->orig_type->bit_size > 64)
-+			return 0;
-+		val =3D zero_extend(val, insn->orig_type->bit_size);
-+		/* fall through */
- 	case OP_TRUNC:
-+		if (!insn->orig_type || insn->orig_type->bit_size > 64)
-+			return 0;
- 		res =3D val;
- 		break;
- 	default:
- 		return 0;
- 	}
--	res &=3D bits_mask(insn->size);
-+	res =3D zero_extend(res, insn->size);
- =09
- 	return replace_with_value(insn, res);
- }
-@@ -2176,7 +2246,7 @@ static int simplify_unop(struct instruction *insn)
- 	case OP_NOT:
- 		switch (DEF_OPCODE(def, src)) {
- 		case OP_ADD:
--			if (!constant(def->src2))
-+			if (insn->size > 64 || !constant(def->src2))
- 				break;
- 			insn->opcode =3D OP_SUB;	// ~(x + C) --> ~C - x
- 			src =3D eval_unop(OP_NOT, insn->size, def->src2);
-@@ -2189,13 +2259,13 @@ static int simplify_unop(struct instruction *insn=
-)
- 		case OP_NOT:			// ~(~x) --> x
- 			return replace_with_pseudo(insn, def->src);
- 		case OP_SUB:
--			if (!constant(def->src1))
-+			if (insn->size > 64 || !constant(def->src1))
- 				break;
- 			insn->opcode =3D OP_ADD;	// ~(C - x) --> x + ~C
- 			insn->src2 =3D eval_unop(OP_NOT, insn->size, def->src1);
- 			return replace_pseudo(insn, &insn->src1, def->src2);
- 		case OP_XOR:
--			if (!constant(def->src2))
-+			if (insn->size > 64 || !constant(def->src2))
- 				break;
- 			insn->opcode =3D OP_XOR;	// ~(x ^ C) --> x ^ ~C
- 			insn->src2 =3D eval_unop(OP_NOT, insn->size, def->src2);
-@@ -2205,7 +2275,7 @@ static int simplify_unop(struct instruction *insn)
- 	case OP_NEG:
- 		switch (DEF_OPCODE(def, src)) {
- 		case OP_ADD:
--			if (!constant(def->src2))
-+			if (insn->size > 64 || !constant(def->src2))
- 				break;
- 			insn->opcode =3D OP_SUB;	// -(x + C) --> (-C - x)
- 			src =3D eval_unop(OP_NEG, insn->size, def->src2);
-@@ -2314,7 +2384,7 @@ static int simplify_cast(struct instruction *insn)
- 	switch (def_opcode(src)) {
- 	case OP_AND:
- 		val =3D def->src2;
--		if (val->type !=3D PSEUDO_VAL)
-+		if (!constant(val) || size > 64 || def->size > 64)
- 			break;
- 		/* A cast of a AND might be a no-op.. */
- 		switch (insn->opcode) {
-@@ -2395,13 +2465,15 @@ static int simplify_cast(struct instruction *insn=
-)
- 	case OP_OR:
- 		switch (insn->opcode) {
- 		case OP_TRUNC:
-+			if (size > 64 || def->size > 64)
-+				break;
- 			mask =3D bits_mask(insn->size);
- 			return simplify_mask_or(insn, mask, def);
- 		}
- 		break;
- 	case OP_LSR:
- 	case OP_SHL:
--		if (insn->opcode !=3D OP_TRUNC)
-+		if (insn->opcode !=3D OP_TRUNC || size > 64 || def->size > 64)
- 			break;
- 		mask =3D bits_mask(insn->size);
- 		return simplify_mask_shift(def, mask);
-@@ -2411,7 +2483,7 @@ static int simplify_cast(struct instruction *insn)
- 			insn->orig_type =3D def->orig_type;
- 			return replace_pseudo(insn, &insn->src1, def->src);
- 		case OP_SEXT:
--			if (size !=3D def->orig_type->bit_size)
-+			if (!def->orig_type || size > 64 || size !=3D def->orig_type->bit_siz=
-e)
- 				break;
- 			if (DEF_OPCODE(def2, def->src) !=3D OP_LSR)
- 				break;
-@@ -2422,7 +2494,8 @@ static int simplify_cast(struct instruction *insn)
- 			insn->src2 =3D def2->src2;
- 			return replace_pseudo(insn, &insn->src1, def2->src1);
- 		case OP_ZEXT:
--			if (size !=3D def->orig_type->bit_size)
-+			if (!def->orig_type || size > 64 || def->size >=3D 64 ||
-+			    size !=3D def->orig_type->bit_size)
- 				break;
- 			insn->opcode =3D OP_AND;
- 			insn->src2 =3D value_pseudo(bits_mask(def->size));
-@@ -2451,6 +2524,10 @@ static int simplify_cast(struct instruction *insn)
- 			return replace_pseudo(insn, &insn->src, def->src);
- 		}
- 		switch (insn->opcode) {
-+		case OP_ZEXT:
-+			if (insn->orig_type !=3D def->orig_type)
-+				break;
-+			/* fall through */
- 		case OP_SEXT:
- 			insn->orig_type =3D def->orig_type;
- 			return replace_pseudo(insn, &insn->src, def->src);
-@@ -2691,6 +2768,10 @@ static int simplify_switch(struct instruction *ins=
-n)
- 	if (!constant(cond))
- 		return 0;
- 	val =3D insn->cond->value;
-+	if (insn->type && insn->size > 0) {
-+		bool is_signed =3D !(insn->type->ctype.modifiers & MOD_UNSIGNED);
-+		val =3D bits_extend(val, insn->size, is_signed);
++	if (token_type(p) !=3D TOKEN_IDENT)
++		return false;
++	if (p->ident =3D=3D &case_ident || p->ident =3D=3D &default_ident)
++		return true;
++	s =3D lookup_keyword(p->ident, NS_KEYWORD);
++	if (s && s->op->statement)
++		return false;
++	if (p->ident->reserved)
++		return false;
++	return match_op(p->next, ':');
++}
++
++static struct token *parse_one_label(struct token *token,
++				     struct statement **stmtp,
++				     bool *is_case)
++{
++	struct decl_state attr_state =3D { };
++	struct statement *stmt;
++
++	*stmtp =3D NULL;
++	*is_case =3D false;
++
++	if (token->ident =3D=3D &case_ident) {
++		stmt =3D alloc_statement(token->pos, STMT_CASE);
++		token =3D parse_expression(token->next, &stmt->case_expression);
++		if (match_op(token, SPECIAL_ELLIPSIS))
++			token =3D parse_expression(token->next, &stmt->case_to);
++		token =3D expect(token, ':', "after default/case");
++		add_case_statement(stmt);
++		*stmtp =3D stmt;
++		*is_case =3D true;
++		return token;
 +	}
-=20
- 	FOR_EACH_PTR(insn->multijmp_list, jmp) {
- 		/* Default case */
-@@ -2717,34 +2798,76 @@ static struct basic_block *is_label(pseudo_t pseu=
-do)
-=20
- static int simplify_cgoto(struct instruction *insn)
- {
--	struct basic_block *target, *bb =3D insn->bb;
--	struct basic_block *bbt, *bbf;
-+	struct basic_block *target, *orig_target, *bb =3D insn->bb;
-+	struct basic_block *bbt, *bbf, *orig_bbt, *orig_bbf;
- 	struct instruction *def;
- 	struct multijmp *jmp;
-=20
- 	switch (DEF_OPCODE(def, insn->src)) {
- 	case OP_SEL:	// CGOTO(SEL(x, L1, L2)) --> CBR x, L1, L2
- 		if ((bbt =3D is_label(def->src2)) && (bbf =3D is_label(def->src3))) {
-+			if (!bbt->ep || !bbf->ep)
-+				return 0;
-+			if (bbt =3D=3D bbf) {
-+				target =3D bbt;
-+				goto convert_to_br;
-+			}
-+			orig_bbt =3D bbt;
-+			orig_bbf =3D bbf;
-+			FOR_EACH_PTR(insn->multijmp_list, jmp) {
-+				if (jmp->target =3D=3D bbt) {
-+					bbt =3D NULL;
-+					continue;
-+				}
-+				if (jmp->target =3D=3D bbf) {
-+					bbf =3D NULL;
-+					continue;
-+				}
-+				remove_bb_from_list(&jmp->target->parents, bb, 1);
-+				remove_bb_from_list(&bb->children, jmp->target, 1);
-+				remove_phisources(bb, jmp->target);
-+			} END_FOR_EACH_PTR(jmp);
-+			free_ptr_list(&insn->multijmp_list);
- 			insn->opcode =3D OP_CBR;
--			insn->bb_true =3D bbt;
--			insn->bb_false =3D bbf;
--			return replace_pseudo(insn, &insn->src1, def->cond);
-+			insn->bb_true =3D orig_bbt;
-+			insn->bb_false =3D orig_bbf;
-+			if (bbt) {
-+				add_bb(&orig_bbt->parents, bb);
-+				add_bb(&bb->children, orig_bbt);
-+			}
-+			if (bbf) {
-+				add_bb(&orig_bbf->parents, bb);
-+				add_bb(&bb->children, orig_bbf);
-+			}
-+			replace_pseudo(insn, &insn->src1, def->cond);
-+			return REPEAT_CSE|REPEAT_CFG_CLEANUP;
- 		}
- 		break;
- 	case OP_LABEL:
- 		target =3D def->bb_true;
- 		if (!target->ep)
- 			return 0;
-+	convert_to_br:
-+		orig_target =3D target;
- 		FOR_EACH_PTR(insn->multijmp_list, jmp) {
--			if (jmp->target =3D=3D target)
-+			if (jmp->target =3D=3D target) {
-+				target =3D NULL;
- 				continue;
-+			}
- 			remove_bb_from_list(&jmp->target->parents, bb, 1);
- 			remove_bb_from_list(&bb->children, jmp->target, 1);
--			DELETE_CURRENT_PTR(jmp);
-+			remove_phisources(bb, jmp->target);
- 		} END_FOR_EACH_PTR(jmp);
-+		free_ptr_list(&insn->multijmp_list);
-+		if (target) {
-+			add_bb(&orig_target->parents, bb);
-+			add_bb(&bb->children, orig_target);
++	if (token->ident =3D=3D &default_ident) {
++		stmt =3D alloc_statement(token->pos, STMT_CASE);
++		token =3D expect(token->next, ':', "after default/case");
++		add_case_statement(stmt);
++		*stmtp =3D stmt;
++		*is_case =3D true;
++		return token;
++	}
++
++	{
++		struct position pos =3D token->pos;
++		struct symbol *s =3D label_symbol(token, 0);
++		s->label_modifiers |=3D attr_state.ctype.modifiers;
++		token =3D handle_label_attributes(token->next->next, s);
++		if (s->stmt) {
++			sparse_error(pos, "label '%s' redefined",
++				     show_ident(s->ident));
++			return token;
 +		}
- 		kill_use(&insn->src);
-+		insn->cond =3D NULL;
- 		insn->opcode =3D OP_BR;
--		insn->bb_true =3D target;
-+		insn->bb_true =3D orig_target;
-+		insn->bb_false =3D NULL;
- 		return REPEAT_CSE|REPEAT_CFG_CLEANUP;
++		stmt =3D alloc_statement(pos, STMT_LABEL);
++		stmt->label_identifier =3D s;
++		stmt->label_scope =3D label_scope;
++		if (s->label_scope) {
++			if (!is_in_scope(label_scope, s->label_scope))
++				warn_label_usage(stmt->pos, s->label_pos,
++						 s->ident);
++		}
++		s->stmt =3D stmt;
++		*stmtp =3D stmt;
++		return token;
++	}
++}
++
+ static struct token *statement(struct token *token, struct statement **t=
+ree)
+ {
+ 	struct statement *stmt =3D alloc_statement(token->pos, STMT_NONE);
+=20
++	if (is_label_token(token)) {
++		struct statement *lbl =3D NULL;
++		bool is_case =3D false;
++
++		token =3D parse_one_label(token, &lbl, &is_case);
++		if (!lbl)
++			return statement(token, tree);
++		*tree =3D lbl;
++		tree =3D is_case ? &lbl->case_statement : &lbl->label_statement;
++		if (match_op(token, '}')) {
++			sparse_error(token->pos,
++				     is_case ? "statement expected after case label" :
++					       "statement expected after label");
++			*tree =3D alloc_statement(token->pos, STMT_NONE);
++			return token;
++		}
++		return statement(token, tree);
++	}
++
+ 	*tree =3D stmt;
+ 	if (token_type(token) =3D=3D TOKEN_IDENT) {
+ 		struct symbol *s =3D lookup_keyword(token->ident, NS_KEYWORD);
+ 		if (s && s->op->statement)
+ 			return s->op->statement(token, stmt);
+-
+-		if (match_op(token->next, ':')) {
+-			struct symbol *s =3D label_symbol(token, 0);
+-			token =3D handle_label_attributes(token->next->next, s);
+-			if (s->stmt) {
+-				sparse_error(stmt->pos, "label '%s' redefined", show_ident(s->ident)=
+);
+-				// skip the label to avoid multiple definitions
+-				return statement(token, tree);
+-			}
+-			stmt->type =3D STMT_LABEL;
+-			stmt->label_identifier =3D s;
+-			stmt->label_scope =3D label_scope;
+-			if (s->label_scope) {
+-				if (!is_in_scope(label_scope, s->label_scope))
+-					warn_label_usage(stmt->pos, s->label_pos, s->ident);
+-			}
+-			s->stmt =3D stmt;
+-			if (match_op(token, '}')) {
+-				warning(token->pos, "statement expected after label");
+-				stmt->label_statement =3D alloc_statement(token->pos, STMT_NONE);
+-				return token;
+-			}
+-			return statement(token, &stmt->label_statement);
+-		}
  	}
- 	return 0;
-diff --git a/validation/optim/simplify-memops-ssa-fixes.c b/validation/op=
-tim/simplify-memops-ssa-fixes.c
+=20
+ 	if (match_op(token, '{')) {
+ 		token =3D compound_statement(token->next, stmt);
+ 		return expect(token, '}', "at end of compound statement");
+ 	}
+-		=09
++
++	if (match_ident(token, &_Static_assert_ident) ||
++	    (standard >=3D STANDARD_C23 &&
++	     match_ident(token, &static_assert_ident))) {
++		sparse_error(token->pos, "declaration is not a statement");
++		stmt->type =3D STMT_NONE;
++		return parse_static_assert(token, NULL);
++	}
++
++	if (lookup_type(token)) {
++		sparse_error(token->pos, "declaration is not a statement");
++		stmt->type =3D STMT_DECLARATION;
++		start_block_scope();
++		token =3D external_declaration(token, &stmt->declaration, NULL);
++		end_block_scope();
++		return token;
++	}
++
+ 	stmt->type =3D STMT_EXPRESSION;
+ 	return expression_statement(token, &stmt->expression);
+ }
+@@ -2714,6 +2767,49 @@ static struct token * statement_list(struct token =
+*token, struct statement_list
+ 		token =3D label_statement(token->next);
+ 	for (;;) {
+ 		struct statement * stmt;
++		struct statement *label_head =3D NULL;
++		struct statement **label_tail =3D &label_head;
++		bool last_is_case =3D false;
++
++		while (is_label_token(token)) {
++			struct statement *lbl =3D NULL;
++			bool is_case =3D false;
++
++			token =3D parse_one_label(token, &lbl, &is_case);
++			if (!lbl)
++				continue;
++			*label_tail =3D lbl;
++			label_tail =3D is_case ? &lbl->case_statement :
++					       &lbl->label_statement;
++			last_is_case =3D is_case;
++		}
++		if (label_head) {
++			if (eof_token(token) || match_op(token, '}')) {
++				if (standard < STANDARD_C23)
++					warning(token->pos,
++						last_is_case ? "statement expected after case label" :
++							       "statement expected after label");
++				*label_tail =3D alloc_statement(token->pos, STMT_NONE);
++				add_statement(list, label_head);
++				break;
++			}
++			if (match_ident(token, &_Static_assert_ident) ||
++			    (standard >=3D STANDARD_C23 &&
++			     match_ident(token, &static_assert_ident)) ||
++			    lookup_type(token)) {
++				if (standard < STANDARD_C23 && Wpedantic)
++					warning(token->pos,
++						"a label can only be part of a statement and a declaration is not =
+a statement");
++				*label_tail =3D alloc_statement(token->pos, STMT_NONE);
++				add_statement(list, label_head);
++			} else {
++				seen_statement =3D Wdeclarationafterstatement;
++				token =3D statement(token, label_tail);
++				add_statement(list, label_head);
++				continue;
++			}
++		}
++
+ 		if (eof_token(token))
+ 			break;
+ 		if (match_op(token, '}'))
+diff --git a/validation/c23-labels-error.c b/validation/c23-labels-error.=
+c
 new file mode 100644
-index 000000000000..b94e0182902e
+index 000000000000..55ee5bfd5b47
 --- /dev/null
-+++ b/validation/optim/simplify-memops-ssa-fixes.c
-@@ -0,0 +1,103 @@
-+/* 1. Negation of LLONG_MIN */
-+static long long test_neg_llong_min(void)
++++ b/validation/c23-labels-error.c
+@@ -0,0 +1,48 @@
++static void test_dup(void)
 +{
-+	return -(-9223372036854775807LL - 1LL);
++dup:
++	;
++dup:
++	;
 +}
 +
-+/* 2. Signed bitfield post-increment assigned to another bitfield */
-+struct sbf {
-+	signed int a:3;
-+	signed int b:3;
-+	signed int c:3;
-+};
-+
-+int bf_postinc_const(void)
++static void test_if_decl(int c)
 +{
-+	struct sbf s =3D { -1, 0, 0 };
-+	s.b =3D s.a++;
-+	return s.c;
++	if (c)
++		int x =3D 1;
 +}
 +
-+/* 3. ((x & mask) | bits) =3D=3D C with bits outside mask */
-+int and_or_equ(unsigned x)
++static void test_if_label_decl(int c)
 +{
-+	return ((x & 0xf0) | 0x01) =3D=3D 0x11;
++	if (c)
++	lbl1:
++		int y =3D 2;
 +}
 +
-+/* 4. Commuted (x + 1U) - x */
-+unsigned add_sub_cancel(unsigned x)
++static void test_if_label_end(int c)
 +{
-+	return (x + 1U) - x;
++	if (c)
++	lbl2:
 +}
 +
-+/* 5. 0 / non-constant */
-+int zero_div(int x)
++static void test_outside_switch(void)
 +{
-+	return 0 / (x ? 1 : 2);
-+}
-+
-+/* 6. Computed goto OP_SEL with identical targets and live PHI */
-+int cgoto_same_target_phi(int c, int d)
-+{
-+	void *p =3D c ? &&L1 : &&L1;
-+	int r =3D 1;
-+	if (d) {
-+		r =3D 2;
-+		goto L2;
-+	}
-+	goto *p;
-+L2:
-+	r =3D 3;
-+L1:
-+	return r;
-+}
-+
-+/* 7. Computed goto OP_LABEL deduplication with live PHI */
-+int cgoto_label_dedup(int c)
-+{
-+	void *p =3D &&L1;
-+	int r =3D 1;
-+	if (c) {
-+		r =3D 2;
-+		goto L2;
-+	}
-+	goto *p;
-+L2:
-+	r =3D 3;
-+L1:
-+	return r;
-+}
-+
-+/* 8. 128-bit zero-extension and addition above 64-bit width */
-+__int128 zext_u64_to_s128(void)
-+{
-+	return (__int128)0x8000000000000000ULL;
-+}
-+
-+unsigned __int128 add_u128_carry(void)
-+{
-+	return (unsigned __int128)0x8000000000000000ULL + 0x8000000000000000ULL=
-;
-+}
-+
-+/* 9. ZEXT of SEXT with distinct source widths */
-+unsigned long long zext_sext_char(signed char c)
-+{
-+	return (unsigned long long)(unsigned int)(int)c;
++	case 1:
++		;
++	default:
++		;
 +}
 +
 +/*
-+ * check-name: simplify-memops-ssa-fixes
-+ * check-command: test-linearize -Wno-decl $file
-+ *
-+ * check-output-ignore
-+ * check-output-excludes: VOID
-+ * check-output-contains: ret\\.64.*\\$0x8000000000000000
-+ * check-output-contains: zext\\.128
-+ * check-output-contains: add\\.128
-+ * check-output-contains: sext\\.32
-+ * check-output-contains: zext\\.64
++ * check-name: c23-labels-error
++ * check-command: sparse -std=3Dc23 -Wno-decl $file
 + *
 + * check-error-start
-+optim/simplify-memops-ssa-fixes.c:4:16: warning: constant integer operat=
-ion overflow
++c23-labels-error.c:5:1: error: label 'dup' redefined
++c23-labels-error.c:12:17: error: declaration is not a statement
++c23-labels-error.c:19:17: error: declaration is not a statement
++c23-labels-error.c:26:1: error: statement expected after label
++c23-labels-error.c:30:9: error: not in switch scope
++c23-labels-error.c:32:9: error: not in switch scope
 + * check-error-end
++ */
+diff --git a/validation/c23-labels-gnu.c b/validation/c23-labels-gnu.c
+new file mode 100644
+index 000000000000..15dcb20be1d8
+--- /dev/null
++++ b/validation/c23-labels-gnu.c
+@@ -0,0 +1,15 @@
++static int test_gnu_case_range(int c)
++{
++	switch (c) {
++	case 1 ... 5:
++		int a =3D 3;
++		return a;
++	case 6 ... 9:
++	}
++	return 0;
++}
++
++/*
++ * check-name: c23-labels-gnu
++ * check-command: sparse -std=3Dgnu23 -Wno-decl $file
++ */
+diff --git a/validation/c23-labels-pedantic.c b/validation/c23-labels-ped=
+antic.c
+new file mode 100644
+index 000000000000..6048f2e48e96
+--- /dev/null
++++ b/validation/c23-labels-pedantic.c
+@@ -0,0 +1,15 @@
++static void test_label_decl(void)
++{
++	goto lbl;
++lbl:
++	int x =3D 42;
++}
++
++/*
++ * check-name: c23-labels-pedantic
++ * check-command: sparse -std=3Dc11 -pedantic -Wno-decl $file
++ *
++ * check-error-start
++c23-labels-pedantic.c:5:9: warning: a label can only be part of a statem=
+ent and a declaration is not a statement
++ * check-error-end
++ */
+diff --git a/validation/c23-labels.c b/validation/c23-labels.c
+new file mode 100644
+index 000000000000..b4d90edbe666
+--- /dev/null
++++ b/validation/c23-labels.c
+@@ -0,0 +1,67 @@
++typedef int T_shadow;
++
++static int test_label_decl(void)
++{
++	goto lbl;
++lbl:
++lbl_chain:
++	int x =3D 42;
++	if (!x)
++		goto lbl_chain;
++	return x;
++}
++
++static int test_case_decl(int c)
++{
++	switch (c) {
++	case 1:
++		int a =3D 10;
++		return a;
++	default:
++		int b =3D 20;
++		return b;
++	}
++}
++
++static void test_label_end(int c)
++{
++	if (c =3D=3D 1)
++		goto end1;
++	if (c =3D=3D 2)
++		goto end2;
++end1:
++end2:
++}
++
++static void test_case_end(int c)
++{
++	switch (c) {
++	case 0:
++	case 1:
++	}
++	switch (c) {
++	default:
++	}
++}
++
++static void test_label_static_assert(void)
++{
++	goto lbl2;
++lbl2:
++	static_assert(1, "");
++}
++
++static int test_typedef_shadow_label(int c)
++{
++	if (c)
++		goto T_shadow;
++	return 0;
++T_shadow:
++	int v =3D 1;
++	return v;
++}
++
++/*
++ * check-name: c23-labels
++ * check-command: sparse -std=3Dc23 -pedantic -Wno-decl $file
 + */
