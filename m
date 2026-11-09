@@ -1,70 +1,70 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=199.89.1.14
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794256406;
-	b=EH62J7IoPeDK/92b1yno+xGt9hoPTkpOtkAkiX1NGFCfOwMah8QbP9W2wbD/gDCk6USg
-	 F/1IScYNUUYQJpB2HvDMzoZ1laDspJ9QWhNhIodvGHpGMblLo3ckiD07ZQlb6pwUldF7x
-	 Q5l5Jkeymz9GYxvbMgu+WcLQroWQgrOgAJol4Nmhn812uSqfotftjI+wSkZBe3FQVnU+4
-	 Yg9k85B11FwfHT19WORbMfgPHaNyzY0O+2kc24qRnGZU1nTNgOh0FcwMs2w7YiTqBZsv/
-	 TPsRanzMu5HGVzIf8QUU/YN3NLojjWYzFkhq1F2JclAQ1AMEoaRzisrfcCB635MDyNQ==
+	t=1794256408;
+	b=0mYfPVE7Q12LtV+phQTQKw4DLexsQR1IUe4f8t0habvJcCZkYX0Ra9r/qS4PFOrrst1y
+	 zdM8TXIs1AOFJaSB7vRbJ+gxohHjf09cPRylPo9kyNLHt8FAR5ECVvW2gu8zIbG+o//Cz
+	 mSMoG6Ra5qOwt7feb6+0H6e0bOHhTup95kJpXVAQn4BrqiQdy07zBjPueHOJKdZgsYl1P
+	 Il1krGYDHdipi40uE0pwq6zyM7UVng/bxkYBuVXapBmEnBjR6rAOJsEwACnN8vR1AZnDP
+	 NNcQutcKehO11+wcT9jBd6IVRaPH/ZrGCzjSBZqKCcdMbl7CybWyv65GAafaWX0RVNg==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794256406;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794256408;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Virus-Scanned:Received:
 	 Received:From:To:Cc:Subject:Date:Message-ID:X-Mailer:In-Reply-To:
 	 References:MIME-Version:Content-Transfer-Encoding;
-	bh=vMCI9uuCpf+rsuGNk3OH4dtS9kOF0ELS1K/3IjT41a8=;
-	b=GFPCHC0PoR1Z0JDGiQ0gdtjFAAIf8IS9Fqt8J/H54zGM5YJHKtGwfPZtdBax20gYXcdo
-	 +QoChvgQMWdMaYQXCVl4npNLbJfONj4XtauszCDiuEwXbz+jhHF2GegBTTOP/49prcP3I
-	 AU4tz/yeD3XF7g/8TGOe0cw9joQVkyvE+b7wtlSJPUqCXX7ecLBgV8X+U175rJxXh/Ei4
-	 uIPdqTkKoe7P0fh9ny6coBnp4kN4l0zdK3lfuceNqcd3gIYg3HnLVKnwZKfrh2bVG9SDP
-	 iR/Y41H1gBL0t0ffleXnqS2MFFQiqWbN9YQ/7LZqrXP2u2hc1PnD7VdM6jAh80KnDGA==
+	bh=rehh1i2Hs7hCRkmBz03U7J71YOeTjeE5B0URGHjj7EA=;
+	b=MCCeLrfsY/hpdl32TtnVkKd0OCUABi9V7oPO+lLgq8CKcmX1cveDzQMS9XXdRPAIWFpL
+	 FzdG2ptykwNHHoeeQWSU4zBeTF6ZA625e5ZQ4JFdG/KOR4/SgDdEh91Uem3YDoUxhzQFS
+	 mDL2OgDSPrhqCEi3vNPwHYXcf+FuYIl7I24ShNQuzOO1batnm+N2qzou38TzVTxb7Fzqm
+	 8cD02RVVW50jvRBQrHSaP3/u1SjZf2KAJ2ieMlAlRG3+JCzi+ZtgnvVe2WQRs/CD/QM7X
+	 J9NFbXRPPxgTzSmLI69U5VfJFR9wEx440kcp4VcUtiFnd984ZyrbfMgihxEJmismPDQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=acm.org;
 	spf=pass smtp.mailfrom=acm.org;
-	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b="whKsqm/2";
+	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=YFVTrcKp;
 	arc=none smtp.remote-ip=199.89.1.14
 Received: from 011.lax.mailroute.net (011.lax.mailroute.net [199.89.1.14])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2AC2C606A326
-	for <linux-sparse@vger.kernel.org>; Mon,  9 Nov 2026 20:33:25 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 2AC2C606A326
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 804BA606A321
+	for <linux-sparse@vger.kernel.org>; Mon,  9 Nov 2026 20:33:27 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 804BA606A321
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=acm.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=whKsqm/2
+	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=YFVTrcKp
 Received: from localhost (localhost [127.0.0.1])
-	by 011.lax.mailroute.net (Postfix) with ESMTP id 4jNhLs4GXcz1XM0nl;
-	Mon,  9 Nov 2026 20:33:25 +0000 (UTC)
+	by 011.lax.mailroute.net (Postfix) with ESMTP id 4jNhLv0mrCz1XLwXN;
+	Mon,  9 Nov 2026 20:33:27 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=acm.org; h=
 	content-transfer-encoding:mime-version:references:in-reply-to
 	:x-mailer:message-id:date:date:subject:subject:from:from
-	:received:received; s=mr01; t=1794256404; x=1796848405; bh=vMCI9
-	uuCpf+rsuGNk3OH4dtS9kOF0ELS1K/3IjT41a8=; b=whKsqm/29C0q8ZZ/XUNEM
-	ywFCJfLaRPRzACdn9btDfMsuNq57z0G5ywbGTex7/5CaV0R8bSwjKakDGp6Bum0l
-	CPiLfpq3n4qyPMpD4TDOKTote+4JWmcg5Q63413+HSU3W2eHTv2msOiIXZltZqNK
-	Xtx+0N1Fvd6kQAzLwlhE0aeljzT7dxwnbu5e1gbzbs4fe0z1Q1Zwhy+si98Ma4cI
-	kCSP5icYURpdkpNtW8XMDa93sX1uiwMzAOJPTIRss+mpG7CKLWePXOxP5GFW1w7y
-	LMipFK8W+aFv//pqA8GFahzQsud6bn0OxYrLqQRYJVrK+mbKuNVn933mcjGg+++k
-	g==
+	:received:received; s=mr01; t=1794256405; x=1796848406; bh=rehh1
+	i2Hs7hCRkmBz03U7J71YOeTjeE5B0URGHjj7EA=; b=YFVTrcKpuajQ3mI/eA6Ni
+	J8e9XXILNc4+Hp6hp/uOtCjBi74YQ7k9clDHhzDq1HcUt6S4e2OB5r0AZwC9JGIc
+	a7CltOsvYocxMzuvWHZy/mawQTQEsEyHTLc/7fKJzKx0/4tBrQxbNfKMsh7xynuV
+	lnXOLigAJSS5AZt0m5fANEJsM66MpfxMF21bnnRv84o86lCbiXLqW1/4cLASAt0W
+	oHej2RpGfAV7kFtuDj5tocYVM6un6fNn5PXI7imWbSzNzSE3wzG32BX4ShXGRzfA
+	MdoT4ijr5vngvIdMm5p3TKkKBPt6JQQ5Y1CAMDiReBoR9CJXGvP4ha+nS8+iuQk/
+	w==
 X-Virus-Scanned: by MailRoute
 Received: from 011.lax.mailroute.net ([127.0.0.1])
  by localhost (011.lax [127.0.0.1]) (mroute_mailscanner, port 10029) with LMTP
- id 4HmK52V7q11z; Mon,  9 Nov 2026 20:33:24 +0000 (UTC)
+ id iZlZxZ6-3hW5; Mon,  9 Nov 2026 20:33:25 +0000 (UTC)
 Received: from bvanassche.c.googlers.com.com (57.237.82.34.bc.googleusercontent.com [34.82.237.57])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
 	(Authenticated sender: bvanassche@acm.org)
-	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4jNhLr3Nthz1XM6J7;
+	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4jNhLr5DGjz1XM6JF;
 	Mon,  9 Nov 2026 20:33:24 +0000 (UTC)
 From: Bart Van Assche <bvanassche@acm.org>
 To: linux-sparse@vger.kernel.org
 Cc: Linus Torvalds <torvalds@linux-foundation.org>,
 	Bart Van Assche <bvanassche@acm.org>
-Subject: [PATCH 01/73] Makefile: Pass '--' to rm in clean target to handle dash-prefixed files
-Date: Mon,  9 Nov 2026 12:31:47 -0800
-Message-ID: <20261109203259.362845-2-bvanassche@acm.org>
+Subject: [PATCH 02/73] sparse-llvm: Use LLVMCreateBuilderForModule() with LLVM 24 and later
+Date: Mon,  9 Nov 2026 12:31:48 -0800
+Message-ID: <20261109203259.362845-3-bvanassche@acm.org>
 X-Mailer: git-send-email 2.56.0.506.g506a7eabc5-goog
 In-Reply-To: <20261109203259.362845-1-bvanassche@acm.org>
 References: <20261109203259.362845-1-bvanassche@acm.org>
@@ -79,26 +79,31 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
 
-Pass '--' to rm in the clean target so that stray files starting with a
-hyphen (such as '-.o') are not interpreted as command-line options by
-rm.
+Call LLVMCreateBuilderForModule(module) instead of
+LLVMCreateBuilderInContext(context) in output_fn() when building against
+LLVM 24 or later so that sparse-llvm builds without a deprecation warning
+after LLVM commit 46db5f8ab053 ("[llvm-c][ocaml] Accept Module instead of
+Context in IRBuilder bindings (#234209)").
 
-Fixes: 86eb97a3c2df ("Makefile: stop cleaning files we didn't make...")
 Signed-off-by: Bart Van Assche <bvanassche@acm.org>
 ---
- Makefile | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ sparse-llvm.c | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-diff --git a/Makefile b/Makefile
-index e172758b8b09..4d2700f5cad3 100644
---- a/Makefile
-+++ b/Makefile
-@@ -288,7 +288,7 @@ validation/%: $(PROGRAMS) FORCE
+diff --git a/sparse-llvm.c b/sparse-llvm.c
+index facce6f745ff..c422a13ce2a8 100644
+--- a/sparse-llvm.c
++++ b/sparse-llvm.c
+@@ -1182,7 +1182,11 @@ static void output_fn(LLVMModuleRef module, struct=
+ entrypoint *ep)
+ 	LLVMSetFunctionCallConv(function.fn, LLVMCCallConv);
+ 	LLVMSetLinkage(function.fn, function_linkage(sym));
 =20
++#if LLVM_VERSION_MAJOR > 23
++	function.builder =3D LLVMCreateBuilderForModule(module);
++#else
+ 	function.builder =3D LLVMCreateBuilderInContext(context);
++#endif
 =20
- clean: clean-check
--	@rm -f *.[oa] .*.d $(PROGRAMS) version.h
-+	@rm -f -- *.[oa] .*.d $(PROGRAMS) version.h
- clean-check:
- 	@echo "  CLEAN"
- 	@find validation/ \( -name "*.c.output.*" \
+ 	/* give a name to each argument */
+ 	nr_args =3D symbol_list_size(base_type->arguments);
