@@ -1,70 +1,70 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=199.89.1.14
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
 	t=1794256438;
-	b=wVzqi0NbMKhIOju56S66Z97VHXbqsQWfUEHv2Lz8urGKouzClxd5n0z9QrAwME1dRzAB
-	 8cWJ+u0Wjp8/eDxsU30Xq1Nz2GdK8VF3v3J3OnR7hWAexrOE4t5pmHlWzK+BeQPzoz0ax
-	 ShwlDSBTXex6aoUey1A9S7QnlE6eZqVTW7+oI6p80TUk93AeNdzGtCuR5kGxPi4yCgShN
-	 sp1Rr8wrSBqBwf0fbLjZWizCxWWIPMVgm4QDU4qSFQJzpv4vbUaGgScCyyJ4ERz2sdBX8
-	 agRKeSElNOSL3KJAj8SM0EvZQCMobc4DYJTKZ1ZelcxNwUpBU5y/j/2XBRSQlP7nnqA==
+	b=45gutIHs5amZgq2aWNsxx5ZQsmYqZr+xkJMgwwA0QyUFlTbuaTCRZ9cD4uAEuDLLHFb+
+	 shOfOSqR2a1GuwF+Ns24NcBVDOrArwyH26nJiszvwGZrP+iL2nEV6okuVy0GyNBHFXC0i
+	 0ATAu/FqDQkZoZRlVOwx65EClnqf6gqYUYdFW8XjbH5Mm7VOKkgi9lMY7lHzsLZS9a8pI
+	 E6t73YFbgUd7kkXoc/U3AshBbgDK989QWR3A34umPQxuNBxiwD+FK5JpLspWQ4QGOaKxJ
+	 YEHY1rl3v1lCH+/veXzWUmVRs8uwppyG0fAsALglBeeiS1R/Vbe/06V+1iRGpx7KWnA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
 	a=rsa-sha256; c=relaxed/relaxed; t=1794256438;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Virus-Scanned:Received:
 	 Received:From:To:Cc:Subject:Date:Message-ID:X-Mailer:In-Reply-To:
 	 References:MIME-Version:Content-Transfer-Encoding;
-	bh=VP4jJCPzQE5lk6R6FyjYFtZcTh2uDlCjstApDWc64y4=;
-	b=LKG9MhQMitk5hiHzPwHH0+VuTt8lxm3Y0Vz/mq1masOpUor9KJI8JT+SXl6elcLd02CU
-	 KQL/+pvzJbXJH39lVridGsnU9DgPWTbwSgZu6PRAbIxsKuJwPaJXLtP32C2V4WAOKhHpH
-	 OM7rvroeS5TEpg5NnzgwJpEloq5tYJhBDp6E0ZmigqoWoAwQ/macB3k1h2GqW+BtfqI7h
-	 Ijl4pTiKHR4bC+KzuEzVkJAahIY8DBtCdHhF3JiH5iyrxo6p60iXMz9oH6KmKdpiS9Q6O
-	 TUfY3g8YckXjrdLp7YVcWtdynurIr6ccp7FcWY4GAYpwk/htoe+dUvJNjkJxQnJ8nXQ==
+	bh=/gxczXZNJoEkxzhl+9Oc6vus4WUohhMyzyam9+HVM8A=;
+	b=1GBMu+Z4yvtMfLixbs13nOFwNQgrDFe68ANN1Kim0fzY7KiX7Y+qv2Eqgbclxo4/5F5S
+	 bT1tj4Q/FkGistNVWROfVM76tFDZGpyEHYt/4rXzxghAO5s/86FZ7XDURrZh3RuNyAgw8
+	 lrLoHoDlfLVQFArv4JPuehcrLGQsWhl9O8ngRGFPiZ1NU9CEirzNcsXM/yhhXQ14OQMzX
+	 FJ04gdvbiVbjihSnQR02OxxBm2U0DQVg83aPGG28qC/Dw8d60SO7Nygkehos4IoML6tJv
+	 Dgu8XCbqpJSkRroVH6nt4fPlp0Ozrca2y/HbLOh8NHnuvq4cT/y6M6YuMZ8W/evPPPw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=acm.org;
 	spf=pass smtp.mailfrom=acm.org;
-	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=tOPkanzw;
+	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=DqW3Jb3j;
 	arc=none smtp.remote-ip=199.89.1.14
 Received: from 011.lax.mailroute.net (011.lax.mailroute.net [199.89.1.14])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 40BC9606A326
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A10BB606A330
 	for <linux-sparse@vger.kernel.org>; Mon,  9 Nov 2026 20:33:57 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 40BC9606A326
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org A10BB606A330
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=acm.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=tOPkanzw
+	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=DqW3Jb3j
 Received: from localhost (localhost [127.0.0.1])
-	by 011.lax.mailroute.net (Postfix) with ESMTP id 4jNhML1Bdfz1XMYJT;
+	by 011.lax.mailroute.net (Postfix) with ESMTP id 4jNhML1Tm3z1XMYJM;
 	Mon,  9 Nov 2026 20:33:50 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=acm.org; h=
 	content-transfer-encoding:mime-version:references:in-reply-to
 	:x-mailer:message-id:date:date:subject:subject:from:from
-	:received:received; s=mr01; t=1794256418; x=1796848419; bh=VP4jJ
-	CPzQE5lk6R6FyjYFtZcTh2uDlCjstApDWc64y4=; b=tOPkanzwxDqaPj3+n3Zc6
-	4wz4CsSq/qHaUaM4BdnzD5qOrt7F0qiiMqFxZCCtkQ1ep/Kg41KFMHqO4yLafaVB
-	ZAdU/nvTSGcQAMtS1lMfEK6CkxNwH7tyg3kVIxOu3DAy8dznGSitzOoDzmQBra3R
-	SeVs5NCYKNllcMQgpsZm7kNZcKvVsV56WfpBu8ZRUhMM+JyZNac696AHZAp0/q0c
-	7h98eMPsphmMIoX9sRcfTZyf9/n4/9pkRE5Fx3P+105cKtilztcPFifY1A2TLXT+
-	nIT/aj2lzpMcwYACDo2ZopGYXQEeXlMuClhwV0IwXpTwxxbeQGdMeExNpnXF42fV
+	:received:received; s=mr01; t=1794256418; x=1796848419; bh=/gxcz
+	XZNJoEkxzhl+9Oc6vus4WUohhMyzyam9+HVM8A=; b=DqW3Jb3j45L4sHCr+abKc
+	W9MKtFj420GqpyDuCLK9johNSiTLnLFTKjgFiMGWpr6U5oBlpRDqV7D55w1Zvc2K
+	5FQUeBGIgbAyYanXlhqX7RmaH+9HY4liCWhAA0Uhy4OpEdvtIfLAbObyePPQDTwD
+	9EfjlUcBD50pUW7ezT6I66yxeeQAyVSuC9IUOiRt0X7cRfufDenDGVw2K0/tSatJ
+	cEsnWzFWnYHatDuLreV1Uwc/Tk1z4suSdP8gM56TqFaxG5mDQDdvO1wl9cXvHoew
+	MMfW7hVeOw3vLMq12k4QrxOGF/J/K3N1fREC3zkvRC2CoT7zj/mlFXZ9ZqfOves5
 	g==
 X-Virus-Scanned: by MailRoute
 Received: from 011.lax.mailroute.net ([127.0.0.1])
  by localhost (011.lax [127.0.0.1]) (mroute_mailscanner, port 10029) with LMTP
- id vSPEnZzUJJZi; Mon,  9 Nov 2026 20:33:38 +0000 (UTC)
+ id ESJV84hetUEX; Mon,  9 Nov 2026 20:33:38 +0000 (UTC)
 Received: from bvanassche.c.googlers.com.com (57.237.82.34.bc.googleusercontent.com [34.82.237.57])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
 	(Authenticated sender: bvanassche@acm.org)
-	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4jNhM470Y6z1XMYJM;
-	Mon,  9 Nov 2026 20:33:36 +0000 (UTC)
+	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4jNhM51RpNz1XLX7h;
+	Mon,  9 Nov 2026 20:33:37 +0000 (UTC)
 From: Bart Van Assche <bvanassche@acm.org>
 To: linux-sparse@vger.kernel.org
 Cc: Linus Torvalds <torvalds@linux-foundation.org>,
 	Bart Van Assche <bvanassche@acm.org>
-Subject: [PATCH 57/73] c23: Add support for u8 character constants and string literals
-Date: Mon,  9 Nov 2026 12:32:43 -0800
-Message-ID: <20261109203259.362845-58-bvanassche@acm.org>
+Subject: [PATCH 58/73] preprocessor: Add support for __VA_OPT__
+Date: Mon,  9 Nov 2026 12:32:44 -0800
+Message-ID: <20261109203259.362845-59-bvanassche@acm.org>
 X-Mailer: git-send-email 2.56.0.506.g506a7eabc5-goog
 In-Reply-To: <20261109203259.362845-1-bvanassche@acm.org>
 References: <20261109203259.362845-1-bvanassche@acm.org>
@@ -79,712 +79,811 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
 
-Support C23 UTF-8 character constants (u8'c') and UTF-8 string literals
-(u8"...") with unsigned char (char8_t) element type per ISO C23 6.4.4.4
-and 6.4.5:
-- Type u8"..." literals (including narrow + u8"" concatenations) as
-  arrays of unsigned char in C23 mode while preserving char[] typing in
-  C11/C17, and diagnose pointer signedness mismatches with char * in C23.
-- Parse \uXXXX and \UXXXXXXXX universal character names in character and
-  string literals, reject u8"" concatenation with wide strings, and emit
-  errors on multi-byte or multi-character u8'...' constants.
-- Warn under -Wpedantic when u8 character constants are used before C23.
+Add support for the __VA_OPT__ functional macro replacement operator
+introduced in C23. Expand the contents of __VA_OPT__(...) if and only if
+variable arguments are passed to the variadic macro, eliminating trailing
+delimiter issues in variadic macro expansion portably.
 
 Signed-off-by: Bart Van Assche <bvanassche@acm.org>
 ---
- char.c                            | 111 ++++++++++++++++++++++++++++--
- evaluate.c                        |   7 +-
- expression.c                      |  15 ++--
- expression.h                      |   3 +-
- ident-list.h                      |   3 +-
- pre-process.c                     |  21 +++++-
- token.h                           |   6 ++
- tokenize.c                        | 102 ++++++++++++++++++---------
- validation/c23-u8-char-error.c    |  16 +++++
- validation/c23-u8-char-pedantic.c |  10 +++
- validation/c23-u8-char-warn.c     |  14 ++++
- validation/c23-u8-char.c          |  37 ++++++++++
- 12 files changed, 296 insertions(+), 49 deletions(-)
- create mode 100644 validation/c23-u8-char-error.c
- create mode 100644 validation/c23-u8-char-pedantic.c
- create mode 100644 validation/c23-u8-char-warn.c
- create mode 100644 validation/c23-u8-char.c
+ ident-list.h                               |   1 +
+ pre-process.c                              | 331 ++++++++++++++++++---
+ token.h                                    |   3 +
+ tokenize.c                                 |  10 +
+ validation/c23-va-opt.c                    |  36 +++
+ validation/preprocessor/c23-va-opt-error.c |  31 ++
+ validation/preprocessor/c23-va-opt.c       |  73 +++++
+ 7 files changed, 446 insertions(+), 39 deletions(-)
+ create mode 100644 validation/c23-va-opt.c
+ create mode 100644 validation/preprocessor/c23-va-opt-error.c
+ create mode 100644 validation/preprocessor/c23-va-opt.c
 
-diff --git a/char.c b/char.c
-index 1f6eb1f6be83..a0776b560e29 100644
---- a/char.c
-+++ b/char.c
-@@ -6,6 +6,54 @@
- #include "expression.h"
- #include "char.h"
-=20
-+static const char *parse_ucn(const char *p, const char *end, int digits,
-+			     unsigned *cp, struct position pos)
-+{
-+	unsigned val =3D 0;
-+	int i;
-+
-+	for (i =3D 0; i < digits; i++) {
-+		unsigned d;
-+		if (p >=3D end || (d =3D hexval(*p)) > 15) {
-+			sparse_error(pos, "incomplete universal character name");
-+			*cp =3D 0;
-+			return p;
-+		}
-+		val =3D (val << 4) + d;
-+		p++;
-+	}
-+	if ((val >=3D 0xd800 && val <=3D 0xdfff) || val > 0x10ffff) {
-+		sparse_error(pos, "invalid universal character name");
-+		val =3D 0;
-+	}
-+	*cp =3D val;
-+	return p;
-+}
-+
-+static int encode_utf8(unsigned cp, char out[4])
-+{
-+	if (cp <=3D 0x7f) {
-+		out[0] =3D cp;
-+		return 1;
-+	}
-+	if (cp <=3D 0x7ff) {
-+		out[0] =3D 0xc0 | (cp >> 6);
-+		out[1] =3D 0x80 | (cp & 0x3f);
-+		return 2;
-+	}
-+	if (cp <=3D 0xffff) {
-+		out[0] =3D 0xe0 | (cp >> 12);
-+		out[1] =3D 0x80 | ((cp >> 6) & 0x3f);
-+		out[2] =3D 0x80 | (cp & 0x3f);
-+		return 3;
-+	}
-+	out[0] =3D 0xf0 | (cp >> 18);
-+	out[1] =3D 0x80 | ((cp >> 12) & 0x3f);
-+	out[2] =3D 0x80 | ((cp >> 6) & 0x3f);
-+	out[3] =3D 0x80 | (cp & 0x3f);
-+	return 4;
-+}
-+
- static const char *parse_escape(const char *p, unsigned *val, const char=
- *end, int bits, struct position pos)
- {
- 	unsigned c =3D (unsigned char)*p++;
-@@ -26,6 +74,11 @@ static const char *parse_escape(const char *p, unsigne=
-d *val, const char *end, i
- 	case 'f': c =3D '\f'; break;
- 	case 'r': c =3D '\r'; break;
- 	case 'e': c =3D '\e'; break;
-+	case 'u':
-+	case 'U':
-+		p =3D parse_ucn(p, end, c =3D=3D 'u' ? 4 : 8, &c, pos);
-+		*val =3D c;
-+		return p;
- 	case 'x': {
- 		unsigned mask =3D -(1U << (bits - 4));
- 		for (c =3D 0; p < end; c =3D (c << 4) + d) {
-@@ -75,6 +128,7 @@ void get_char_constant(struct token *token, unsigned l=
-ong long *val)
- 	switch (type) {
- 	case TOKEN_CHAR:
- 	case TOKEN_WIDE_CHAR:
-+	case TOKEN_UTF8_CHAR:
- 		p =3D token->string->data;
- 		end =3D p + token->string->length - 1;
- 		if (end =3D=3D p) {
-@@ -86,14 +140,34 @@ void get_char_constant(struct token *token, unsigned=
- long long *val)
- 	case TOKEN_CHAR_EMBEDDED_0 ... TOKEN_CHAR_EMBEDDED_3:
- 		end =3D p + type - TOKEN_CHAR;
- 		break;
--	default:
-+	case TOKEN_WIDE_CHAR_EMBEDDED_0 ... TOKEN_WIDE_CHAR_EMBEDDED_3:
- 		end =3D p + type - TOKEN_WIDE_CHAR;
-+		break;
-+	default:
-+		end =3D p + type - TOKEN_UTF8_CHAR;
-+		break;
- 	}
- 	p =3D parse_escape(p, &v, end,
--			type < TOKEN_WIDE_CHAR ? bits_in_char : wchar_ctype->bit_size, token-=
->pos);
--	if (p !=3D end)
-+			 (type >=3D TOKEN_WIDE_CHAR &&
-+			  type <=3D TOKEN_WIDE_CHAR_EMBEDDED_3) ?
-+				 wchar_ctype->bit_size :
-+				 bits_in_char,
-+			 token->pos);
-+	if (type >=3D TOKEN_UTF8_CHAR && type <=3D TOKEN_UTF8_CHAR_EMBEDDED_3) =
-{
-+		if (p !=3D end || v > 0xff ||
-+		    (token->embedded[0] =3D=3D '\\' &&
-+		     (token->embedded[1] =3D=3D 'u' || token->embedded[1] =3D=3D 'U') =
-&&
-+		     v > 0x7f) ||
-+		    (type =3D=3D TOKEN_UTF8_CHAR && token->string->data[0] =3D=3D '\\'=
- &&
-+		     (token->string->data[1] =3D=3D 'u' ||
-+		      token->string->data[1] =3D=3D 'U') &&
-+		     v > 0x7f))
-+			sparse_error(token->pos,
-+				     "multi-character UTF-8 character constant");
-+	} else if (p !=3D end) {
- 		warning(token->pos,
- 			"multi-character character constant");
-+	}
- 	*val =3D v;
- }
-=20
-@@ -103,6 +177,7 @@ struct token *get_string_constant(struct token *token=
-, struct expression *expr)
- 	struct token *next =3D token->next, *done =3D NULL;
- 	int stringtype =3D token_type(token);
- 	int is_wide =3D stringtype =3D=3D TOKEN_WIDE_STRING;
-+	int is_utf8 =3D stringtype =3D=3D TOKEN_UTF8_STRING;
- 	static char buffer[MAX_STRING];
- 	int len =3D 0;
- 	int bits;
-@@ -112,6 +187,12 @@ struct token *get_string_constant(struct token *toke=
-n, struct expression *expr)
- 		switch (token_type(next)) {
- 		case TOKEN_WIDE_STRING:
- 			is_wide =3D 1;
-+			next =3D next->next;
-+			break;
-+		case TOKEN_UTF8_STRING:
-+			is_utf8 =3D 1;
-+			next =3D next->next;
-+			break;
- 		case TOKEN_STRING:
- 			next =3D next->next;
- 			break;
-@@ -119,18 +200,35 @@ struct token *get_string_constant(struct token *tok=
-en, struct expression *expr)
- 			done =3D next;
- 		}
- 	}
-+	if (is_wide && is_utf8) {
-+		sparse_error(token->pos,
-+			     "unsupported non-standard concatenation of string literals");
-+		is_utf8 =3D 0;
-+	}
- 	bits =3D is_wide ? wchar_ctype->bit_size: bits_in_char;
- 	while (token !=3D done) {
- 		unsigned v;
- 		const char *p =3D token->string->data;
- 		const char *end =3D p + token->string->length - 1;
- 		while (p < end) {
-+			bool is_ucn =3D (*p =3D=3D '\\' && p + 1 < end &&
-+				       (p[1] =3D=3D 'u' || p[1] =3D=3D 'U'));
- 			if (*p =3D=3D '\\')
- 				esc_count++;
- 			p =3D parse_escape(p, &v, end, bits, token->pos);
--			if (len < MAX_STRING)
--				buffer[len] =3D v;
--			len++;
-+			if (is_ucn && !is_wide) {
-+				char utf8[4];
-+				int i, n =3D encode_utf8(v, utf8);
-+				for (i =3D 0; i < n; i++) {
-+					if (len < MAX_STRING)
-+						buffer[len] =3D utf8[i];
-+					len++;
-+				}
-+			} else {
-+				if (len < MAX_STRING)
-+					buffer[len] =3D v;
-+				len++;
-+			}
- 		}
- 		token =3D token->next;
- 	}
-@@ -148,5 +246,6 @@ struct token *get_string_constant(struct token *token=
-, struct expression *expr)
- 	}
- 	expr->string =3D string;
- 	expr->wide =3D is_wide;
-+	expr->utf8 =3D is_utf8;
- 	return token;
- }
-diff --git a/evaluate.c b/evaluate.c
-index f40e35773639..e46b1a7d4f70 100644
---- a/evaluate.c
-+++ b/evaluate.c
-@@ -135,7 +135,8 @@ static struct symbol *evaluate_string(struct expressi=
-on *expr)
- 	struct expression *addr =3D alloc_expression(expr->pos, EXPR_SYMBOL);
- 	struct expression *initstr =3D alloc_expression(expr->pos, EXPR_STRING)=
-;
- 	unsigned int length =3D expr->string->length;
--	struct symbol *char_type =3D expr->wide ? wchar_ctype : &char_ctype;
-+	struct symbol *char_type =3D expr->wide ? wchar_ctype :
-+		(expr->utf8 && standard >=3D STANDARD_C23) ? &uchar_ctype : &char_ctyp=
-e;
-=20
- 	sym->array_size =3D alloc_const_expression(expr->pos, length);
- 	sym->bit_size =3D length * char_type->bit_size;
-@@ -148,6 +149,8 @@ static struct symbol *evaluate_string(struct expressi=
-on *expr)
- 	sym->evaluated =3D 1;
-=20
- 	initstr->ctype =3D sym;
-+	initstr->wide =3D expr->wide;
-+	initstr->utf8 =3D expr->utf8;
- 	initstr->string =3D expr->string;
-=20
- 	array->array_size =3D sym->array_size;
-@@ -1599,7 +1602,7 @@ static int whitelist_pointers(struct symbol *t1, st=
-ruct symbol *t2)
- 	if (t1 =3D=3D t2)
- 		return 1;
- 	if (t1->rank =3D=3D -2 && t2->rank =3D=3D -2)
--		return 1;
-+		return !Wtypesign && !Wpedantic && standard < STANDARD_C23;
- 	if (t1->rank !=3D t2->rank)
- 		return 0;
- 	return !Wtypesign;
-diff --git a/expression.c b/expression.c
-index 1b04d977a2d5..ace0bf6d1a31 100644
---- a/expression.c
-+++ b/expression.c
-@@ -599,17 +599,23 @@ struct token *primary_expression(struct token *toke=
-n, struct expression **tree)
- 	struct expression *expr =3D NULL;
-=20
- 	switch (token_type(token)) {
--	case TOKEN_CHAR ... TOKEN_WIDE_CHAR_EMBEDDED_3:
-+	case TOKEN_CHAR ... TOKEN_UTF8_CHAR_EMBEDDED_3:
- 		expr =3D alloc_expression(token->pos, EXPR_VALUE);
- 		expr->flags =3D CEF_SET_CHAR;
- 		get_char_constant(token, &expr->value);
-=20
--		// TODO: handle 'u8', 'u' & 'U' prefixes.
--		if (token_type(token) < TOKEN_WIDE_CHAR) {
-+		// TODO: handle 'u' & 'U' prefixes.
-+		if (token_type(token) <=3D TOKEN_CHAR_EMBEDDED_3) {
- 			expr->ctype =3D &char_ctype;
- 			cast_value(expr, &int_ctype, expr);
--		} else {
-+		} else if (token_type(token) <=3D TOKEN_WIDE_CHAR_EMBEDDED_3) {
- 			expr->ctype =3D wchar_ctype;
-+		} else {
-+			if (standard < STANDARD_C23 && Wpedantic)
-+				warning(token->pos,
-+					"UTF-8 character constants are a C23 feature");
-+			expr->ctype =3D &uchar_ctype;
-+			cast_value(expr, &uchar_ctype, expr);
- 		}
- 		token =3D token->next;
- 		break;
-@@ -709,6 +715,7 @@ struct token *primary_expression(struct token *token,=
- struct expression **tree)
-=20
- 	case TOKEN_STRING:
- 	case TOKEN_WIDE_STRING:
-+	case TOKEN_UTF8_STRING:
- 		expr =3D alloc_expression(token->pos, EXPR_STRING);
- 		token =3D get_string_constant(token, expr);
- 		break;
-diff --git a/expression.h b/expression.h
-index 8bf40d32e10b..8c387adf9d5b 100644
---- a/expression.h
-+++ b/expression.h
-@@ -175,7 +175,8 @@ struct expression {
-=20
- 		// EXPR_STRING
- 		struct {
--			int wide;
-+			char wide;
-+			char utf8;
- 			struct string *string;
- 		};
-=20
 diff --git a/ident-list.h b/ident-list.h
-index f51f2048f5ca..3340f11641fa 100644
+index 3340f11641fa..b4e01e0a423c 100644
 --- a/ident-list.h
 +++ b/ident-list.h
-@@ -54,8 +54,9 @@ IDENT(static_assert);
- IDENT(thread_local);
- IDENT(true);
-=20
--/* Special case for L'\t' */
-+/* Special case for L'\t' and u8'a' */
- IDENT(L);
-+IDENT(u8);
-=20
- /* Extended gcc identifiers */
- IDENT(asm); IDENT_RESERVED(__asm); IDENT_RESERVED(__asm__);
+@@ -80,6 +80,7 @@ IDENT(c_generic_selections);
+ IDENT(c_static_assert);
+ __IDENT(pragma_ident, "__pragma__", 0);
+ __IDENT(__VA_ARGS___ident, "__VA_ARGS__", 0);
++__IDENT(__VA_OPT___ident, "__VA_OPT__", 0);
+ __IDENT(__func___ident, "__func__", 0);
+ __IDENT(__FUNCTION___ident, "__FUNCTION__", 0);
+ __IDENT(__PRETTY_FUNCTION___ident, "__PRETTY_FUNCTION__", 0);
 diff --git a/pre-process.c b/pre-process.c
-index 428b96f990fb..9ebf09cffbdd 100644
+index 9ebf09cffbdd..8eb70ca7a1a4 100644
 --- a/pre-process.c
 +++ b/pre-process.c
-@@ -507,12 +507,19 @@ static enum token_type combine(struct token *left, =
-struct token *right, char *p)
- 		return TOKEN_ERROR;
-=20
- 	if (t1 =3D=3D TOKEN_IDENT && left->ident =3D=3D &L_ident) {
--		if (t2 >=3D TOKEN_CHAR && t2 < TOKEN_WIDE_CHAR)
-+		if (t2 >=3D TOKEN_CHAR && t2 <=3D TOKEN_CHAR_EMBEDDED_3)
- 			return t2 + TOKEN_WIDE_CHAR - TOKEN_CHAR;
- 		if (t2 =3D=3D TOKEN_STRING)
- 			return TOKEN_WIDE_STRING;
+@@ -640,7 +640,7 @@ static struct token *dup_token(const struct token *to=
+ken, struct position *strea
+ static struct token **copy(struct token **where, struct token *list, int=
+ *count)
+ {
+ 	int need_copy =3D --*count;
+-	while (!eof_token(list)) {
++	do {
+ 		struct token *token;
+ 		if (need_copy)
+ 			token =3D dup_token(list, &list->pos);
+@@ -651,7 +651,7 @@ static struct token **copy(struct token **where, stru=
+ct token *list, int *count)
+ 		*where =3D token;
+ 		where =3D &token->next;
+ 		list =3D list->next;
+-	}
++	} while (!eof_token(list));
+ 	*where =3D &eof_token_entry;
+ 	return where;
+ }
+@@ -677,11 +677,26 @@ static int handle_kludge(const struct token **p, st=
+ruct arg *args)
  	}
+ }
 =20
-+	if (t1 =3D=3D TOKEN_IDENT && left->ident =3D=3D &u8_ident) {
-+		if (t2 >=3D TOKEN_CHAR && t2 <=3D TOKEN_CHAR_EMBEDDED_3)
-+			return t2 + TOKEN_UTF8_CHAR - TOKEN_CHAR;
-+		if (t2 =3D=3D TOKEN_STRING)
-+			return TOKEN_UTF8_STRING;
+-static struct token **substitute(struct token **list, const struct token=
+ *body, struct arg *args)
++static inline int arg_empty(struct arg *arg)
++{
++	struct token *t =3D arg->expanded;
++
++	if (!t)
++		return 1;
++	while (token_type(t) =3D=3D TOKEN_UNTAINT)
++		t =3D t->next;
++	return eof_token(t);
++}
++
++static struct token **substitute_tokens(struct token **list,
++					struct position *base_pos,
++					const struct token *body,
++					struct arg *args, int vararg_num)
+ {
+-	struct position *base_pos =3D &(*list)->pos;
+ 	int *count;
++	int one;
+ 	enum {Normal, Placeholder, Concat} state =3D Normal;
++	int extra_whitespace =3D 0;
+=20
+ 	for (; !eof_token(body); body =3D body->next) {
+ 		struct token *added, *arg;
+@@ -712,9 +727,57 @@ static struct token **substitute(struct token **list=
+, const struct token *body,
+ 			tail =3D &added->next;
+ 			break;
+=20
++		case TOKEN_STR_VA_OPT: {
++			struct token *inner =3D &eof_token_entry;
++
++			if (vararg_num >=3D 0 && !arg_empty(&args[vararg_num]))
++				substitute_tokens(&inner, base_pos,
++						  body->target, args,
++						  vararg_num);
++			added =3D stringify(inner);
++			added->pos.stream =3D base_pos->stream;
++			added->pos.line =3D base_pos->line;
++			added->pos.pos =3D base_pos->pos;
++			added->pos.newline =3D body->pos.newline;
++			added->pos.whitespace =3D
++				body->pos.whitespace || extra_whitespace;
++			extra_whitespace =3D 0;
++			tail =3D &added->next;
++			break;
++		}
++
++		case TOKEN_VA_OPT: {
++			struct token *inner =3D &eof_token_entry;
++
++			if (vararg_num >=3D 0 && !arg_empty(&args[vararg_num]))
++				substitute_tokens(&inner, base_pos,
++						  body->target, args,
++						  vararg_num);
++			if (eof_token(inner)) {
++				if (body->pos.whitespace && state !=3D Concat &&
++				    token_type(body->next) !=3D TOKEN_CONCAT)
++					extra_whitespace =3D 1;
++				if (state =3D=3D Concat)
++					state =3D Normal;
++				else if (token_type(body->next) =3D=3D TOKEN_CONCAT)
++					state =3D Placeholder;
++				else
++					state =3D Normal;
++				continue;
++			}
++			arg =3D inner;
++			one =3D 1;
++			count =3D &one;
++			goto copy_arg;
++		}
++
+ 		case TOKEN_STR_ARGUMENT:
+ 			arg =3D args[body->argnum].str;
+ 			count =3D &args[body->argnum].n_str;
++			if (eof_token(arg)) {
++				state =3D Normal;
++				continue;
++			}
+ 			goto copy_arg;
+=20
+ 		case TOKEN_QUOTED_ARGUMENT:
+@@ -740,6 +803,10 @@ static struct token **substitute(struct token **list=
+, const struct token *body,
+ 			tail =3D copy(&added, arg, count);
+ 			added->pos.newline =3D body->pos.newline;
+ 			added->pos.whitespace =3D body->pos.whitespace;
++			if (extra_whitespace) {
++				added->pos.whitespace =3D 1;
++				extra_whitespace =3D 0;
++			}
+ 			break;
+=20
+ 		case TOKEN_CONCAT:
+@@ -754,6 +821,10 @@ static struct token **substitute(struct token **list=
+, const struct token *body,
+ 			if (token_type(body) =3D=3D TOKEN_IDENT &&
+ 			    added->ident->tainted)
+ 				added->pos.noexpand =3D 1;
++			if (extra_whitespace) {
++				added->pos.whitespace =3D 1;
++				extra_whitespace =3D 0;
++			}
+ 			tail =3D &added->next;
+ 			break;
+ 		}
+@@ -776,6 +847,14 @@ static struct token **substitute(struct token **list=
+, const struct token *body,
+ 	return list;
+ }
+=20
++static struct token **substitute(struct token **list, const struct token=
+ *body,
++				 struct arg *args, int vararg_num)
++{
++	struct position base_pos =3D (*list)->pos;
++
++	return substitute_tokens(list, &base_pos, body, args, vararg_num);
++}
++
+ static bool parse_has_include(struct token **list, int how);
+ static bool parse_has_embed(struct token **list);
+=20
+@@ -811,8 +890,14 @@ static int expand(struct token **list, struct symbol=
+ *sym)
+ 	struct token **tail;
+ 	struct token *expansion =3D sym->expansion;
+ 	int nargs =3D sym->arglist ? sym->arglist->count.normal : 0;
++	int vararg_num =3D (sym->arglist && sym->arglist->count.vararg) ?
++				 (sym->arglist->count.normal - 1) :
++				 -1;
+ 	struct arg args[nargs ? nargs : 1];
+=20
++	if (nargs)
++		memset(args, 0, nargs * sizeof(args[0]));
++
+ 	if (expanding->tainted) {
+ 		token->pos.noexpand =3D 1;
+ 		return 1;
+@@ -855,7 +940,7 @@ static int expand(struct token **list, struct symbol =
+*sym)
+ 	expanding->tainted =3D 1;
+=20
+ 	last =3D token->next;
+-	tail =3D substitute(list, expansion, args);
++	tail =3D substitute(list, expansion, args, vararg_num);
+ 	/*
+ 	 * Note that it won't be eof - at least TOKEN_UNTAINT will be there.
+ 	 * We still can lose the newline flag if the sucker expands to nothing,
+@@ -2147,6 +2232,8 @@ static int handle_argv_include(struct stream *strea=
+m, struct token **list, struc
+ 	return handle_include_path(stream, list, token, 2);
+ }
+=20
++static int token_list_different(struct token *list1, struct token *list2=
+);
++
+ static int token_different(struct token *t1, struct token *t2)
+ {
+ 	int different;
+@@ -2164,6 +2251,10 @@ static int token_different(struct token *t1, struc=
+t token *t2)
+ 	case TOKEN_GNU_KLUDGE:
+ 		different =3D 0;
+ 		break;
++	case TOKEN_VA_OPT:
++	case TOKEN_STR_VA_OPT:
++		different =3D token_list_different(t1->target, t2->target);
++		break;
+ 	case TOKEN_NUMBER:
+ 		different =3D strcmp(t1->number, t2->number);
+ 		break;
+@@ -2240,6 +2331,8 @@ static struct token *parse_arguments(struct token *=
+list)
+ 	while (token_type(arg) =3D=3D TOKEN_IDENT) {
+ 		if (arg->ident =3D=3D &__VA_ARGS___ident)
+ 			goto Eva_args;
++		if (arg->ident =3D=3D &__VA_OPT___ident)
++			goto Eva_opt;
+ 		if (!++count->normal)
+ 			goto Eargs;
+ 		next =3D arg->next;
+@@ -2263,6 +2356,7 @@ static struct token *parse_arguments(struct token *=
+list)
+ 			if (match_op(next->next, ')')) {
+ 				set_arg_count(next);
+ 				next->count.vararg =3D 1;
++				count->vararg =3D 1;
+ 				next =3D next->next;
+ 				arg->next->next =3D &eof_token_entry;
+ 				return next->next;
+@@ -2290,6 +2384,7 @@ static struct token *parse_arguments(struct token *=
+list)
+ 			goto Eargs;
+ 		set_arg_count(next);
+ 		next->count.vararg =3D 1;
++		count->vararg =3D 1;
+ 		next =3D next->next;
+ 		arg->next->next =3D &eof_token_entry;
+ 		return next;
+@@ -2315,6 +2410,10 @@ Ebadstuff:
+ Enotclosed:
+ 	sparse_error(arg->pos, "missing ')' in macro parameter list");
+ 	return NULL;
++Eva_opt:
++	sparse_error(arg->pos,
++		     "__VA_OPT__ cannot appear in a macro parameter list");
++	return NULL;
+ Eva_args:
+ 	sparse_error(arg->pos, "__VA_ARGS__ can only appear in the expansion of=
+ a C99 variadic macro");
+ 	return NULL;
+@@ -2363,11 +2462,26 @@ static int try_arg(struct token *token, enum toke=
+n_type type, struct token *argl
+ 	return 0;
+ }
+=20
++static struct token *handle_va_opt(struct token **p, struct token *argli=
+st);
++static int parse_expansion_tokens(struct token **expansion_p,
++				  struct token *arglist);
++
+ static struct token *handle_hash(struct token **p, struct token *arglist=
+)
+ {
+ 	struct token *token =3D *p;
+ 	if (arglist) {
+ 		struct token *next =3D token->next;
++		if (token_type(next) =3D=3D TOKEN_IDENT &&
++		    next->ident =3D=3D &__VA_OPT___ident) {
++			next =3D handle_va_opt(&token->next, arglist);
++			if (!next)
++				return NULL;
++			token_type(next) =3D TOKEN_STR_VA_OPT;
++			next->pos.whitespace =3D token->pos.whitespace;
++			__free_token(token);
++			*p =3D next;
++			return next;
++		}
+ 		if (!try_arg(next, TOKEN_STR_ARGUMENT, arglist))
+ 			goto Equote;
+ 		next->pos.whitespace =3D token->pos.whitespace;
+@@ -2412,6 +2526,11 @@ static struct token *handle_hashhash(struct token =
+*token, struct token *arglist)
+ 			t =3D handle_hash(&concat->next, arglist);
+ 			if (!t)
+ 				return NULL;
++		} else if (token_type(t) =3D=3D TOKEN_IDENT &&
++			   t->ident =3D=3D &__VA_OPT___ident) {
++			t =3D handle_va_opt(&concat->next, arglist);
++			if (!t)
++				return NULL;
+ 		}
+=20
+ 		is_arg =3D try_arg(t, TOKEN_QUOTED_ARGUMENT, arglist);
+@@ -2437,43 +2556,146 @@ Econcat:
+ 	return NULL;
+ }
+=20
+-static struct token *parse_expansion(struct token *expansion, struct tok=
+en *arglist, struct ident *name)
++static struct token *handle_va_opt(struct token **p, struct token *argli=
+st)
+ {
+-	struct token *token =3D expansion;
++	struct token *token =3D *p;
++	struct token *lparen =3D token->next;
++	struct token *cur, *prev, *body;
++	int nesting =3D 1;
++
++	if (!arglist || !arglist->count.vararg) {
++		sparse_error(
++			token->pos,
++			"__VA_OPT__ can only appear in the expansion of a variadic macro");
++		return NULL;
++	}
++	if (!match_op(lparen, '(')) {
++		sparse_error(token->pos, "expected '(' after __VA_OPT__");
++		return NULL;
++	}
++	if (standard < STANDARD_C23 && Wpedantic)
++		warning(token->pos, "__VA_OPT__ is a C23 feature");
++
++	for (cur =3D arglist->next; !eof_token(cur); cur =3D cur->next->next) {
++		if (cur->next->count.vararg) {
++			if (!++cur->next->count.normal) {
++				sparse_error(
++					token->pos,
++					"too many instances of argument in body");
++				return NULL;
++			}
++			break;
++		}
 +	}
 +
- 	if (t2 !=3D TOKEN_IDENT && t2 !=3D TOKEN_NUMBER && t2 !=3D TOKEN_SPECIA=
-L)
- 		return TOKEN_ERROR;
++	prev =3D lparen;
++	for (cur =3D lparen->next; !eof_token(cur); prev =3D cur, cur =3D cur->=
+next) {
++		if (token_type(cur) =3D=3D TOKEN_IDENT &&
++		    cur->ident =3D=3D &__VA_OPT___ident) {
++			sparse_error(
++				cur->pos,
++				"__VA_OPT__ cannot appear within __VA_OPT__");
++			return NULL;
++		}
++		if (match_op(cur, '('))
++			nesting++;
++		else if (match_op(cur, ')')) {
++			if (!--nesting)
++				break;
++		}
++	}
++	if (nesting) {
++		sparse_error(token->pos, "unterminated __VA_OPT__");
++		return NULL;
++	}
++
++	/* cur is ')' */
++	if (lparen->next !=3D cur && match_op(lparen->next, SPECIAL_HASHHASH)) =
+{
++		sparse_error(
++			lparen->next->pos,
++			"'##' cannot appear at the beginning of __VA_OPT__");
++		return NULL;
++	}
++	if (prev !=3D lparen && match_op(prev, SPECIAL_HASHHASH)) {
++		sparse_error(prev->pos,
++			     "'##' cannot appear at the end of __VA_OPT__");
++		return NULL;
++	}
++
++	if (lparen->next =3D=3D cur) {
++		body =3D &eof_token_entry;
++	} else {
++		body =3D lparen->next;
++		prev->next =3D &eof_token_entry;
++		if (parse_expansion_tokens(&body, arglist) < 0)
++			return NULL;
++	}
++
++	token_type(token) =3D TOKEN_VA_OPT;
++	token->target =3D body;
++	token->next =3D cur->next;
++	__free_token(lparen);
++	__free_token(cur);
++	return token;
++}
++
++static int parse_expansion_tokens(struct token **expansion_p,
++				  struct token *arglist)
++{
++	struct token *token =3D *expansion_p;
+ 	struct token **p;
 =20
-@@ -592,12 +599,15 @@ static int merge(struct token *left, struct token *=
-right)
+ 	if (match_op(token, SPECIAL_HASHHASH))
+ 		goto Econcat;
 =20
- 	case TOKEN_WIDE_CHAR:
- 	case TOKEN_WIDE_STRING:
-+	case TOKEN_UTF8_CHAR:
-+	case TOKEN_UTF8_STRING:
- 		token_type(left) =3D res;
- 		left->pos.noexpand =3D 0;
- 		left->string =3D right->string;
- 		return 1;
-=20
- 	case TOKEN_WIDE_CHAR_EMBEDDED_0 ... TOKEN_WIDE_CHAR_EMBEDDED_3:
-+	case TOKEN_UTF8_CHAR_EMBEDDED_0 ... TOKEN_UTF8_CHAR_EMBEDDED_3:
- 		token_type(left) =3D res;
- 		left->pos.noexpand =3D 0;
- 		memcpy(left->embedded, right->embedded, 4);
-@@ -620,7 +630,9 @@ static struct token *dup_token(const struct token *to=
-ken, struct position *strea
- 	alloc->pos.stream =3D pos.stream;
- 	alloc->pos.line =3D pos.line;
- 	alloc->pos.pos =3D pos.pos;
--	if (token_type(alloc) =3D=3D TOKEN_STRING || token_type(alloc) =3D=3D T=
-OKEN_WIDE_STRING)
-+	if (token_type(alloc) =3D=3D TOKEN_STRING ||
-+	    token_type(alloc) =3D=3D TOKEN_WIDE_STRING ||
-+	    token_type(alloc) =3D=3D TOKEN_UTF8_STRING)
- 		token->string->immutable =3D 1;
- 	return alloc;=09
+-	for (p =3D &expansion; !eof_token(token); p =3D &token->next, token =3D=
+ *p) {
++	for (p =3D expansion_p; !eof_token(token); p =3D &token->next, token =3D=
+ *p) {
+ 		if (match_op(token, '#')) {
+ 			token =3D handle_hash(p, arglist);
+ 			if (!token)
+-				return NULL;
++				return -1;
++		} else if (token_type(token) =3D=3D TOKEN_IDENT &&
++			   token->ident =3D=3D &__VA_OPT___ident) {
++			token =3D handle_va_opt(p, arglist);
++			if (!token)
++				return -1;
+ 		}
+ 		if (match_op(token->next, SPECIAL_HASHHASH)) {
+ 			token =3D handle_hashhash(token, arglist);
+ 			if (!token)
+-				return NULL;
+-		} else {
++				return -1;
++		} else if (token_type(token) =3D=3D TOKEN_IDENT) {
+ 			try_arg(token, TOKEN_MACRO_ARGUMENT, arglist);
+ 		}
+ 		if (token_type(token) =3D=3D TOKEN_ERROR)
+ 			goto Earg;
+ 	}
++	return 0;
++
++Econcat:
++	sparse_error(token->pos,
++		     "'##' cannot appear at the ends of macro expansion");
++	return -1;
++Earg:
++	sparse_error(token->pos, "too many instances of argument in body");
++	return -1;
++}
++
++static struct token *parse_expansion(struct token *expansion, struct tok=
+en *arglist, struct ident *name)
++{
++	struct token *token;
++	struct token **p;
++
++	if (parse_expansion_tokens(&expansion, arglist) < 0)
++		return NULL;
++
++	for (p =3D &expansion; !eof_token(*p); p =3D &(*p)->next)
++		;
+ 	token =3D alloc_token(&expansion->pos);
+ 	token_type(token) =3D TOKEN_UNTAINT;
+ 	token->ident =3D name;
+ 	token->next =3D *p;
+ 	*p =3D token;
+ 	return expansion;
+-
+-Econcat:
+-	sparse_error(token->pos, "'##' cannot appear at the ends of macro expan=
+sion");
+-	return NULL;
+-Earg:
+-	sparse_error(token->pos, "too many instances of argument in body");
+-	return NULL;
  }
-@@ -2165,12 +2177,15 @@ static int token_different(struct token *t1, stru=
-ct token *t2)
- 		break;
- 	case TOKEN_CHAR_EMBEDDED_0 ... TOKEN_CHAR_EMBEDDED_3:
- 	case TOKEN_WIDE_CHAR_EMBEDDED_0 ... TOKEN_WIDE_CHAR_EMBEDDED_3:
-+	case TOKEN_UTF8_CHAR_EMBEDDED_0 ... TOKEN_UTF8_CHAR_EMBEDDED_3:
- 		different =3D memcmp(t1->embedded, t2->embedded, 4);
- 		break;
- 	case TOKEN_CHAR:
- 	case TOKEN_WIDE_CHAR:
-+	case TOKEN_UTF8_CHAR:
- 	case TOKEN_STRING:
--	case TOKEN_WIDE_STRING: {
-+	case TOKEN_WIDE_STRING:
-+	case TOKEN_UTF8_STRING: {
- 		struct string *s1, *s2;
 =20
- 		s1 =3D t1->string;
+ static int do_define(struct position pos, struct token *token, struct id=
+ent *name,
+@@ -2482,6 +2704,12 @@ static int do_define(struct position pos, struct t=
+oken *token, struct ident *nam
+ 	struct symbol *sym;
+ 	int ret =3D 1;
+=20
++	if (name =3D=3D &__VA_ARGS___ident || name =3D=3D &__VA_OPT___ident) {
++		sparse_error(pos, "\"%s\" cannot be used as a macro name",
++			     show_ident(name));
++		return 1;
++	}
++
+ 	expansion =3D parse_expansion(expansion, arglist, name);
+ 	if (!expansion)
+ 		return 1;
+@@ -2656,6 +2884,13 @@ static int do_handle_undef(struct stream *stream, =
+struct token **line, struct to
+ 		return 1;
+ 	}
+=20
++	if (left->ident =3D=3D &__VA_ARGS___ident ||
++	    left->ident =3D=3D &__VA_OPT___ident) {
++		warning(token->pos, "undefining \"%s\"",
++			show_ident(left->ident));
++		return 1;
++	}
++
+ 	sym =3D lookup_symbol(left->ident, NS_MACRO | NS_UNDEF);
+ 	if (sym) {
+ 		if (attr < sym->attr)
+@@ -3597,6 +3832,44 @@ static int is_VA_ARGS_token(struct token *token)
+ 		(token->ident =3D=3D &__VA_ARGS___ident);
+ }
+=20
++static void dump_macro_tokens(struct token *token, struct token **args,
++			      bool top_level)
++{
++	bool first =3D !top_level;
++
++	while (top_level ? token_type(token) !=3D TOKEN_UNTAINT :
++			   !eof_token(token)) {
++		struct token *next =3D token->next;
++
++		if (!first && token->pos.whitespace)
++			putchar(' ');
++		first =3D false;
++		switch (token_type(token)) {
++		case TOKEN_CONCAT:
++			printf("##");
++			break;
++		case TOKEN_STR_VA_OPT:
++			printf("#");
++			/* fall-through */
++		case TOKEN_VA_OPT:
++			printf("__VA_OPT__(");
++			dump_macro_tokens(token->target, args, false);
++			putchar(')');
++			break;
++		case TOKEN_STR_ARGUMENT:
++			printf("#");
++			/* fall-through */
++		case TOKEN_QUOTED_ARGUMENT:
++		case TOKEN_MACRO_ARGUMENT:
++			token =3D args[token->argnum];
++			/* fall-through */
++		default:
++			printf("%s", show_token(token));
++		}
++		token =3D next;
++	}
++}
++
+ static void dump_macro(struct symbol *sym)
+ {
+ 	int nargs =3D sym->arglist ? sym->arglist->count.normal : 0;
+@@ -3622,27 +3895,7 @@ static void dump_macro(struct symbol *sym)
+ 		putchar(')');
+ 	}
+=20
+-	token =3D sym->expansion;
+-	while (token_type(token) !=3D TOKEN_UNTAINT) {
+-		struct token *next =3D token->next;
+-		if (token->pos.whitespace)
+-			putchar(' ');
+-		switch (token_type(token)) {
+-		case TOKEN_CONCAT:
+-			printf("##");
+-			break;
+-		case TOKEN_STR_ARGUMENT:
+-			printf("#");
+-			/* fall-through */
+-		case TOKEN_QUOTED_ARGUMENT:
+-		case TOKEN_MACRO_ARGUMENT:
+-			token =3D args[token->argnum];
+-			/* fall-through */
+-		default:
+-			printf("%s", show_token(token));
+-		}
+-		token =3D next;
+-	}
++	dump_macro_tokens(sym->expansion, args, true);
+ 	putchar('\n');
+ }
+=20
 diff --git a/token.h b/token.h
-index 8c8a496bee89..b421f166f1f7 100644
+index b421f166f1f7..998d83a123c9 100644
 --- a/token.h
 +++ b/token.h
-@@ -94,8 +94,14 @@ enum token_type {
- 	TOKEN_WIDE_CHAR_EMBEDDED_1,
- 	TOKEN_WIDE_CHAR_EMBEDDED_2,
- 	TOKEN_WIDE_CHAR_EMBEDDED_3,
-+	TOKEN_UTF8_CHAR,
-+	TOKEN_UTF8_CHAR_EMBEDDED_0,
-+	TOKEN_UTF8_CHAR_EMBEDDED_1,
-+	TOKEN_UTF8_CHAR_EMBEDDED_2,
-+	TOKEN_UTF8_CHAR_EMBEDDED_3,
- 	TOKEN_STRING,
- 	TOKEN_WIDE_STRING,
-+	TOKEN_UTF8_STRING,
- 	TOKEN_SPECIAL,
- 	TOKEN_STREAMBEGIN,
- 	TOKEN_STREAMEND,
+@@ -110,6 +110,8 @@ enum token_type {
+ 	TOKEN_QUOTED_ARGUMENT,
+ 	TOKEN_CONCAT,
+ 	TOKEN_GNU_KLUDGE,
++	TOKEN_VA_OPT,
++	TOKEN_STR_VA_OPT,
+ 	TOKEN_UNTAINT,
+ 	TOKEN_ARG_COUNT,
+ 	TOKEN_IF,
+@@ -200,6 +202,7 @@ struct token {
+ 		int argnum;
+ 		struct argcount count;
+ 		char embedded[4];
++		struct token *target;
+ 	};
+ };
+=20
 diff --git a/tokenize.c b/tokenize.c
-index b0d4059c8782..4ac40e9e1506 100644
+index 4ac40e9e1506..775c54667af7 100644
 --- a/tokenize.c
 +++ b/tokenize.c
-@@ -152,12 +152,16 @@ const char *show_string(const struct string *string=
-)
- 	return buffer;
- }
+@@ -265,6 +265,12 @@ const char *show_token(const struct token *token)
+ 		sprintf(buffer, "<argcnt>");
+ 		return buffer;
 =20
--static const char *show_char(const char *s, size_t len, char prefix, cha=
-r delim)
-+static const char *show_char(const char *s, size_t len, const char *pref=
-ix,
-+			     char delim)
- {
--	static char buffer[MAX_STRING + 4];
-+	static char buffer[MAX_STRING + 8];
- 	char *p =3D buffer;
--	if (prefix)
--		*p++ =3D prefix;
-+	if (prefix) {
-+		size_t plen =3D strlen(prefix);
-+		memcpy(p, prefix, plen);
-+		p +=3D plen;
-+	}
- 	*p++ =3D delim;
- 	memcpy(p, s, len);
- 	p +=3D len;
-@@ -166,13 +170,17 @@ static const char *show_char(const char *s, size_t =
-len, char prefix, char delim)
- 	return buffer;
- }
++	case TOKEN_VA_OPT:
++		return "__VA_OPT__(...)";
++
++	case TOKEN_STR_VA_OPT:
++		return "#__VA_OPT__(...)";
++
+ 	case TOKEN_GNU_KLUDGE:
+ 		return ",";
 =20
--static const char *quote_char(const char *s, size_t len, char prefix, ch=
-ar delim)
-+static const char *quote_char(const char *s, size_t len, const char *pre=
-fix,
-+			      char delim)
- {
--	static char buffer[2*MAX_STRING + 6];
-+	static char buffer[2 * MAX_STRING + 8];
- 	size_t i;
- 	char *p =3D buffer;
--	if (prefix)
--		*p++ =3D prefix;
-+	if (prefix) {
-+		size_t plen =3D strlen(prefix);
-+		memcpy(p, prefix, plen);
-+		p +=3D plen;
-+	}
- 	if (delim =3D=3D '"')
- 		*p++ =3D '\\';
- 	*p++ =3D delim;
-@@ -211,24 +219,35 @@ const char *show_token(const struct token *token)
- 	case TOKEN_SPECIAL:
- 		return show_special(token->special);
-=20
--	case TOKEN_CHAR:=20
--		return show_char(token->string->data,
--			token->string->length - 1, 0, '\'');
-+	case TOKEN_CHAR:
-+		return show_char(token->string->data, token->string->length - 1,
-+				 NULL, '\'');
- 	case TOKEN_CHAR_EMBEDDED_0 ... TOKEN_CHAR_EMBEDDED_3:
- 		return show_char(token->embedded,
--			token_type(token) - TOKEN_CHAR, 0, '\'');
--	case TOKEN_WIDE_CHAR:=20
--		return show_char(token->string->data,
--			token->string->length - 1, 'L', '\'');
-+				 token_type(token) - TOKEN_CHAR, NULL, '\'');
-+	case TOKEN_WIDE_CHAR:
-+		return show_char(token->string->data, token->string->length - 1,
-+				 "L", '\'');
- 	case TOKEN_WIDE_CHAR_EMBEDDED_0 ... TOKEN_WIDE_CHAR_EMBEDDED_3:
- 		return show_char(token->embedded,
--			token_type(token) - TOKEN_WIDE_CHAR, 'L', '\'');
--	case TOKEN_STRING:=20
--		return show_char(token->string->data,
--			token->string->length - 1, 0, '"');
--	case TOKEN_WIDE_STRING:=20
--		return show_char(token->string->data,
--			token->string->length - 1, 'L', '"');
-+				 token_type(token) - TOKEN_WIDE_CHAR, "L",
-+				 '\'');
-+	case TOKEN_UTF8_CHAR:
-+		return show_char(token->string->data, token->string->length - 1,
-+				 "u8", '\'');
-+	case TOKEN_UTF8_CHAR_EMBEDDED_0 ... TOKEN_UTF8_CHAR_EMBEDDED_3:
-+		return show_char(token->embedded,
-+				 token_type(token) - TOKEN_UTF8_CHAR, "u8",
-+				 '\'');
-+	case TOKEN_STRING:
-+		return show_char(token->string->data, token->string->length - 1,
-+				 NULL, '"');
-+	case TOKEN_WIDE_STRING:
-+		return show_char(token->string->data, token->string->length - 1,
-+				 "L", '"');
-+	case TOKEN_UTF8_STRING:
-+		return show_char(token->string->data, token->string->length - 1,
-+				 "u8", '"');
-=20
- 	case TOKEN_STREAMBEGIN:
- 		snprintf(buffer, sizeof(buffer), "<beginning of '%s'>", stream_name(to=
-ken->pos.stream));
-@@ -273,24 +292,35 @@ const char *quote_token(const struct token *token)
- 	case TOKEN_SPECIAL:
- 		return show_special(token->special);
-=20
--	case TOKEN_CHAR:=20
-+	case TOKEN_CHAR:
+@@ -321,6 +327,10 @@ const char *quote_token(const struct token *token)
+ 	case TOKEN_UTF8_STRING:
  		return quote_char(token->string->data,
--			token->string->length - 1, 0, '\'');
-+				  token->string->length - 1, NULL, '\'');
- 	case TOKEN_CHAR_EMBEDDED_0 ... TOKEN_CHAR_EMBEDDED_3:
- 		return quote_char(token->embedded,
--			token_type(token) - TOKEN_CHAR, 0, '\'');
--	case TOKEN_WIDE_CHAR:=20
-+				  token_type(token) - TOKEN_CHAR, NULL, '\'');
-+	case TOKEN_WIDE_CHAR:
- 		return quote_char(token->string->data,
--			token->string->length - 1, 'L', '\'');
-+				  token->string->length - 1, "L", '\'');
- 	case TOKEN_WIDE_CHAR_EMBEDDED_0 ... TOKEN_WIDE_CHAR_EMBEDDED_3:
- 		return quote_char(token->embedded,
--			token_type(token) - TOKEN_WIDE_CHAR, 'L', '\'');
--	case TOKEN_STRING:=20
-+				  token_type(token) - TOKEN_WIDE_CHAR, "L",
-+				  '\'');
-+	case TOKEN_UTF8_CHAR:
-+		return quote_char(token->string->data,
-+				  token->string->length - 1, "u8", '\'');
-+	case TOKEN_UTF8_CHAR_EMBEDDED_0 ... TOKEN_UTF8_CHAR_EMBEDDED_3:
-+		return quote_char(token->embedded,
-+				  token_type(token) - TOKEN_UTF8_CHAR, "u8",
-+				  '\'');
-+	case TOKEN_STRING:
-+		return quote_char(token->string->data,
-+				  token->string->length - 1, NULL, '"');
-+	case TOKEN_WIDE_STRING:
- 		return quote_char(token->string->data,
--			token->string->length - 1, 0, '"');
--	case TOKEN_WIDE_STRING:=20
-+				  token->string->length - 1, "L", '"');
-+	case TOKEN_UTF8_STRING:
- 		return quote_char(token->string->data,
--			token->string->length - 1, 'L', '"');
-+				  token->string->length - 1, "u8", '"');
+ 				  token->string->length - 1, "u8", '"');
++	case TOKEN_VA_OPT:
++		return "__VA_OPT__(...)";
++	case TOKEN_STR_VA_OPT:
++		return "#__VA_OPT__(...)";
  	case TOKEN_GNU_KLUDGE:
  		return ",";
  	default:
-@@ -979,6 +1009,14 @@ static int get_one_identifier(int c, stream_t *stre=
-am)
- 				return eat_string(nextchar(stream), stream,
- 							TOKEN_WIDE_STRING);
- 		}
-+		if (len =3D=3D 2 && buf[0] =3D=3D 'u' && buf[1] =3D=3D '8') {
-+			if (next =3D=3D '\'')
-+				return eat_string(nextchar(stream), stream,
-+						  TOKEN_UTF8_CHAR);
-+			else
-+				return eat_string(nextchar(stream), stream,
-+						  TOKEN_UTF8_STRING);
-+		}
- 	}
- 	hash =3D ident_hash_end(hash);
- 	ident =3D create_hashed_ident(buf, len, hash);
-diff --git a/validation/c23-u8-char-error.c b/validation/c23-u8-char-erro=
-r.c
+diff --git a/validation/c23-va-opt.c b/validation/c23-va-opt.c
 new file mode 100644
-index 000000000000..da03b604e8cd
+index 000000000000..bef475812fdd
 --- /dev/null
-+++ b/validation/c23-u8-char-error.c
-@@ -0,0 +1,16 @@
-+static unsigned char e1 =3D u8'';
-+static unsigned char e2 =3D u8'ab';
-+static unsigned char e3 =3D u8'\u00e9';
-+static const void *e4 =3D u8"a" L"b";
++++ b/validation/c23-va-opt.c
+@@ -0,0 +1,36 @@
++#define EMPTY
++#define COUNT_VA(...) 0 __VA_OPT__(+1)
++static_assert(COUNT_VA() =3D=3D 0, "empty");
++static_assert(COUNT_VA(EMPTY) =3D=3D 0, "empty macro");
++static_assert(COUNT_VA(x) =3D=3D 1, "one");
++static_assert(COUNT_VA(x, y) =3D=3D 1, "two");
 +
-+/*
-+ * check-name: c23-u8-char-error
-+ * check-command: sparse -std=3Dc23 $file
-+ *
-+ * check-error-start
-+c23-u8-char-error.c:1:27: error: empty character constant
-+c23-u8-char-error.c:2:27: error: multi-character UTF-8 character constan=
-t
-+c23-u8-char-error.c:3:27: error: multi-character UTF-8 character constan=
-t
-+c23-u8-char-error.c:4:25: error: unsupported non-standard concatenation =
-of string literals
-+ * check-error-end
-+ */
-diff --git a/validation/c23-u8-char-pedantic.c b/validation/c23-u8-char-p=
-edantic.c
-new file mode 100644
-index 000000000000..8c2fbbaeecf6
---- /dev/null
-+++ b/validation/c23-u8-char-pedantic.c
-@@ -0,0 +1,10 @@
-+static int x =3D u8'a';
++#define ADD_OPT(x, ...) (x __VA_OPT__(+__VA_ARGS__))
++static_assert(ADD_OPT(10) =3D=3D 10, "add 1");
++static_assert(ADD_OPT(10, 20) =3D=3D 30, "add 2");
 +
-+/*
-+ * check-name: c23-u8-char-pedantic
-+ * check-command: sparse -std=3Dc11 -Wpedantic $file
-+ *
-+ * check-error-start
-+c23-u8-char-pedantic.c:1:16: warning: UTF-8 character constants are a C2=
-3 feature
-+ * check-error-end
-+ */
-diff --git a/validation/c23-u8-char-warn.c b/validation/c23-u8-char-warn.=
-c
-new file mode 100644
-index 000000000000..2ccf459e01f3
---- /dev/null
-+++ b/validation/c23-u8-char-warn.c
-@@ -0,0 +1,14 @@
-+static unsigned char w1 =3D u8'\x100';
-+static const char *w2 =3D u8"test";
++#define STR_OPT(...) #__VA_OPT__(__VA_ARGS__)
++static_assert(sizeof(STR_OPT()) =3D=3D 1, "str empty");
++static_assert(sizeof(STR_OPT(EMPTY)) =3D=3D 1, "str empty macro");
++static_assert(sizeof(STR_OPT(abc)) =3D=3D 4, "str abc");
 +
-+/*
-+ * check-name: c23-u8-char-warn
-+ * check-command: sparse -std=3Dc23 $file
-+ *
-+ * check-error-start
-+c23-u8-char-warn.c:1:27: warning: hex escape sequence out of range
-+c23-u8-char-warn.c:2:25: warning: incorrect type in initializer (differe=
-nt signedness)
-+c23-u8-char-warn.c:2:25:    expected char const *static [toplevel] w2
-+c23-u8-char-warn.c:2:25:    got unsigned char *
-+ * check-error-end
-+ */
-diff --git a/validation/c23-u8-char.c b/validation/c23-u8-char.c
-new file mode 100644
-index 000000000000..60e0c2a02e36
---- /dev/null
-+++ b/validation/c23-u8-char.c
-@@ -0,0 +1,37 @@
-+static_assert(sizeof(u8'a') =3D=3D 1, "sizeof u8 char");
-+static_assert(u8'a' =3D=3D 97, "value u8 char");
-+static_assert(u8'\0' =3D=3D 0, "u8 nul");
-+static_assert(u8'\xff' =3D=3D 255, "u8 0xff is unsigned");
-+static_assert(u8'\u0041' =3D=3D 65, "u8 UCN ASCII");
-+static_assert(_Generic(u8'a', unsigned char: 1, char: 0, int: 0, default=
-: 0) =3D=3D 1,
-+	      "type u8 char");
++#define PASTE_OPT(p, ...) p ## __VA_OPT__(_ok)
++enum { val =3D 10, val_ok =3D 20 };
++static_assert(PASTE_OPT(val) =3D=3D 10, "paste empty");
++static_assert(PASTE_OPT(val, 1) =3D=3D 20, "paste non-empty");
 +
-+static_assert(sizeof(u8"hello") =3D=3D 6, "sizeof u8 string");
-+static_assert(sizeof(u8"\u00e9") =3D=3D 3, "sizeof 2-byte UTF-8 UCN stri=
-ng");
-+static_assert(sizeof(u8"\U0001F600") =3D=3D 5, "sizeof 4-byte UTF-8 UCN =
-string");
-+static_assert(sizeof(u8"ab" "cd") =3D=3D 5, "concat u8 + narrow");
-+static_assert(sizeof("ab" u8"cd") =3D=3D 5, "concat narrow + u8");
-+static_assert(_Generic(u8"hello", unsigned char *: 1, char *: 0, default=
-: 0) =3D=3D 1,
-+	      "u8 string decays to unsigned char *");
-+static_assert(_Generic("ab" u8"cd", unsigned char *: 1, char *: 0, defau=
-lt: 0) =3D=3D 1,
-+	      "narrow + u8 string decays to unsigned char *");
-+
-+static const unsigned char c =3D u8'z';
-+static const unsigned char *s =3D u8"test";
-+static char s1[] =3D u8"abc";
-+static unsigned char s2[] =3D u8"abc";
-+static signed char s3[] =3D u8"abc";
-+
-+#define CAT(a, b) a##b
-+static const unsigned char c2 =3D CAT(u8, 'x');
-+static const unsigned char *s_cat =3D CAT(u8, "yz");
-+
-+static int use_vars(void)
++static int foo(int a, ...)
 +{
-+	return c + s[0] + s1[0] + s2[0] + s3[0] + c2 + s_cat[0];
++	return a;
++}
++
++#define CALL_FOO(...) foo(0 __VA_OPT__(, __VA_ARGS__))
++static int test(void)
++{
++	return CALL_FOO() + CALL_FOO(1) + CALL_FOO(1, 2);
 +}
 +
 +/*
-+ * check-name: c23-u8-char
-+ * check-command: sparse -std=3Dc23 -pedantic $file
++ * check-name: c23-va-opt-compile
++ * check-command: sparse -std=3Dc23 -Wno-decl $file
++ */
+diff --git a/validation/preprocessor/c23-va-opt-error.c b/validation/prep=
+rocessor/c23-va-opt-error.c
+new file mode 100644
+index 000000000000..c494bc6f2a16
+--- /dev/null
++++ b/validation/preprocessor/c23-va-opt-error.c
+@@ -0,0 +1,31 @@
++#define BAD0 __VA_OPT__(1)
++#define BAD1(x) __VA_OPT__(x)
++#define BAD2(...) __VA_OPT__
++#define BAD3(...) __VA_OPT__(1
++#define BAD4(...) __VA_OPT__(__VA_OPT__(1))
++#define BAD5(...) __VA_OPT__(##x)
++#define BAD6(...) __VA_OPT__(x##)
++#define BAD7(__VA_OPT__) 1
++#define __VA_OPT__ 1
++
++/*
++ * check-name: c23-va-opt-error
++ * check-command: sparse -std=3Dc23 -E $file
++ *
++ * check-output-start
++
++
++ * check-output-end
++ *
++ * check-error-start
++preprocessor/c23-va-opt-error.c:1:14: error: __VA_OPT__ can only appear =
+in the expansion of a variadic macro
++preprocessor/c23-va-opt-error.c:2:17: error: __VA_OPT__ can only appear =
+in the expansion of a variadic macro
++preprocessor/c23-va-opt-error.c:3:19: error: expected '(' after __VA_OPT=
+__
++preprocessor/c23-va-opt-error.c:4:19: error: unterminated __VA_OPT__
++preprocessor/c23-va-opt-error.c:5:30: error: __VA_OPT__ cannot appear wi=
+thin __VA_OPT__
++preprocessor/c23-va-opt-error.c:6:30: error: '##' cannot appear at the b=
+eginning of __VA_OPT__
++preprocessor/c23-va-opt-error.c:7:31: error: '##' cannot appear at the e=
+nd of __VA_OPT__
++preprocessor/c23-va-opt-error.c:8:14: error: __VA_OPT__ cannot appear in=
+ a macro parameter list
++preprocessor/c23-va-opt-error.c:9:9: error: "__VA_OPT__" cannot be used =
+as a macro name
++ * check-error-end
++ */
+diff --git a/validation/preprocessor/c23-va-opt.c b/validation/preprocess=
+or/c23-va-opt.c
+new file mode 100644
+index 000000000000..b2318faf298f
+--- /dev/null
++++ b/validation/preprocessor/c23-va-opt.c
+@@ -0,0 +1,73 @@
++#define LOG(fmt, ...) printf(fmt __VA_OPT__(, __VA_ARGS__))
++LOG("empty")
++LOG("empty", )
++LOG("one", 1)
++LOG("two", 1, 2)
++
++#define M(...) __VA_OPT__(1) 2 __VA_OPT__(3)
++M()
++M(a)
++
++#define N(...) __VA_OPT__(foo(bar(baz)))
++N()
++N(1)
++
++#define G(a, b, ...) a b __VA_OPT__(c)
++G(1, 2)
++G(1, 2, )
++G(1, 2, 3)
++
++#define EMPTY
++#define VA_ORDER1(...) __VA_ARGS__ __VA_OPT__(opt)
++#define VA_ORDER2(...) __VA_OPT__(opt) __VA_ARGS__
++VA_ORDER1()
++VA_ORDER2()
++VA_ORDER1(EMPTY)
++VA_ORDER2(EMPTY)
++
++#define K 42
++#define X hello
++#define S(a, ...) #__VA_OPT__(a K __VA_ARGS__)
++S(X)
++S(X, Y)
++S(X, K)
++
++#define PASTE_L(x, ...) x ## __VA_OPT__(_suffix)
++#define PASTE_R(y, ...) __VA_OPT__(prefix_) ## y
++PASTE_L(foo)
++PASTE_L(foo, 1)
++PASTE_R(bar)
++PASTE_R(bar, 1)
++
++#define FN(v) ((v) + 1)
++#define CALL(...) __VA_OPT__(FN)(10)
++CALL()
++CALL(1)
++
++/*
++ * check-name: c23-va-opt
++ * check-command: sparse -std=3Dc23 -E $file
++ *
++ * check-output-start
++
++printf("empty" )
++printf("empty" )
++printf("one" , 1)
++printf("two" , 1, 2)
++2
++1 2 3
++foo(bar(baz))
++1 2
++1 2
++1 2 c
++""
++"hello K Y"
++"hello K 42"
++foo
++foo_suffix
++bar
++prefix_bar
++(10)
++((10) + 1)
++ * check-output-end
 + */
