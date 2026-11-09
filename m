@@ -1,70 +1,70 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=199.89.1.14
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794256439;
-	b=3clQ6Ibh2dCFJvViCh3wdKVOLWTdVdUo6Ikd/w1Muf/6xJbbDkfQj0DGBuUjHt9dikI+
-	 r5k7AleehTDh111W6+CoAFbiPiiZvAJwz2LTKgE8SaHu6OJWYjNpAaxNuNBRmM3IxzHJj
-	 gA/AmGrKF1+dnDHaZMv7PyLeNnaxSyTjyn9GU0is+Ec3nADAtdKmNHJFp8aZi7/2lZ2P+
-	 tUkVTC8SguRWgNSsweYNO3fEuJRX8ls5+saklKUKo57VLKaGu2Hsay/v17dcKce3+4loO
-	 vLhDThYpmV/VWSTCZN7D1kyiBdMLkaGEQQkpeKY7uaDQvF9qtUuxLs3mOXOX5Bq6lhQ==
+	t=1794256440;
+	b=w0NWCIOfZpRESLZ+ZIJ5g3kpz/PCVL1jGOqmACpMu/a7y3B0Tqqxv4XPDXCSXNoRXYnW
+	 iLUbUNvzI7dGIpeq8NWoX4OGm5TW/uWFr8nn24n7htwmQo0UsSsiUwaPQ6Mj/PkyoZBu9
+	 JOfr7nNgu8bxIVwXybfFAufEAhC9sHpB7YlFhLxVfJ3UcFrxaskB68cZnDz7+jlUuG+gW
+	 nytbJLZbjQTUjU1HfuYE7gzEV4faQGqN39wM+QzlFu3j54eVh0iq6BiDRt6k8Ni6D6WW5
+	 wqzPXeShTlJvDvOxcEta4y8+hFPftPGarngmmwAO3SnLxGp5WWv7yRYcNU8OYNjZ3Qw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794256439;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794256440;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Virus-Scanned:Received:
 	 Received:From:To:Cc:Subject:Date:Message-ID:X-Mailer:In-Reply-To:
 	 References:MIME-Version:Content-Transfer-Encoding;
-	bh=Y1u8L0oBsM4YtANH+6u6MHR9FfKSGwm6c3ZrFO5iCW0=;
-	b=hFgonjTool/lOH3fNI8iW1vO2NYiJIhB+I8p9FayUDnjxywv1yGU5GTN4ggxxgWNxB5A
-	 Hu/cP1ElVuUFKePf7L86mMItATPqQyMUNWUHrBoTq6Dim/sihGbSTNwLDnAsoZEnFjusr
-	 hNyqDcryK2bMUAFk4sdMADBK7rJ7RmUzdTZh5FbzmHFLhCZjtsMLXmWqfoh2cC2i0aAwC
-	 VXijNY7WlnztfoTxOtyPwj7mNua5SKD+k73elDYrcFof4beYaWexLUemn4ZJ09iszdy5O
-	 /tELoJG1w8SW/hxDXjqff2BHLRbqFR1JMEzmfBhVleU4iGbbTKEJ3s71CsGeDvkCkGQ==
+	bh=w8TvLavYFfyjdvkH778s6W0pZm7aJmklVKoQ/TEWObo=;
+	b=wFl0QnD57cAGbJbkTi5YDvBX7oiTnR2wo5Ka/xmiglKZlMMRHCfyIwXUNpNooQY+tpvN
+	 gnmGJ+uqQ1MGFW/HPVQuYW+YAq8z9Va7vW48SStZdJ2CLlHLKfho8fJyrIJp3lzrKlqZZ
+	 i1Zvxiww8QnMK0uV4Sdlsz/acyjlVEOU7rICAlQi8qCsB6VtHbq9j3FFqE4QFJTItdl8h
+	 ztT9IICOhcQ+B1F/TbBN429nVOhWZse0BJpVJAnxltExHbtTx3trkC97iS4VFsGXdnVAj
+	 PIWX/uuH5igSk5zeFWvS7UiSIZm0EIVEHZw2uRvS1qWZz+72zw+MBgfktvJc9V7sfXw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=acm.org;
 	spf=pass smtp.mailfrom=acm.org;
-	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=V3+jr91M;
+	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=SdGj3d3k;
 	arc=none smtp.remote-ip=199.89.1.14
 Received: from 011.lax.mailroute.net (011.lax.mailroute.net [199.89.1.14])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C5BBB606A325
-	for <linux-sparse@vger.kernel.org>; Mon,  9 Nov 2026 20:33:58 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org C5BBB606A325
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 629EB606A326
+	for <linux-sparse@vger.kernel.org>; Mon,  9 Nov 2026 20:33:59 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 629EB606A326
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=acm.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=V3+jr91M
+	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=SdGj3d3k
 Received: from localhost (localhost [127.0.0.1])
-	by 011.lax.mailroute.net (Postfix) with ESMTP id 4jNhML63Jfz1XM0nk;
+	by 011.lax.mailroute.net (Postfix) with ESMTP id 4jNhML6GTJz1XMYJX;
 	Mon,  9 Nov 2026 20:33:50 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=acm.org; h=
 	content-transfer-encoding:mime-version:references:in-reply-to
 	:x-mailer:message-id:date:date:subject:subject:from:from
-	:received:received; s=mr01; t=1794256417; x=1796848418; bh=Y1u8L
-	0oBsM4YtANH+6u6MHR9FfKSGwm6c3ZrFO5iCW0=; b=V3+jr91MNQ2VOyoFHWkcO
-	Qc898gWD1zGUq/oMzr4l8LMcCyykO3CKJfm7HQRc7fxDVNNhpVhzbYUuYkLwFrDb
-	DxWV3lICTq+TnXAUXeXZW0ZkMn9xEefrqhdzlLPNdrZMhz987VvMRPZ/JUA0sjQz
-	3Tf1c0z+CKMKE7iFnViWaPp3G/xi2w8ALQMhPLag1Hw6ouGgtdRP8VCRoQLoGxvm
-	Grd7U7XyHxKBoyonSJxkohzD+HhX4xC/+r+hz3rukaeSNaqyZZZFvm5eFSWvEP6T
-	AeSeEfULptUBRSUr9FoWgAfyDrnf9hpQnaEQKyozN8vlTBOlfJyoSrbp50AXWx++
-	g==
+	:received:received; s=mr01; t=1794256416; x=1796848417; bh=w8TvL
+	avYFfyjdvkH778s6W0pZm7aJmklVKoQ/TEWObo=; b=SdGj3d3kdKo5ccwMkXc3A
+	5jcicygHO/S0y8BHD7CEf6iHep9R/dhvKzP/JakUugxgy9wP1qMBeuOjK4sT7CQe
+	MkuZGqxlR1rM/PJFLUS4BR7e8Hh2bA3mzh9rmGuhpFH8NIsuWln5uoPgW6FGHvc2
+	pGRCf0/zs/Zm0GGMrL0Z8oAhONUCQkYF8wEqYXsaSyPezkjzfk3xo2N4zG/oCJ8m
+	VqOwUVXZ00//QqWzmqJkz43p2VWPuhws8ajhl0IcRZVB1LgY0JVdhRfKNpWAUFqn
+	dbxlDqmV34LblmUBts5mrCRtqz4uBn3HlrJOMM83ED5Vg56ZaDl1vZFubxYROFx/
+	w==
 X-Virus-Scanned: by MailRoute
 Received: from 011.lax.mailroute.net ([127.0.0.1])
  by localhost (011.lax [127.0.0.1]) (mroute_mailscanner, port 10029) with LMTP
- id K6Q1C1rizeyp; Mon,  9 Nov 2026 20:33:37 +0000 (UTC)
+ id J0w7sVSBeo_U; Mon,  9 Nov 2026 20:33:36 +0000 (UTC)
 Received: from bvanassche.c.googlers.com.com (57.237.82.34.bc.googleusercontent.com [34.82.237.57])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
 	(Authenticated sender: bvanassche@acm.org)
-	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4jNhM36BPsz1XMYJH;
-	Mon,  9 Nov 2026 20:33:35 +0000 (UTC)
+	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4jNhM20kHlz1XM6J7;
+	Mon,  9 Nov 2026 20:33:34 +0000 (UTC)
 From: Bart Van Assche <bvanassche@acm.org>
 To: linux-sparse@vger.kernel.org
 Cc: Linus Torvalds <torvalds@linux-foundation.org>,
 	Bart Van Assche <bvanassche@acm.org>
-Subject: [PATCH 52/73] c23: Support standard [[]] attribute syntax
-Date: Mon,  9 Nov 2026 12:32:38 -0800
-Message-ID: <20261109203259.362845-53-bvanassche@acm.org>
+Subject: [PATCH 44/73] c23: Add support for nullptr and nullptr_t
+Date: Mon,  9 Nov 2026 12:32:30 -0800
+Message-ID: <20261109203259.362845-45-bvanassche@acm.org>
 X-Mailer: git-send-email 2.56.0.506.g506a7eabc5-goog
 In-Reply-To: <20261109203259.362845-1-bvanassche@acm.org>
 References: <20261109203259.362845-1-bvanassche@acm.org>
@@ -79,878 +79,972 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
 
-Parse C23 '[[]]' attribute specifier sequences across declarations,
-declarators, types, structs, enums, parameters, labels, and statements
-per ISO C23 6.7.12:
-- Map standard attributes (nodiscard, maybe_unused, deprecated,
-  fallthrough, noreturn, _Noreturn, reproducible, unsequenced) and
-  gnu::/__gnu__:: scoped attributes to their Sparse modifiers, while
-  ignoring unknown vendor-scoped attributes cleanly.
-- Support '[[]]' attributes after declarator identifiers and after
-  function parameter lists without misapplying function modifiers to
-  pointer declarators.
-- Distinguish attributed case and default labels from named goto labels
-  inside switch statements, and warn under -Wpedantic in pre-C23 modes.
+Introduce the reserved C23 nullptr keyword and a dedicated nullptr_ctype
+base type representing nullptr_t per ISO C23 6.2.5 and 6.3.2.3:
+- Evaluate nullptr as an address constant of type nullptr_ctype rather
+  than an integer constant expression, rejecting nullptr in array bounds,
+  enumerators, and switch controlling expressions.
+- Support implicit and explicit conversions from nullptr_t expressions to
+  any pointer type and bool, equality comparisons with pointers and null
+  pointer constants, conditional expressions, _Generic associations, and
+  variadic arguments, while rejecting relational comparisons, arithmetic,
+  and non-bool/non-void/non-pointer casts.
+- Lower nullptr_ctype as a pointer-sized null value in linearize and
+  sparse-llvm.
 
 Signed-off-by: Bart Van Assche <bvanassche@acm.org>
 ---
- ident-list.h                         |   2 +
- parse.c                              | 275 +++++++++++++++++++++++----
- symbol.h                             |   7 +-
- validation/attr_in_parameter.c       |   2 +
- validation/c23-attributes-error.c    |  20 ++
- validation/c23-attributes-pedantic.c |  10 +
- validation/c23-attributes.c          | 149 +++++++++++++++
- validation/c23-param-attribute.c     |  28 +++
- 8 files changed, 448 insertions(+), 45 deletions(-)
- create mode 100644 validation/c23-attributes-error.c
- create mode 100644 validation/c23-attributes-pedantic.c
- create mode 100644 validation/c23-attributes.c
- create mode 100644 validation/c23-param-attribute.c
+ evaluate.c                       | 186 +++++++++++++++++++++++++++++--
+ expression.c                     |  10 ++
+ ident-list.h                     |   1 +
+ linearize.c                      |   2 +
+ parse.c                          |   7 ++
+ show-parse.c                     |   1 +
+ sparse-llvm.c                    |  26 +++--
+ symbol.c                         |  12 +-
+ symbol.h                         |  13 ++-
+ validation/backend/c23-nullptr.c |  21 ++++
+ validation/c23-nullptr-assign.c  |  35 ++++++
+ validation/c23-nullptr-error.c   | 107 ++++++++++++++++++
+ validation/c23-nullptr.c         | 107 ++++++++++++++++++
+ validation/linear/c23-nullptr.c  |  20 ++++
+ 14 files changed, 528 insertions(+), 20 deletions(-)
+ create mode 100644 validation/backend/c23-nullptr.c
+ create mode 100644 validation/c23-nullptr-assign.c
+ create mode 100644 validation/c23-nullptr-error.c
+ create mode 100644 validation/c23-nullptr.c
+ create mode 100644 validation/linear/c23-nullptr.c
 
-diff --git a/ident-list.h b/ident-list.h
-index 46e6cd9e4f61..bc5df947913a 100644
---- a/ident-list.h
-+++ b/ident-list.h
-@@ -65,6 +65,8 @@ IDENT_RESERVED(__sizeof_ptr__);
- IDENT_RESERVED(__builtin_types_compatible_p);
- IDENT_RESERVED(__builtin_offsetof);
- IDENT_RESERVED(__label__);
-+IDENT(gnu);
-+IDENT(__gnu__);
+diff --git a/evaluate.c b/evaluate.c
+index ec02e5bbc4fe..c0d039105881 100644
+--- a/evaluate.c
++++ b/evaluate.c
+@@ -857,6 +857,8 @@ const char *type_difference(struct ctype *c1, struct =
+ctype *c2,
+ 				return "different address spaces";
+ 			if (base1 !=3D base2)
+ 				return "different base types";
++			if (!base1 && t1->bit_size !=3D t2->bit_size)
++				return "different base types";
+ 			if (t1->rank !=3D t2->rank)
+ 				return "different type sizes";
+ 			diff =3D (mod1 ^ mod2) & ~MOD_IGNORE;
+@@ -1106,7 +1108,11 @@ enum null_constant_type {
 =20
- /* Preprocessor idents.  Direct use of __IDENT avoids mentioning the key=
-word
-  * itself by name, preventing these tokens from expanding when compiling
-diff --git a/parse.c b/parse.c
-index 48793dd51671..13b8cf5d43c1 100644
---- a/parse.c
-+++ b/parse.c
-@@ -50,6 +50,13 @@ struct statement_list *function_computed_goto_list;
-=20
- static struct token *statement(struct token *token, struct statement **t=
-ree);
- static struct token *handle_attributes(struct token *token, struct decl_=
-state *ctx);
-+static inline bool match_c23_attribute(struct token *token)
-+{
-+	return match_op(token, '[') && match_op(token->next, '[');
-+}
-+static struct token *c23_attribute_specifier(struct token *token,
-+					     struct decl_state *ctx);
-+static struct token *skip_c23_attributes(struct token *token);
- static struct token *skip_attributes(struct token *token);
-=20
- typedef struct token *declarator_t(struct token *, struct symbol *, stru=
-ct decl_state *);
-@@ -563,6 +570,7 @@ static struct init_keyword {
- 	D("noderef",		&attr_mod_op,		.mods =3D MOD_NODEREF),
- 	D("safe",		&attr_mod_op,		.mods =3D MOD_SAFE),
- 	D("unused",		&attr_mod_op,		.mods =3D MOD_UNUSED),
-+	D("maybe_unused",	&attr_mod_op,		.mods =3D MOD_UNUSED),
- 	D("externally_visible",	&attr_mod_op,		.mods =3D MOD_EXT_VISIBLE),
- 	D("force",		&attr_force_op),
- 	D("bitwise",		&attr_bitwise_op,	.mods =3D MOD_BITWISE),
-@@ -570,9 +578,14 @@ static struct init_keyword {
- 	D("designated_init",	&designated_init_op),
- 	D("transparent_union",	&transparent_union_op),
- 	D("noreturn",		&attr_fun_op,		.mods =3D MOD_NORETURN),
-+	D("_Noreturn",		&attr_fun_op,		.mods =3D MOD_NORETURN),
- 	D("pure",		&attr_fun_op,		.mods =3D MOD_PURE),
- 	A("const",		&attr_fun_op,		.mods =3D MOD_PURE),
- 	D("gnu_inline",		&attr_fun_op,		.mods =3D MOD_GNU_INLINE),
-+	D("nodiscard",		&ignore_attr_op),
-+	D("fallthrough",	&ignore_attr_op),
-+	D("unsequenced",	&attr_fun_op,		.mods =3D MOD_PURE),
-+	D("reproducible",	&attr_fun_op,		.mods =3D MOD_PURE),
-=20
- 	/* Modes */
- 	D("mode",		&mode_op),
-@@ -1666,22 +1679,29 @@ static struct token *attribute_transparent_union(=
-struct token *token, struct sym
- 	return token;
- }
-=20
--static struct token *recover_unknown_attribute(struct token *token)
-+static struct token *skip_parens(struct token *token)
+ static inline int is_null_pointer_constant(struct expression *e)
  {
--	struct expression *expr =3D NULL;
--
--	if (Wunknown_attribute)
--		warning(token->pos, "unknown attribute '%s'", show_ident(token->ident)=
-);
--	token =3D token->next;
- 	if (match_op(token, '(')) {
--		if (match_op(token->next, ')'))
--			token =3D token->next->next;
--		else
--			token =3D parens_expression(token, &expr, "in attribute");
-+		int depth =3D 1;
-+		token =3D token->next;
-+		while (depth && !eof_token(token)) {
-+			if (match_op(token, '('))
-+				depth++;
-+			else if (match_op(token, ')'))
-+				depth--;
-+			token =3D token->next;
-+		}
+-	if (e->ctype =3D=3D &null_ctype)
++	if (e->ctype =3D=3D &null_ctype ||
++	    (e->ctype && e->ctype->type =3D=3D SYM_NODE && e->ctype->ctype.base=
+_type =3D=3D &null_ctype))
++		return NULL_PTR;
++	if (is_nullptr_type(e->ctype) &&
++	    (e->type =3D=3D EXPR_VALUE || (e->flags & CEF_ADDR)))
+ 		return NULL_PTR;
+ 	if (!(e->flags & CEF_ICE))
+ 		return NON_NULL;
+@@ -1148,6 +1154,87 @@ static struct symbol *evaluate_compare(struct expr=
+ession *expr)
+ 		goto OK;
  	}
- 	return token;
- }
 =20
-+static struct token *recover_unknown_attribute(struct token *token)
-+{
-+	if (Wunknown_attribute)
-+		warning(token->pos, "unknown attribute '%s'", show_ident(token->ident)=
-);
-+	return skip_parens(token->next);
-+}
++	/* nullptr_t equality comparisons [C23 6.5.9] */
++	if (ltype =3D=3D &nullptr_ctype || rtype =3D=3D &nullptr_ctype) {
++		int is_null1, is_null2;
 +
- static struct token *attribute_specifier(struct token *token, struct sym=
-bol *sym, struct decl_state *ctx)
- {
- 	token =3D expect(token, '(', "after attribute");
-@@ -1863,7 +1883,11 @@ struct symbol *ctype_integer(int size, int want_un=
-signed)
-=20
- static struct token *handle_qualifiers(struct token *t, struct decl_stat=
-e *ctx)
- {
--	while (token_type(t) =3D=3D TOKEN_IDENT) {
-+	while (token_type(t) =3D=3D TOKEN_IDENT || match_c23_attribute(t)) {
-+		if (match_c23_attribute(t)) {
-+			t =3D c23_attribute_specifier(t, ctx);
-+			continue;
-+		}
- 		struct symbol *s =3D lookup_keyword(t->ident, NS_TYPEDEF);
- 		if (!s || !s->op)
- 			break;
-@@ -1882,7 +1906,11 @@ static struct token *declaration_specifiers(struct=
- token *token, struct decl_sta
- 	int class =3D CInt;
- 	int rank =3D 0;
-=20
--	while (token_type(token) =3D=3D TOKEN_IDENT) {
-+	while (token_type(token) =3D=3D TOKEN_IDENT || match_c23_attribute(toke=
-n)) {
-+		if (match_c23_attribute(token)) {
-+			token =3D c23_attribute_specifier(token, ctx);
-+			continue;
-+		}
- 		struct symbol *s =3D lookup_symbol(token->ident,
- 						 NS_TYPEDEF | NS_SYMBOL);
- 		if (!s || !(s->namespace & NS_TYPEDEF))
-@@ -2040,16 +2068,22 @@ static bool match_attribute(struct token *token)
-=20
- static struct token *skip_attribute(struct token *token)
- {
--	token =3D token->next;
--	if (match_op(token, '(')) {
--		int depth =3D 1;
--		token =3D token->next;
--		while (depth && !eof_token(token)) {
--			if (token_type(token) =3D=3D TOKEN_SPECIAL) {
--				if (token->special =3D=3D '(')
--					depth++;
--				else if (token->special =3D=3D ')')
--					depth--;
-+	return skip_parens(token->next);
-+}
++		if (expr->op !=3D SPECIAL_EQUAL && expr->op !=3D SPECIAL_NOTEQUAL)
++			return bad_expr_type(expr);
 +
-+static struct token *skip_c23_attributes(struct token *token)
-+{
-+	while (match_c23_attribute(token)) {
-+		token =3D token->next->next;
-+		while (!eof_token(token)) {
-+			if (match_op(token, ']') &&
-+			    match_op(token->next, ']')) {
-+				token =3D token->next->next;
-+				break;
++		is_null1 =3D is_null_pointer_constant(left);
++		is_null2 =3D is_null_pointer_constant(right);
++		if (ltype =3D=3D &nullptr_ctype && rtype =3D=3D &nullptr_ctype) {
++			if (is_null1 && is_null2) {
++				expr->type =3D EXPR_VALUE;
++				expr->value =3D (expr->op =3D=3D SPECIAL_EQUAL);
++				expr->flags |=3D CEF_ACE;
 +			}
-+			if (match_op(token, '(')) {
-+				token =3D skip_parens(token);
-+				continue;
- 			}
- 			token =3D token->next;
++			goto OK;
++		}
++		if (ltype =3D=3D &nullptr_ctype) {
++			if (rclass & TYPE_PTR) {
++				if (is_null1 && is_null2) {
++					if (is_null2 =3D=3D NULL_ZERO)
++						bad_null(right);
++					expr->type =3D EXPR_VALUE;
++					expr->value =3D (expr->op =3D=3D SPECIAL_EQUAL);
++					expr->flags |=3D CEF_ACE;
++					goto OK;
++				}
++				if (rtype =3D=3D &null_ctype) {
++					expr->left =3D cast_to(left, &ptr_ctype);
++					expr->right =3D cast_to(right, &ptr_ctype);
++				} else {
++					expr->left =3D cast_to(left, rtype);
++				}
++				goto OK;
++			}
++			if (is_null2) {
++				if (is_null2 =3D=3D NULL_ZERO)
++					bad_null(right);
++				if (is_null1) {
++					expr->type =3D EXPR_VALUE;
++					expr->value =3D (expr->op =3D=3D SPECIAL_EQUAL);
++					expr->flags |=3D CEF_ACE;
++				} else {
++					expr->right =3D cast_to(right, &nullptr_ctype);
++				}
++				goto OK;
++			}
++			return bad_expr_type(expr);
++		}
++		if (lclass & TYPE_PTR) {
++			if (is_null1 && is_null2) {
++				if (is_null1 =3D=3D NULL_ZERO)
++					bad_null(left);
++				expr->type =3D EXPR_VALUE;
++				expr->value =3D (expr->op =3D=3D SPECIAL_EQUAL);
++				expr->flags |=3D CEF_ACE;
++				goto OK;
++			}
++			if (ltype =3D=3D &null_ctype) {
++				expr->left =3D cast_to(left, &ptr_ctype);
++				expr->right =3D cast_to(right, &ptr_ctype);
++			} else {
++				expr->right =3D cast_to(right, ltype);
++			}
++			goto OK;
++		}
++		if (is_null1) {
++			if (is_null1 =3D=3D NULL_ZERO)
++				bad_null(left);
++			if (is_null2) {
++				expr->type =3D EXPR_VALUE;
++				expr->value =3D (expr->op =3D=3D SPECIAL_EQUAL);
++				expr->flags |=3D CEF_ACE;
++			} else {
++				expr->left =3D cast_to(left, &nullptr_ctype);
++			}
++			goto OK;
++		}
++		return bad_expr_type(expr);
++	}
++
+ 	/* at least one must be a pointer */
+ 	if (!((lclass | rclass) & TYPE_PTR))
+ 		return bad_expr_type(expr);
+@@ -1276,6 +1363,29 @@ static struct symbol *evaluate_conditional_express=
+ion(struct expression *expr)
+ 		goto out;
+ 	}
+=20
++	if (ltype =3D=3D &nullptr_ctype || rtype =3D=3D &nullptr_ctype) {
++		if (ltype =3D=3D &nullptr_ctype && rtype =3D=3D &nullptr_ctype) {
++			ctype =3D &nullptr_ctype;
++			goto out;
++		}
++		if (ltype =3D=3D &nullptr_ctype && (rclass & TYPE_PTR)) {
++			ctype =3D (rtype =3D=3D &null_ctype) ? &ptr_ctype : rtype;
++			*cond =3D cast_to(*cond, ctype);
++			if (rtype =3D=3D &null_ctype)
++				expr->cond_false =3D cast_to(expr->cond_false, ctype);
++			goto out;
++		}
++		if (rtype =3D=3D &nullptr_ctype && (lclass & TYPE_PTR)) {
++			ctype =3D (ltype =3D=3D &null_ctype) ? &ptr_ctype : ltype;
++			if (ltype =3D=3D &null_ctype)
++				*cond =3D cast_to(*cond, ctype);
++			expr->cond_false =3D cast_to(expr->cond_false, ctype);
++			goto out;
++		}
++		typediff =3D "different types";
++		goto Err;
++	}
++
+ 	if ((lclass | rclass) & TYPE_PTR) {
+ 		int is_null1 =3D is_null_pointer_constant(*cond);
+ 		int is_null2 =3D is_null_pointer_constant(expr->cond_false);
+@@ -1486,6 +1596,20 @@ static int check_assignment_types(struct symbol *t=
+arget, struct expression **rp,
+ 	int tclass =3D classify_type(target, &t);
+ 	int sclass =3D classify_type(source, &s);
+=20
++	if (t =3D=3D &nullptr_ctype) {
++		int is_null;
++		if (s =3D=3D &nullptr_ctype)
++			return 1;
++		is_null =3D is_null_pointer_constant(*rp);
++		if (is_null) {
++			if (is_null =3D=3D NULL_ZERO)
++				bad_null(*rp);
++			goto Cast;
++		}
++		*typediff =3D "different base types";
++		return 0;
++	}
++
+ 	if (tclass & sclass & TYPE_NUM) {
+ 		if (tclass & TYPE_RESTRICT) {
+ 			/* allowed assignments unfoul */
+@@ -1518,10 +1642,21 @@ static int check_assignment_types(struct symbol *=
+target, struct expression **rp,
+ 				bad_null(*rp);
+ 			goto Cast;
  		}
-@@ -2057,27 +2091,113 @@ static struct token *skip_attribute(struct token=
- *token)
- 	return token;
- }
-=20
--static struct token *skip_attributes(struct token *token)
-+static struct token *c23_attribute_specifier(struct token *token,
-+					     struct decl_state *ctx)
- {
--	while (match_attribute(token)) {
--		token =3D expect(token->next, '(', "after attribute");
--		token =3D expect(token, '(', "after attribute");
--		while (token_type(token) =3D=3D TOKEN_IDENT) {
--			token =3D skip_attribute(token);
--			if (!match_op(token, ','))
-+	if (standard < STANDARD_C23 && Wpedantic)
-+		warning(token->pos, "C23 attribute syntax is a C23 extension");
-+
-+	token =3D expect(token, '[', "in attribute specifier");
-+	token =3D expect(token, '[', "in attribute specifier");
-+
-+	while (!match_op(token, ']') && !eof_token(token)) {
-+		struct ident *prefix =3D NULL;
-+		struct ident *attr_ident =3D NULL;
-+		struct token *id_tok =3D NULL;
-+
-+		if (match_op(token, ',')) {
-+			token =3D token->next;
-+			continue;
-+		}
-+
-+		if (token_type(token) !=3D TOKEN_IDENT) {
-+			sparse_error(token->pos, "expected attribute name");
-+			break;
-+		}
-+
-+		id_tok =3D token;
-+		attr_ident =3D token->ident;
-+		token =3D token->next;
-+
-+		if (match_op(token, ':') && match_op(token->next, ':')) {
-+			prefix =3D attr_ident;
-+			token =3D token->next->next;
-+			if (token_type(token) !=3D TOKEN_IDENT) {
-+				sparse_error(
-+					token->pos,
-+					"expected attribute name after '::'");
- 				break;
++		if (s =3D=3D &nullptr_ctype) {
++			if (t =3D=3D &null_ctype) {
++				*typediff =3D "different base types";
++				return 0;
 +			}
-+			id_tok =3D token;
-+			attr_ident =3D token->ident;
- 			token =3D token->next;
++			goto Cast;
++		}
+ 		if (!(sclass & TYPE_PTR)) {
+ 			*typediff =3D "different base types";
+ 			return 0;
  		}
--		token =3D expect(token, ')', "after attribute");
--		token =3D expect(token, ')', "after attribute");
-+
-+		if (!prefix || prefix =3D=3D &gnu_ident ||
-+		    prefix =3D=3D &__gnu___ident) {
-+			struct symbol *attr =3D
-+				lookup_keyword(attr_ident, NS_KEYWORD);
-+			if (attr && attr->op && attr->op->attribute)
-+				token =3D attr->op->attribute(token, attr, ctx);
-+			else {
-+				if (Wunknown_attribute)
-+					warning(id_tok->pos,
-+						"unknown attribute '%s'",
-+						show_ident(attr_ident));
-+				token =3D skip_parens(token);
-+			}
-+		} else {
-+			/* Other vendor prefixes (e.g. clang::...): ignore */
-+			token =3D skip_parens(token);
++		if (t =3D=3D &null_ctype && s !=3D &null_ctype) {
++			*typediff =3D "different base types";
++			return 0;
 +		}
-+
-+		if (match_op(token, ','))
-+			token =3D token->next;
-+		else if (match_op(token, ']'))
-+			break;
-+		else {
-+			sparse_error(token->pos,
-+				     "expected ']' or ',' after attribute");
-+			break;
+ 		b1 =3D examine_pointer_target(t);
+ 		b2 =3D examine_pointer_target(s);
+ 		mod1 =3D t->ctype.modifiers & (MOD_IGN | MOD_NODEREF);
+@@ -1566,7 +1701,7 @@ static int check_assignment_types(struct symbol *ta=
+rget, struct expression **rp,
+=20
+ 	if (tclass & TYPE_NUM) {
+ 		/* XXX: need to turn into comparison with NULL */
+-		if (is_bool_type(t) && (sclass & TYPE_PTR))
++		if (is_bool_type(t) && ((sclass & TYPE_PTR) || s =3D=3D &nullptr_ctype=
+))
+ 			goto Cast;
+ 		*typediff =3D "different base types";
+ 		return 0;
+@@ -2067,9 +2202,13 @@ static struct symbol *evaluate_preop(struct expres=
+sion *expr)
+ 		expr->flags =3D expr->unop->flags & ~CEF_CONST_MASK;
+ 		/*
+ 		 * A logical negation never yields an address constant
+-		 * [6.6(9)].
++		 * [6.6(9)], though negating an address constant yields
++		 * an arithmetic constant expression.
+ 		 */
+-		expr->flags &=3D ~CEF_ADDR;
++		if (expr->unop->flags & CEF_ADDR) {
++			expr->flags &=3D ~CEF_ADDR;
++			expr->flags |=3D CEF_ACE;
 +		}
-+	}
-+
-+	token =3D expect(token, ']', "at end of attribute specifier");
-+	token =3D expect(token, ']', "at end of attribute specifier");
-+	return token;
-+}
-+
-+static struct token *skip_attributes(struct token *token)
-+{
-+	for (;;) {
-+		if (match_attribute(token)) {
-+			token =3D expect(token->next, '(', "after attribute");
-+			token =3D expect(token, '(', "after attribute");
-+			while (token_type(token) =3D=3D TOKEN_IDENT) {
-+				token =3D skip_attribute(token);
-+				if (!match_op(token, ','))
-+					break;
-+				token =3D token->next;
-+			}
-+			token =3D expect(token, ')', "after attribute");
-+			token =3D expect(token, ')', "after attribute");
-+		} else if (match_c23_attribute(token)) {
-+			token =3D skip_c23_attributes(token);
-+		} else {
-+			break;
-+		}
- 	}
- 	return token;
- }
 =20
- static struct token *handle_attributes(struct token *token, struct decl_=
-state *ctx)
- {
--	while (match_attribute(token))
--		token =3D attribute_specifier(token->next, NULL, ctx);
-+	while (match_attribute(token) || match_c23_attribute(token)) {
-+		if (match_attribute(token))
-+			token =3D attribute_specifier(token->next, NULL, ctx);
-+		else
-+			token =3D c23_attribute_specifier(token, ctx);
-+	}
- 	return token;
- }
-=20
-@@ -2115,10 +2235,10 @@ static enum kind which_func(struct token *token,
- 			    struct ident **n,
- 			    int prefer_abstract)
- {
--	struct token *next =3D token->next;
-+	struct token *next =3D skip_attributes(token->next);
-=20
- 	if (token_type(next) =3D=3D TOKEN_IDENT) {
--		if (lookup_type(next))
-+		if (lookup_type(next) || next !=3D token->next)
- 			return Proto;
- 		/* identifier list not in definition; complain */
- 		if (prefer_abstract)
-@@ -2160,6 +2280,24 @@ static struct token *direct_declarator(struct toke=
-n *token, struct decl_state *c
- 	if (ctx->ident && token_type(token) =3D=3D TOKEN_IDENT) {
- 		*ctx->ident =3D token->ident;
- 		token =3D token->next;
-+		if (match_c23_attribute(token)) {
-+			struct decl_state attr =3D { };
-+			token =3D handle_attributes(token, &attr);
-+			ctx->ident_modifiers |=3D (attr.ctype.modifiers & MOD_DECLARE) |
-+						attr.f_modifiers;
-+			if (attr.cleanup)
-+				ctx->cleanup =3D attr.cleanup;
-+			if (attr.packed)
-+				ctx->packed =3D attr.packed;
-+			if (attr.transparent_union)
-+				ctx->transparent_union =3D attr.transparent_union;
-+			if (attr.designated_init)
-+				ctx->designated_init =3D attr.designated_init;
-+			if (attr.ctype.alignment > ctx->ctype.alignment)
-+				ctx->ctype.alignment =3D attr.ctype.alignment;
-+			attr.ctype.modifiers &=3D ~MOD_DECLARE;
-+			apply_ctype(token->pos, &ctx->ctype, &attr.ctype);
-+		}
- 	} else if (match_op(token, '(') &&
- 	    is_nested(token, &next, ctx->prefer_abstract)) {
- 		struct symbol *base_type =3D ctype->base_type;
-@@ -2191,16 +2329,24 @@ static struct token *direct_declarator(struct tok=
-en *token, struct decl_state *c
- 			token =3D parameter_type_list(token, fn);
- 		token =3D expect(token, ')', "in function declarator");
- 		fn->endpos =3D token->pos;
-+		if (match_c23_attribute(token)) {
-+			struct decl_state attr =3D { };
-+			token =3D handle_attributes(token, &attr);
-+			ctype->modifiers |=3D attr.f_modifiers;
-+			apply_ctype(token->pos, ctype, &attr.ctype);
-+		}
- 		return token;
- 	}
-=20
--	while (match_op(token, '[')) {
-+	while (match_op(token, '[') && !match_c23_attribute(token)) {
- 		struct symbol *array;
- 		array =3D alloc_indirect_symbol(token->pos, ctype, SYM_ARRAY);
- 		token =3D abstract_array_declarator(token->next, array);
- 		token =3D expect(token, ']', "in abstract_array_declarator");
- 		array->endpos =3D token->pos;
- 		ctype =3D &array->ctype;
-+		if (match_c23_attribute(token))
-+			token =3D handle_attributes(token, ctx);
- 	}
- 	return token;
- }
-@@ -2295,6 +2441,7 @@ static struct token *declaration_list(struct token =
-*token, struct symbol_list **
- 	for (;;) {
- 		struct symbol *decl =3D alloc_symbol(token->pos, SYM_NODE);
- 		ctx.cleanup =3D NULL;
-+		ctx.ident_modifiers =3D 0;
- 		ctx.ident =3D &decl->ident;
-=20
- 		token =3D declarator(token, &ctx);
-@@ -2302,6 +2449,7 @@ static struct token *declaration_list(struct token =
-*token, struct symbol_list **
- 			token =3D handle_bitfield(token, &ctx);
-=20
- 		token =3D handle_attributes(token, &ctx);
-+		ctx.ctype.modifiers |=3D ctx.ident_modifiers;
- 		apply_modifiers(token->pos, &ctx);
-=20
- 		decl->ctype =3D ctx.ctype;
-@@ -2366,6 +2514,7 @@ static struct token *parameter_declaration(struct t=
-oken *token, struct symbol *s
- 	ctx.ident =3D &sym->ident;
- 	token =3D declarator(token, &ctx);
- 	token =3D handle_attributes(token, &ctx);
-+	ctx.ctype.modifiers |=3D ctx.ident_modifiers;
- 	apply_modifiers(token->pos, &ctx);
- 	sym->ctype =3D ctx.ctype;
- 	sym->ctype.modifiers |=3D decl_modifiers(&ctx);
-@@ -2412,6 +2561,8 @@ struct token *typename(struct token *token, struct =
-symbol **p, int *forced)
- 		ctx.ctype.base_type =3D &bad_ctype;
- 	}
- 	token =3D declarator(token, &ctx);
-+	token =3D handle_attributes(token, &ctx);
-+	ctx.ctype.modifiers |=3D ctx.ident_modifiers;
- 	apply_modifiers(token->pos, &ctx);
- 	sym->ctype =3D ctx.ctype;
- 	sym->endpos =3D token->pos;
-@@ -2700,7 +2851,10 @@ static struct token *parse_for_statement(struct to=
-ken *token, struct statement *
- 	syms =3D NULL;
- 	e1 =3D NULL;
- 	/* C99 variable declaration? */
--	if (lookup_type(token)) {
-+	struct token *next =3D token;
-+	if (match_c23_attribute(token))
-+		next =3D skip_c23_attributes(token);
-+	if (lookup_type(next)) {
- 		token =3D external_declaration(token, &syms, validate_for_loop_decl);
- 	} else {
- 		token =3D parse_expression(token, &e1);
-@@ -2873,13 +3027,13 @@ static struct token *handle_label_attributes(stru=
-ct token *token, struct symbol
- 	struct decl_state ctx =3D { };
-=20
- 	token =3D handle_attributes(token, &ctx);
--	label->label_modifiers =3D ctx.ctype.modifiers;
-+	label->label_modifiers |=3D ctx.ctype.modifiers;
- 	return token;
- }
-=20
- static bool is_label_token(struct token *token)
- {
--	struct token *p =3D token;
-+	struct token *p =3D skip_c23_attributes(token);
- 	struct symbol *s;
-=20
- 	if (token_type(p) !=3D TOKEN_IDENT)
-@@ -2903,6 +3057,8 @@ static struct token *parse_one_label(struct token *=
-token,
-=20
- 	*stmtp =3D NULL;
- 	*is_case =3D false;
-+	if (match_c23_attribute(token))
-+		token =3D handle_attributes(token, &attr_state);
-=20
- 	if (token->ident =3D=3D &case_ident) {
- 		stmt =3D alloc_statement(token->pos, STMT_CASE);
-@@ -2950,7 +3106,7 @@ static struct token *parse_one_label(struct token *=
-token,
-=20
- static struct token *statement(struct token *token, struct statement **t=
-ree)
- {
--	struct statement *stmt =3D alloc_statement(token->pos, STMT_NONE);
-+	struct statement *stmt;
-=20
- 	if (is_label_token(token)) {
- 		struct statement *lbl =3D NULL;
-@@ -2971,6 +3127,27 @@ static struct token *statement(struct token *token=
-, struct statement **tree)
- 		return statement(token, tree);
- 	}
-=20
-+	if (match_c23_attribute(token)) {
-+		struct token *next =3D skip_c23_attributes(token);
-+		if (lookup_type(next)) {
-+			sparse_error(token->pos, "declaration is not a statement");
-+			stmt =3D alloc_statement(token->pos, STMT_DECLARATION);
-+			*tree =3D stmt;
-+			start_block_scope();
-+			token =3D external_declaration(token, &stmt->declaration, NULL);
-+			end_block_scope();
-+			return token;
-+		}
-+		struct decl_state attr_state =3D {};
-+		token =3D handle_attributes(token, &attr_state);
-+		if (match_op(token, ';')) {
-+			stmt =3D alloc_statement(token->pos, STMT_NONE);
-+			*tree =3D stmt;
-+			return token->next;
-+		}
-+		return statement(token, tree);
-+	}
-+	stmt =3D alloc_statement(token->pos, STMT_NONE);
- 	*tree =3D stmt;
- 	if (token_type(token) =3D=3D TOKEN_IDENT) {
- 		struct symbol *s =3D lookup_keyword(token->ident, NS_KEYWORD);
-@@ -3031,6 +3208,7 @@ static struct token * statement_list(struct token *=
-token, struct statement_list
- 		struct statement *label_head =3D NULL;
- 		struct statement **label_tail =3D &label_head;
- 		bool last_is_case =3D false;
-+		struct token *next;
-=20
- 		while (is_label_token(token)) {
- 			struct statement *lbl =3D NULL;
-@@ -3054,10 +3232,13 @@ static struct token * statement_list(struct token=
- *token, struct statement_list
- 				add_statement(list, label_head);
- 				break;
+ 		if (is_safe_type(ctype))
+ 			warning(expr->pos, "testing a 'safe expression'");
+@@ -2474,6 +2613,8 @@ int evaluate_arguments(struct symbol_list *argtypes=
+, struct expression_list *hea
+ 					*p =3D cast_to(expr, &ptr_ctype);
+ 				else
+ 					degenerate(expr);
++			} else if (type =3D=3D &nullptr_ctype) {
++				degenerate(expr);
  			}
-+			next =3D match_c23_attribute(token) ?
-+				       skip_c23_attributes(token) :
-+				       token;
- 			if (match_ident(token, &_Static_assert_ident) ||
- 			    (standard >=3D STANDARD_C23 &&
- 			     match_ident(token, &static_assert_ident)) ||
--			    lookup_type(token)) {
-+			    lookup_type(next)) {
- 				if (standard < STANDARD_C23 && Wpedantic)
- 					warning(token->pos,
- 						"a label can only be part of a statement and a declaration is not =
-a statement");
-@@ -3081,7 +3262,10 @@ static struct token * statement_list(struct token =
-*token, struct statement_list
- 			token =3D parse_static_assert(token, NULL);
+ 		} else if (!target->forced_arg){
+ 			static char where[30];
+@@ -2984,6 +3125,14 @@ static struct symbol *cast_to_bool(struct expressi=
+on *expr)
+ 		return NULL;
+=20
+ 	zero =3D alloc_const_expression(expr->pos, 0);
++	if (otype =3D=3D &nullptr_ctype) {
++		zero->ctype =3D otype;
++		expr->op =3D SPECIAL_NOTEQUAL;
++		expr->type =3D EXPR_COMPARE;
++		expr->left =3D old;
++		expr->right =3D zero;
++		return expr->ctype;
++	}
+ 	if (oclass & TYPE_PTR)
+ 		zero->ctype =3D otype;
+ 	expr->op =3D SPECIAL_NOTEQUAL;
+@@ -3030,7 +3179,7 @@ static int cast_flags(struct expression *expr, stru=
+ct expression *old)
+ 		 */
+ 		else if (old->flags & CEF_FLOAT)
+ 			flags =3D CEF_SET_ICE;
+-	} else if (class & TYPE_PTR) {
++	} else if ((class & TYPE_PTR) || t =3D=3D &nullptr_ctype) {
+ 		/*
+ 		 * Casts of integer literals to pointer type yield
+ 		 * address constants [6.6(9)].
+@@ -3145,6 +3294,19 @@ static struct symbol *evaluate_cast(struct express=
+ion *expr)
+ 	if (expr->type =3D=3D EXPR_FORCE_CAST)
+ 		goto out;
+=20
++	if (ttype =3D=3D &nullptr_ctype) {
++		if (stype !=3D &nullptr_ctype && !is_null_pointer_constant(source))
++			expression_error(expr, "conversion from '%s' to 'nullptr_t'",
++					 show_typename(source->ctype));
++		goto out;
++	}
++	if (stype =3D=3D &nullptr_ctype) {
++		if (!is_bool_type(ttype) && tclass !=3D TYPE_PTR)
++			expression_error(expr, "conversion from 'nullptr_t' to '%s'",
++					 show_typename(ctype));
++		goto out;
++	}
++
+ 	if (tclass & (TYPE_COMPOUND | TYPE_FN)) {
+ 		/*
+ 		 * Special case: cast to union type (GCC extension)
+@@ -3471,8 +3633,13 @@ static struct symbol *evaluate_generic_selection(s=
+truct expression *expr)
+ 		return NULL;
+ 	}
+=20
+-	source =3D *ctrl;
+-	source.ctype.modifiers &=3D ~(MOD_QUALIFIER|MOD_ATOMIC);
++	struct symbol *sel_ctrl =3D ctrl;
++
++	if (ctrl->ctype.modifiers & (MOD_QUALIFIER|MOD_ATOMIC)) {
++		source =3D *ctrl;
++		source.ctype.modifiers &=3D ~(MOD_QUALIFIER|MOD_ATOMIC);
++		sel_ctrl =3D &source;
++	}
+ 	for (map =3D expr->map; map; map =3D map->next) {
+ 		struct symbol *stype =3D map->type;
+ 		struct symbol *base;
+@@ -3509,7 +3676,7 @@ static struct symbol *evaluate_generic_selection(st=
+ruct expression *expr)
+ 			sparse_error(stype->pos, "incomplete type in generic selection");
  			continue;
  		}
--		if (lookup_type(token)) {
-+		next =3D token;
-+		if (match_c23_attribute(token))
-+			next =3D skip_c23_attributes(token);
-+		if (lookup_type(next)) {
- 			if (seen_statement) {
- 				warning(token->pos, "mixing declarations and code");
- 				seen_statement =3D 0;
-@@ -3457,6 +3641,7 @@ struct token *external_declaration(struct token *to=
-ken, struct symbol_list **lis
- 	struct symbol *decl;
- 	struct decl_state ctx =3D { .ident =3D &ident };
- 	struct ctype saved;
-+	unsigned long saved_f_modifiers;
- 	struct symbol *base_type;
- 	unsigned long mod;
- 	int is_typedef;
-@@ -3495,9 +3680,11 @@ struct token *external_declaration(struct token *t=
-oken, struct symbol_list **lis
- 			     "'enum' underlying type may not be specified here");
+-		if (!type_selection(&source, stype))
++		if (!type_selection(sel_ctrl, stype))
+ 			continue;
 =20
- 	saved =3D ctx.ctype;
-+	saved_f_modifiers =3D ctx.f_modifiers;
- 	token =3D declarator(token, &ctx);
- 	token =3D handle_asm_name(token, &ctx);
- 	token =3D handle_attributes(token, &ctx);
-+	ctx.ctype.modifiers |=3D ctx.ident_modifiers;
- 	apply_modifiers(token->pos, &ctx);
+ 		res =3D map->expr;
+@@ -4009,6 +4176,9 @@ static void evaluate_switch_statement(struct statem=
+ent *stmt)
+ 	evaluate_statement(stmt->switch_statement);
+ 	if (!sel)
+ 		return;
++	if (valid_type(sel->ctype) && !is_int_type(sel->ctype) &&
++	    !is_restricted_type(sel->ctype) && !is_fouled_type(sel->ctype))
++		expression_error(sel, "switch quantity is not an integer");
+ 	if (sel->ctype && is_enum_type(sel->ctype))
+ 		enumcase_holder =3D NULL; /* Only check cases against switch */
 =20
- 	decl->ctype =3D ctx.ctype;
-@@ -3753,10 +3940,13 @@ struct token *external_declaration(struct token *=
-token, struct symbol_list **lis
- 		decl =3D alloc_symbol(token->pos, SYM_NODE);
- 		ctx.ctype =3D saved;
- 		ctx.cleanup =3D NULL;
-+		ctx.ident_modifiers =3D 0;
-+		ctx.f_modifiers =3D saved_f_modifiers;
- 		token =3D handle_attributes(token, &ctx);
- 		token =3D declarator(token, &ctx);
- 		token =3D handle_asm_name(token, &ctx);
- 		token =3D handle_attributes(token, &ctx);
-+		ctx.ctype.modifiers |=3D ctx.ident_modifiers;
- 		apply_modifiers(token->pos, &ctx);
- 		decl->ctype =3D ctx.ctype;
- 		decl->ctype.modifiers |=3D mod;
-@@ -3781,6 +3971,7 @@ struct token *external_declaration(struct token *to=
-ken, struct symbol_list **lis
- 		/* Function declarations are automatically extern unless specifically =
-static */
- 		base_type =3D decl->ctype.base_type;
- 		if (!is_typedef && base_type && base_type->type =3D=3D SYM_FN) {
-+			decl->ctype.modifiers |=3D ctx.f_modifiers;
- 			if (!(decl->ctype.modifiers & MOD_STATIC))
- 				decl->ctype.modifiers |=3D MOD_EXTERN;
+diff --git a/expression.c b/expression.c
+index 9b07963c914a..da2c14b458db 100644
+--- a/expression.c
++++ b/expression.c
+@@ -480,6 +480,16 @@ struct token *primary_expression(struct token *token=
+, struct expression **tree)
+ 			break;
  		}
+=20
++		if (standard >=3D STANDARD_C23 &&
++		    token->ident =3D=3D &nullptr_ident) {
++			expr =3D alloc_expression(token->pos, EXPR_VALUE);
++			expr->flags =3D CEF_ADDR;
++			expr->ctype =3D &nullptr_ctype;
++			expr->value =3D 0;
++			token =3D next;
++			break;
++		}
++
+ 		sym =3D lookup_symbol(token->ident, NS_SYMBOL | NS_TYPEDEF);
+=20
+ 		if (!sym) {
+diff --git a/ident-list.h b/ident-list.h
+index 31a37bede4ed..18dabf5193b2 100644
+--- a/ident-list.h
++++ b/ident-list.h
+@@ -48,6 +48,7 @@ IDENT(alignas);
+ IDENT(alignof);
+ IDENT(bool);
+ IDENT(false);
++IDENT(nullptr);
+ IDENT(static_assert);
+ IDENT(thread_local);
+ IDENT(true);
+diff --git a/linearize.c b/linearize.c
+index bb3a5a9ecf16..422cee820ddb 100644
+--- a/linearize.c
++++ b/linearize.c
+@@ -1276,6 +1276,8 @@ retry:	switch (s->type) {
+ 	case_int:
+ 		return sign ? MTYPE_SINT : MTYPE_UINT;
+ 	case SYM_BASETYPE:
++		if (s =3D=3D &nullptr_ctype)
++			return MTYPE_VPTR;
+ 		if (s->ctype.base_type =3D=3D &fp_type)
+ 			return MTYPE_FLOAT;
+ 		if (s->ctype.base_type =3D=3D &int_type)
+diff --git a/parse.c b/parse.c
+index 4edfed1cdf97..5e526b0cc840 100644
+--- a/parse.c
++++ b/parse.c
+@@ -658,6 +658,7 @@ void init_parser_finalize(void)
+ 		alignof_ident.reserved =3D 1;
+ 		true_ident.reserved =3D 1;
+ 		false_ident.reserved =3D 1;
++		nullptr_ident.reserved =3D 1;
+ 	}
+ }
+=20
+@@ -1006,6 +1007,12 @@ static struct token *parse_enum_declaration(struct=
+ token *token, struct symbol *
+ 			ctype =3D &void_ctype;
+ 			if (expr && expr->ctype)
+ 				ctype =3D expr->ctype;
++			if (is_nullptr_type(ctype)) {
++				sparse_error(expr->pos,
++					     "enumerator value for '%s' is not an integer constant",
++					     show_ident(token->ident));
++				ctype =3D &int_ctype;
++			}
+ 		} else if (!ctype) {
+ 			ctype =3D &int_ctype;
+ 		} else if (is_int_type(ctype)) {
+diff --git a/show-parse.c b/show-parse.c
+index 850d6ce5f937..78d86e20e93a 100644
+--- a/show-parse.c
++++ b/show-parse.c
+@@ -278,6 +278,7 @@ static struct ctype_name {
+=20
+ 	{ &void_ctype,   "void", "" },
+ 	{ &bool_ctype,   "bool", "" },
++	{ &nullptr_ctype, "nullptr_t", "" },
+=20
+ 	{ &float_ctype,  "float", "F" },
+ 	{ &double_ctype, "double", "" },
+diff --git a/sparse-llvm.c b/sparse-llvm.c
+index 8f37bde1b98d..c7055238ff88 100644
+--- a/sparse-llvm.c
++++ b/sparse-llvm.c
+@@ -154,6 +154,9 @@ static LLVMTypeRef sym_basetype_type(struct symbol *s=
+ym)
+ {
+ 	LLVMTypeRef ret =3D NULL;
+=20
++	if (sym =3D=3D &nullptr_ctype)
++		return LLVMPointerType(LLVMInt8TypeInContext(context), 0);
++
+ 	if (is_float_type(sym)) {
+ 		switch (sym->bit_size) {
+ 		case 32:
+@@ -458,12 +461,17 @@ static LLVMValueRef value_to_ivalue(struct function=
+ *fn, struct symbol *ctype, L
+ 	return val;
+ }
+=20
++static inline bool is_llvm_ptr_type(struct symbol *type)
++{
++	return is_ptr_type(type) || is_nullptr_type(type);
++}
++
+ static LLVMValueRef value_to_pvalue(struct function *fn, struct symbol *=
+ctype, LLVMValueRef val)
+ {
+ 	const char *name =3D LLVMGetValueName(val);
+ 	LLVMTypeRef dtype =3D symbol_type(ctype);
+=20
+-	assert(is_ptr_type(ctype));
++	assert(is_llvm_ptr_type(ctype));
+ 	switch (LLVMGetTypeKind(LLVMTypeOf(val))) {
+ 	case LLVMIntegerTypeKind:
+ 		val =3D LLVMBuildIntToPtr(fn->builder, val, dtype, name);
+@@ -481,7 +489,7 @@ static LLVMValueRef adjust_type(struct function *fn, =
+struct symbol *ctype, LLVMV
+ {
+ 	if (is_int_type(ctype))
+ 		return value_to_ivalue(fn, ctype, val);
+-	if (is_ptr_type(ctype))
++	if (is_llvm_ptr_type(ctype))
+ 		return value_to_pvalue(fn, ctype, val);
+ 	return val;
+ }
+@@ -901,18 +909,18 @@ static void output_op_ptrcast(struct function *fn, =
+struct instruction *insn)
+ 	case OP_UTPTR:
+ 	case OP_SEXT:			// FIXME
+ 		assert(is_int_type(otype));
+-		assert(is_ptr_type(insn->type));
++		assert(is_llvm_ptr_type(insn->type));
+ 		op =3D LLVMIntToPtr;
+ 		break;
+ 	case OP_PTRTU:
+-		assert(is_ptr_type(otype));
++		assert(is_llvm_ptr_type(otype));
+ 		assert(is_int_type(insn->type));
+ 		op =3D LLVMPtrToInt;
+ 		break;
+ 	case OP_PTRCAST:
+ 	case OP_ZEXT:			// FIXME
+-		assert(is_ptr_type(otype));
+-		assert(is_ptr_type(insn->type));
++		assert(is_llvm_ptr_type(otype));
++		assert(is_llvm_ptr_type(insn->type));
+ 		op =3D LLVMBitCast;
+ 		break;
+ 	default:
+@@ -930,7 +938,7 @@ static void output_op_cast(struct function *fn, struc=
+t instruction *insn, LLVMOp
+ 	struct symbol *otype =3D insn->orig_type;
+ 	char target_name[64];
+=20
+-	if (is_ptr_type(insn->type))	// cast to void* is OP_CAST ...
++	if (is_llvm_ptr_type(insn->type))	// cast to void* is OP_CAST ...
+ 		return output_op_ptrcast(fn, insn);
+=20
+ 	assert(is_int_type(insn->type));
+@@ -939,7 +947,7 @@ static void output_op_cast(struct function *fn, struc=
+t instruction *insn, LLVMOp
+ 	pseudo_name(insn->target, target_name);
+=20
+ 	dtype =3D symbol_type(insn->type);
+-	if (is_ptr_type(otype)) {
++	if (is_llvm_ptr_type(otype)) {
+ 		op =3D LLVMPtrToInt;
+ 	} else if (is_float_type(otype)) {
+ 		assert(op =3D=3D LLVMFPToUI || op =3D=3D LLVMFPToSI);
+@@ -1252,7 +1260,7 @@ static LLVMValueRef output_data(LLVMModuleRef modul=
+e, struct symbol *sym)
+ 	if (initializer) {
+ 		switch (initializer->type) {
+ 		case EXPR_VALUE:
+-			initial_value =3D LLVMConstInt(symbol_type(sym), initializer->value, =
+1);
++			initial_value =3D constant_value(initializer->value, symbol_type(sym)=
+);
+ 			break;
+ 		case EXPR_FVALUE:
+ 			initial_value =3D LLVMConstReal(symbol_type(sym), initializer->fvalue=
+);
+diff --git a/symbol.c b/symbol.c
+index 06cd8ca2ede7..a05e240cdfaa 100644
+--- a/symbol.c
++++ b/symbol.c
+@@ -307,7 +307,14 @@ static struct symbol * examine_array_type(struct sym=
+bol *sym)
+ 		unsigned long count =3D get_expression_value_silent(array_size);
+ 		if (base_type->bit_size >=3D 0)
+ 			bit_size =3D array_element_offset(base_type->bit_size, count);
+-		if (array_size->type !=3D EXPR_VALUE) {
++		if (valid_type(array_size->ctype) &&
++		    !is_int_type(array_size->ctype) &&
++		    !is_restricted_type(array_size->ctype) &&
++		    !is_fouled_type(array_size->ctype)) {
++			sparse_error(array_size->pos,
++				     "size of array has non-integer type");
++			bit_size =3D 0;
++		} else if (array_size->type !=3D EXPR_VALUE) {
+ 			if (Wvla)
+ 				warning(array_size->pos, "Variable length array is used.");
+ 			bit_size =3D -1;
+@@ -875,7 +882,7 @@ struct symbol	bool_ctype, void_ctype, type_ctype,
+ 		float_ctype, double_ctype, ldouble_ctype,
+ 		string_ctype, ptr_ctype, lazy_ptr_ctype,
+ 		incomplete_ctype, label_ctype, bad_ctype,
+-		null_ctype;
++		null_ctype, nullptr_ctype;
+ struct symbol	autotype_ctype;
+ struct symbol	schar_ptr_ctype, short_ptr_ctype;
+ struct symbol	int_ptr_ctype, uint_ptr_ctype;
+@@ -942,6 +949,7 @@ static const struct ctype_declare {
+ 	{ &incomplete_ctype,   T_BASETYPE },
+ 	{ &autotype_ctype,     T_BASETYPE },
+ 	{ &bad_ctype,          T_BASETYPE },
++	{ &nullptr_ctype,      SYM_BASETYPE, 0, 0, &bits_in_pointer, &pointer_a=
+lignment, NULL },
+=20
+ 	{ &char_ctype,         T__INT(-2, char) },
+ 	{ &schar_ctype,        T_SINT(-2, char) },
 diff --git a/symbol.h b/symbol.h
-index 8035d9d21b3c..a072ac8fc739 100644
+index 2c6731f88399..acd381fe64fd 100644
 --- a/symbol.h
 +++ b/symbol.h
-@@ -110,6 +110,7 @@ struct decl_state {
- 	struct symbol_op *mode;
- 	struct expression *cleanup;
- 	unsigned long f_modifiers;		// function attributes
-+	unsigned long ident_modifiers;		// declarator-id C23 attributes
- 	unsigned long storage_class;
- 	unsigned char prefer_abstract;
- 	unsigned char autotype;
-@@ -272,11 +273,11 @@ struct symbol {
- #define MOD_SPECIFIER	MOD_SIGNEDNESS
- #define MOD_IGNORE	(MOD_STORAGE | MOD_ACCESS | MOD_USERTYPE | MOD_EXPLIC=
-ITLY_SIGNED | MOD_EXT_VISIBLE | MOD_UNUSED | MOD_GNU_INLINE | MOD_CONSTEX=
-PR)
- #define MOD_QUALIFIER	(MOD_CONST | MOD_VOLATILE | MOD_RESTRICT)
--#define MOD_PTRINHERIT	(MOD_QUALIFIER | MOD_ATOMIC | MOD_NODEREF | MOD_N=
-ORETURN | MOD_NOCAST)
--/* modifiers preserved by typeof() operator */
--#define MOD_TYPEOF	(MOD_QUALIFIER | MOD_ATOMIC | MOD_NOCAST | MOD_SPECIF=
-IER)
- /* modifiers for function attributes */
- #define MOD_FUN_ATTR	(MOD_PURE|MOD_NORETURN)
-+#define MOD_PTRINHERIT	(MOD_QUALIFIER | MOD_ATOMIC | MOD_NODEREF | MOD_F=
-UN_ATTR | MOD_NOCAST)
-+/* modifiers preserved by typeof() operator */
-+#define MOD_TYPEOF	(MOD_QUALIFIER | MOD_ATOMIC | MOD_NOCAST | MOD_SPECIF=
-IER)
- /* like cvr-qualifiers but 'reversed' (OK: source <=3D target) */
- #define MOD_REV_QUAL	(MOD_PURE|MOD_NORETURN)
- /* do not warn when these are duplicated */
-diff --git a/validation/attr_in_parameter.c b/validation/attr_in_paramete=
-r.c
-index 1b104ea43ec5..33d8b85aa5cb 100644
---- a/validation/attr_in_parameter.c
-+++ b/validation/attr_in_parameter.c
-@@ -7,6 +7,8 @@ static void g(int A *x)
- 	f(x, x);
- 	p =3D q;
+@@ -306,7 +306,7 @@ extern struct symbol	bool_ctype, void_ctype, type_cty=
+pe,
+ 			float_ctype, double_ctype, ldouble_ctype,
+ 			string_ctype, ptr_ctype, lazy_ptr_ctype,
+ 			incomplete_ctype, label_ctype, bad_ctype,
+-			null_ctype;
++			null_ctype, nullptr_ctype;
+ extern struct symbol	autotype_ctype;
+ extern struct symbol	schar_ptr_ctype, short_ptr_ctype;
+ extern struct symbol	int_ptr_ctype, uint_ptr_ctype;
+@@ -487,6 +487,13 @@ static inline int is_bool_type(struct symbol *type)
+ 	return type =3D=3D &bool_ctype;
  }
-+static void h(__attribute__((unused)) int x);
-+
- /*
-  * check-name: attribute after ( in direct-declarator
-  */
-diff --git a/validation/c23-attributes-error.c b/validation/c23-attribute=
-s-error.c
-new file mode 100644
-index 000000000000..a78086311c1c
---- /dev/null
-+++ b/validation/c23-attributes-error.c
-@@ -0,0 +1,20 @@
-+[[nodiscard] static int unclosed;
-+[[gnu::]] static int missing_scoped;
-+
-+static void test_if_attr_decl(int c)
+=20
++static inline int is_nullptr_type(const struct symbol *type)
 +{
-+	if (c)
-+		[[maybe_unused]] int z =3D 3;
++	if (type && type->type =3D=3D SYM_NODE)
++		type =3D type->ctype.base_type;
++	return type =3D=3D &nullptr_ctype;
++}
++
+ static inline int is_scalar_type(struct symbol *type)
+ {
+ 	if (type->type =3D=3D SYM_NODE)
+@@ -505,6 +512,8 @@ static inline int is_scalar_type(struct symbol *type)
+ 		return 1;
+ 	if (type->ctype.base_type =3D=3D &fp_type)
+ 		return 1;
++	if (type =3D=3D &nullptr_ctype)
++		return 1;
+ 	return 0;
+ }
+=20
+@@ -524,6 +533,8 @@ static inline bool is_integral_type(struct symbol *ty=
+pe)
+ 	}
+ 	if (type->ctype.base_type =3D=3D &int_type)
+ 		return 1;
++	if (type =3D=3D &nullptr_ctype)
++		return 1;
+ 	return 0;
+ }
+=20
+diff --git a/validation/backend/c23-nullptr.c b/validation/backend/c23-nu=
+llptr.c
+new file mode 100644
+index 000000000000..2cfb27b19f47
+--- /dev/null
++++ b/validation/backend/c23-nullptr.c
+@@ -0,0 +1,21 @@
++typedef typeof(nullptr) nullptr_t;
++
++extern int sink(const char *fmt, ...);
++
++static nullptr_t g_np =3D nullptr;
++
++int test_nullptr_llvm(nullptr_t arg, int **out);
++int test_nullptr_llvm(nullptr_t arg, int **out)
++{
++	*out =3D arg;
++	g_np =3D nullptr;
++	return sink("test", nullptr, arg, g_np);
 +}
 +
 +/*
-+ * check-name: c23-attributes-error
-+ * check-command: sparse -std=3Dc23 $file
-+ *
-+ * check-error-start
-+c23-attributes-error.c:1:14: error: Expected ] at end of attribute speci=
-fier
-+c23-attributes-error.c:1:14: error: got static
-+c23-attributes-error.c:2:8: error: expected attribute name after '::'
-+c23-attributes-error.c:7:17: error: declaration is not a statement
-+ * check-error-end
++ * check-name: backend-c23-nullptr
++ * check-command: sparse-llvm-dis -m64 -std=3Dc23 $file
++ * check-output-ignore
++ * check-output-contains: define i32 @test_nullptr_llvm(
++ * check-output-contains: @sink(
 + */
-diff --git a/validation/c23-attributes-pedantic.c b/validation/c23-attrib=
-utes-pedantic.c
+diff --git a/validation/c23-nullptr-assign.c b/validation/c23-nullptr-ass=
+ign.c
 new file mode 100644
-index 000000000000..224f36f5bdf3
+index 000000000000..e863075f2103
 --- /dev/null
-+++ b/validation/c23-attributes-pedantic.c
-@@ -0,0 +1,10 @@
-+[[maybe_unused]] static int x;
++++ b/validation/c23-nullptr-assign.c
+@@ -0,0 +1,35 @@
++typedef typeof(nullptr) nullptr_t;
++
++void test(int *p, void *v)
++{
++	nullptr_t np;
++	np =3D p;
++	np =3D v;
++	np =3D 0;
++
++	int i =3D nullptr;
++	double d =3D np;
++	(void)i;
++	(void)d;
++}
 +
 +/*
-+ * check-name: C23 [[]] standard attribute syntax pedantic warning
-+ * check-command: sparse -std=3Dc11 -Wpedantic $file
++ * check-name: c23-nullptr-assign
++ * check-command: sparse -std=3Dc23 -Wno-decl $file
 + *
 + * check-error-start
-+c23-attributes-pedantic.c:1:1: warning: C23 attribute syntax is a C23 ex=
-tension
++c23-nullptr-assign.c:6:12: warning: incorrect type in assignment (differ=
+ent base types)
++c23-nullptr-assign.c:6:12:    expected nullptr_t [usertype] np
++c23-nullptr-assign.c:6:12:    got int *p
++c23-nullptr-assign.c:7:12: warning: incorrect type in assignment (differ=
+ent base types)
++c23-nullptr-assign.c:7:12:    expected nullptr_t [usertype] np
++c23-nullptr-assign.c:7:12:    got void *v
++c23-nullptr-assign.c:8:14: warning: Using plain integer as NULL pointer
++c23-nullptr-assign.c:10:17: warning: incorrect type in initializer (diff=
+erent base types)
++c23-nullptr-assign.c:10:17:    expected int i
++c23-nullptr-assign.c:10:17:    got nullptr_t
++c23-nullptr-assign.c:11:20: warning: incorrect type in initializer (diff=
+erent base types)
++c23-nullptr-assign.c:11:20:    expected double d
++c23-nullptr-assign.c:11:20:    got nullptr_t [assigned] [usertype] np
 + * check-error-end
 + */
-diff --git a/validation/c23-attributes.c b/validation/c23-attributes.c
+diff --git a/validation/c23-nullptr-error.c b/validation/c23-nullptr-erro=
+r.c
 new file mode 100644
-index 000000000000..8b53ce06d0cf
+index 000000000000..1e26878519a2
 --- /dev/null
-+++ b/validation/c23-attributes.c
-@@ -0,0 +1,149 @@
-+[[maybe_unused]] static int unused_var;
++++ b/validation/c23-nullptr-error.c
+@@ -0,0 +1,107 @@
++typedef typeof(nullptr) nullptr_t;
 +
-+[[nodiscard]] static int get_val(void)
-+{
-+	return 42;
-+}
++static int (nullptr);
 +
-+[[deprecated("use new_func instead")]] static void old_func(void)
-+{
-+}
-+
-+[[noreturn]] static void fatal(void)
-+{
-+	for (;;) {
-+	}
-+}
-+
-+[[_Noreturn]] static void fatal2(void)
-+{
-+	for (;;) {
-+	}
-+}
-+
-+static int pure_add(int a, int b) [[unsequenced]]
-+{
-+	return a + b;
-+}
-+
-+static int pure_mul(int a, int b) [[reproducible]]
-+{
-+	return a * b;
-+}
-+
-+static int (*fp_unseq)(int, int) [[unsequenced]] =3D pure_add;
-+typedef int (*plain_int_fp_t)(int);
-+typedef int (__attribute__((__pure__)) *repro_int_fp_t)(int);
-+static int plain_inc(int a)
-+{
-+	return a + 1;
-+}
-+static int repro_inc(int a) [[reproducible]]
-+{
-+	return a + 1;
-+}
-+static int (*get_plain_fp(void) [[reproducible]])(int)
-+{
-+	return plain_inc;
-+}
-+static int (*get_repro_fp(void))(int) [[reproducible]]
-+{
-+	return repro_inc;
-+}
-+static_assert([typeof(&get_plain_fp)] =3D=3D
-+	      [plain_int_fp_t (__attribute__((__pure__)) *)(void)],
-+	      "inner [[]] applies to outer function");
-+static_assert([typeof(get_plain_fp())] =3D=3D [plain_int_fp_t],
-+	      "inner [[]] does not leak to returned function pointer");
-+static_assert([typeof(&get_repro_fp)] =3D=3D [repro_int_fp_t (*)(void)],
-+	      "outer [[]] does not leak to outer function");
-+static_assert([typeof(get_repro_fp())] =3D=3D [repro_int_fp_t],
-+	      "outer [[]] applies to returned function pointer");
-+
-+struct [[deprecated]] S {
-+	[[maybe_unused]] int field;
++enum bad_enum {
++	E_BAD =3D nullptr,
++	E_NEXT,
 +};
 +
-+enum [[deprecated]] E {
-+	ITEM1 [[deprecated]],
-+	ITEM2,
++struct bad_bf {
++	unsigned int x : nullptr;
 +};
 +
-+typedef int T_attr_label;
++static int bad_arr[nullptr];
 +
-+static void param_fn([[maybe_unused]] int a, int b [[maybe_unused]],
-+		     [[maybe_unused]] int)
++static void test_errors(int *p, int c)
 +{
-+	(void)a;
-+	(void)b;
-+}
++	nullptr_t np =3D nullptr;
++	int i2 =3D (int)nullptr;
++	long l2 =3D (long)np;
++	double d2 =3D (double)nullptr;
++	nullptr_t b1 =3D (nullptr_t)1;
++	nullptr_t b2 =3D (nullptr_t)(int *)0;
++	bool r1 =3D nullptr < nullptr;
++	bool r2 =3D np > p;
++	bool r3 =3D nullptr =3D=3D 1;
++	int t1 =3D c ? nullptr : 1;
++	nullptr_t t0 =3D c ? nullptr : 0;
++	void *a1 =3D nullptr + 1;
++	int u1 =3D *nullptr;
++	int u2 =3D +nullptr;
++	int u3 =3D -nullptr;
++	int u4 =3D ~nullptr;
++	np++;
 +
-+struct [[gnu::packed]] PackedStruct {
-+	char c;
-+	int i;
-+};
-+static_assert(sizeof(struct PackedStruct) =3D=3D sizeof(char) + sizeof(i=
-nt),
-+	      "packed");
-+
-+struct [[gnu::aligned(16)]] AlignedStruct {
-+	int x;
-+};
-+static_assert(alignof(struct AlignedStruct) =3D=3D 16, "align");
-+
-+[[gnu::aligned(16)]] static int aligned_var;
-+
-+[[maybe_unused]] [[nodiscard]] static int multi_attr(void)
-+{
-+	return 0;
-+}
-+
-+[[maybe_unused, nodiscard]] static int comma_attr(void)
-+{
-+	return 0;
-+}
-+
-+[[]] static int empty_attr;
-+[[
-+	,
-+]] static int empty_attr2;
-+
-+static int test_statements(int val)
-+{
-+	[[maybe_unused]] int x =3D val;
-+	if (x < 0)
-+		goto lbl1;
-+	switch (x) {
-+	case 1:
-+		x++;
-+		[[fallthrough]];
-+	case 2:
-+		return x;
-+	[[maybe_unused]] case 3:
-+		return 3;
-+	[[maybe_unused]] default:
++	switch (np) {
++	default:
 +		break;
 +	}
 +
-+lbl1:
-+	[[]];
-+[[maybe_unused]] lbl2:
-+	[[maybe_unused]] int y =3D 10;
-+	if (!y)
-+		goto T_attr_label;
-+[[maybe_unused]] T_attr_label:
-+	return y;
++	switch (c) {
++	case nullptr:
++		break;
++	}
++
++	(void)i2;
++	(void)l2;
++	(void)d2;
++	(void)b1;
++	(void)b2;
++	(void)r1;
++	(void)r2;
++	(void)r3;
++	(void)t1;
++	(void)t0;
++	(void)a1;
++	(void)u1;
++	(void)u2;
++	(void)u3;
++	(void)u4;
 +}
-+
-+[[clang::annotate_type("ptr_attr", void *)]] static int *vendor_attr_var=
-;
-+[[vendor::custom(struct foo, (1 + 2))]] static int vendor_attr_var2;
-+
-+static void fn_after_ident [[deprecated]] (void)
-+{
-+}
-+
-+static int arr_after_ident [[maybe_unused]] [4];
 +
 +/*
-+ * check-name: C23 [[]] standard attribute syntax
-+ * check-command: sparse -std=3Dc23 $file
++ * check-name: c23-nullptr-error
++ * check-command: sparse -std=3Dc23 -Wno-decl $file
++ *
++ * check-error-start
++c23-nullptr-error.c:3:12: error: Trying to use reserved word 'nullptr' a=
+s identifier
++c23-nullptr-error.c:6:17: error: enumerator value for 'E_BAD' is not an =
+integer constant
++c23-nullptr-error.c:11:26: error: bad integer constant expression
++c23-nullptr-error.c:11:33: error: bitfield 'x' has invalid width (0)
++c23-nullptr-error.c:14:20: error: size of array has non-integer type
++c23-nullptr-error.c:19:19: error: conversion from 'nullptr_t' to 'int'
++c23-nullptr-error.c:20:20: error: conversion from 'nullptr_t' to 'long'
++c23-nullptr-error.c:21:22: error: conversion from 'nullptr_t' to 'double=
+'
++c23-nullptr-error.c:22:25: error: conversion from 'int' to 'nullptr_t'
++c23-nullptr-error.c:23:25: error: conversion from 'int *' to 'nullptr_t'
++c23-nullptr-error.c:24:27: error: incompatible types for operation (<):
++c23-nullptr-error.c:24:27:    nullptr_t
++c23-nullptr-error.c:24:27:    nullptr_t
++c23-nullptr-error.c:25:22: error: incompatible types for operation (>):
++c23-nullptr-error.c:25:22:    nullptr_t [usertype] np
++c23-nullptr-error.c:25:22:    int *p
++c23-nullptr-error.c:26:27: error: incompatible types for operation (=3D=3D=
+):
++c23-nullptr-error.c:26:27:    nullptr_t
++c23-nullptr-error.c:26:27:    int
++c23-nullptr-error.c:27:20: error: incompatible types in conditional expr=
+ession (different types):
++c23-nullptr-error.c:27:20:    nullptr_t
++c23-nullptr-error.c:27:20:    int
++c23-nullptr-error.c:28:26: error: incompatible types in conditional expr=
+ession (different types):
++c23-nullptr-error.c:28:26:    nullptr_t
++c23-nullptr-error.c:28:26:    int
++c23-nullptr-error.c:29:28: error: incompatible types for operation (+):
++c23-nullptr-error.c:29:28:    nullptr_t
++c23-nullptr-error.c:29:28:    int
++c23-nullptr-error.c:30:18: error: cannot dereference this type
++c23-nullptr-error.c:31:18: error: incompatible type for operation (+):
++c23-nullptr-error.c:31:18:    nullptr_t
++c23-nullptr-error.c:32:18: error: incompatible type for operation (-):
++c23-nullptr-error.c:32:18:    nullptr_t
++c23-nullptr-error.c:33:18: error: incompatible type for operation (~):
++c23-nullptr-error.c:33:18:    nullptr_t
++c23-nullptr-error.c:34:11: error: need scalar for ++/--
++c23-nullptr-error.c:36:17: error: switch quantity is not an integer
++c23-nullptr-error.c:42:14: error: incompatible types for 'case' statemen=
+t
++ * check-error-end
 + */
-diff --git a/validation/c23-param-attribute.c b/validation/c23-param-attr=
-ibute.c
+diff --git a/validation/c23-nullptr.c b/validation/c23-nullptr.c
 new file mode 100644
-index 000000000000..a89c025ed002
+index 000000000000..e7c0d4aa7f45
 --- /dev/null
-+++ b/validation/c23-param-attribute.c
-@@ -0,0 +1,28 @@
++++ b/validation/c23-nullptr.c
+@@ -0,0 +1,107 @@
++typedef typeof(nullptr) nullptr_t;
++
++static_assert(sizeof(nullptr) =3D=3D sizeof(void *), "sizeof nullptr");
++static_assert(sizeof(nullptr_t) =3D=3D sizeof(void *), "sizeof nullptr_t=
+");
++static_assert(alignof(nullptr_t) =3D=3D alignof(void *), "alignof nullpt=
+r_t");
++static_assert(_Generic(nullptr, nullptr_t: 1, void *: 0, int: 0, default=
+: 0) =3D=3D 1,
++	      "typeof nullptr is nullptr_t");
++
++void *p =3D nullptr;
++int *q =3D nullptr;
++nullptr_t np =3D nullptr;
++static nullptr_t np_zero =3D 0;
++static nullptr_t np_void0 =3D (void *)0;
++static void (*fp_global)(void) =3D nullptr;
++
++static void test_call(int *arg1, nullptr_t arg2)
++{
++	(void)arg1;
++	(void)arg2;
++}
++
++static void test_varargs(int n, ...)
++{
++	(void)n;
++}
++
++static nullptr_t test_ret_np(void)
++{
++	return nullptr;
++}
++
++static int *test_ret_ptr(void)
++{
++	return nullptr;
++}
++
++static void dummy_fn(void)
++{
++}
++
++static void test_func(const int *cq_const)
++{
++	p =3D np;
++	q =3D np;
++	np =3D 0;
++	np =3D (void *)0;
++	np =3D (nullptr_t)nullptr;
++	np =3D (const nullptr_t)np;
++	np =3D test_ret_np();
++	q =3D test_ret_ptr();
++
++	void (*fp)(void) =3D np;
++	fp =3D nullptr;
++	if (fp =3D=3D nullptr || nullptr !=3D dummy_fn) {
++	}
++
++	test_call(nullptr, nullptr);
++	test_call(np, np);
++	test_call(np_zero, np_void0);
++	test_varargs(2, nullptr, np);
++
++	(void)nullptr;
++	(void)np;
++	(void)fp_global;
++
++	bool b1 =3D nullptr;
++	bool b2 =3D np;
++	bool b3 =3D (bool)nullptr;
++	bool b4 =3D (bool)np;
++	(void)b1;
++	(void)b2;
++	(void)b3;
++	(void)b4;
++
++	if (nullptr) {
++	}
++	if (!nullptr && !np) {
++	}
++	if (p =3D=3D nullptr && nullptr =3D=3D q) {
++	}
++	if (np =3D=3D p && p =3D=3D np) {
++	}
++	if (np =3D=3D nullptr && np =3D=3D 0 && 0 =3D=3D np && np =3D=3D (void =
+*)0) {
++	}
++
++	int cond =3D 1;
++	void *cp =3D cond ? nullptr : p;
++	int *cq =3D cond ? q : nullptr;
++	const int *ccq =3D cond ? np : cq_const;
++	void *cv0 =3D cond ? nullptr : (void *)0;
++	nullptr_t cnp1 =3D cond ? np : nullptr;
++
++	static_assert(_Generic(1 ? nullptr : (int *)0, int *: 1, default: 0) =3D=
+=3D 1);
++	static_assert(_Generic(1 ? nullptr : (void *)0, void *: 1, default: 0) =
+=3D=3D 1);
++	static_assert(_Generic(1 ? np : nullptr, nullptr_t: 1, default: 0) =3D=3D=
+ 1);
++
++	(void)cp;
++	(void)cq;
++	(void)ccq;
++	(void)cv0;
++	(void)cnp1;
++}
++
 +/*
-+ * Check that function declarators properly parse parameter lists
-+ * where parameters have standard C23 attributes.
++ * check-name: c23-nullptr
++ * check-command: sparse -std=3Dc23 -pedantic -Wno-decl -Wno-non-pointer=
+-null $file
 + */
+diff --git a/validation/linear/c23-nullptr.c b/validation/linear/c23-null=
+ptr.c
+new file mode 100644
+index 000000000000..bdf4fb36e32a
+--- /dev/null
++++ b/validation/linear/c23-nullptr.c
+@@ -0,0 +1,20 @@
++typedef typeof(nullptr) nullptr_t;
 +
-+static void f1([[maybe_unused]] int x)
++static void *np_to_ptr(nullptr_t np)
 +{
++	return np;
 +}
 +
-+static int f2([[maybe_unused]] int a, [[maybe_unused]] int b)
++static bool np_is_null(nullptr_t np)
 +{
-+	return a;
-+}
-+
-+static void (*fp)([[maybe_unused]] int);
-+
-+static void test_call(void)
-+{
-+	f1(10);
-+	f2(1, 2);
-+	fp =3D f1;
-+	fp(20);
++	return !np;
 +}
 +
 +/*
-+ * check-name: C23 parameter attributes
-+ * check-command: sparse -std=3Dc23 $file
++ * check-name: linear-c23-nullptr
++ * check-command: test-linearize -m64 -std=3Dc23 $file
++ *
++ * check-output-ignore
++ * check-output-contains: ret\\.64 *%arg1
++ * check-output-contains: seteq\\.1
 + */
