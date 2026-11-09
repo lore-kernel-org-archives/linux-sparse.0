@@ -1,70 +1,70 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=199.89.1.14
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
 	t=1794256417;
-	b=3xaDk8Os86rbtXmS9cXpFlqbflQUKkjzucPylzKgzy7lBApFBYXz8NIxB/JWK870oEjA
-	 moGXY+/tnRYvrer2a4jumXCIrK2KY8g5Zw61Gve4gk8XaKfnd+TxVSPwZL3Zo6Zobk70R
-	 J8Ij7WJLydOlEiseva6lyc37A3UfSAonTQzaYXDd2lhScLUKpChmn+RVd/VAkTLmhYgjO
-	 1ehUk1Wv9Opg+Q+s+wBuHyvxX1TVaUbwdmuYj0i/B+T04/MshaPOpxgON7PLlaGY2ViKC
-	 0/MyfPcB15d1IZ/Hyo6/tSi4Ak0F0XCZXyJ5PoUUecT50VLkFkBUaJYj2Eu3rMAfikg==
+	b=qhlMH7RqkY6/XK+ceWS1NkgiWnwfObLWCt91n9RcJdeXLtXjUVxw4U1s9I9EfcRND0/f
+	 CQPkktpqagRQ/cSpbzDHxfItV8ouwj6XmAGIeyIFs5vWm6PFS2PvPCifHpt6cVQ6RqvaT
+	 G5yHrVU9NWEi0PJbejFaUmcCYd85H4D3B54whRb2f9OZCZyv39Ik6gm8fRzy1KsaHpnDt
+	 7oOK3yDEnBPo2rECrzcbQKgiogctOy7e08Yn8Vli8GrWcXTg7I0ZJKbpf3UqHxapqLGWy
+	 0HX+u5P4rUtehS7S3FT0mIUUS1LpK3GZkvHe+p2ghk30A0M+d9+q6DYQ9a2hrIOqSug==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
 	a=rsa-sha256; c=relaxed/relaxed; t=1794256417;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Virus-Scanned:Received:
 	 Received:From:To:Cc:Subject:Date:Message-ID:X-Mailer:In-Reply-To:
 	 References:MIME-Version:Content-Transfer-Encoding;
-	bh=JBythO/Etaca6V+fIPI1MM6a+Ro0XI0YyobgUZ0ALps=;
-	b=sbfMGPzN/+4s/qBDsnTMwWLuE39kj9buxeesduNVh8Qz+ZJWmSS5Z6M7KEUdwzcBwMKl
-	 DzHAKrOmxi04VGxYJPEexPJPekdYUrFo/MmQP+QCfV4fscDJnvm6r/18AY2RxjL/Q9xCI
-	 1Gy1ra9DFYrHbP1FZvdLLCfFzeRDhuxfqkIFeqWoyuoWlNzSHClePjiqAV6UfevBSrul1
-	 Bu0s17ODt5AJwu8S9mDaoG+XdbCK/PfKN8nfNYbdtHLAtdv8ACFmrXnU5uAnBKoFv06jw
-	 c8vQjUWO9S4BkwQGoi0eixKoFEILihmvEIFnuDAIfX4fo6jPuB4i7/AVbzV+PfnSt5g==
+	bh=VHM2ihSjJc2y10Zq78S65QZ2nQ38IO7jr+FKMRBX4EE=;
+	b=C+SBVWV0mQWw+2MYpWHpdc5cAvk3mhyfMyKpvY9nc7tuxt4GvGd1zWFPaFjw3LVSZFrD
+	 QO6JB9Y/MHJff/EqlYrmX/8zd1Iiz0MehwZY6mje8U/HVgRiwVymBZ/cmxNmtQtdgxcrt
+	 +bWXrPg8dawLmA64+LX6xmAzfgDV2m8kEiDzcvkXl4+OxtKm6sqBkVG6TJPAwSTvTLlPA
+	 sME/9WacbHib5At8IFnHMcFhpa5W/dR2hyCnbfYYlpx/FNtrs9+KFZE260ryLp+1UEo2C
+	 smT0uNAZzYpSzlpuZUW0dwFJ36OYjuNrsZ0aFUF5W539PQCAOrsPs/37NqndeWOilUw==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=acm.org;
 	spf=pass smtp.mailfrom=acm.org;
-	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=FU6vrMF6;
+	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=khxnphXO;
 	arc=none smtp.remote-ip=199.89.1.14
 Received: from 011.lax.mailroute.net (011.lax.mailroute.net [199.89.1.14])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BBA46606A330
-	for <linux-sparse@vger.kernel.org>; Mon,  9 Nov 2026 20:33:36 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org BBA46606A330
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8370B606A326
+	for <linux-sparse@vger.kernel.org>; Mon,  9 Nov 2026 20:33:37 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 8370B606A326
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=acm.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=FU6vrMF6
+	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=khxnphXO
 Received: from localhost (localhost [127.0.0.1])
-	by 011.lax.mailroute.net (Postfix) with ESMTP id 4jNhM34bkvz1XMYJg;
+	by 011.lax.mailroute.net (Postfix) with ESMTP id 4jNhM34xD3z1XMG49;
 	Mon,  9 Nov 2026 20:33:35 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=acm.org; h=
 	content-transfer-encoding:mime-version:references:in-reply-to
 	:x-mailer:message-id:date:date:subject:subject:from:from
-	:received:received; s=mr01; t=1794256414; x=1796848415; bh=JByth
-	O/Etaca6V+fIPI1MM6a+Ro0XI0YyobgUZ0ALps=; b=FU6vrMF6j8SZd3mQI5Di8
-	cfbPNxYn6JyohBBaW0AWEQJLt807X0bUaEs4qtA8eJAMSzfye9te2cV9ZtG8uXZ6
-	sdAJaiNaIGjvxpGssTEdCN8SvWVZYoEF3rQVa8dWx/zzwuZE3iOjGHEStsSNEZfk
-	BPj3h4hEquoi2AfwI0t/ZrgFXhdMsmGHUHkZjOYt2MeF1g2YNVdVvUNBXmJ3ci6n
-	tb0TYrelQGI1dLPZFR9Z9xRiDG25aOir7tFUWx2QPcXucjLOX0RAqnYFn6RSZP7I
-	yLwmpwxhMdxdPrfyEa/cFZk6h7VLGX/21UqlpEjVglmbnbb82iXZ0G5W1+WGVSZ5
-	w==
+	:received:received; s=mr01; t=1794256414; x=1796848415; bh=VHM2i
+	hSjJc2y10Zq78S65QZ2nQ38IO7jr+FKMRBX4EE=; b=khxnphXOuG/KOy1qHnAGw
+	+apwegakIk/gmghLPi9OGhDZ9Jh6FguwYZZV6lGOCC5H753wwK1D7aYwlsWqgR8c
+	q4T4E9aI/gwD31uDq54GYTecPwD/dshC0ysQQeBUotGLJh7TF8abgbzVl7dvg57J
+	z9VBDksrUoGZTx8y9GbttyRh8sqQaAqQMB1GIE7l14+HU6ntZU8fbiMWUNm4emy7
+	KKeyUlY3LMu1qKRHL3n17Dm7vfEfU6ooJ12oof1tjw4faiYRzdqpgQHczmquLlHS
+	y4HfujQxp9H2o9CSL3SKgpRampyImB7hDKBYR5Wu04JS4PwutlCz3Q8SGtVQG/Lf
+	A==
 X-Virus-Scanned: by MailRoute
 Received: from 011.lax.mailroute.net ([127.0.0.1])
  by localhost (011.lax [127.0.0.1]) (mroute_mailscanner, port 10029) with LMTP
- id XHs4NnubcUZS; Mon,  9 Nov 2026 20:33:34 +0000 (UTC)
+ id kX9fAf9pemm6; Mon,  9 Nov 2026 20:33:34 +0000 (UTC)
 Received: from bvanassche.c.googlers.com.com (57.237.82.34.bc.googleusercontent.com [34.82.237.57])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
 	(Authenticated sender: bvanassche@acm.org)
-	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4jNhLx2mPJz1XMYJK;
+	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4jNhLx1DFcz1XMYJH;
 	Mon,  9 Nov 2026 20:33:29 +0000 (UTC)
 From: Bart Van Assche <bvanassche@acm.org>
 To: linux-sparse@vger.kernel.org
 Cc: Linus Torvalds <torvalds@linux-foundation.org>,
 	Bart Van Assche <bvanassche@acm.org>
-Subject: [PATCH 23/73] dissect: Unwrap array element type via base_type()
-Date: Mon,  9 Nov 2026 12:32:09 -0800
-Message-ID: <20261109203259.362845-24-bvanassche@acm.org>
+Subject: [PATCH 22/73] ctags: Fix line comparison order and handle SYM_RESTRICT and SYM_LABEL
+Date: Mon,  9 Nov 2026 12:32:08 -0800
+Message-ID: <20261109203259.362845-23-bvanassche@acm.org>
 X-Mailer: git-send-email 2.56.0.506.g506a7eabc5-goog
 In-Reply-To: <20261109203259.362845-1-bvanassche@acm.org>
 References: <20261109203259.362845-1-bvanassche@acm.org>
@@ -79,25 +79,39 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
 
-Use base_type(in) instead of in->ctype.base_type when stepping through
-array subscripts in dissect.c so SYM_NODE wrappers are unwrapped properly=
-.
+Return a tri-state comparison result for line numbers in cmp_sym() instea=
+d
+of a boolean '<' check that violates qsort()'s strict weak ordering.
+
+Handle SYM_RESTRICT by recursing into its base type and ignore SYM_LABEL
+cleanly in examine_symbol().
 
 Signed-off-by: Bart Van Assche <bvanassche@acm.org>
 ---
- dissect.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ ctags.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-diff --git a/dissect.c b/dissect.c
-index 9419c5931fbb..5d25e02fa1ad 100644
---- a/dissect.c
-+++ b/dissect.c
-@@ -467,7 +467,7 @@ again:
- 					lookup_member(in, expr->ident, NULL));
- 			} else {
- 				do_expression(U_R_VAL, expr->index);
--				in =3D in->ctype.base_type;
-+				in =3D base_type(in);
- 			}
- 		} while ((expr =3D expr->down));
+diff --git a/ctags.c b/ctags.c
+index afdc42b77b98..e6925510f278 100644
+--- a/ctags.c
++++ b/ctags.c
+@@ -50,7 +50,7 @@ static int cmp_sym(const void *m, const void *n)
+ 		ret =3D strcmp(stream_name(a_pos.stream),
+ 		             stream_name(b_pos.stream));
+ 		if (!ret)
+-			return a_pos.line < b_pos.line;
++			return (a_pos.line > b_pos.line) - (a_pos.line < b_pos.line);
  	}
+ 	return ret;
+ }
+@@ -155,8 +155,10 @@ static void examine_symbol(struct symbol *sym)
+ 	case SYM_BITFIELD:
+ 	case SYM_FN:
+ 	case SYM_ARRAY:
++	case SYM_RESTRICT:
+ 		examine_symbol(sym->ctype.base_type);
+ 		break;
++	case SYM_LABEL:
+ 	case SYM_BASETYPE:
+ 		break;
+=20
