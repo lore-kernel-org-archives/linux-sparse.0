@@ -1,70 +1,70 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=199.89.1.14
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
 	t=1794256432;
-	b=QZhD0kKT8t2luErEWVR2UsrUbx1+ynm31W+sVdRho00X1fnmR+7cOVsqQURkmpqk2DoT
-	 ISNQfDdlDBWcBPW5Z6qDat+wSiyurl6brEYellxpR0HiP8esU5sjBI+r+NdG+KqJREUhC
-	 h0zdUxvcDybNGbL72xhbW10g/L7nMnXLTl2Q2oHqYmN6WyeqP48bBehixkTgow84uvwRU
-	 w3IIQglU1EAtRJbc3leSoFN0Oe4WsgtbXrzcns9RPuBj9LcZ57K4AQ9CIEMOi/sD15PRr
-	 3b8Am/QID8u5xoovpo7XfH93gkUpDb9bzQ1MHFkRrhxR+aUc6f4t4Qn6rEe/cNNmm6g==
+	b=oYH2fidykKtjiWnL447irXfGeD5D+CsArEcDAvz6tBfNKrus3A593D5lTmDkLkL6W1hk
+	 OTdDswupo3yuPC6OqRKV92chOtGYhAMj+YKr2BA/lZqM0IqohNRD8CGN4Upup7mFdMX9j
+	 /4ZeOa7FifxqD4u1KMCIrt0vxmlfSE70NdcuiSM4zp+04+MH5Cf59Ij+uoQioE5wAgENS
+	 if927FibOQuMcHPMuxgH9nEA5n8zFUOmH47HUNLBkbwPTQJdc3iiEuh3LTTN1Sl/tAGSy
+	 LLiL1lpQkHrQbic6byvAujrkIHtuld8zrQXr+qv1+FqjD+Hl1hHWD1mN7XDyrdaofHw==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
 	a=rsa-sha256; c=relaxed/relaxed; t=1794256432;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Virus-Scanned:Received:
 	 Received:From:To:Cc:Subject:Date:Message-ID:X-Mailer:In-Reply-To:
 	 References:MIME-Version:Content-Transfer-Encoding;
-	bh=io/igg1OVLGS4dHMzgc/UaHqAbIPA3PkQVKYhG58cg0=;
-	b=YM4kij/7Bnj6JbXD1NUqfR/J7r+/Z8W2CX+YAYqKWEcO1xZnVcl6mkyP2TQPN25k6ilz
-	 Z14r57SNDu4A0mNLgOU1DB4HpROGkLnvXGDIkeOZq4w3xWZ6+kib4qCDwZUxOp6sc9eQ+
-	 nlyAya0RbOLAsdVQAwtRxdH+BxYXsy8u/+3g5buKdGP+7XM6k7E/OwWQqidC+3jDE+LK+
-	 9Q7z5HgjSfSixxPhw7x3lg5uFnN4KIwJmi8Ie9Ykc5ntes7yVxGCGdSgNWavXhjOqYVrD
-	 SSwKgNmWl72HTgvSUIIue0QgYC05ORiGBljSBmDzKPOCmsAp39lVY/78y4YdrqaFtsg==
+	bh=4gj5fhcpfBSax3ZhuTMoRXv+HQ296zTx7IhsnzbkyD4=;
+	b=T152cObp3qYrW0Ci/FQbRdJHow8g2zsrO+EYPKtkGKs9n5fru/qnlbwztps1JXaIw0sD
+	 PV+vOv4DJ1I2PDNLrHMRR/vsqyeEtniBCNQoLWCae+c3OlnSMhV8arpXy9qcP/GlXRIjk
+	 y+SOHIMsRd/LkgblI8zwLrnB29O75kpqwwCdK25uq68A4oot5JY487179erVKAYASfVcA
+	 wInVt8+mMwBzpXqiV3XZ85SneXSzEwCbSvRuw6SoG/wVoMhhSud0bpxyVdPg8p6xmOzdK
+	 2F9AIRDymLoVnB5FDikN6jnw2NKvy0odVgDF/WL8uSsh5SkDPTCxQBh1S0UPMS9HsiQ==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=acm.org;
 	spf=pass smtp.mailfrom=acm.org;
-	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=dol3fz5u;
+	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=4+ObnAYo;
 	arc=none smtp.remote-ip=199.89.1.14
 Received: from 011.lax.mailroute.net (011.lax.mailroute.net [199.89.1.14])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 683A8606A330
-	for <linux-sparse@vger.kernel.org>; Mon,  9 Nov 2026 20:33:51 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 683A8606A330
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2629D606A325
+	for <linux-sparse@vger.kernel.org>; Mon,  9 Nov 2026 20:33:52 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 2629D606A325
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=acm.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=dol3fz5u
+	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=4+ObnAYo
 Received: from localhost (localhost [127.0.0.1])
-	by 011.lax.mailroute.net (Postfix) with ESMTP id 4jNhMF0Jn8z1XM0nl;
+	by 011.lax.mailroute.net (Postfix) with ESMTP id 4jNhMF14sxz1XLwXF;
 	Mon,  9 Nov 2026 20:33:45 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=acm.org; h=
 	content-transfer-encoding:mime-version:references:in-reply-to
 	:x-mailer:message-id:date:date:subject:subject:from:from
-	:received:received; s=mr01; t=1794256415; x=1796848416; bh=io/ig
-	g1OVLGS4dHMzgc/UaHqAbIPA3PkQVKYhG58cg0=; b=dol3fz5utb4bY5cyGe0Ex
-	gbRA+ExxZZNHA9vRcl1Rpg8kLTSjjuQy1+jeWm1WdI3vE8pWS94ioxyfxlFRgB+Q
-	wek81E/a7t5jtd1Q7m1aKAtyjc9+Or4vO64rC7vi8kwVD9pN88B9Iqor7t1Jd6Uz
-	YV17/nLYFURwvO8zXp0bKrOr028UyK/RqJJiKmxxgEn4Dg3TDc7VrloZ/Xu4vJiD
-	Hr2AUYFMbD80NxUE0oFAzfU0n5NjejcHSoMpcqbDKSzCBusV9h9S9S0empVWdY30
-	JiixVasJ7RI19Oqcb7STh7hBvMioP9c9HozC/M25c2pa0JfHNKOKNe0RcigeHEqK
-	g==
+	:received:received; s=mr01; t=1794256418; x=1796848419; bh=4gj5f
+	hcpfBSax3ZhuTMoRXv+HQ296zTx7IhsnzbkyD4=; b=4+ObnAYoLcgme1JOEOPGM
+	iLi+4UsQcZ7Q6yGYRJ6athfv8xSAFfrVyW/CJFCxvKstOm+bLnOxK+ict9AVsbH1
+	FKAmxfQwX3dzNGUd8ITLzoVXMoBZt6vQpe5qdM63i3Yh2SVDq7s9A4UZ8wh1GelA
+	8zy+7Fh7klSHvxLfievVD56JG5O6mnqmEaCpqWK7IT8N+rFGJYbhfxROMm1L5EKn
+	dJpdMZv0VB6BnQLik4GFp5p4ZFiTR5Ai6U54/5qpB7CufrRo41IIpuWkgCaHkR2d
+	PWFAyxB4HvaaIXi4sBMRlLqtGVYngs2U5vGrr6Te8bcPh0ctBGE9fxjTWXvzSV+r
+	A==
 X-Virus-Scanned: by MailRoute
 Received: from 011.lax.mailroute.net ([127.0.0.1])
  by localhost (011.lax [127.0.0.1]) (mroute_mailscanner, port 10029) with LMTP
- id ddmV2xrbTKYl; Mon,  9 Nov 2026 20:33:35 +0000 (UTC)
+ id VX3NPrcRtD31; Mon,  9 Nov 2026 20:33:38 +0000 (UTC)
 Received: from bvanassche.c.googlers.com.com (57.237.82.34.bc.googleusercontent.com [34.82.237.57])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
 	(Authenticated sender: bvanassche@acm.org)
-	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4jNhLz1VK5z1XLwXF;
-	Mon,  9 Nov 2026 20:33:31 +0000 (UTC)
+	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4jNhM530gvz1XMYJk;
+	Mon,  9 Nov 2026 20:33:37 +0000 (UTC)
 From: Bart Van Assche <bvanassche@acm.org>
 To: linux-sparse@vger.kernel.org
 Cc: Linus Torvalds <torvalds@linux-foundation.org>,
 	Bart Van Assche <bvanassche@acm.org>
-Subject: [PATCH 31/73] context: Add "conditional context increment" model
-Date: Mon,  9 Nov 2026 12:32:17 -0800
-Message-ID: <20261109203259.362845-32-bvanassche@acm.org>
+Subject: [PATCH 59/73] c23: Treat empty parameter list () as (void) and reject K&R functions
+Date: Mon,  9 Nov 2026 12:32:45 -0800
+Message-ID: <20261109203259.362845-60-bvanassche@acm.org>
 X-Mailer: git-send-email 2.56.0.506.g506a7eabc5-goog
 In-Reply-To: <20261109203259.362845-1-bvanassche@acm.org>
 References: <20261109203259.362845-1-bvanassche@acm.org>
@@ -79,520 +79,251 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
 
-From: Linus Torvalds <torvalds@linux-foundation.org>
+Treat an empty parameter list '()' in a function declarator as '(void)'
+and reject K&R identifier-list function declarations and definitions in
+C23 mode per ISO C23 6.7.6.3 and 6.9.1:
+- Parse '()' as a zero-parameter prototype in C23 mode so calls with
+  arguments and conflicting redeclarations are diagnosed.
+- Track identifier-list declarators via kr_args on SYM_FN and report an
+  error in C23 mode on K&R function definitions (with or without
+  parameter declarations) and K&R function or function-pointer
+  declarations.
 
-Use a negative output parameter to the "context" attribute to indicate
-that the context is increased conditionally.
-
-Support "trylock()" kinds of functions that return success if the lock
-operation succeeded, matching Linux kernel commit 4a557a5d1a61 ("sparse:
-introduce conditional lock acquire function attribute") for
-refcount_dec_and_lock() and friends.
-
-Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
-[ bvanassche: Rewrite commit message in imperative mood, support multiple
-  context attributes in linearize_call_expression(), validate conditional
-  context function definitions in check_context(), and extend
-  validation/context.c ]
 Signed-off-by: Bart Van Assche <bvanassche@acm.org>
 ---
- linearize.c          |  42 ++++++++-
- sparse.c             | 202 +++++++++++++++++++++++++++++++++++++++++--
- validation/context.c | 101 +++++++++++++++++++---
- 3 files changed, 318 insertions(+), 27 deletions(-)
+ parse.c                             | 34 ++++++++++++++++++---
+ symbol.h                            |  1 +
+ validation/c23-empty-parameters.c   | 29 ++++++++++++++++++
+ validation/c23-empty-params-error.c | 47 +++++++++++++++++++++++++++++
+ validation/c23-knr-error.c          | 14 +++++++++
+ 5 files changed, 120 insertions(+), 5 deletions(-)
+ create mode 100644 validation/c23-empty-parameters.c
+ create mode 100644 validation/c23-empty-params-error.c
+ create mode 100644 validation/c23-knr-error.c
 
-diff --git a/linearize.c b/linearize.c
-index c6ec3703b149..24b402622b83 100644
---- a/linearize.c
-+++ b/linearize.c
-@@ -1539,19 +1539,20 @@ static pseudo_t linearize_call_expression(struct =
-entrypoint *ep, struct expressi
- 	add_one_insn(ep, insn);
-=20
- 	if (ctype) {
-+		struct basic_block *post_call =3D NULL;
-+
- 		FOR_EACH_PTR(ctype->contexts, context) {
- 			int in =3D context->in;
- 			int out =3D context->out;
- 			int check =3D 0;
- 			int context_diff;
-+
-+			if (out < 0)
-+				continue;
- 			if (in < 0) {
- 				check =3D 1;
- 				in =3D 0;
- 			}
--			if (out < 0) {
--				check =3D 0;
--				out =3D 0;
--			}
- 			context_diff =3D out - in;
- 			if (check || context_diff) {
- 				insn =3D alloc_instruction(OP_CONTEXT, 0);
-@@ -1562,6 +1563,39 @@ static pseudo_t linearize_call_expression(struct e=
-ntrypoint *ep, struct expressi
- 			}
- 		} END_FOR_EACH_PTR(context);
-=20
-+		FOR_EACH_PTR(ctype->contexts, context) {
-+			int in =3D context->in;
-+			int out =3D context->out;
-+
-+			if (out >=3D 0)
-+				continue;
-+			if (retval =3D=3D VOID) {
-+				warning(expr->pos, "nonsensical conditional output context with no c=
-ondition");
-+				continue;
-+			}
-+			if (in) {
-+				warning(expr->pos, "nonsensical conditional input context");
-+				continue;
-+			}
-+			if (!post_call) {
-+				struct basic_block *set_context;
-+				post_call =3D alloc_basic_block(ep, expr->pos);
-+				set_context =3D alloc_basic_block(ep, expr->pos);
-+				add_branch(ep, retval, set_context, post_call);
-+				set_activeblock(ep, set_context);
-+			}
-+			insn =3D alloc_instruction(OP_CONTEXT, 0);
-+			insn->increment =3D -out;
-+			insn->check =3D 0;
-+			insn->context_expr =3D context->context;
-+			add_one_insn(ep, insn);
-+		} END_FOR_EACH_PTR(context);
-+
-+		if (post_call) {
-+			add_goto(ep, post_call);
-+			set_activeblock(ep, post_call);
+diff --git a/parse.c b/parse.c
+index f49b3f188c69..782683a84fba 100644
+--- a/parse.c
++++ b/parse.c
+@@ -2241,9 +2241,14 @@ static enum kind which_func(struct token *token,
+ 		if (lookup_type(next) || next !=3D token->next)
+ 			return Proto;
+ 		/* identifier list not in definition; complain */
+-		if (prefer_abstract)
+-			warning(token->pos,
+-				"identifier list not in definition");
++		if (prefer_abstract || !n) {
++			if (standard >=3D STANDARD_C23)
++				sparse_error(token->pos,
++					     "identifier list not in definition");
++			else
++				warning(token->pos,
++					"identifier list not in definition");
 +		}
-+
- 		if (ctype->modifiers & MOD_NORETURN)
- 			add_unreachable(ep);
+ 		return K_R;
  	}
-diff --git a/sparse.c b/sparse.c
-index 883a5edec5b1..19c6ba46e012 100644
---- a/sparse.c
-+++ b/sparse.c
-@@ -79,9 +79,168 @@ static int imbalance(struct entrypoint *ep, struct ba=
-sic_block *bb, int entry, i
- 	return -1;
- }
 =20
--static int check_bb_context(struct entrypoint *ep, struct basic_block *b=
-b, int entry, int exit);
-+struct cond_context_state {
-+	int cond_out;
-+	bool saw_base_out;
-+	bool saw_cond_out;
-+	bool all_zero;
-+	bool all_nonzero;
-+	struct basic_block *any_exit_bb;
-+};
-+
-+static bool is_pure_return_bb(struct basic_block *bb)
-+{
-+	struct instruction *insn, *last =3D NULL;
-+
-+	if (!bb)
-+		return false;
-+	FOR_EACH_PTR(bb->insns, insn) {
-+		if (!insn->bb)
-+			continue;
-+		if (insn->opcode =3D=3D OP_CONTEXT || insn->opcode =3D=3D OP_CALL ||
-+		    insn->opcode =3D=3D OP_INLINED_CALL || insn->opcode =3D=3D OP_ASM)
-+			return false;
-+		last =3D insn;
-+	} END_FOR_EACH_PTR(insn);
-+	return last && last->opcode =3D=3D OP_RET;
-+}
-+
-+static int known_cond_on_edge(pseudo_t cond, struct basic_block *from, s=
-truct basic_block *to)
-+{
-+	int hops;
-+
-+	for (hops =3D 0; from && to && hops < 4; hops++) {
-+		struct instruction *br =3D last_instruction(from->insns);
-+		if (br && br->opcode =3D=3D OP_CBR && br->cond =3D=3D cond &&
-+		    br->bb_true !=3D br->bb_false) {
-+			if (to =3D=3D br->bb_true)
-+				return 1;
-+			if (to =3D=3D br->bb_false)
-+				return 0;
-+		}
-+		if (ptr_list_size((struct ptr_list *)from->parents) !=3D 1)
-+			break;
-+		to =3D from;
-+		from =3D first_basic_block(from->parents);
-+		if (from =3D=3D to)
-+			break;
-+	}
-+	return -1;
-+}
-+
-+static int return_truth_on_edge(pseudo_t val, struct basic_block *from,
-+				struct basic_block *ret_bb, int depth)
-+{
-+	struct instruction *def;
-+	int known;
-+
-+	if (!val || val =3D=3D VOID || depth > 8)
-+		return -1;
-+	if (val->type =3D=3D PSEUDO_VAL)
-+		return val->value !=3D 0 ? 1 : 0;
-+
-+	known =3D known_cond_on_edge(val, from, ret_bb);
-+	if (known >=3D 0)
-+		return known;
-+
-+	if (val->type !=3D PSEUDO_REG && val->type !=3D PSEUDO_PHI)
-+		return -1;
-+	def =3D val->def;
-+	if (!def)
-+		return -1;
-+
-+	switch (def->opcode) {
-+	case OP_PHI: {
-+		struct basic_block *cur =3D from;
-+		int hops;
-+		for (hops =3D 0; cur && hops < 4; hops++) {
-+			pseudo_t phi;
-+			FOR_EACH_PTR(def->phi_list, phi) {
-+				if (!phi || phi =3D=3D VOID || !phi->def)
-+					continue;
-+				if (phi->def->bb =3D=3D cur)
-+					return return_truth_on_edge(phi->def->phi_src,
-+								    cur, ret_bb, depth + 1);
-+			} END_FOR_EACH_PTR(phi);
-+			if (ptr_list_size((struct ptr_list *)cur->parents) !=3D 1)
-+				break;
-+			cur =3D first_basic_block(cur->parents);
-+		}
-+		return -1;
-+	}
-+	case OP_PHISOURCE:
-+		return return_truth_on_edge(def->phi_src, def->bb, ret_bb, depth + 1);
-+	case OP_ZEXT:
-+	case OP_SEXT:
-+		if (def->orig_type && def->size >=3D def->orig_type->bit_size)
-+			return return_truth_on_edge(def->src, from, ret_bb, depth + 1);
-+		return -1;
-+	case OP_SET_EQ:
-+		if (def->src2 && def->src2->type =3D=3D PSEUDO_VAL && def->src2->value=
- =3D=3D 0) {
-+			int t =3D return_truth_on_edge(def->src1, from, ret_bb, depth + 1);
-+			return t >=3D 0 ? !t : -1;
-+		}
-+		return -1;
-+	case OP_SET_NE:
-+		if (def->src2 && def->src2->type =3D=3D PSEUDO_VAL && def->src2->value=
- =3D=3D 0)
-+			return return_truth_on_edge(def->src1, from, ret_bb, depth + 1);
-+		return -1;
-+	case OP_SEL: {
-+		int ct =3D return_truth_on_edge(def->cond, from, ret_bb, depth + 1);
-+		int tt, ft;
-+		if (ct =3D=3D 1)
-+			return return_truth_on_edge(def->src2, from, ret_bb, depth + 1);
-+		if (ct =3D=3D 0)
-+			return return_truth_on_edge(def->src3, from, ret_bb, depth + 1);
-+		tt =3D return_truth_on_edge(def->src2, from, ret_bb, depth + 1);
-+		ft =3D return_truth_on_edge(def->src3, from, ret_bb, depth + 1);
-+		return (tt >=3D 0 && tt =3D=3D ft) ? tt : -1;
-+	}
-+	default:
-+		return -1;
-+	}
-+}
-+
-+static int check_exit_edge(struct entrypoint *ep, struct basic_block *fr=
-om,
-+			   struct basic_block *ret_bb, struct instruction *ret_insn,
-+			   int entry, int exit, struct cond_context_state *cs)
-+{
-+	struct basic_block *diag_bb =3D from ? from : ret_bb;
-+	int truth;
-+
-+	if (!cs || !cs->cond_out)
-+		return entry !=3D exit ? imbalance(ep, ret_bb, entry, exit, "wrong cou=
-nt at exit") : 0;
-+
-+	if (!ret_insn->src || ret_insn->src =3D=3D VOID)
-+		return imbalance(ep, diag_bb, entry, exit + cs->cond_out, "wrong count=
- at exit");
-+
-+	truth =3D return_truth_on_edge(ret_insn->src, from, ret_bb, 0);
-+	if (!cs->any_exit_bb)
-+		cs->any_exit_bb =3D diag_bb;
-+	if (entry =3D=3D exit)
-+		cs->saw_base_out =3D true;
-+	if (entry =3D=3D exit + cs->cond_out)
-+		cs->saw_cond_out =3D true;
-+	if (truth !=3D 0)
-+		cs->all_zero =3D false;
-+	if (truth !=3D 1)
-+		cs->all_nonzero =3D false;
-+
-+	if (truth =3D=3D 0)
-+		return entry !=3D exit ? imbalance(ep, diag_bb, entry, exit, "wrong co=
-unt at exit") : 0;
-+	if (truth =3D=3D 1)
-+		return entry !=3D exit + cs->cond_out ?
-+			imbalance(ep, diag_bb, entry, exit + cs->cond_out, "wrong count at ex=
-it") : 0;
-+	if (entry !=3D exit && entry !=3D exit + cs->cond_out)
-+		return imbalance(ep, diag_bb, entry, exit, "wrong count at exit");
-+	return 0;
-+}
+@@ -2251,6 +2256,8 @@ static enum kind which_func(struct token *token,
+ 		return Bad_Func;
 =20
--static int check_children(struct entrypoint *ep, struct basic_block *bb,=
- int entry, int exit)
-+static int check_bb_context(struct entrypoint *ep, struct basic_block *b=
-b,
-+			    int entry, int exit, struct cond_context_state *cs);
-+
-+static int check_children(struct entrypoint *ep, struct basic_block *bb,
-+			  int entry, int exit, struct cond_context_state *cs)
+ 	if (next->special =3D=3D ')') {
++		if (standard >=3D STANDARD_C23)
++			return Proto;
+ 		/* don't complain about those */
+ 		if (!n || match_op(next->next, ';') || match_op(next->next, ','))
+ 			return Empty;
+@@ -3284,6 +3291,7 @@ static struct token * statement_list(struct token *=
+token, struct statement_list
+ static struct token *identifier_list(struct token *token, struct symbol =
+*fn)
  {
- 	struct instruction *insn;
- 	struct basic_block *child;
-@@ -90,16 +249,23 @@ static int check_children(struct entrypoint *ep, str=
-uct basic_block *bb, int ent
- 	if (!insn)
- 		return 0;
- 	if (insn->opcode =3D=3D OP_RET)
--		return entry !=3D exit ? imbalance(ep, bb, entry, exit, "wrong count a=
-t exit") : 0;
-+		return check_exit_edge(ep, NULL, bb, insn, entry, exit, cs);
+ 	struct symbol_list **list =3D &fn->arguments;
++	fn->kr_args =3D 1;
+ 	for (;;) {
+ 		struct symbol *sym =3D alloc_symbol(token->pos, SYM_NODE);
+ 		sym->ident =3D token->ident;
+@@ -3304,6 +3312,9 @@ static struct token *parameter_type_list(struct tok=
+en *token, struct symbol *fn)
+ {
+ 	struct symbol_list **list =3D &fn->arguments;
 =20
- 	FOR_EACH_PTR(bb->children, child) {
--		if (check_bb_context(ep, child, entry, exit))
-+		if (cs && cs->cond_out && is_pure_return_bb(child)) {
-+			if (check_exit_edge(ep, bb, child, last_instruction(child->insns),
-+					    entry, exit, cs))
-+				return -1;
-+			continue;
++	if (match_op(token, ')'))
++		return token;
++
+ 	for (;;) {
+ 		struct symbol *sym;
+=20
+@@ -3602,7 +3613,10 @@ static struct token *parse_k_r_arguments(struct to=
+ken *token, struct symbol *dec
+ {
+ 	struct symbol_list *args =3D NULL;
+=20
+-	if (Wold_style_definition)
++	if (standard >=3D STANDARD_C23)
++		sparse_error(token->pos,
++			     "old-style function definition is invalid in C23");
++	else if (Wold_style_definition)
+ 		warning(token->pos, "non-ANSI definition of function '%s'", show_ident=
+(decl->ident));
+=20
+ 	do {
+@@ -3772,8 +3786,15 @@ struct token *external_declaration(struct token *t=
+oken, struct symbol_list **lis
+ 		}
+ 		if (lookup_type(token))
+ 			return parse_k_r_arguments(token, decl, list);
+-		if (match_op(token, '{'))
++		if (match_op(token, '{')) {
++			if (standard >=3D STANDARD_C23 && base_type->kr_args)
++				sparse_error(decl->pos,
++					     "old-style function definition is invalid in C23");
+ 			return parse_function_body(token, decl, list);
 +		}
-+		if (check_bb_context(ep, child, entry, exit, cs))
- 			return -1;
- 	} END_FOR_EACH_PTR(child);
- 	return 0;
- }
++		if (standard >=3D STANDARD_C23 && base_type->kr_args)
++			sparse_error(decl->pos,
++				     "identifier list not in function definition");
 =20
--static int check_bb_context(struct entrypoint *ep, struct basic_block *b=
-b, int entry, int exit)
-+static int check_bb_context(struct entrypoint *ep, struct basic_block *b=
-b,
-+			    int entry, int exit, struct cond_context_state *cs)
- {
- 	if (!bb)
- 		return 0;
-@@ -115,7 +281,7 @@ static int check_bb_context(struct entrypoint *ep, st=
-ruct basic_block *bb, int e
- 	if (entry < 0)
- 		return imbalance(ep, bb, entry, exit, "unexpected unlock");
-=20
--	return check_children(ep, bb, entry, exit);
-+	return check_children(ep, bb, entry, exit, cs);
- }
-=20
- static void check_cast_instruction(struct instruction *insn)
-@@ -260,11 +426,29 @@ static void check_context(struct entrypoint *ep)
-=20
- 	check_instructions(ep);
-=20
-+	struct cond_context_state cs =3D {
-+		.all_zero =3D true,
-+		.all_nonzero =3D true,
-+	};
-+
- 	FOR_EACH_PTR(sym->ctype.contexts, context) {
--		in_context +=3D context->in;
--		out_context +=3D context->out;
-+		int in =3D context->in;
-+		int out =3D context->out;
-+
-+		if (in > 0)
-+			in_context +=3D in;
-+		if (out > 0)
-+			out_context +=3D out;
-+		else if (out < 0)
-+			cs.cond_out +=3D -out;
- 	} END_FOR_EACH_PTR(context);
--	check_bb_context(ep, ep->entry->bb, in_context, out_context);
-+	if (!check_bb_context(ep, ep->entry->bb, in_context, out_context, &cs) =
-&&
-+	    cs.cond_out > 0 && cs.any_exit_bb) {
-+		if ((!cs.all_zero && !cs.saw_cond_out) ||
-+		    (!cs.all_nonzero && !cs.saw_base_out))
-+			imbalance(ep, cs.any_exit_bb, in_context,
-+				  out_context + cs.cond_out, "wrong count at exit");
-+	}
- }
-=20
- /* list_compound_symbol - symbol info for arrays, structures, unions */
-diff --git a/validation/context.c b/validation/context.c
-index b9500dc7508d..3330482c2195 100644
---- a/validation/context.c
-+++ b/validation/context.c
-@@ -10,6 +10,10 @@ static void r(void) __attribute__((context(1,0)))
- 	__context__(-1);
- }
-=20
-+// Negative output means "conditional positive output"
-+extern int cond_get(void) __attribute((context(0,-1)));
-+extern void nonsensical_cond_get(void) __attribute((context(0,-1)));
-+
- extern int _ca(int fail);
- #define ca(fail) __cond_lock(_ca(fail))
-=20
-@@ -19,6 +23,17 @@ static void good_paired1(void)
- 	r();
- }
-=20
-+static void good_conditional(void)
-+{
-+	if (cond_get())
-+		r();
-+}
-+
-+static void nonsensical_conditional(void)
-+{
-+	nonsensical_cond_get();
-+}
-+
- static void good_paired2(void)
- {
- 	a();
-@@ -314,23 +329,81 @@ static void warn_cond_lock1(void)
-         condition2 =3D 1; /* do stuff */
-     r();
- }
-+
-+static int good_trylock_def(int ok) __attribute__((context(0, -1)))
-+{
-+	if (ok) {
-+		__context__(1);
-+		return 1;
-+	}
-+	return 0;
-+}
-+
-+static int good_trylock_wrap(void) __attribute__((context(0, -1)))
-+{
-+	return cond_get();
-+}
-+
-+static int good_trylock_stub(void) __attribute__((context(0, -1)))
+ 		if (!(decl->ctype.modifiers & MOD_STATIC))
+ 			decl->ctype.modifiers |=3D MOD_EXTERN;
+@@ -3977,6 +3998,9 @@ struct token *external_declaration(struct token *to=
+ken, struct symbol_list **lis
+ 		base_type =3D decl->ctype.base_type;
+ 		if (!is_typedef && base_type && base_type->type =3D=3D SYM_FN) {
+ 			decl->ctype.modifiers |=3D ctx.f_modifiers;
++			if (standard >=3D STANDARD_C23 && base_type->kr_args)
++				sparse_error(decl->pos,
++					     "identifier list not in function definition");
+ 			if (!(decl->ctype.modifiers & MOD_STATIC))
+ 				decl->ctype.modifiers |=3D MOD_EXTERN;
+ 		}
+diff --git a/symbol.h b/symbol.h
+index a072ac8fc739..942baad97df5 100644
+--- a/symbol.h
++++ b/symbol.h
+@@ -198,6 +198,7 @@ struct symbol {
+ 				packed : 1, transparent_union : 1,
+ 				fixed_type : 1;
+ 			unsigned int has_alignas : 1;
++			unsigned int kr_args : 1;
+ 			unsigned int underspecified : 1;
+ 			unsigned int c23_auto : 1;
+ 			int		rank:3;	// arithmetic's rank
+diff --git a/validation/c23-empty-parameters.c b/validation/c23-empty-par=
+ameters.c
+new file mode 100644
+index 000000000000..9c493256d54b
+--- /dev/null
++++ b/validation/c23-empty-parameters.c
+@@ -0,0 +1,29 @@
++int f();
++int f(void)
 +{
 +	return 0;
 +}
 +
-+extern int multi_cond_get(void)
-+	__attribute__((context(lock_a, 0, -1)))
-+	__attribute__((context(lock_b, 0, 1)));
-+static void release_a(void) __attribute__((context(lock_a, 1, 0)))
-+{
-+	__context__(lock_a, -1);
-+}
-+static void release_b(void) __attribute__((context(lock_b, 1, 0)))
-+{
-+	__context__(lock_b, -1);
-+}
-+static void good_multi_cond(void)
-+{
-+	if (multi_cond_get())
-+		release_a();
-+	release_b();
-+}
-+
-+static int warn_trylock_missing(void) __attribute__((context(0, -1)))
++int g(void);
++int g()
 +{
 +	return 1;
 +}
 +
-+static int warn_trylock_inverted(void) __attribute__((context(0, -1)))
++static int h()
 +{
-+	__context__(1);
++	return 2;
++}
++
++static int test(void)
++{
++	int (*fp)() =3D f;
++	int (*fp2)(void) =3D h;
++
++	return fp() + fp2() + g();
++}
++
++/*
++ * check-name: c23-empty-parameters
++ * check-command: sparse -std=3Dc23 -Wstrict-prototypes -pedantic $file
++ */
+diff --git a/validation/c23-empty-params-error.c b/validation/c23-empty-p=
+arams-error.c
+new file mode 100644
+index 000000000000..4c0efe972358
+--- /dev/null
++++ b/validation/c23-empty-params-error.c
+@@ -0,0 +1,47 @@
++int f();
++
++static int h()
++{
 +	return 0;
 +}
 +
-+static int warn_trylock_uncond(int x) __attribute__((context(0, -1)))
++int mismatch();
++int mismatch(int x)
 +{
-+	__context__(1);
 +	return x;
 +}
- /*
-  * check-name: Check -Wcontext
-  *
-  * check-error-start
--context.c:69:13: warning: context imbalance in 'warn_lock1' - wrong coun=
-t at exit
--context.c:74:13: warning: context imbalance in 'warn_lock2' - wrong coun=
-t at exit
--context.c:81:13: warning: context imbalance in 'warn_lock3' - wrong coun=
-t at exit
--context.c:88:13: warning: context imbalance in 'warn_unlock1' - unexpect=
-ed unlock
--context.c:93:13: warning: context imbalance in 'warn_unlock2' - unexpect=
-ed unlock
--context.c:131:12: warning: context imbalance in 'warn_if1' - wrong count=
- at exit
--context.c:140:12: warning: context imbalance in 'warn_if2' - different l=
-ock contexts for basic block
--context.c:202:9: warning: context imbalance in 'warn_while1' - different=
- lock contexts for basic block
--context.c:210:17: warning: context imbalance in 'warn_while2' - unexpect=
-ed unlock
--context.c:216:9: warning: context imbalance in 'warn_while3' - wrong cou=
-nt at exit
--context.c:274:13: warning: context imbalance in 'warn_goto1' - wrong cou=
-nt at exit
--context.c:283:13: warning: context imbalance in 'warn_goto2' - wrong cou=
-nt at exit
--context.c:300:5: warning: context imbalance in 'warn_goto3' - different =
-lock contexts for basic block
--context.c:315:5: warning: context imbalance in 'warn_cond_lock1' - diffe=
-rent lock contexts for basic block
-+context.c:34:29: warning: nonsensical conditional output context with no=
- condition
-+context.c:84:13: warning: context imbalance in 'warn_lock1' - wrong coun=
-t at exit
-+context.c:89:13: warning: context imbalance in 'warn_lock2' - wrong coun=
-t at exit
-+context.c:96:13: warning: context imbalance in 'warn_lock3' - wrong coun=
-t at exit
-+context.c:103:13: warning: context imbalance in 'warn_unlock1' - unexpec=
-ted unlock
-+context.c:108:13: warning: context imbalance in 'warn_unlock2' - unexpec=
-ted unlock
-+context.c:146:12: warning: context imbalance in 'warn_if1' - wrong count=
- at exit
-+context.c:155:12: warning: context imbalance in 'warn_if2' - different l=
-ock contexts for basic block
-+context.c:217:9: warning: context imbalance in 'warn_while1' - different=
- lock contexts for basic block
-+context.c:225:17: warning: context imbalance in 'warn_while2' - unexpect=
-ed unlock
-+context.c:231:9: warning: context imbalance in 'warn_while3' - wrong cou=
-nt at exit
-+context.c:289:13: warning: context imbalance in 'warn_goto1' - wrong cou=
-nt at exit
-+context.c:298:13: warning: context imbalance in 'warn_goto2' - wrong cou=
-nt at exit
-+context.c:315:5: warning: context imbalance in 'warn_goto3' - different =
-lock contexts for basic block
-+context.c:330:5: warning: context imbalance in 'warn_cond_lock1' - diffe=
-rent lock contexts for basic block
-+context.c:370:12: warning: context imbalance in 'warn_trylock_missing' -=
- wrong count at exit
-+context.c:375:12: warning: context imbalance in 'warn_trylock_inverted' =
-- wrong count at exit
-+context.c:381:12: warning: context imbalance in 'warn_trylock_uncond' - =
-wrong count at exit
-  * check-error-end
-  */
++
++int ident_decl(a, b);
++int (*bad_fp)(a, b);
++
++int old_implicit(a, b)
++{
++	return 0;
++}
++
++static void bad_calls(int (*fp)())
++{
++	f(1);
++	h(1, 2);
++	fp(3);
++}
++
++/*
++ * check-name: c23-empty-params-error
++ * check-command: sparse -std=3Dc23 -Wno-decl $file
++ *
++ * check-error-start
++c23-empty-params-error.c:14:5: error: identifier list not in function de=
+finition
++c23-empty-params-error.c:15:14: error: identifier list not in definition
++c23-empty-params-error.c:17:5: error: old-style function definition is i=
+nvalid in C23
++c23-empty-params-error.c:17:18: error: missing type declaration for para=
+meter 'a'
++c23-empty-params-error.c:17:21: error: missing type declaration for para=
+meter 'b'
++c23-empty-params-error.c:9:5: error: symbol 'mismatch' redeclared with d=
+ifferent type (different argument counts):
++c23-empty-params-error.c:9:5:    int extern [addressable] [signed] [topl=
+evel] mismatch( ... )
++c23-empty-params-error.c:8:5: note: previously declared as:
++c23-empty-params-error.c:8:5:    int extern [addressable] [signed] [topl=
+evel] mismatch( ... )
++c23-empty-params-error.c:24:10: error: too many arguments for function f
++c23-empty-params-error.c:25:10: error: too many arguments for function h
++c23-empty-params-error.c:26:11: error: too many arguments for function f=
+p
++ * check-error-end
++ */
+diff --git a/validation/c23-knr-error.c b/validation/c23-knr-error.c
+new file mode 100644
+index 000000000000..f7ae837815b5
+--- /dev/null
++++ b/validation/c23-knr-error.c
+@@ -0,0 +1,14 @@
++int old_func(a, b)
++int a, b;
++{
++	return a + b;
++}
++
++/*
++ * check-name: c23-knr-error
++ * check-command: sparse -std=3Dc23 $file
++ *
++ * check-error-start
++c23-knr-error.c:2:1: error: old-style function definition is invalid in =
+C23
++ * check-error-end
++ */
