@@ -1,70 +1,70 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=199.89.1.14
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794256438;
-	b=45gutIHs5amZgq2aWNsxx5ZQsmYqZr+xkJMgwwA0QyUFlTbuaTCRZ9cD4uAEuDLLHFb+
-	 shOfOSqR2a1GuwF+Ns24NcBVDOrArwyH26nJiszvwGZrP+iL2nEV6okuVy0GyNBHFXC0i
-	 0ATAu/FqDQkZoZRlVOwx65EClnqf6gqYUYdFW8XjbH5Mm7VOKkgi9lMY7lHzsLZS9a8pI
-	 E6t73YFbgUd7kkXoc/U3AshBbgDK989QWR3A34umPQxuNBxiwD+FK5JpLspWQ4QGOaKxJ
-	 YEHY1rl3v1lCH+/veXzWUmVRs8uwppyG0fAsALglBeeiS1R/Vbe/06V+1iRGpx7KWnA==
+	t=1794256439;
+	b=YijSDRDfK3OIQkvia+w7MQ1MxxADli508BKxwYACex9QbtxSlKY4OaS/auyBVrQn+Wbg
+	 b9R6Nks1l2cXgFWCiZDxtpaE6SkfYK1VMYEiZpAZ0rsYSFeYFC3nxG3ybX8e87w2VJsOr
+	 dUv0oZm6luQV9ZEsc+lAO+7jdI0qoqLJDTF+zm5yW9H7vhJbiL4yqawkW63iG1wShcX34
+	 inj/+8I+vlqBnJpO/Fyy8L4LLbIWP9/ssFaPSTCTYefhg4zuLA5EXCC7qz3c1KQvnp53R
+	 zq5/KnRteANTKOuHPvrMFPQ/FztRohuNiJhdV7w2j7PMEuxNRtOrWyVR5A1VqTqO35w==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794256438;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794256439;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Virus-Scanned:Received:
 	 Received:From:To:Cc:Subject:Date:Message-ID:X-Mailer:In-Reply-To:
 	 References:MIME-Version:Content-Transfer-Encoding;
-	bh=/gxczXZNJoEkxzhl+9Oc6vus4WUohhMyzyam9+HVM8A=;
-	b=1GBMu+Z4yvtMfLixbs13nOFwNQgrDFe68ANN1Kim0fzY7KiX7Y+qv2Eqgbclxo4/5F5S
-	 bT1tj4Q/FkGistNVWROfVM76tFDZGpyEHYt/4rXzxghAO5s/86FZ7XDURrZh3RuNyAgw8
-	 lrLoHoDlfLVQFArv4JPuehcrLGQsWhl9O8ngRGFPiZ1NU9CEirzNcsXM/yhhXQ14OQMzX
-	 FJ04gdvbiVbjihSnQR02OxxBm2U0DQVg83aPGG28qC/Dw8d60SO7Nygkehos4IoML6tJv
-	 Dgu8XCbqpJSkRroVH6nt4fPlp0Ozrca2y/HbLOh8NHnuvq4cT/y6M6YuMZ8W/evPPPw==
+	bh=Y/7hUH2oj7d7vQDVJ1RSbK/GJlsJ0+HryhVYXUA4550=;
+	b=j3FUbZKHGZQ0eyn5PanjsFgsEKOswdLs5OuW6b6kKp0bFALMBWJbjydhialvdoFclI2h
+	 y3V4oXskBeULHQWlu/Bs6WZO9Di/orVoD6+4LOKBVKvxdrQQTpmE4sQ1hsB51pxVR7VC8
+	 wICNEYRatFPv8uUNXhQi9bL/BpRjjCVEiCCyjy2NpzBoCzahysamg0oDaMuK/J/4xB4V2
+	 bTro+OryjJ/xFO6/k1a0ObeNA4pZh2/OQjCn3UBXeIDbzZBCyiVUwa2t+nWrsnR9nIYK8
+	 KxkJMLnrsT1At0VCPBBevk147CsJPpPaaoSx8Unu1Vq+Taep7a2P449/0KtIzv/ylXA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=acm.org;
 	spf=pass smtp.mailfrom=acm.org;
-	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=DqW3Jb3j;
+	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=rMqXPpgU;
 	arc=none smtp.remote-ip=199.89.1.14
 Received: from 011.lax.mailroute.net (011.lax.mailroute.net [199.89.1.14])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A10BB606A330
-	for <linux-sparse@vger.kernel.org>; Mon,  9 Nov 2026 20:33:57 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org A10BB606A330
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 595D3606A326
+	for <linux-sparse@vger.kernel.org>; Mon,  9 Nov 2026 20:33:58 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 595D3606A326
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=acm.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=DqW3Jb3j
+	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=rMqXPpgU
 Received: from localhost (localhost [127.0.0.1])
-	by 011.lax.mailroute.net (Postfix) with ESMTP id 4jNhML1Tm3z1XMYJM;
+	by 011.lax.mailroute.net (Postfix) with ESMTP id 4jNhML4RQqz1XMYJW;
 	Mon,  9 Nov 2026 20:33:50 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=acm.org; h=
 	content-transfer-encoding:mime-version:references:in-reply-to
 	:x-mailer:message-id:date:date:subject:subject:from:from
-	:received:received; s=mr01; t=1794256418; x=1796848419; bh=/gxcz
-	XZNJoEkxzhl+9Oc6vus4WUohhMyzyam9+HVM8A=; b=DqW3Jb3j45L4sHCr+abKc
-	W9MKtFj420GqpyDuCLK9johNSiTLnLFTKjgFiMGWpr6U5oBlpRDqV7D55w1Zvc2K
-	5FQUeBGIgbAyYanXlhqX7RmaH+9HY4liCWhAA0Uhy4OpEdvtIfLAbObyePPQDTwD
-	9EfjlUcBD50pUW7ezT6I66yxeeQAyVSuC9IUOiRt0X7cRfufDenDGVw2K0/tSatJ
-	cEsnWzFWnYHatDuLreV1Uwc/Tk1z4suSdP8gM56TqFaxG5mDQDdvO1wl9cXvHoew
-	MMfW7hVeOw3vLMq12k4QrxOGF/J/K3N1fREC3zkvRC2CoT7zj/mlFXZ9ZqfOves5
-	g==
+	:received:received; s=mr01; t=1794256418; x=1796848419; bh=Y/7hU
+	H2oj7d7vQDVJ1RSbK/GJlsJ0+HryhVYXUA4550=; b=rMqXPpgU27jMn4Z4HMMbp
+	VmI+L5/auwfBWnAY/PXF8rc1j8AFxpg0H6V9P0ToAHY2kPq5apKK67NytCaDTJm5
+	K8yjKfPBcEljbEwxA2kzGUYYsm5VzG7UwSHNoRYuhnfR7PdvYyYU7D5F8t2UN4Fw
+	RhYDWZUQ48HbMo7JrbGay9ugbG+xa4t944ydqv5k8qXcLQoeCw4kj1yClbpcpgtD
+	+oRo2zO1u2cRqeaNZMdgsYbnw5EuxUJhs/hBDzqjGp1V0WLQw/cYgSAtSzoHSD75
+	3uTI1XwapAy0z9FsqXHwdYvOI4M/6EKDwxRePrLli0aRJU65MY9Y6LzDg9SBhYGG
+	A==
 X-Virus-Scanned: by MailRoute
 Received: from 011.lax.mailroute.net ([127.0.0.1])
  by localhost (011.lax [127.0.0.1]) (mroute_mailscanner, port 10029) with LMTP
- id ESJV84hetUEX; Mon,  9 Nov 2026 20:33:38 +0000 (UTC)
+ id RY1SvDMRUoZV; Mon,  9 Nov 2026 20:33:38 +0000 (UTC)
 Received: from bvanassche.c.googlers.com.com (57.237.82.34.bc.googleusercontent.com [34.82.237.57])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
 	(Authenticated sender: bvanassche@acm.org)
-	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4jNhM51RpNz1XLX7h;
+	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4jNhM54Y78z1XMfrY;
 	Mon,  9 Nov 2026 20:33:37 +0000 (UTC)
 From: Bart Van Assche <bvanassche@acm.org>
 To: linux-sparse@vger.kernel.org
 Cc: Linus Torvalds <torvalds@linux-foundation.org>,
 	Bart Van Assche <bvanassche@acm.org>
-Subject: [PATCH 58/73] preprocessor: Add support for __VA_OPT__
-Date: Mon,  9 Nov 2026 12:32:44 -0800
-Message-ID: <20261109203259.362845-59-bvanassche@acm.org>
+Subject: [PATCH 60/73] c23: Support storage-class specifiers in compound literals
+Date: Mon,  9 Nov 2026 12:32:46 -0800
+Message-ID: <20261109203259.362845-61-bvanassche@acm.org>
 X-Mailer: git-send-email 2.56.0.506.g506a7eabc5-goog
 In-Reply-To: <20261109203259.362845-1-bvanassche@acm.org>
 References: <20261109203259.362845-1-bvanassche@acm.org>
@@ -79,811 +79,647 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
 
-Add support for the __VA_OPT__ functional macro replacement operator
-introduced in C23. Expand the contents of __VA_OPT__(...) if and only if
-variable arguments are passed to the variadic macro, eliminating trailing
-delimiter issues in variadic macro expansion portably.
+Support C23 storage-class specifiers (constexpr, static, register, and
+thread_local) in compound literals per ISO C23 6.5.2.5:
+- Allow static, register, constexpr, and static thread_local compound
+  literals while rejecting extern, typedef, auto, file-scope register,
+  and un-static block-scope thread_local compound literals.
+- Keep block-scope constexpr compound literals at automatic storage
+  duration unless static is also specified, enforce constant initializers
+  on static and thread_local objects in C23 mode, and warn when taking
+  the address or decaying an array of a register compound literal.
+- Emit anonymous static and thread_local compound literal globals and
+  their constant scalar or array initializers in sparse-llvm, and warn
+  under -Wpedantic before C23.
 
 Signed-off-by: Bart Van Assche <bvanassche@acm.org>
 ---
- ident-list.h                               |   1 +
- pre-process.c                              | 331 ++++++++++++++++++---
- token.h                                    |   3 +
- tokenize.c                                 |  10 +
- validation/c23-va-opt.c                    |  36 +++
- validation/preprocessor/c23-va-opt-error.c |  31 ++
- validation/preprocessor/c23-va-opt.c       |  73 +++++
- 7 files changed, 446 insertions(+), 39 deletions(-)
- create mode 100644 validation/c23-va-opt.c
- create mode 100644 validation/preprocessor/c23-va-opt-error.c
- create mode 100644 validation/preprocessor/c23-va-opt.c
+ evaluate.c                                    | 28 +++++++--
+ expand.c                                      |  5 +-
+ expression.c                                  | 61 ++++++++++++++++---
+ expression.h                                  |  1 +
+ parse.c                                       | 59 +++++++++++++-----
+ sparse-llvm.c                                 | 10 ++-
+ symbol.h                                      |  4 +-
+ .../backend/c23-compound-literal-storage.c    | 27 ++++++++
+ .../c23-compound-literal-register-addr.c      | 17 ++++++
+ .../c23-compound-literal-storage-error.c      | 37 +++++++++++
+ .../c23-compound-literal-storage-pedantic.c   | 10 +++
+ validation/c23-compound-literal-storage.c     | 27 ++++++++
+ 12 files changed, 252 insertions(+), 34 deletions(-)
+ create mode 100644 validation/backend/c23-compound-literal-storage.c
+ create mode 100644 validation/c23-compound-literal-register-addr.c
+ create mode 100644 validation/c23-compound-literal-storage-error.c
+ create mode 100644 validation/c23-compound-literal-storage-pedantic.c
+ create mode 100644 validation/c23-compound-literal-storage.c
 
-diff --git a/ident-list.h b/ident-list.h
-index 3340f11641fa..b4e01e0a423c 100644
---- a/ident-list.h
-+++ b/ident-list.h
-@@ -80,6 +80,7 @@ IDENT(c_generic_selections);
- IDENT(c_static_assert);
- __IDENT(pragma_ident, "__pragma__", 0);
- __IDENT(__VA_ARGS___ident, "__VA_ARGS__", 0);
-+__IDENT(__VA_OPT___ident, "__VA_OPT__", 0);
- __IDENT(__func___ident, "__func__", 0);
- __IDENT(__FUNCTION___ident, "__FUNCTION__", 0);
- __IDENT(__PRETTY_FUNCTION___ident, "__PRETTY_FUNCTION__", 0);
-diff --git a/pre-process.c b/pre-process.c
-index 9ebf09cffbdd..8eb70ca7a1a4 100644
---- a/pre-process.c
-+++ b/pre-process.c
-@@ -640,7 +640,7 @@ static struct token *dup_token(const struct token *to=
-ken, struct position *strea
- static struct token **copy(struct token **where, struct token *list, int=
- *count)
- {
- 	int need_copy =3D --*count;
--	while (!eof_token(list)) {
-+	do {
- 		struct token *token;
- 		if (need_copy)
- 			token =3D dup_token(list, &list->pos);
-@@ -651,7 +651,7 @@ static struct token **copy(struct token **where, stru=
-ct token *list, int *count)
- 		*where =3D token;
- 		where =3D &token->next;
- 		list =3D list->next;
--	}
-+	} while (!eof_token(list));
- 	*where =3D &eof_token_entry;
- 	return where;
- }
-@@ -677,11 +677,26 @@ static int handle_kludge(const struct token **p, st=
-ruct arg *args)
+diff --git a/evaluate.c b/evaluate.c
+index e46b1a7d4f70..32621d04a17e 100644
+--- a/evaluate.c
++++ b/evaluate.c
+@@ -1918,7 +1918,10 @@ static struct symbol *create_pointer(struct expres=
+sion *expr, struct symbol *sym
+=20
+ 	access_symbol(sym);
+ 	if (sym->ctype.modifiers & MOD_REGISTER) {
+-		warning(expr->pos, "taking address of 'register' variable '%s'", show_=
+ident(sym->ident));
++		if (sym->ident)
++			warning(expr->pos, "taking address of 'register' variable '%s'", show=
+_ident(sym->ident));
++		else
++			warning(expr->pos, "taking address of 'register' compound literal");
+ 		sym->ctype.modifiers &=3D ~MOD_REGISTER;
  	}
- }
+ 	if (sym->type =3D=3D SYM_NODE) {
+@@ -2944,7 +2947,7 @@ found:
+ 		else
+ 			v =3D &top->ident_expression;
 =20
--static struct token **substitute(struct token **list, const struct token=
- *body, struct arg *args)
-+static inline int arg_empty(struct arg *arg)
-+{
-+	struct token *t =3D arg->expanded;
-+
-+	if (!t)
-+		return 1;
-+	while (token_type(t) =3D=3D TOKEN_UNTAINT)
-+		t =3D t->next;
-+	return eof_token(t);
-+}
-+
-+static struct token **substitute_tokens(struct token **list,
-+					struct position *base_pos,
-+					const struct token *body,
-+					struct arg *args, int vararg_num)
- {
--	struct position *base_pos =3D &(*list)->pos;
- 	int *count;
-+	int one;
- 	enum {Normal, Placeholder, Concat} state =3D Normal;
-+	int extra_whitespace =3D 0;
+-		mods |=3D ctype->ctype.modifiers & (MOD_STORAGE | MOD_CONSTEXPR);
++		mods |=3D ctype->ctype.modifiers & (MOD_STORAGE | MOD_TLS | MOD_CONSTE=
+XPR);
+ 		if (handle_initializer(v, 1, lclass, top->ctype, mods))
+ 			continue;
 =20
- 	for (; !eof_token(body); body =3D body->next) {
- 		struct token *added, *arg;
-@@ -712,9 +727,57 @@ static struct token **substitute(struct token **list=
-, const struct token *body,
- 			tail =3D &added->next;
- 			break;
-=20
-+		case TOKEN_STR_VA_OPT: {
-+			struct token *inner =3D &eof_token_entry;
-+
-+			if (vararg_num >=3D 0 && !arg_empty(&args[vararg_num]))
-+				substitute_tokens(&inner, base_pos,
-+						  body->target, args,
-+						  vararg_num);
-+			added =3D stringify(inner);
-+			added->pos.stream =3D base_pos->stream;
-+			added->pos.line =3D base_pos->line;
-+			added->pos.pos =3D base_pos->pos;
-+			added->pos.newline =3D body->pos.newline;
-+			added->pos.whitespace =3D
-+				body->pos.whitespace || extra_whitespace;
-+			extra_whitespace =3D 0;
-+			tail =3D &added->next;
-+			break;
+@@ -3236,10 +3239,14 @@ static int handle_initializer(struct expression *=
+*ep, int nested,
+ 		mods |=3D ctype->ctype.modifiers;
+ 		if (mods & MOD_CONSTEXPR)
+ 			check_constexpr_scalar_init(&orig, ctype);
+-		if ((mods & (MOD_TOPLEVEL | MOD_STATIC)) &&
+-		    !(e->flags & (CEF_ACE | CEF_ADDR)))
+-			if (Wconstexpr_not_const)
++		else if ((mods & (MOD_TOPLEVEL | MOD_STATIC | MOD_TLS)) &&
++			 valid_type(ctype->ctype.base_type) &&
++			 !(e->flags & (CEF_ACE | CEF_ADDR))) {
++			if (standard >=3D STANDARD_C23)
++				sparse_error(e->pos, "non-constant initializer for static object");
++			else if (Wconstexpr_not_const)
+ 				warning(e->pos, "non-constant initializer for static object");
 +		}
-+
-+		case TOKEN_VA_OPT: {
-+			struct token *inner =3D &eof_token_entry;
-+
-+			if (vararg_num >=3D 0 && !arg_empty(&args[vararg_num]))
-+				substitute_tokens(&inner, base_pos,
-+						  body->target, args,
-+						  vararg_num);
-+			if (eof_token(inner)) {
-+				if (body->pos.whitespace && state !=3D Concat &&
-+				    token_type(body->next) !=3D TOKEN_CONCAT)
-+					extra_whitespace =3D 1;
-+				if (state =3D=3D Concat)
-+					state =3D Normal;
-+				else if (token_type(body->next) =3D=3D TOKEN_CONCAT)
-+					state =3D Placeholder;
-+				else
-+					state =3D Normal;
-+				continue;
-+			}
-+			arg =3D inner;
-+			one =3D 1;
-+			count =3D &one;
-+			goto copy_arg;
-+		}
-+
- 		case TOKEN_STR_ARGUMENT:
- 			arg =3D args[body->argnum].str;
- 			count =3D &args[body->argnum].n_str;
-+			if (eof_token(arg)) {
-+				state =3D Normal;
-+				continue;
-+			}
- 			goto copy_arg;
 =20
- 		case TOKEN_QUOTED_ARGUMENT:
-@@ -740,6 +803,10 @@ static struct token **substitute(struct token **list=
-, const struct token *body,
- 			tail =3D copy(&added, arg, count);
- 			added->pos.newline =3D body->pos.newline;
- 			added->pos.whitespace =3D body->pos.whitespace;
-+			if (extra_whitespace) {
-+				added->pos.whitespace =3D 1;
-+				extra_whitespace =3D 0;
-+			}
- 			break;
-=20
- 		case TOKEN_CONCAT:
-@@ -754,6 +821,10 @@ static struct token **substitute(struct token **list=
-, const struct token *body,
- 			if (token_type(body) =3D=3D TOKEN_IDENT &&
- 			    added->ident->tainted)
- 				added->pos.noexpand =3D 1;
-+			if (extra_whitespace) {
-+				added->pos.whitespace =3D 1;
-+				extra_whitespace =3D 0;
-+			}
- 			tail =3D &added->next;
- 			break;
- 		}
-@@ -776,6 +847,14 @@ static struct token **substitute(struct token **list=
-, const struct token *body,
- 	return list;
- }
-=20
-+static struct token **substitute(struct token **list, const struct token=
- *body,
-+				 struct arg *args, int vararg_num)
-+{
-+	struct position base_pos =3D (*list)->pos;
-+
-+	return substitute_tokens(list, &base_pos, body, args, vararg_num);
-+}
-+
- static bool parse_has_include(struct token **list, int how);
- static bool parse_has_embed(struct token **list);
-=20
-@@ -811,8 +890,14 @@ static int expand(struct token **list, struct symbol=
- *sym)
- 	struct token **tail;
- 	struct token *expansion =3D sym->expansion;
- 	int nargs =3D sym->arglist ? sym->arglist->count.normal : 0;
-+	int vararg_num =3D (sym->arglist && sym->arglist->count.vararg) ?
-+				 (sym->arglist->count.normal - 1) :
-+				 -1;
- 	struct arg args[nargs ? nargs : 1];
-=20
-+	if (nargs)
-+		memset(args, 0, nargs * sizeof(args[0]));
-+
- 	if (expanding->tainted) {
- 		token->pos.noexpand =3D 1;
  		return 1;
-@@ -855,7 +940,7 @@ static int expand(struct token **list, struct symbol =
-*sym)
- 	expanding->tainted =3D 1;
+ 	}
+@@ -3443,13 +3450,22 @@ static struct symbol *evaluate_compound_literal(s=
+truct expression *expr, struct
 =20
- 	last =3D token->next;
--	tail =3D substitute(list, expansion, args);
-+	tail =3D substitute(list, expansion, args, vararg_num);
- 	/*
- 	 * Note that it won't be eof - at least TOKEN_UNTAINT will be there.
- 	 * We still can lose the newline flag if the sucker expands to nothing,
-@@ -2147,6 +2232,8 @@ static int handle_argv_include(struct stream *strea=
-m, struct token **list, struc
- 	return handle_include_path(stream, list, token, 2);
+ 	addr->ctype =3D &lazy_ptr_ctype;	/* Lazy eval */
+ 	addr->symbol =3D sym;
+-	if (sym->ctype.modifiers & MOD_TOPLEVEL)
++	if (sym->ctype.modifiers & (MOD_TOPLEVEL | MOD_STATIC | MOD_TLS))
+ 		addr->flags |=3D CEF_ADDR;
+=20
+ 	expr->type =3D EXPR_PREOP;
+ 	expr->op =3D '*';
+ 	expr->deref =3D addr;
+ 	expr->ctype =3D sym;
++	if (sym->ctype.modifiers & MOD_CONSTEXPR) {
++		struct symbol *base_type =3D get_base_type(sym);
++		if (is_float_type(base_type))
++			expr->flags =3D CEF_SET_FLOAT;
++		else if (is_int_type(base_type))
++			expr->flags =3D CEF_SET_ICE;
++		else
++			expr->flags =3D CEF_ADDR;
++	}
+ 	return sym;
  }
 =20
-+static int token_list_different(struct token *list1, struct token *list2=
-);
-+
- static int token_different(struct token *t1, struct token *t2)
- {
- 	int different;
-@@ -2164,6 +2251,10 @@ static int token_different(struct token *t1, struc=
-t token *t2)
- 	case TOKEN_GNU_KLUDGE:
- 		different =3D 0;
- 		break;
-+	case TOKEN_VA_OPT:
-+	case TOKEN_STR_VA_OPT:
-+		different =3D token_list_different(t1->target, t2->target);
-+		break;
- 	case TOKEN_NUMBER:
- 		different =3D strcmp(t1->number, t2->number);
- 		break;
-@@ -2240,6 +2331,8 @@ static struct token *parse_arguments(struct token *=
-list)
- 	while (token_type(arg) =3D=3D TOKEN_IDENT) {
- 		if (arg->ident =3D=3D &__VA_ARGS___ident)
- 			goto Eva_args;
-+		if (arg->ident =3D=3D &__VA_OPT___ident)
-+			goto Eva_opt;
- 		if (!++count->normal)
- 			goto Eargs;
- 		next =3D arg->next;
-@@ -2263,6 +2356,7 @@ static struct token *parse_arguments(struct token *=
-list)
- 			if (match_op(next->next, ')')) {
- 				set_arg_count(next);
- 				next->count.vararg =3D 1;
-+				count->vararg =3D 1;
- 				next =3D next->next;
- 				arg->next->next =3D &eof_token_entry;
- 				return next->next;
-@@ -2290,6 +2384,7 @@ static struct token *parse_arguments(struct token *=
-list)
- 			goto Eargs;
- 		set_arg_count(next);
- 		next->count.vararg =3D 1;
-+		count->vararg =3D 1;
- 		next =3D next->next;
- 		arg->next->next =3D &eof_token_entry;
- 		return next;
-@@ -2315,6 +2410,10 @@ Ebadstuff:
- Enotclosed:
- 	sparse_error(arg->pos, "missing ')' in macro parameter list");
- 	return NULL;
-+Eva_opt:
-+	sparse_error(arg->pos,
-+		     "__VA_OPT__ cannot appear in a macro parameter list");
-+	return NULL;
- Eva_args:
- 	sparse_error(arg->pos, "__VA_ARGS__ can only appear in the expansion of=
- a C99 variadic macro");
- 	return NULL;
-@@ -2363,11 +2462,26 @@ static int try_arg(struct token *token, enum toke=
-n_type type, struct token *argl
- 	return 0;
- }
-=20
-+static struct token *handle_va_opt(struct token **p, struct token *argli=
-st);
-+static int parse_expansion_tokens(struct token **expansion_p,
-+				  struct token *arglist);
-+
- static struct token *handle_hash(struct token **p, struct token *arglist=
+diff --git a/expand.c b/expand.c
+index 13a3bc0457ba..7c85b66ab02f 100644
+--- a/expand.c
++++ b/expand.c
+@@ -848,9 +848,8 @@ static int expand_dereference(struct expression *expr=
 )
- {
- 	struct token *token =3D *p;
- 	if (arglist) {
- 		struct token *next =3D token->next;
-+		if (token_type(next) =3D=3D TOKEN_IDENT &&
-+		    next->ident =3D=3D &__VA_OPT___ident) {
-+			next =3D handle_va_opt(&token->next, arglist);
-+			if (!next)
-+				return NULL;
-+			token_type(next) =3D TOKEN_STR_VA_OPT;
-+			next->pos.whitespace =3D token->pos.whitespace;
-+			__free_token(token);
-+			*p =3D next;
-+			return next;
-+		}
- 		if (!try_arg(next, TOKEN_STR_ARGUMENT, arglist))
- 			goto Equote;
- 		next->pos.whitespace =3D token->pos.whitespace;
-@@ -2412,6 +2526,11 @@ static struct token *handle_hashhash(struct token =
-*token, struct token *arglist)
- 			t =3D handle_hash(&concat->next, arglist);
- 			if (!t)
- 				return NULL;
-+		} else if (token_type(t) =3D=3D TOKEN_IDENT &&
-+			   t->ident =3D=3D &__VA_OPT___ident) {
-+			t =3D handle_va_opt(&concat->next, arglist);
-+			if (!t)
-+				return NULL;
- 		}
-=20
- 		is_arg =3D try_arg(t, TOKEN_QUOTED_ARGUMENT, arglist);
-@@ -2437,43 +2556,146 @@ Econcat:
- 	return NULL;
- }
-=20
--static struct token *parse_expansion(struct token *expansion, struct tok=
-en *arglist, struct ident *name)
-+static struct token *handle_va_opt(struct token **p, struct token *argli=
-st)
- {
--	struct token *token =3D expansion;
-+	struct token *token =3D *p;
-+	struct token *lparen =3D token->next;
-+	struct token *cur, *prev, *body;
-+	int nesting =3D 1;
-+
-+	if (!arglist || !arglist->count.vararg) {
-+		sparse_error(
-+			token->pos,
-+			"__VA_OPT__ can only appear in the expansion of a variadic macro");
-+		return NULL;
-+	}
-+	if (!match_op(lparen, '(')) {
-+		sparse_error(token->pos, "expected '(' after __VA_OPT__");
-+		return NULL;
-+	}
-+	if (standard < STANDARD_C23 && Wpedantic)
-+		warning(token->pos, "__VA_OPT__ is a C23 feature");
-+
-+	for (cur =3D arglist->next; !eof_token(cur); cur =3D cur->next->next) {
-+		if (cur->next->count.vararg) {
-+			if (!++cur->next->count.normal) {
-+				sparse_error(
-+					token->pos,
-+					"too many instances of argument in body");
-+				return NULL;
-+			}
-+			break;
-+		}
-+	}
-+
-+	prev =3D lparen;
-+	for (cur =3D lparen->next; !eof_token(cur); prev =3D cur, cur =3D cur->=
-next) {
-+		if (token_type(cur) =3D=3D TOKEN_IDENT &&
-+		    cur->ident =3D=3D &__VA_OPT___ident) {
-+			sparse_error(
-+				cur->pos,
-+				"__VA_OPT__ cannot appear within __VA_OPT__");
-+			return NULL;
-+		}
-+		if (match_op(cur, '('))
-+			nesting++;
-+		else if (match_op(cur, ')')) {
-+			if (!--nesting)
-+				break;
-+		}
-+	}
-+	if (nesting) {
-+		sparse_error(token->pos, "unterminated __VA_OPT__");
-+		return NULL;
-+	}
-+
-+	/* cur is ')' */
-+	if (lparen->next !=3D cur && match_op(lparen->next, SPECIAL_HASHHASH)) =
-{
-+		sparse_error(
-+			lparen->next->pos,
-+			"'##' cannot appear at the beginning of __VA_OPT__");
-+		return NULL;
-+	}
-+	if (prev !=3D lparen && match_op(prev, SPECIAL_HASHHASH)) {
-+		sparse_error(prev->pos,
-+			     "'##' cannot appear at the end of __VA_OPT__");
-+		return NULL;
-+	}
-+
-+	if (lparen->next =3D=3D cur) {
-+		body =3D &eof_token_entry;
-+	} else {
-+		body =3D lparen->next;
-+		prev->next =3D &eof_token_entry;
-+		if (parse_expansion_tokens(&body, arglist) < 0)
-+			return NULL;
-+	}
-+
-+	token_type(token) =3D TOKEN_VA_OPT;
-+	token->target =3D body;
-+	token->next =3D cur->next;
-+	__free_token(lparen);
-+	__free_token(cur);
-+	return token;
-+}
-+
-+static int parse_expansion_tokens(struct token **expansion_p,
-+				  struct token *arglist)
-+{
-+	struct token *token =3D *expansion_p;
- 	struct token **p;
-=20
- 	if (match_op(token, SPECIAL_HASHHASH))
- 		goto Econcat;
-=20
--	for (p =3D &expansion; !eof_token(token); p =3D &token->next, token =3D=
- *p) {
-+	for (p =3D expansion_p; !eof_token(token); p =3D &token->next, token =3D=
- *p) {
- 		if (match_op(token, '#')) {
- 			token =3D handle_hash(p, arglist);
- 			if (!token)
--				return NULL;
-+				return -1;
-+		} else if (token_type(token) =3D=3D TOKEN_IDENT &&
-+			   token->ident =3D=3D &__VA_OPT___ident) {
-+			token =3D handle_va_opt(p, arglist);
-+			if (!token)
-+				return -1;
- 		}
- 		if (match_op(token->next, SPECIAL_HASHHASH)) {
- 			token =3D handle_hashhash(token, arglist);
- 			if (!token)
--				return NULL;
--		} else {
-+				return -1;
-+		} else if (token_type(token) =3D=3D TOKEN_IDENT) {
- 			try_arg(token, TOKEN_MACRO_ARGUMENT, arglist);
- 		}
- 		if (token_type(token) =3D=3D TOKEN_ERROR)
- 			goto Earg;
- 	}
-+	return 0;
-+
-+Econcat:
-+	sparse_error(token->pos,
-+		     "'##' cannot appear at the ends of macro expansion");
-+	return -1;
-+Earg:
-+	sparse_error(token->pos, "too many instances of argument in body");
-+	return -1;
-+}
-+
-+static struct token *parse_expansion(struct token *expansion, struct tok=
-en *arglist, struct ident *name)
-+{
-+	struct token *token;
-+	struct token **p;
-+
-+	if (parse_expansion_tokens(&expansion, arglist) < 0)
-+		return NULL;
-+
-+	for (p =3D &expansion; !eof_token(*p); p =3D &(*p)->next)
-+		;
- 	token =3D alloc_token(&expansion->pos);
- 	token_type(token) =3D TOKEN_UNTAINT;
- 	token->ident =3D name;
- 	token->next =3D *p;
- 	*p =3D token;
- 	return expansion;
--
--Econcat:
--	sparse_error(token->pos, "'##' cannot appear at the ends of macro expan=
-sion");
--	return NULL;
--Earg:
--	sparse_error(token->pos, "too many instances of argument in body");
--	return NULL;
- }
-=20
- static int do_define(struct position pos, struct token *token, struct id=
-ent *name,
-@@ -2482,6 +2704,12 @@ static int do_define(struct position pos, struct t=
-oken *token, struct ident *nam
+ 				expr->type =3D EXPR_VALUE;
+ 				expr->value =3D value->value;
+ 				expr->taint =3D 0;
+-				if ((sym->ctype.modifiers & MOD_CONSTEXPR) &&
+-				    is_int_type(ctype))
+-					expr->flags =3D CEF_SET_ICE;
++				if (sym->ctype.modifiers & MOD_CONSTEXPR)
++					expr->flags =3D is_int_type(ctype) ? CEF_SET_ICE : CEF_ADDR;
+ 				return 0;
+ 			} else if (value->type =3D=3D EXPR_FVALUE) {
+ 				if (!is_float_type(ctype))
+diff --git a/expression.c b/expression.c
+index ace0bf6d1a31..65efff3b61fe 100644
+--- a/expression.c
++++ b/expression.c
+@@ -150,6 +150,7 @@ static struct token *parse_type(struct token *token, =
+struct expression **tree)
  	struct symbol *sym;
- 	int ret =3D 1;
+ 	*tree =3D alloc_expression(token->pos, EXPR_TYPE);
+ 	token =3D typename(token, &sym, NULL);
++	check_typename_storage(sym);
+ 	if (sym->ident)
+ 		sparse_error(token->pos,
+ 			     "type expression should not include identifier "
+@@ -198,6 +199,7 @@ static struct token *builtin_offsetof_expr(struct tok=
+en *token,
 =20
-+	if (name =3D=3D &__VA_ARGS___ident || name =3D=3D &__VA_OPT___ident) {
-+		sparse_error(pos, "\"%s\" cannot be used as a macro name",
-+			     show_ident(name));
-+		return 1;
-+	}
-+
- 	expansion =3D parse_expansion(expansion, arglist, name);
- 	if (!expansion)
- 		return 1;
-@@ -2656,6 +2884,13 @@ static int do_handle_undef(struct stream *stream, =
-struct token **line, struct to
- 		return 1;
- 	}
+ 	token =3D token->next;
+ 	token =3D typename(token, &sym, NULL);
++	check_typename_storage(sym);
+ 	if (sym->ident)
+ 		sparse_error(token->pos,
+ 			     "type expression should not include identifier "
+@@ -569,6 +571,7 @@ static struct token *generic_selection(struct token *=
+token, struct expression **
+ 		if (lookup_type(token)) {
+ 			struct type_expression *map =3D __alloc_type_expression(0);
+ 			token =3D typename(token, &map->type, NULL);
++			check_typename_storage(map->type);
+ 			token =3D expect(token, ':', "after typename");
+ 			token =3D assignment_expression(token, &map->expr);
+ 			if (!map->expr)
+@@ -730,6 +733,7 @@ struct token *primary_expression(struct token *token,=
+ struct expression **tree)
+ 		if (token->special =3D=3D '[' && lookup_type(token->next)) {
+ 			expr =3D alloc_expression(token->pos, EXPR_TYPE);
+ 			token =3D typename(token->next, &expr->symbol, NULL);
++			check_typename_storage(expr->symbol);
+ 			token =3D expect(token, ']', "in type expression");
+ 			break;
+ 		}
+@@ -837,6 +841,46 @@ static struct token *postfix_expression(struct token=
+ *token, struct expression *
+ static struct token *cast_expression(struct token *token, struct express=
+ion **tree);
+ static struct token *unary_expression(struct token *token, struct expres=
+sion **tree);
 =20
-+	if (left->ident =3D=3D &__VA_ARGS___ident ||
-+	    left->ident =3D=3D &__VA_OPT___ident) {
-+		warning(token->pos, "undefining \"%s\"",
-+			show_ident(left->ident));
-+		return 1;
-+	}
-+
- 	sym =3D lookup_symbol(left->ident, NS_MACRO | NS_UNDEF);
- 	if (sym) {
- 		if (attr < sym->attr)
-@@ -3597,6 +3832,44 @@ static int is_VA_ARGS_token(struct token *token)
- 		(token->ident =3D=3D &__VA_ARGS___ident);
- }
-=20
-+static void dump_macro_tokens(struct token *token, struct token **args,
-+			      bool top_level)
++static void check_compound_literal_storage(struct symbol *sym, int is_fo=
+rce)
 +{
-+	bool first =3D !top_level;
++	unsigned long mods;
 +
-+	while (top_level ? token_type(token) !=3D TOKEN_UNTAINT :
-+			   !eof_token(token)) {
-+		struct token *next =3D token->next;
-+
-+		if (!first && token->pos.whitespace)
-+			putchar(' ');
-+		first =3D false;
-+		switch (token_type(token)) {
-+		case TOKEN_CONCAT:
-+			printf("##");
-+			break;
-+		case TOKEN_STR_VA_OPT:
-+			printf("#");
-+			/* fall-through */
-+		case TOKEN_VA_OPT:
-+			printf("__VA_OPT__(");
-+			dump_macro_tokens(token->target, args, false);
-+			putchar(')');
-+			break;
-+		case TOKEN_STR_ARGUMENT:
-+			printf("#");
-+			/* fall-through */
-+		case TOKEN_QUOTED_ARGUMENT:
-+		case TOKEN_MACRO_ARGUMENT:
-+			token =3D args[token->argnum];
-+			/* fall-through */
-+		default:
-+			printf("%s", show_token(token));
-+		}
-+		token =3D next;
++	if (toplevel(block_scope))
++		sym->ctype.modifiers |=3D MOD_TOPLEVEL;
++	if (is_force)
++		warning(sym->pos, "[force] in compound literal");
++	mods =3D sym->ctype.modifiers;
++	if (mods & MOD_EXTERN) {
++		sparse_error(sym->pos, "'extern' is not allowed in compound literal");
++		return;
 +	}
-+}
-+
- static void dump_macro(struct symbol *sym)
++	if (sym->explicit_typedef) {
++		sparse_error(sym->pos, "'typedef' is not allowed in compound literal")=
+;
++		return;
++	}
++	if ((mods & MOD_AUTO) || sym->ctype.base_type =3D=3D &autotype_ctype) {
++		sparse_error(sym->pos, "'auto' is not allowed in compound literal");
++		if (sym->ctype.base_type =3D=3D &autotype_ctype)
++			sym->ctype.base_type =3D &int_ctype;
++		return;
++	}
++	if ((mods & MOD_TOPLEVEL) && (mods & MOD_REGISTER)) {
++		sparse_error(sym->pos,
++			     "file-scope compound literal cannot specify 'register'");
++		return;
++	}
++	if (!(mods & MOD_TOPLEVEL) && (mods & MOD_TLS) && !(mods & MOD_STATIC))=
  {
- 	int nargs =3D sym->arglist ? sym->arglist->count.normal : 0;
-@@ -3622,27 +3895,7 @@ static void dump_macro(struct symbol *sym)
- 		putchar(')');
++		sparse_error(sym->pos,
++			     "block-scope compound literal with 'thread_local' requires 'stat=
+ic'");
++		return;
++	}
++	if (mods & (MOD_STATIC | MOD_REGISTER | MOD_TLS | MOD_CONSTEXPR)) {
++		if (standard < STANDARD_C23 && Wpedantic)
++			warning(sym->pos,
++				"storage-class specifiers in compound literals are a C23 feature");
++	}
++}
++
+ static struct token *type_info_expression(struct token *token,
+ 	struct expression **tree, int type)
+ {
+@@ -845,6 +889,7 @@ static struct token *type_info_expression(struct toke=
+n *token,
+ 	bool std_alignof =3D (op_ident =3D=3D &_Alignof_ident ||
+ 			    op_ident =3D=3D &alignof_ident);
+ 	struct token *p;
++	int is_force =3D 0;
+=20
+ 	*tree =3D expr;
+ 	expr->flags =3D CEF_SET_ICE; /* XXX: VLA support will need that changed=
+ */
+@@ -857,7 +902,7 @@ static struct token *type_info_expression(struct toke=
+n *token,
+ 		return unary_expression(token, &expr->cast_expression);
+ 	}
+ 	p =3D token;
+-	token =3D typename(token->next, &expr->cast_type, NULL);
++	token =3D typename(token->next, &expr->cast_type, &is_force);
+=20
+ 	if (!match_op(token, ')')) {
+ 		static const char * error[] =3D {
+@@ -865,6 +910,7 @@ static struct token *type_info_expression(struct toke=
+n *token,
+ 			[EXPR_ALIGNOF] =3D "at end of __alignof__",
+ 			[EXPR_PTRSIZEOF] =3D "at end of __sizeof_ptr__"
+ 		};
++		check_typename_storage(expr->cast_type);
+ 		return expect(token, ')', error[type]);
  	}
 =20
--	token =3D sym->expansion;
--	while (token_type(token) !=3D TOKEN_UNTAINT) {
--		struct token *next =3D token->next;
--		if (token->pos.whitespace)
--			putchar(' ');
--		switch (token_type(token)) {
--		case TOKEN_CONCAT:
--			printf("##");
--			break;
--		case TOKEN_STR_ARGUMENT:
--			printf("#");
--			/* fall-through */
--		case TOKEN_QUOTED_ARGUMENT:
--		case TOKEN_MACRO_ARGUMENT:
--			token =3D args[token->argnum];
--			/* fall-through */
--		default:
--			printf("%s", show_token(token));
--		}
--		token =3D next;
--	}
-+	dump_macro_tokens(sym->expansion, args, true);
- 	putchar('\n');
+@@ -874,16 +920,20 @@ static struct token *type_info_expression(struct to=
+ken *token,
+ 	 * of a typed initializer expression..
+ 	 */
+ 	if (match_op(token, '{')) {
++		struct symbol *sym =3D expr->cast_type;
+ 		struct expression *cast =3D alloc_expression(p->pos, EXPR_CAST);
+ 		if (std_alignof && Wpedantic)
+ 			warning(expr->pos,
+ 				"ISO C does not allow '%s' on an expression",
+ 				show_ident(op_ident));
+-		cast->cast_type =3D expr->cast_type;
++		check_compound_literal_storage(sym, is_force);
++		cast->cast_type =3D sym;
+ 		expr->cast_type =3D NULL;
+ 		expr->cast_expression =3D cast;
+ 		token =3D initializer(&cast->cast_expression, token);
+ 		token =3D postfix_expression(token, &expr->cast_expression, cast);
++	} else {
++		check_typename_storage(expr->cast_type);
+ 	}
+ 	return token;
+ }
+@@ -993,14 +1043,11 @@ static struct token *cast_expression(struct token =
+*token, struct expression **tr
+ 			cast->cast_type =3D sym;
+ 			token =3D expect(token, ')', "at end of cast operator");
+ 			if (match_op(token, '{')) {
+-				if (toplevel(block_scope))
+-					sym->ctype.modifiers |=3D MOD_TOPLEVEL;
+-				if (is_force)
+-					warning(sym->pos,
+-						"[force] in compound literal");
++				check_compound_literal_storage(sym, is_force);
+ 				token =3D initializer(&cast->cast_expression, token);
+ 				return postfix_expression(token, tree, cast);
+ 			}
++			check_typename_storage(sym);
+ 			*tree =3D cast;
+ 			if (is_force)
+ 				cast->type =3D EXPR_FORCE_CAST;
+diff --git a/expression.h b/expression.h
+index 8c387adf9d5b..213c31d246aa 100644
+--- a/expression.h
++++ b/expression.h
+@@ -319,6 +319,7 @@ static inline struct expression *alloc_const_expressi=
+on(struct position pos, int
+=20
+ /* Type name parsing */
+ struct token *typename(struct token *, struct symbol **, int *);
++void check_typename_storage(struct symbol *sym);
+=20
+ static inline int lookup_type(struct token *token)
+ {
+diff --git a/parse.c b/parse.c
+index 782683a84fba..0787ad2af576 100644
+--- a/parse.c
++++ b/parse.c
+@@ -840,6 +840,7 @@ static struct token *struct_union_enum_specifier(enum=
+ type type,
+ 				warning(token->pos,
+ 					"ISO C does not support specifying 'enum' underlying types before C=
+23");
+ 			token =3D typename(token->next, &underlying, NULL);
++			check_typename_storage(underlying);
+ 			underlying =3D examine_symbol_type(underlying);
+ 			if (!underlying || !is_int_type(underlying) ||
+ 			    is_enum_type(underlying)) {
+@@ -923,6 +924,7 @@ static struct token *struct_union_enum_specifier(enum=
+ type type,
+ 				warning(token->pos,
+ 					"ISO C does not support specifying 'enum' underlying types before C=
+23");
+ 			token =3D typename(token->next, &underlying, NULL);
++			check_typename_storage(underlying);
+ 			underlying =3D examine_symbol_type(underlying);
+ 			if (!underlying || !is_int_type(underlying) ||
+ 			    is_enum_type(underlying)) {
+@@ -1337,6 +1339,7 @@ static struct token *typeof_specifier_helper(struct=
+ token *token, struct symbol
+ 	if (lookup_type(token->next)) {
+ 		struct symbol *sym;
+ 		token =3D typename(token->next, &sym, NULL);
++		check_typename_storage(sym);
+ 		sym =3D examine_symbol_type(sym);
+ 		if (!qual) {
+ 			sym->ctype.modifiers &=3D ~MOD_QUALIFIER;
+@@ -1780,6 +1783,7 @@ static struct token *alignas_specifier(struct token=
+ *token, struct symbol *sym,
+ 	if (lookup_type(token->next)) {
+ 		struct symbol *sym =3D NULL;
+ 		token =3D typename(token->next, &sym, NULL);
++		check_typename_storage(sym);
+ 		sym =3D examine_symbol_type(sym);
+ 		alignment =3D sym->ctype.alignment;
+ 		token =3D expect(token, ')', "after _Alignas(...");
+@@ -2550,37 +2554,62 @@ static struct token *parameter_declaration(struct=
+ token *token, struct symbol *s
+ 	return token;
  }
 =20
-diff --git a/token.h b/token.h
-index b421f166f1f7..998d83a123c9 100644
---- a/token.h
-+++ b/token.h
-@@ -110,6 +110,8 @@ enum token_type {
- 	TOKEN_QUOTED_ARGUMENT,
- 	TOKEN_CONCAT,
- 	TOKEN_GNU_KLUDGE,
-+	TOKEN_VA_OPT,
-+	TOKEN_STR_VA_OPT,
- 	TOKEN_UNTAINT,
- 	TOKEN_ARG_COUNT,
- 	TOKEN_IF,
-@@ -200,6 +202,7 @@ struct token {
- 		int argnum;
- 		struct argcount count;
- 		char embedded[4];
-+		struct token *target;
- 	};
- };
-=20
-diff --git a/tokenize.c b/tokenize.c
-index 4ac40e9e1506..775c54667af7 100644
---- a/tokenize.c
-+++ b/tokenize.c
-@@ -265,6 +265,12 @@ const char *show_token(const struct token *token)
- 		sprintf(buffer, "<argcnt>");
- 		return buffer;
-=20
-+	case TOKEN_VA_OPT:
-+		return "__VA_OPT__(...)";
-+
-+	case TOKEN_STR_VA_OPT:
-+		return "#__VA_OPT__(...)";
-+
- 	case TOKEN_GNU_KLUDGE:
- 		return ",";
-=20
-@@ -321,6 +327,10 @@ const char *quote_token(const struct token *token)
- 	case TOKEN_UTF8_STRING:
- 		return quote_char(token->string->data,
- 				  token->string->length - 1, "u8", '"');
-+	case TOKEN_VA_OPT:
-+		return "__VA_OPT__(...)";
-+	case TOKEN_STR_VA_OPT:
-+		return "#__VA_OPT__(...)";
- 	case TOKEN_GNU_KLUDGE:
- 		return ",";
- 	default:
-diff --git a/validation/c23-va-opt.c b/validation/c23-va-opt.c
-new file mode 100644
-index 000000000000..bef475812fdd
---- /dev/null
-+++ b/validation/c23-va-opt.c
-@@ -0,0 +1,36 @@
-+#define EMPTY
-+#define COUNT_VA(...) 0 __VA_OPT__(+1)
-+static_assert(COUNT_VA() =3D=3D 0, "empty");
-+static_assert(COUNT_VA(EMPTY) =3D=3D 0, "empty macro");
-+static_assert(COUNT_VA(x) =3D=3D 1, "one");
-+static_assert(COUNT_VA(x, y) =3D=3D 1, "two");
-+
-+#define ADD_OPT(x, ...) (x __VA_OPT__(+__VA_ARGS__))
-+static_assert(ADD_OPT(10) =3D=3D 10, "add 1");
-+static_assert(ADD_OPT(10, 20) =3D=3D 30, "add 2");
-+
-+#define STR_OPT(...) #__VA_OPT__(__VA_ARGS__)
-+static_assert(sizeof(STR_OPT()) =3D=3D 1, "str empty");
-+static_assert(sizeof(STR_OPT(EMPTY)) =3D=3D 1, "str empty macro");
-+static_assert(sizeof(STR_OPT(abc)) =3D=3D 4, "str abc");
-+
-+#define PASTE_OPT(p, ...) p ## __VA_OPT__(_ok)
-+enum { val =3D 10, val_ok =3D 20 };
-+static_assert(PASTE_OPT(val) =3D=3D 10, "paste empty");
-+static_assert(PASTE_OPT(val, 1) =3D=3D 20, "paste non-empty");
-+
-+static int foo(int a, ...)
-+{
-+	return a;
+-struct token *typename(struct token *token, struct symbol **p, int *forc=
+ed)
++void check_typename_storage(struct symbol *sym)
+ {
+-	struct decl_state ctx =3D {.prefer_abstract =3D 1};
++	struct symbol *base;
+ 	unsigned long class;
++	if (!sym)
++		return;
++	for (base =3D sym; base && (base->type =3D=3D SYM_NODE ||
++				  base->type =3D=3D SYM_PTR ||
++				  base->type =3D=3D SYM_ARRAY);
++	     base =3D base->ctype.base_type)
++		;
++	if (base =3D=3D &autotype_ctype) {
++		sparse_error(sym->pos, "'%s' in type name",
++			     sym->c23_auto ? "auto" : "__auto_type");
++		sym->ctype.base_type =3D &bad_ctype;
++		return;
++	}
++	if (sym->has_alignas)
++		sparse_error(sym->pos, "alignment specified for type name");
++	if (sym->ctype.modifiers & MOD_CONSTEXPR)
++		sparse_error(sym->pos, "constexpr in typename");
++	class =3D sym->ctype.modifiers & (MOD_STORAGE | MOD_TLS);
++	if (class)
++		warning(sym->pos, "storage class in typename (%s%s)",
++			modifier_string(class), show_typename(sym));
 +}
 +
-+#define CALL_FOO(...) foo(0 __VA_OPT__(, __VA_ARGS__))
-+static int test(void)
++struct token *typename(struct token *token, struct symbol **p, int *forc=
+ed)
 +{
-+	return CALL_FOO() + CALL_FOO(1) + CALL_FOO(1, 2);
++	struct decl_state ctx =3D { .prefer_abstract =3D 1 };
+ 	struct symbol *sym =3D alloc_symbol(token->pos, SYM_NODE);
++	unsigned long mod;
+ 	*p =3D sym;
+ 	token =3D declaration_specifiers(token, &ctx);
+-	if (ctx.has_alignas)
+-		sparse_error(sym->pos, "alignment specified for type name");
++	mod =3D decl_modifiers(&ctx);
+ 	if (ctx.opaque_fixed_enum)
+ 		sparse_error(ctx.opaque_fixed_enum_pos,
+ 			     "'enum' underlying type may not be specified here");
+-	if (ctx.autotype) {
+-		sparse_error(sym->pos, "'%s' in type name",
+-			     ctx.has_auto ? "auto" : "__auto_type");
+-		ctx.ctype.base_type =3D &bad_ctype;
+-	}
+ 	token =3D declarator(token, &ctx);
+ 	token =3D handle_attributes(token, &ctx);
+ 	ctx.ctype.modifiers |=3D ctx.ident_modifiers;
+ 	apply_modifiers(token->pos, &ctx);
+ 	sym->ctype =3D ctx.ctype;
++	sym->c23_auto =3D ctx.autotype && ctx.has_auto;
+ 	sym->endpos =3D token->pos;
+-	if (ctx.is_constexpr)
+-		sparse_error(sym->pos, "constexpr in typename");
+-	class =3D ctx.storage_class;
++	if (ctx.storage_class =3D=3D MOD_USERTYPE)
++		sym->explicit_typedef =3D 1;
++	if (ctx.has_alignas)
++		sym->has_alignas =3D 1;
++	if (ctx.is_constexpr) {
++		apply_constexpr_const(sym);
++		sym->ctype.modifiers |=3D MOD_CONSTEXPR;
++	}
++	sym->ctype.modifiers |=3D mod | decl_modifiers(&ctx);
+ 	if (forced)
+ 		*forced =3D ctx.forced;
+-	if (class)
+-		warning(sym->pos, "storage class in typename (%s%s)",
+-			modifier_string(class), show_typename(sym));
+ 	return token;
+ }
+=20
+diff --git a/sparse-llvm.c b/sparse-llvm.c
+index f3f6b7e01171..7d15d7a70e54 100644
+--- a/sparse-llvm.c
++++ b/sparse-llvm.c
+@@ -318,7 +318,7 @@ static LLVMValueRef get_sym_value(LLVMModuleRef modul=
+e, struct symbol *sym)
+ 	LLVMValueRef result =3D NULL;
+ 	struct expression *expr;
+=20
+-	assert(sym->bb_target =3D=3D NULL);
++	assert(sym->namespace !=3D NS_LABEL);
+=20
+ 	expr =3D sym->initializer;
+ 	if (expr && !sym->ident) {
+@@ -348,6 +348,14 @@ static LLVMValueRef get_sym_value(LLVMModuleRef modu=
+le, struct symbol *sym)
+ 		}
+ 	}
+=20
++	if (!sym->ident && (sym->ctype.modifiers & (MOD_STATIC | MOD_TOPLEVEL |=
+ MOD_TLS))) {
++		if (!sym->aux) {
++			expand_symbol(sym);
++			sym->aux =3D output_data(module, sym);
++		}
++		return sym->aux;
++	}
++
+ 	if (LLVMGetTypeKind(type) =3D=3D LLVMFunctionTypeKind) {
+ 		result =3D LLVMGetNamedFunction(module, name);
+ 		if (!result)
+diff --git a/symbol.h b/symbol.h
+index 942baad97df5..435fa18a4990 100644
+--- a/symbol.h
++++ b/symbol.h
+@@ -196,7 +196,7 @@ struct symbol {
+ 				designated_init : 1, forced_arg : 1,
+ 				accessed : 1, builtin : 1, torename : 1,
+ 				packed : 1, transparent_union : 1,
+-				fixed_type : 1;
++				fixed_type : 1, explicit_typedef : 1;
+ 			unsigned int has_alignas : 1;
+ 			unsigned int kr_args : 1;
+ 			unsigned int underspecified : 1;
+@@ -282,7 +282,7 @@ struct symbol {
+ /* like cvr-qualifiers but 'reversed' (OK: source <=3D target) */
+ #define MOD_REV_QUAL	(MOD_PURE|MOD_NORETURN)
+ /* do not warn when these are duplicated */
+-#define MOD_DUP_OK	(MOD_UNUSED|MOD_GNU_INLINE)
++#define MOD_DUP_OK	(MOD_UNUSED|MOD_GNU_INLINE|MOD_USERTYPE)
+ /* must be part of the declared symbol, not its type */
+ #define MOD_DECLARE                                                     =
+    \
+ 	(MOD_STORAGE | MOD_INLINE | MOD_TLS | MOD_GNU_INLINE | MOD_UNUSED | \
+diff --git a/validation/backend/c23-compound-literal-storage.c b/validati=
+on/backend/c23-compound-literal-storage.c
+new file mode 100644
+index 000000000000..e4f0d430e6c8
+--- /dev/null
++++ b/validation/backend/c23-compound-literal-storage.c
+@@ -0,0 +1,27 @@
++static const int *g_arr =3D (static int[]){ 1, 2, 3 };
++
++int *test_cl_static_scalar_addr(void);
++int *test_cl_static_scalar_addr(void)
++{
++	return &(static int){ 42 };
++}
++
++int test_cl_llvm(void);
++int test_cl_llvm(void)
++{
++	int *lp =3D (static int[]){ 7, 8, 9 };
++	int *tp =3D (static thread_local int[]){ 14 };
++	register int rv =3D (register int){ 12 };
++	int ce =3D (constexpr int){ 42 };
++
++	lp[0] +=3D 1;
++	return g_arr[0] + lp[0] + tp[0] + rv + ce;
 +}
 +
 +/*
-+ * check-name: c23-va-opt-compile
-+ * check-command: sparse -std=3Dc23 -Wno-decl $file
++ * check-name: backend-c23-compound-literal-storage
++ * check-command: sparse-llvm-dis -m64 -std=3Dc23 $file
++ * check-output-ignore
++ * check-output-contains: private global i32 42
++ * check-output-contains: define i32 @test_cl_llvm(
 + */
-diff --git a/validation/preprocessor/c23-va-opt-error.c b/validation/prep=
-rocessor/c23-va-opt-error.c
+diff --git a/validation/c23-compound-literal-register-addr.c b/validation=
+/c23-compound-literal-register-addr.c
 new file mode 100644
-index 000000000000..c494bc6f2a16
+index 000000000000..0bd817efcc6a
 --- /dev/null
-+++ b/validation/preprocessor/c23-va-opt-error.c
-@@ -0,0 +1,31 @@
-+#define BAD0 __VA_OPT__(1)
-+#define BAD1(x) __VA_OPT__(x)
-+#define BAD2(...) __VA_OPT__
-+#define BAD3(...) __VA_OPT__(1
-+#define BAD4(...) __VA_OPT__(__VA_OPT__(1))
-+#define BAD5(...) __VA_OPT__(##x)
-+#define BAD6(...) __VA_OPT__(x##)
-+#define BAD7(__VA_OPT__) 1
-+#define __VA_OPT__ 1
++++ b/validation/c23-compound-literal-register-addr.c
+@@ -0,0 +1,17 @@
++static void bad_reg_addr(void)
++{
++	int *p =3D &(register int){ 1 };
++	int *q =3D (register int[]){ 1, 2 };
++	(void)p;
++	(void)q;
++}
 +
 +/*
-+ * check-name: c23-va-opt-error
-+ * check-command: sparse -std=3Dc23 -E $file
-+ *
-+ * check-output-start
-+
-+
-+ * check-output-end
++ * check-name: c23-compound-literal-register-addr
++ * check-command: sparse -std=3Dc23 $file
 + *
 + * check-error-start
-+preprocessor/c23-va-opt-error.c:1:14: error: __VA_OPT__ can only appear =
-in the expansion of a variadic macro
-+preprocessor/c23-va-opt-error.c:2:17: error: __VA_OPT__ can only appear =
-in the expansion of a variadic macro
-+preprocessor/c23-va-opt-error.c:3:19: error: expected '(' after __VA_OPT=
-__
-+preprocessor/c23-va-opt-error.c:4:19: error: unterminated __VA_OPT__
-+preprocessor/c23-va-opt-error.c:5:30: error: __VA_OPT__ cannot appear wi=
-thin __VA_OPT__
-+preprocessor/c23-va-opt-error.c:6:30: error: '##' cannot appear at the b=
-eginning of __VA_OPT__
-+preprocessor/c23-va-opt-error.c:7:31: error: '##' cannot appear at the e=
-nd of __VA_OPT__
-+preprocessor/c23-va-opt-error.c:8:14: error: __VA_OPT__ cannot appear in=
- a macro parameter list
-+preprocessor/c23-va-opt-error.c:9:9: error: "__VA_OPT__" cannot be used =
-as a macro name
++c23-compound-literal-register-addr.c:3:20: warning: taking address of 'r=
+egister' compound literal
++c23-compound-literal-register-addr.c:4:19: warning: taking address of 'r=
+egister' compound literal
 + * check-error-end
 + */
-diff --git a/validation/preprocessor/c23-va-opt.c b/validation/preprocess=
-or/c23-va-opt.c
+diff --git a/validation/c23-compound-literal-storage-error.c b/validation=
+/c23-compound-literal-storage-error.c
 new file mode 100644
-index 000000000000..b2318faf298f
+index 000000000000..c6bf45d7cb1d
 --- /dev/null
-+++ b/validation/preprocessor/c23-va-opt.c
-@@ -0,0 +1,73 @@
-+#define LOG(fmt, ...) printf(fmt __VA_OPT__(, __VA_ARGS__))
-+LOG("empty")
-+LOG("empty", )
-+LOG("one", 1)
-+LOG("two", 1, 2)
++++ b/validation/c23-compound-literal-storage-error.c
+@@ -0,0 +1,37 @@
++void *e =3D (extern int[]){ 1 };
++void *t =3D (typedef int[]){ 1 };
++int f_reg =3D sizeof((register int){ 1 });
 +
-+#define M(...) __VA_OPT__(1) 2 __VA_OPT__(3)
-+M()
-+M(a)
++static void bad_block_literals(int non_const)
++{
++	int *a1 =3D (auto int[]){ 1, 2 };
++	int a2 =3D (auto){ 1 };
++	int *tl =3D (thread_local int[]){ 14 };
++	int *nc =3D (static int[]){ non_const };
++	int *dup_s =3D (static static int[]){ 1 };
++	int s_reg =3D (static register int){ 1 };
 +
-+#define N(...) __VA_OPT__(foo(bar(baz)))
-+N()
-+N(1)
-+
-+#define G(a, b, ...) a b __VA_OPT__(c)
-+G(1, 2)
-+G(1, 2, )
-+G(1, 2, 3)
-+
-+#define EMPTY
-+#define VA_ORDER1(...) __VA_ARGS__ __VA_OPT__(opt)
-+#define VA_ORDER2(...) __VA_OPT__(opt) __VA_ARGS__
-+VA_ORDER1()
-+VA_ORDER2()
-+VA_ORDER1(EMPTY)
-+VA_ORDER2(EMPTY)
-+
-+#define K 42
-+#define X hello
-+#define S(a, ...) #__VA_OPT__(a K __VA_ARGS__)
-+S(X)
-+S(X, Y)
-+S(X, K)
-+
-+#define PASTE_L(x, ...) x ## __VA_OPT__(_suffix)
-+#define PASTE_R(y, ...) __VA_OPT__(prefix_) ## y
-+PASTE_L(foo)
-+PASTE_L(foo, 1)
-+PASTE_R(bar)
-+PASTE_R(bar, 1)
-+
-+#define FN(v) ((v) + 1)
-+#define CALL(...) __VA_OPT__(FN)(10)
-+CALL()
-+CALL(1)
++	(void)a1;
++	(void)a2;
++	(void)tl;
++	(void)nc;
++	(void)dup_s;
++	(void)s_reg;
++}
 +
 +/*
-+ * check-name: c23-va-opt
-+ * check-command: sparse -std=3Dc23 -E $file
++ * check-name: c23-compound-literal-storage-error
++ * check-command: sparse -std=3Dc23 -Wno-decl $file
 + *
-+ * check-output-start
++ * check-error-start
++c23-compound-literal-storage-error.c:1:12: error: 'extern' is not allowe=
+d in compound literal
++c23-compound-literal-storage-error.c:2:12: error: 'typedef' is not allow=
+ed in compound literal
++c23-compound-literal-storage-error.c:3:21: error: file-scope compound li=
+teral cannot specify 'register'
++c23-compound-literal-storage-error.c:7:20: error: 'auto' is not allowed =
+in compound literal
++c23-compound-literal-storage-error.c:8:19: error: 'auto' is not allowed =
+in compound literal
++c23-compound-literal-storage-error.c:9:20: error: block-scope compound l=
+iteral with 'thread_local' requires 'static'
++c23-compound-literal-storage-error.c:11:37: error: duplicate static
++c23-compound-literal-storage-error.c:12:38: error: multiple storage clas=
+ses
++c23-compound-literal-storage-error.c:10:35: error: non-constant initiali=
+zer for static object
++ * check-error-end
++ */
+diff --git a/validation/c23-compound-literal-storage-pedantic.c b/validat=
+ion/c23-compound-literal-storage-pedantic.c
+new file mode 100644
+index 000000000000..a4ddc95fdb0f
+--- /dev/null
++++ b/validation/c23-compound-literal-storage-pedantic.c
+@@ -0,0 +1,10 @@
++static const int *p =3D (static int[]){ 1, 2, 3 };
 +
-+printf("empty" )
-+printf("empty" )
-+printf("one" , 1)
-+printf("two" , 1, 2)
-+2
-+1 2 3
-+foo(bar(baz))
-+1 2
-+1 2
-+1 2 c
-+""
-+"hello K Y"
-+"hello K 42"
-+foo
-+foo_suffix
-+bar
-+prefix_bar
-+(10)
-+((10) + 1)
-+ * check-output-end
++/*
++ * check-name: c23-compound-literal-storage-pedantic
++ * check-command: sparse -std=3Dc11 -Wpedantic $file
++ *
++ * check-error-start
++c23-compound-literal-storage-pedantic.c:1:24: warning: storage-class spe=
+cifiers in compound literals are a C23 feature
++ * check-error-end
++ */
+diff --git a/validation/c23-compound-literal-storage.c b/validation/c23-c=
+ompound-literal-storage.c
+new file mode 100644
+index 000000000000..75a4552eecde
+--- /dev/null
++++ b/validation/c23-compound-literal-storage.c
+@@ -0,0 +1,27 @@
++static const int *p =3D (static int[]){ 1, 2, 3 };
++static const int *cp =3D (constexpr int[]){ 4, 5, 6 };
++
++static int test(void)
++{
++	static int *lp =3D (static int[]){ 7, 8, 9 };
++	register int rv =3D (register int){ 12 };
++	int *tp =3D (static thread_local int[]){ 14 };
++	const int *lcp =3D &(static constexpr int){ 99 };
++	int auto_ce =3D (constexpr int){ 42 };
++
++	return lp[0] + rv + tp[0] + *lcp + auto_ce + p[0] + cp[0];
++}
++
++static_assert(sizeof((static int[]){ 1, 2, 3 }) =3D=3D 3 * sizeof(int),
++	      "sizeof static compound literal");
++static_assert(sizeof((constexpr int[]){ 1, 2, 3, 4 }) =3D=3D 4 * sizeof(=
+int),
++	      "sizeof constexpr compound literal");
++static_assert(sizeof((thread_local int[]){ 14, 15 }) =3D=3D 2 * sizeof(i=
+nt),
++	      "sizeof file-scope thread_local compound literal");
++static_assert((constexpr int){ 42 } =3D=3D 42,
++	      "constexpr scalar compound literal in ICE");
++
++/*
++ * check-name: c23-compound-literal-storage
++ * check-command: sparse -std=3Dc23 -pedantic $file
 + */
