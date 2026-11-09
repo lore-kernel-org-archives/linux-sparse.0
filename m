@@ -1,70 +1,70 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=199.89.1.14
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1794256424;
-	b=vHHrwcZz7WqoAs90vU2khF6QcUAZTy9bQG7GtLdtJh5iTbS4G/6wS+KayGc4Jao5HTwy
-	 rDKPMApqlyydMPpZq8ABI19gqryLRg1w8jEp9Nsnjlf7rKLTZLxIDREE5GapyYQKpbHlg
-	 4r2qcqnKakvzjXWrv1OlqoTjeOcxcdvsBwJEEqoma1o3nQUKPKlMIQobObxVjsakZ0nj1
-	 sN6nEXIj9VaB9SvdfkDG3019r594iypp+R9uhUfNlanXOihBN9ZccXtruXXx8E5m2EBN8
-	 QHiA+yecB4jW70Pd7gfYDjdshXp4HxOSz3yhV8v3dK3Ruy3CqNm0cCWsxjzHISGC5zw==
+	t=1794256425;
+	b=rOEJO5vSb0dzId9aHOY3miFmTC3I7cuhioqt4T+l+Sq5ynAygcoarJpQcQoP6E9NF1aT
+	 68C8e820sJ5wpLayybJbqvDq8SJxIfdxVPA8zRhM/Cm28dWhQXX8i9ghPDNi+87GkAbZt
+	 7ycuA1ECLEqQQWI7Jda+rWUbA3jrfRjjPlmTrk1ptxbWOEgBBd0R/nw8HCTRPPrmdYrvy
+	 nvP2wqyCRpHyUqaD1xdyOIlezefvb+3INPjiKzW/9kw8rlM4M1uIlGkugJudO0iZjAUBf
+	 oVcQAwyePAQoMS33u92ubhgtdjzCS476GB0/k4LJ6Pby/YUl2+mPuSrhKydzXOdHJ7Q==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1794256424;
+	a=rsa-sha256; c=relaxed/relaxed; t=1794256425;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Virus-Scanned:Received:
 	 Received:From:To:Cc:Subject:Date:Message-ID:X-Mailer:In-Reply-To:
 	 References:MIME-Version:Content-Transfer-Encoding;
-	bh=MTOnAxLFCON0eYPzz9crnIJAIXlA5E4I+6h2LNT7UWE=;
-	b=xZP7mPt3EHGuh+avZZBRB1zzwBoswkUJsAkMWp6leCg0dKEA5qwJvAZV9ZEYXf/AFFoH
-	 8EaeXUin3szeGn2XETdgYpyzEblGyUsnoPsDkaQZjzla9vDxTSOL1h7uORG8sIlB7a31F
-	 k/E9nUd042ovS9Jiaq+iWC/WUvrdxVOqzCHjFKh/UUMeMQ9I0rWxP1kY5FL3v/r+7ugiV
-	 QCsFVq4yYr9LLj2pPJBM6tYlhfpFmj7wkR13sH+hW5iB7vnUUs5sADTeI45cDUp5OvVgH
-	 CWBr7//U1Gg/+IfCOOx01a1TMmaxzJzRecdwNGw24XDlUDpGy+Zkob/Okslqgsn4Q4w==
+	bh=1wLUwA3AamVtyVt8fxowkWoQYrt+r9lIcxZUXs1uYhI=;
+	b=NkC/VDzM7f4B6rGZL1IzMUJbqSXflRlvON1puXZDfOmuRXm/DtvyqI/6Fz4r34Q3SFwT
+	 LBXElah5r/TgeRlJANWZbG7VyWbKAaEexjqhOpRx28RmdCueswYZZmxkpdccU5+ZHTeox
+	 k1kbBeTXKz4EUp0H9MetEV0jrlkDpJlsQz+cxF4wrDk3cGenAy/SCTjABIAacT2zdovbA
+	 y5kxZjoMDPjOXVXM+s0UFOkq3z4cnk7LcNP+KlUMcSoDXzsZjH6K/9/7Z56QoJId2YiTF
+	 y/op2qOqcma8bh6VACEFSxTIofERFgiESSh+fXM/Wh/Z+mweyQ+O7r45pfz9y2s39OA==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=acm.org;
 	spf=pass smtp.mailfrom=acm.org;
-	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=NrsqccUp;
+	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=1WuZnaTu;
 	arc=none smtp.remote-ip=199.89.1.14
 Received: from 011.lax.mailroute.net (011.lax.mailroute.net [199.89.1.14])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 56E30606A335
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C7E10606A325
 	for <linux-sparse@vger.kernel.org>; Mon,  9 Nov 2026 20:33:44 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 56E30606A335
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org C7E10606A325
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=acm.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=NrsqccUp
+	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=1WuZnaTu
 Received: from localhost (localhost [127.0.0.1])
-	by 011.lax.mailroute.net (Postfix) with ESMTP id 4jNhM71x4Tz1XMfrh;
+	by 011.lax.mailroute.net (Postfix) with ESMTP id 4jNhM72qvKz1XMYJY;
 	Mon,  9 Nov 2026 20:33:39 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=acm.org; h=
 	content-transfer-encoding:mime-version:references:in-reply-to
 	:x-mailer:message-id:date:date:subject:subject:from:from
-	:received:received; s=mr01; t=1794256415; x=1796848416; bh=MTOnA
-	xLFCON0eYPzz9crnIJAIXlA5E4I+6h2LNT7UWE=; b=NrsqccUpsNSKK9fqsXYFL
-	W0L1+mmh8Z+6ghtdo6zH/jJfhZXBHjhs0ASkScN/jErcgOpOzUeRLazVVS+/0xHh
-	4i+Ua/V1inPaKaei0caUwLNUdTNiv4BAZ33bQ4nV4pTPIk3uoG/q6heANeTADDPO
-	gO71wlQWAVVDJ0RKT3lwNBaZ7VTENMqncjISAoMxtmFtLvC49detYM9Nla+Bk6wA
-	0wbpUHT0guDf5RqTz66zw0no3Xk35+yZH/XstPLX2HT4RLSKikJHLvGdr8CMQd5T
-	x7MGmKmRsehp6qL47okhQZXBafJ996vjD+Be1kTJz6H1Et2uOxBOoGz2MlyTHiI1
-	A==
+	:received:received; s=mr01; t=1794256415; x=1796848416; bh=1wLUw
+	A3AamVtyVt8fxowkWoQYrt+r9lIcxZUXs1uYhI=; b=1WuZnaTuX3pY9XQZGPpSJ
+	PG32JXLmEwPqXMXfqveCSgqSoIPai53QaAtC7ZTxElbTWEBgIl2nZyjx7beZ+pjL
+	JiSDYrBeNlClyuMjh4z7RYNYD8LGvcpBIOE/a433ud92x+XBvz4Qy9Xi799QKRRh
+	UquajFhS2pNf4+4GIPbj7BLFscGUpqeqeUcrE+pwzeRtNjLqMQR2WLGoHBt+3Xie
+	Jx580na75zzXpLn6aHgn1qvXpYu+4bouFblqq0Plk41NNkYGfiFT9wl/reH9G44t
+	zWppFpCcLCe+F0QFLMJPKg61xVnmycEX7Fl2kK/IUxtuOa8/aZXfYX3h6hY9VvZW
+	w==
 X-Virus-Scanned: by MailRoute
 Received: from 011.lax.mailroute.net ([127.0.0.1])
  by localhost (011.lax [127.0.0.1]) (mroute_mailscanner, port 10029) with LMTP
- id RdYxtk4uQVfd; Mon,  9 Nov 2026 20:33:35 +0000 (UTC)
+ id fWcMbl-04MJW; Mon,  9 Nov 2026 20:33:35 +0000 (UTC)
 Received: from bvanassche.c.googlers.com.com (57.237.82.34.bc.googleusercontent.com [34.82.237.57])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
 	(Authenticated sender: bvanassche@acm.org)
-	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4jNhM100Mxz1XMYJY;
-	Mon,  9 Nov 2026 20:33:32 +0000 (UTC)
+	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4jNhLy73yYz1XMYJT;
+	Mon,  9 Nov 2026 20:33:30 +0000 (UTC)
 From: Bart Van Assche <bvanassche@acm.org>
 To: linux-sparse@vger.kernel.org
 Cc: Linus Torvalds <torvalds@linux-foundation.org>,
 	Bart Van Assche <bvanassche@acm.org>
-Subject: [PATCH 39/73] options: Add support for -std=c23, -std=c2x and -std=gnu23
-Date: Mon,  9 Nov 2026 12:32:25 -0800
-Message-ID: <20261109203259.362845-40-bvanassche@acm.org>
+Subject: [PATCH 30/73] cse, canon: Cast pointers to uintptr_t before relational comparison
+Date: Mon,  9 Nov 2026 12:32:16 -0800
+Message-ID: <20261109203259.362845-31-bvanassche@acm.org>
 X-Mailer: git-send-email 2.56.0.506.g506a7eabc5-goog
 In-Reply-To: <20261109203259.362845-1-bvanassche@acm.org>
 References: <20261109203259.362845-1-bvanassche@acm.org>
@@ -79,81 +79,150 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
 
-Add STANDARD_C23 and STANDARD_GNU23 to enum standard, handle the c23,
-c2x, iso9899:2024, gnu23, and gnu2x arguments to -std=3D, and set
-__STDC_VERSION__ to 202311L when targeting C23 so that users and build
-systems can select ISO C23 and GNU23 language modes and feature-test
-macros.
+Cast pointer operands to uintptr_t before comparing them with relational
+operators (<) in cse.c, simplify.c, and storage.c.
 
+Avoid undefined behavior under ISO C when comparing pointers that do not
+point to elements of the same object, and prevent AddressSanitizer
+invalid-pointer-pair aborts under detect_invalid_pointer_pairs=3D2.
+
+Fixes: fe8df476cce2 ("Add initial CSE pass")
+Fixes: 37a29afc774f ("Start splitting out generic "storage"...")
+Fixes: 84f84262a122 ("canon: simplify calculation of canonical order")
 Signed-off-by: Bart Van Assche <bvanassche@acm.org>
 ---
- options.c                     |  5 +++++
- options.h                     |  2 ++
- predefine.c                   |  4 ++++
- validation/c23-stdc-version.c | 11 +++++++++++
- 4 files changed, 22 insertions(+)
- create mode 100644 validation/c23-stdc-version.c
+ cse.c      | 17 +++++++++--------
+ simplify.c |  3 ++-
+ storage.c  |  5 +++--
+ 3 files changed, 14 insertions(+), 11 deletions(-)
 
-diff --git a/options.c b/options.c
-index 5aa3290e07da..c140a912e8e9 100644
---- a/options.c
-+++ b/options.c
-@@ -797,6 +797,11 @@ static char **handle_switch_s(const char *arg, char =
-**next)
- 		else if (!strcmp(arg, "gnu17") ||
- 			 !strcmp(arg, "gnu18"))
- 			standard =3D STANDARD_GNU17;
-+		else if (!strcmp(arg, "c23") || !strcmp(arg, "c2x") ||
-+			 !strcmp(arg, "iso9899:2024"))
-+			standard =3D STANDARD_C23;
-+		else if (!strcmp(arg, "gnu23") || !strcmp(arg, "gnu2x"))
-+			standard =3D STANDARD_GNU23;
+diff --git a/cse.c b/cse.c
+index b59581814ab7..b7d0314a0400 100644
+--- a/cse.c
++++ b/cse.c
+@@ -10,6 +10,7 @@
+ #include <stdlib.h>
+ #include <stdio.h>
+ #include <stddef.h>
++#include <stdint.h>
+ #include <assert.h>
 =20
- 		else
- 			die("Unsupported C dialect");
-diff --git a/options.h b/options.h
-index c2a9551a78e2..94eb7d10e362 100644
---- a/options.h
-+++ b/options.h
-@@ -27,6 +27,8 @@ enum standard {
- 	STANDARD_GNU11 =3D STANDARD_C11 | STANDARD_GNU,
- 	STANDARD_C17,
- 	STANDARD_GNU17 =3D STANDARD_C17 | STANDARD_GNU,
-+	STANDARD_C23,
-+	STANDARD_GNU23 =3D STANDARD_C23 | STANDARD_GNU,
- };
+ #include "parse.h"
+@@ -28,9 +29,9 @@ static int phi_compare(pseudo_t phi1, pseudo_t phi2)
+ 	const struct instruction *def2 =3D phi2->def;
 =20
- extern int die_if_error;
-diff --git a/predefine.c b/predefine.c
-index 5b0f0caf4c35..d6ab0785abad 100644
---- a/predefine.c
-+++ b/predefine.c
-@@ -111,6 +111,10 @@ void predefined_macros(void)
- 	case STANDARD_GNU17:
- 		predefine("__STDC_VERSION__", 1, "201710L");
+ 	if (def1->src1 !=3D def2->src1)
+-		return def1->src1 < def2->src1 ? -1 : 1;
++		return (uintptr_t)def1->src1 < (uintptr_t)def2->src1 ? -1 : 1;
+ 	if (def1->bb !=3D def2->bb)
+-		return def1->bb < def2->bb ? -1 : 1;
++		return (uintptr_t)def1->bb < (uintptr_t)def2->bb ? -1 : 1;
+ 	return 0;
+ }
+=20
+@@ -184,7 +185,7 @@ static int insn_compare(const void *_i1, const void *=
+_i2)
+=20
+ 	case OP_SEL:
+ 		if (i1->src3 !=3D i2->src3)
+-			return i1->src3 < i2->src3 ? -1 : 1;
++			return (uintptr_t)i1->src3 < (uintptr_t)i2->src3 ? -1 : 1;
+ 		/* Fall-through to binops */
+=20
+ 	/* Binary arithmetic */
+@@ -208,7 +209,7 @@ static int insn_compare(const void *_i1, const void *=
+_i2)
+ 	case OP_FDIV:
+ 	case_binops:
+ 		if (i1->src2 !=3D i2->src2)
+-			return i1->src2 < i2->src2 ? -1 : 1;
++			return (uintptr_t)i1->src2 < (uintptr_t)i2->src2 ? -1 : 1;
+ 		/* Fall through to unops */
+=20
+ 	/* Unary */
+@@ -216,17 +217,17 @@ static int insn_compare(const void *_i1, const void=
+ *_i2)
+ 	case OP_FNEG:
+ 	case OP_SYMADDR:
+ 		if (i1->src1 !=3D i2->src1)
+-			return i1->src1 < i2->src1 ? -1 : 1;
++			return (uintptr_t)i1->src1 < (uintptr_t)i2->src1 ? -1 : 1;
  		break;
-+	case STANDARD_C23:
-+	case STANDARD_GNU23:
-+		predefine("__STDC_VERSION__", 1, "202311L");
-+		break;
- 	}
- 	if (!(standard & STANDARD_GNU) && (standard !=3D STANDARD_NONE))
- 		predefine("__STRICT_ANSI__", 1, "1");
-diff --git a/validation/c23-stdc-version.c b/validation/c23-stdc-version.=
-c
-new file mode 100644
-index 000000000000..a2903362f2f3
---- /dev/null
-+++ b/validation/c23-stdc-version.c
-@@ -0,0 +1,11 @@
-+__STDC_VERSION__
-+
-+/*
-+ * check-name: c23-stdc-version
-+ * check-command: sparse -E -std=3Dc23 $file
-+ *
-+ * check-output-start
-+
-+202311L
-+ * check-output-end
-+ */
+=20
+ 	case OP_LABEL:
+ 		if (i1->bb_true !=3D i2->bb_true)
+-			return i1->bb_true < i2->bb_true ? -1 : 1;
++			return (uintptr_t)i1->bb_true < (uintptr_t)i2->bb_true ? -1 : 1;
+ 		break;
+=20
+ 	case OP_SETVAL:
+ 		if (i1->val !=3D i2->val)
+-			return i1->val < i2->val ? -1 : 1;
++			return (uintptr_t)i1->val < (uintptr_t)i2->val ? -1 : 1;
+ 		break;
+=20
+ 	case OP_SETFVAL:
+@@ -244,7 +245,7 @@ static int insn_compare(const void *_i1, const void *=
+_i2)
+ 	case OP_PTRCAST:
+ 	case OP_UTPTR: case OP_PTRTU:
+ 		if (i1->src !=3D i2->src)
+-			return i1->src < i2->src ? -1 : 1;
++			return (uintptr_t)i1->src < (uintptr_t)i2->src ? -1 : 1;
+=20
+ 		// Note: if it can be guaranted that identical ->src
+ 		// implies identical orig_type->bit_size, then this
+diff --git a/simplify.c b/simplify.c
+index 2ddaf1c619a8..88f261da297e 100644
+--- a/simplify.c
++++ b/simplify.c
+@@ -40,6 +40,7 @@
+ // * `SHIFT(x, S)` is used for `LSR(x, S)` or `SHL(x, S)`.
+=20
+ #include <assert.h>
++#include <stdint.h>
+=20
+ #include "parse.h"
+ #include "expression.h"
+@@ -1814,7 +1815,7 @@ static int canonical_order(pseudo_t p1, pseudo_t p2=
+)
+ 		return 0;
+ 	switch (t1) {
+ 	case PSEUDO_SYM:
+-		return p1->sym <=3D p2->sym;
++		return (uintptr_t)p1->sym <=3D (uintptr_t)p2->sym;
+ 	case PSEUDO_REG:
+ 	case PSEUDO_ARG:
+ 		return p1->nr <=3D p2->nr;
+diff --git a/storage.c b/storage.c
+index 160d424ee1f6..1dafa08dccf0 100644
+--- a/storage.c
++++ b/storage.c
+@@ -8,6 +8,7 @@
+  */
+ #include <stdio.h>
+ #include <stdlib.h>
++#include <stdint.h>
+ #include <assert.h>
+=20
+ #include "symbol.h"
+@@ -33,7 +34,7 @@ static int hash_list_cmp(const void *_a, const void *_b=
+)
+ 	const struct storage_hash *a =3D _a;
+ 	const struct storage_hash *b =3D _b;
+ 	if (a->pseudo !=3D b->pseudo)
+-		return a->pseudo < b->pseudo ? -1 : 1;
++		return (uintptr_t)a->pseudo < (uintptr_t)b->pseudo ? -1 : 1;
+ 	return 0;
+ }
+=20
+@@ -118,7 +119,7 @@ static int storage_hash_cmp(const void *_a, const voi=
+d *_b)
+ 	struct storage *bb =3D b->storage;
+=20
+ 	if (a->bb !=3D b->bb)
+-		return a->bb < b->bb ? -1 : 1;
++		return (uintptr_t)a->bb < (uintptr_t)b->bb ? -1 : 1;
+ 	if (a->inout !=3D b->inout)
+ 		return a->inout < b->inout ? -1 : 1;
+ 	if (aa->type !=3D bb->type)
