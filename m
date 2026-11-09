@@ -1,70 +1,70 @@
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=199.89.1.14
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
 	t=1794256427;
-	b=uGXxK0ro4c2FFV7vj7v0s7659B1oED8XVChQXk1FEelsXzKZKsElmah1PI8O+iOQfYLM
-	 dKMNdtp7j+Y9nLUPMSaQi/vy1o8yeAzdLw36C20TYwm9MTHurO5HEfgEDFvzdRQMqgBqO
-	 BJHBvwNiY76bw3Chy/35/GY/kF9L4xYL1lzgB52c5rVSFwULmRSti/KcY0Xh+kyVFo84n
-	 xx+gIwTUnZdhvyT5FxdeWugDEZZdqeP/rInFt6NMUH3ozobSxZGWma1y5aSHm0+HZKGIN
-	 KPba0pnCWuurnm8vIlA9Voc+THJcKa77maTpoMdTUm4bV2q3f1uFYbWlmn5uyi7CYXw==
+	b=O3mtyXYtcu3CzOlttx5v1tarXfj2lJ2Qf6ZdNLphy6FJpvvPkfQU2ygLqXB42YBaB5CQ
+	 AEXz6B4nf813J/oceJv4uXYqNxzErxGRYwmReJGx68Jv7stuPUn+K9Z5CsLYwHFr8xnR9
+	 QsL1/0O21HBbIQZcvUHy3DUxsPSHegInpeABmUrF98a9+PPI6zwgDDA76H2o8I/3FkB+7
+	 wLl4uuQ81StvX2OGYftb5Wxu7iW+EzwHywD1w40sOZYyyGmLU1uBmvVLBWyIur80LufLJ
+	 CxdoJstT6W5az6fZmVZ1zCEOruYlWCgMOdy/zJF32HLuXYdSlst+5qKOOkzjJotFhvA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
 	a=rsa-sha256; c=relaxed/relaxed; t=1794256427;
 	h=DMARC-Filter:Received:DKIM-Signature:X-Virus-Scanned:Received:
 	 Received:From:To:Cc:Subject:Date:Message-ID:X-Mailer:In-Reply-To:
 	 References:MIME-Version:Content-Transfer-Encoding;
-	bh=iXX8EuJubFe7hZnkkPk/dG40LXQ8zpOrFkXdfsUWnVQ=;
-	b=KbOSVArh2jQuAnjqugUHl20eMAraZmnz5j1goT3xi6GF2uNXA+DpcSbIduQC7Teun7dU
-	 DZ3jOtOlJQcVPR2cDwAIzMtHoJLOpMIVvB2s+J1Elqd3A6voyMMuKy1ytX/buHyVqMMKt
-	 KChC3Rev9APGEf1cXaDihEKC2p3WwISSEZGBhjE099PyEtueCz5S7JIq63KRviQ+Z4C0N
-	 1lvef+wBI+0tVSweVhbnOwdCGpYJ/RwChJ/0xO3gfwOSYfhZ0sWC/5eLZO8xjuMFlleHk
-	 pUOSrRnDOjE3z5USyH/qQfSDtvZZQMT6pjnj7X8cYi+5Wy2rHw2WzU5KcQUV6pZNxig==
+	bh=UMwkkcA/2NtkTGHZrt2UgbKTdxOFI4CnBnZf78la1FU=;
+	b=BXIFqvyJ6bIcNNJJ8wKmiVa3tBEV6ek2TY58ss7royFpkmfeIurjxZKyWeHlCB6y7XES
+	 sPXZ7PmwSYguMBf8SYslo+ABuMRy0Zg2NbKzjECBdtQPvv4lsc/D7qNov3uO7EWfZL9R/
+	 clqYV5dwo8W8kYmT9pKt6LtbjsEyMykDaQ6zhVZh89TwJbeNxAU0evnn0+3Hdj09pNpLj
+	 MzYs486plHQ2QoLr0bm/AmZdptBI9g+qnpGDzamFJeopZhYk6EZ0A4ZuvGzlOERXhr9DM
+	 cpvkH/Ph4HLyu8hLhnlGlvKsrlR0spF/E31p432cVPJtg5eZ5YTZm/GE7d37eFoVt+Q==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
 	dmarc=pass header.from=acm.org;
 	spf=pass smtp.mailfrom=acm.org;
-	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=OxeQXV+R;
+	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=DeB3Cu70;
 	arc=none smtp.remote-ip=199.89.1.14
 Received: from 011.lax.mailroute.net (011.lax.mailroute.net [199.89.1.14])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A2C19606A31C
-	for <linux-sparse@vger.kernel.org>; Mon,  9 Nov 2026 20:33:46 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org A2C19606A31C
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 199F0606A326
+	for <linux-sparse@vger.kernel.org>; Mon,  9 Nov 2026 20:33:47 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 199F0606A326
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=acm.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=OxeQXV+R
+	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=DeB3Cu70
 Received: from localhost (localhost [127.0.0.1])
-	by 011.lax.mailroute.net (Postfix) with ESMTP id 4jNhM95ZxTz1XM6JF;
-	Mon,  9 Nov 2026 20:33:41 +0000 (UTC)
+	by 011.lax.mailroute.net (Postfix) with ESMTP id 4jNhMB1f5hz1XLyht;
+	Mon,  9 Nov 2026 20:33:42 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=acm.org; h=
 	content-transfer-encoding:mime-version:references:in-reply-to
 	:x-mailer:message-id:date:date:subject:subject:from:from
-	:received:received; s=mr01; t=1794256418; x=1796848419; bh=iXX8E
-	uJubFe7hZnkkPk/dG40LXQ8zpOrFkXdfsUWnVQ=; b=OxeQXV+RDH2m65rpz5NQh
-	WDOccYa9HwU6dU6qDYHv9GGpE8au9OrIAd7rKOH0o9nrxXSkChCYb0dq6TnRWGZE
-	yJHMMw9ygyFcnZ0LhXUFidB5vJ7DkDBxNdUVwdHf1dPgIi2BtIQnfnuk4v8NanhB
-	xTy99yoUJY/8DRKHyvQ9zL2D5fMdVLW1uIbRKxNa3Y9vdOHZpXN7i1GOTmJ3NVV8
-	tzpT14OuS+O6DG7nw9OkUU6rlTetwRdy4TzdpC/DmYPt1ImyZhspfHnxDT/M7B9W
-	topSJIVTla89Qn4Ae/Kk/z0DxpSdZBb2Vjr7UeBxzROe/fRokBcURX4+bVQmyuUm
-	g==
+	:received:received; s=mr01; t=1794256418; x=1796848419; bh=UMwkk
+	cA/2NtkTGHZrt2UgbKTdxOFI4CnBnZf78la1FU=; b=DeB3Cu704bSFyvrh0T1gL
+	rjkXEuMQlRcfowZAvArQgIN/+MWr+BlZ3y6HvIKZa8yQZ7VxlgPi/1+khGdrvlIm
+	08l01H4h3fV8ehPPmHZwyjUaXQ3XjiBg6o5ET8Aa1mEBQs20RV/fkfJn+qLd0UiG
+	QvmfCnEymKvJE1lvW5WoiI7eN24DRNISsZ0qx396ePzivxt0eUS9PMpomIrm6ezr
+	GL7wPLUx4zApmXq9X96LXFtd7l1nVIGn6xMB0IMVf3zpSjCbrAKVQQd37JHrqI+o
+	YZmGVCwaQiG1FC7IUk1SHKD4zDp3N64sCoJnhSAGKHjDk1XDMZ/Z0wcrLE2A5k3y
+	Q==
 X-Virus-Scanned: by MailRoute
 Received: from 011.lax.mailroute.net ([127.0.0.1])
  by localhost (011.lax [127.0.0.1]) (mroute_mailscanner, port 10029) with LMTP
- id 1P_rBkDeYWIU; Mon,  9 Nov 2026 20:33:38 +0000 (UTC)
+ id wXVyVtsMTuPW; Mon,  9 Nov 2026 20:33:38 +0000 (UTC)
 Received: from bvanassche.c.googlers.com.com (57.237.82.34.bc.googleusercontent.com [34.82.237.57])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
 	(Authenticated sender: bvanassche@acm.org)
-	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4jNhM65N20z1XLyht;
+	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4jNhM63nHmz1XMYJR;
 	Mon,  9 Nov 2026 20:33:38 +0000 (UTC)
 From: Bart Van Assche <bvanassche@acm.org>
 To: linux-sparse@vger.kernel.org
 Cc: Linus Torvalds <torvalds@linux-foundation.org>,
 	Bart Van Assche <bvanassche@acm.org>
-Subject: [PATCH 65/73] builtin: Support __builtin_infer_alloc_token() as a size_t ICE
-Date: Mon,  9 Nov 2026 12:32:51 -0800
-Message-ID: <20261109203259.362845-66-bvanassche@acm.org>
+Subject: [PATCH 64/73] expand: Ignore top-level non-array address space in compare_types()
+Date: Mon,  9 Nov 2026 12:32:50 -0800
+Message-ID: <20261109203259.362845-65-bvanassche@acm.org>
 X-Mailer: git-send-email 2.56.0.506.g506a7eabc5-goog
 In-Reply-To: <20261109203259.362845-1-bvanassche@acm.org>
 References: <20261109203259.362845-1-bvanassche@acm.org>
@@ -79,100 +79,106 @@ Precedence: list
 MIME-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
 
-Declare __builtin_infer_alloc_token() returning size_t_ctype and fold
-calls to integer constant expression 0 (CEF_SET_ICE) while evaluating all
-arguments without type restrictions.
+Clear c1.as and c2.as in compare_types() only when base_type is not
+SYM_ARRAY so that __builtin_types_compatible_p() ignores top-level scalar
+address spaces while still distinguishing both pointer target address
+spaces and array element address spaces.
 
-Support __kmalloc_token(...) in the Linux kernel's slab allocator on both
-32-bit and 64-bit targets without an #ifdef __CHECKER__ workaround, and
-add validation/builtin-infer-alloc-token.c.
+Add active validation tests in validation/types-compatible-address-space.=
+c
+instead of placing assertions in check-known-to-fail typeof-addresspace.c=
+.
 
 Signed-off-by: Bart Van Assche <bvanassche@acm.org>
 ---
- builtin.c                              | 21 +++++++++++++++++++
- validation/builtin-infer-alloc-token.c | 28 ++++++++++++++++++++++++++
- 2 files changed, 49 insertions(+)
- create mode 100644 validation/builtin-infer-alloc-token.c
+ expand.c                                    |  9 +++--
+ validation/types-compatible-address-space.c | 39 +++++++++++++++++++++
+ 2 files changed, 46 insertions(+), 2 deletions(-)
+ create mode 100644 validation/types-compatible-address-space.c
 
-diff --git a/builtin.c b/builtin.c
-index 0be03c51aedd..ba3326970391 100644
---- a/builtin.c
-+++ b/builtin.c
-@@ -638,6 +638,26 @@ static struct symbol_op object_size_op =3D {
- 	.expand =3D expand_object_size,
- };
+diff --git a/expand.c b/expand.c
+index 815ff24ac487..57d3aeba0f4e 100644
+--- a/expand.c
++++ b/expand.c
+@@ -790,8 +790,13 @@ static int expand_comma(struct expression *expr)
 =20
-+static int evaluate_infer_alloc_token(struct expression *expr)
-+{
-+	expr->flags |=3D CEF_SET_ICE;
-+	return 1;
-+}
-+
-+static int expand_infer_alloc_token(struct expression *expr, int cost)
-+{
-+	expr->flags =3D CEF_SET_ICE;
-+	expr->type =3D EXPR_VALUE;
-+	expr->value =3D 0;
-+	expr->taint =3D 0;
-+	return 0;
-+}
-+
-+static struct symbol_op infer_alloc_token_op =3D {
-+	.evaluate =3D evaluate_infer_alloc_token,
-+	.expand =3D expand_infer_alloc_token,
-+};
-+
- static int args_va_start(struct expression *expr)
+ static int compare_types(int op, struct symbol *left, struct symbol *rig=
+ht)
  {
- 	struct symbol *sym =3D expr->fn->ctype;
-@@ -865,6 +885,7 @@ static const struct builtin_fn builtins_common[] =3D =
-{
- 	{ "__builtin_index", &string_ctype, 0, { &const_string_ctype, &int_ctyp=
-e }},
- 	{ "__builtin_inf", &double_ctype, 0 },
- 	{ "__builtin_inff", &float_ctype, 0 },
-+	{ "__builtin_infer_alloc_token", size_t_ctype, 1, .op =3D &infer_alloc_=
-token_op },
- 	{ "__builtin_infl", &ldouble_ctype, 0 },
- 	{ "__builtin_isdigit", &int_ctype, 0, { &int_ctype }, .op =3D &isdigit_=
-op },
- 	{ "__builtin_isfinite", &int_ctype, 1, .op =3D &fp_unop_op },
-diff --git a/validation/builtin-infer-alloc-token.c b/validation/builtin-=
-infer-alloc-token.c
+-	struct ctype c1 =3D {.base_type =3D left};
+-	struct ctype c2 =3D {.base_type =3D right};
++	struct ctype c1 =3D left->type =3D=3D SYM_NODE ? left->ctype : (struct =
+ctype){.base_type =3D left};
++	struct ctype c2 =3D right->type =3D=3D SYM_NODE ? right->ctype : (struc=
+t ctype){.base_type =3D right};
++
++	if (!c1.base_type || c1.base_type->type !=3D SYM_ARRAY)
++		c1.as =3D NULL;
++	if (!c2.base_type || c2.base_type->type !=3D SYM_ARRAY)
++		c2.as =3D NULL;
+ 	switch (op) {
+ 	case SPECIAL_EQUAL:
+ 		return !type_difference(&c1, &c2, MOD_IGN, MOD_IGN);
+diff --git a/validation/types-compatible-address-space.c b/validation/typ=
+es-compatible-address-space.c
 new file mode 100644
-index 000000000000..0ec460d80edb
+index 000000000000..38953eca77e2
 --- /dev/null
-+++ b/validation/builtin-infer-alloc-token.c
-@@ -0,0 +1,28 @@
-+typedef struct { __SIZE_TYPE__ v; } kmalloc_token_t;
++++ b/validation/types-compatible-address-space.c
+@@ -0,0 +1,39 @@
++#define __as1 __attribute__((address_space(1)))
++#define __as2 __attribute__((address_space(2)))
 +
-+_Static_assert(__builtin_infer_alloc_token(1) =3D=3D 0, "infer_alloc_tok=
-en ICE");
-+_Static_assert(__builtin_infer_alloc_token(1, 2) =3D=3D 0, "infer_alloc_=
-token 2-arg ICE");
-+_Static_assert(__builtin_types_compatible_p(typeof(__builtin_infer_alloc=
-_token(1)),
-+					    __SIZE_TYPE__), "size_t return type");
++typedef int __as1 as1_int_t;
++typedef int __as1 as1_arr_t[4];
++typedef int __as1 as1_mat_t[2][4];
 +
-+static const __SIZE_TYPE__ static_tok =3D __builtin_infer_alloc_token(64=
-);
-+
-+static __SIZE_TYPE__ test_infer(int size, int flags)
++static void test_types_compatible_as(void)
 +{
-+	__SIZE_TYPE__ tok =3D __builtin_infer_alloc_token(size, flags);
-+	return tok + static_tok;
-+}
++	int __as1 obj, *ptr;
 +
-+static __SIZE_TYPE__ test_infer_single(int size)
-+{
-+	return __builtin_infer_alloc_token(size);
-+}
++	/* Top-level address space on scalar / pointer itself is ignored */
++	_Static_assert(__builtin_types_compatible_p(int __as1, int), "scalar as=
+1 vs int");
++	_Static_assert(__builtin_types_compatible_p(as1_int_t, int), "typedef s=
+calar as1 vs int");
++	_Static_assert(__builtin_types_compatible_p(typeof(obj), int), "typeof(=
+obj) vs int");
++	_Static_assert(__builtin_types_compatible_p(typeof(*ptr), int), "typeof=
+(*ptr) vs int");
++	_Static_assert(__builtin_types_compatible_p(int * __as1, int *), "ptr o=
+wn as1 vs int *");
 +
-+static kmalloc_token_t test_struct(int size)
-+{
-+	return (kmalloc_token_t){ .v =3D __builtin_infer_alloc_token(size) };
++	/* Pointee address space must match */
++	_Static_assert(!__builtin_types_compatible_p(int __as1 *, int *), "poin=
+tee as1 vs default");
++	_Static_assert(!__builtin_types_compatible_p(typeof(ptr), int *), "type=
+of(ptr) vs int *");
++	_Static_assert(!__builtin_types_compatible_p(int __as1 *, int __as2 *),=
+ "pointee as1 vs as2");
++	_Static_assert(__builtin_types_compatible_p(int __as1 *, int __as1 *), =
+"pointee as1 vs as1");
++
++	/* Array element address space must match */
++	_Static_assert(!__builtin_types_compatible_p(int __as1[4], int[4]), "ar=
+ray elem as1 vs default");
++	_Static_assert(!__builtin_types_compatible_p(as1_arr_t, int[4]), "typed=
+ef array as1 vs int[4]");
++	_Static_assert(!__builtin_types_compatible_p(typeof(as1_arr_t), int[4])=
+, "typeof(as1_arr_t) vs int[4]");
++	_Static_assert(!__builtin_types_compatible_p(int __as1[4], int __as2[4]=
+), "array elem as1 vs as2");
++	_Static_assert(__builtin_types_compatible_p(int __as1[4], int __as1[4])=
+, "array elem as1 vs as1");
++	_Static_assert(!__builtin_types_compatible_p(int __as1[2][4], int[2][4]=
+), "2d array elem as1 vs default");
++	_Static_assert(!__builtin_types_compatible_p(as1_mat_t, int[2][4]), "ty=
+pedef 2d array as1 vs int[2][4]");
++	_Static_assert(__builtin_types_compatible_p(int __as1[2][4], int __as1[=
+2][4]), "2d array elem as1 vs as1");
 +}
 +
 +/*
-+ * check-name: builtin-infer-alloc-token
++ * check-name: types-compatible-address-space
++ * check-command: sparse $file
 + */
