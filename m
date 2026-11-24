@@ -1,83 +1,66 @@
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=198.175.65.15
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.remote-ip=199.89.1.14
 ARC-Seal: i=1; d=subspace.kernel.org; s=arc20261015; a=rsa-sha256; cv=none;
-	t=1795514465;
-	b=GdLMTom0yheX6f0PXV7Sm8JCeEnBQtyjGbDIpd9xPGEx4rsecT/V/rqBhjMpOlZNpB5F
-	 TYjIJmbuP8v65p5pZW4Od+NcAizl5BqQrmQ+GyBbhGBSaiPtTS1+DpMV2id+pRlssL6Ta
-	 SoyB9iNTrM2SYSM1Vqaz9PQrw0F6XuQPppQ65f3dYTim1Mb8IXqq4k9ryKR6APEvkvjPM
-	 S1o2ayCYrvqOWBvstiIoLurVbJujQVt2mhU8qjCv2iUQz1yj4j+0HO3hMIdoH1SRTUXHK
-	 s4Nv7A93DAWtDhbICvuIJxmtJo+HvYkohQKIW+DgRGIri/4Jc7uTF8kHHL2xTrSw5+w==
+	t=1795538703;
+	b=KxcLamuTxSFKs+ujMIQC+qL0SwP/oHqb/h+i28GAGZfsP88zf2qU8DBFaTIUyZ1BSVsw
+	 kF3y03Kfamp2QbimKufF8IIv8is2XOGTl+nrd5l2ZOzQXYPQ5PMI8edc/gQ7l+dRd0R8u
+	 y6oy6k0kSOTOBGdh+mMcW6q3LkM11cyl4sk+999S6mPK/uHCVtboy8yNVSNyr9+J6jhER
+	 ZggGA6Kpi3mvsgs/beT20ENBy2S0QA6WhbKEa/sztGRzKmOXGwnL9QqmQe5vw2cBlKylZ
+	 nvbJtHpGDP498pYS+Ke+lwtbsDb7Dc0dazenxzcao1I8DJemjRxHmc7tKdU3fT93gbA==
 ARC-Message-Signature: i=1; d=subspace.kernel.org; s=arc20261015;
-	a=rsa-sha256; c=relaxed/relaxed; t=1795514465;
-	h=DMARC-Filter:DKIM-Signature:X-CSE-ConnectionGUID:X-CSE-MsgGUID:
-	 X-IronPort-AV:X-IronPort-AV:Received:X-CSE-ConnectionGUID:
-	 X-CSE-MsgGUID:X-ExtLoop1:X-IronPort-AV:Received:Date:From:To:Cc:
-	 Subject:Message-ID:References:MIME-Version:Content-Type:
-	 Content-Disposition:In-Reply-To:Organization;
-	bh=Zf9ESEgy1Yvb0BHjTagLxMnoCOgbiLUZ3kDaGMI2aC0=;
-	b=hi/3e0CVGIQtoL3cVqmlIn980MFZ50mK0eL3RpF6Hi/R3L1+p2xHc8Kf2sM6Whz735F6
-	 nwrHpQftGTbe6dau5KhrI0PZNKchlYjwWQSdS5Ftvb2hM3ts0XAce5iBeEpJvrFUA+ISo
-	 cMvW1fxsDQaEDvdCS3abBGcwuRwyCuKj15iKiIYhaAyTJ6ZiXO3kiUH8rm2bnzswegOON
-	 yyAMQ2dmS4LGuSV0c+pRDZLPJWxeWC4Y/x5Yd6YVAQXS0NwPNwOXzrhdWJDKd5az0KUtL
-	 CDUmvaugC4i07yiI5eHWdqu2uI0YZ0P7L7n7FcMxAZU9zFExLmt7yDiHMjaDE/ATLGg==
+	a=rsa-sha256; c=relaxed/relaxed; t=1795538703;
+	h=DMARC-Filter:Received:DKIM-Signature:X-Virus-Scanned:Received:
+	 Received:Message-ID:Date:MIME-Version:User-Agent:Subject:From:To:Cc:
+	 References:Content-Language:In-Reply-To:Content-Type:
+	 Content-Transfer-Encoding;
+	bh=jaMI51BbORS69FqpxFYJrqCgzBf7eHo4MXrQiJASQ5g=;
+	b=W1RwuGg1R8cK3YR4QmkD2G9TkM0tqFgEvrrUyZkLcRaDFkNpxjWXd4yO17ox4HOK5sfs
+	 Hq7KgdasmDiLHyiKApgKyuKAhjGubc3uuQNRJXQlII8GzsO4lUt1Mt/wx++fA8eVRQibK
+	 5R03Lj1v4eWajYiG8TqG942R07Ub6kpC9Oen1pKG68c3DSVzIQXluH+dZlpYjsnhvbi8Z
+	 7t2lsgdtjCbmglnYWL9a6JwhO94MI6zoJVX0ZwVielmrE8ZvhtpQ1jxraY6z1LKqEbtGS
+	 oT3mhNZ08k5gkZqiiQM9zOmuowlqcHwaNVAHSO4zilHdObI+6EcH8RRwS9ZjLHincjg==
 ARC-Authentication-Results: i=1; smtp.subspace.kernel.org; 
-	dmarc=pass header.from=linux.intel.com;
-	spf=pass smtp.mailfrom=linux.intel.com;
-	dkim=pass header.d=intel.com header.i=@intel.com header.a=rsa-sha256 header.s=Intel header.b=L3jXIWAq;
-	arc=none smtp.remote-ip=198.175.65.15
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.15])
-	(using TLSv1.2 with cipher ECDHE-ECDSA-AES256-GCM-SHA384 (256/256 bits))
+	dmarc=pass header.from=acm.org;
+	spf=pass smtp.mailfrom=acm.org;
+	dkim=pass header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=bXfYRebI;
+	arc=none smtp.remote-ip=199.89.1.14
+Received: from 011.lax.mailroute.net (011.lax.mailroute.net [199.89.1.14])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (prime256v1) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6D04F606A31E;
-	Tue, 24 Nov 2026 10:01:05 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org 6D04F606A31E
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.intel.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A0845606A32D
+	for <linux-sparse@vger.kernel.org>; Tue, 24 Nov 2026 16:45:02 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.2 smtp.subspace.kernel.org A0845606A32D
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=acm.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.a=rsa-sha256 header.s=Intel header.b=L3jXIWAq
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1795514465; x=1827050465;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=Eltag6jOZ8zeJgwzkIWJ40VcLJAp19NlWjNiKuJ8QlY=;
-  b=L3jXIWAqRYQhwOkE1/XF1eOoyoTA/Zal08pjECmpIu0BWnEaA0C+nYjL
-   wMI43Dgp/DD7yfV261rP0zGv+0KNu9h9nP2ei8Xu2MWZ1vE3bOkPv3L+z
-   SImbgLRMo/F1n6KcnDccIsBSqWOaT9nUk3XkjHCb/zmNxbzfsRLS1zZ29
-   q/hpndiFfLE/dkZuDqQRiEu2BOoGC0Ew5Asa585NLxFyQWDH+9TV4sZWc
-   5ZXfqKNlwlluoUP6peeao1BqxcA8+gACVskMn4y+3KAxI6Hs4LDGA77fv
-   llVbHckpEsjgy7pFQVh7rHsZtol0D8g/iks7eLUOm6X/mek4Nom9kPqa5
-   g==;
-X-CSE-ConnectionGUID: S6aHRbljTIqIe1f14ixqyQ==
-X-CSE-MsgGUID: n9ysHJPbSo25lB9h9WFcrA==
-X-IronPort-AV: E=McAfee;i="6800,10657,11975"; a="4355697"
-X-IronPort-AV: E=Sophos;i="6.27,230,1787036400"; 
-   d="scan'208";a="4355697"
-Received: from orviesa009.jf.intel.com ([10.64.159.149])
-  by orvoesa107.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Nov 2026 01:13:45 -0800
-X-CSE-ConnectionGUID: n61VJSvpRo2frX89+RSoZg==
-X-CSE-MsgGUID: FX+CTpqaRFujgeEjWD0HRQ==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.27,230,1787036400"; 
-   d="scan'208";a="11834755"
-Received: from hrotuna-mobl2.ger.corp.intel.com (HELO localhost) ([10.245.245.125])
-  by smtpauth.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Nov 2026 01:13:43 -0800
-Date: Tue, 24 Nov 2026 11:13:41 +0200
-From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-To: Yury Norov <ynorov@nvidia.com>
-Cc: linux-kernel@vger.kernel.org, Yury Norov <yury.norov@gmail.com>,
-	Rasmus Villemoes <linux@rasmusvillemoes.dk>,
-	Jonathan Cameron <jic23@kernel.org>, Chris Li <sparse@chrisli.org>,
-	Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
-	linux-sparse@vger.kernel.org
-Subject: Re: [PATCH v1 1/1] bitmap: Refactor bitmap_read() and bitmap_write()
- to avoid too big shift
-Message-ID: <awVVRTuvDLLVmRlS@ashevche-desk.local>
-References: <20261119191530.1716850-1-andriy.shevchenko@linux.intel.com>
- <av9eAde6AKlAKWaH@yury>
- <av9kOeZtIjOtH2yp@ashevche-desk.local>
- <av9ofhBTAcMJud_-@yury>
- <awAH8F_UXdcftgV6@ashevche-desk.local>
- <awBcWKvDGV8sLcGu@yury>
+	dkim=pass (2048-bit key, unprotected) header.d=acm.org header.i=@acm.org header.a=rsa-sha256 header.s=mr01 header.b=bXfYRebI
+Received: from localhost (localhost [127.0.0.1])
+	by 011.lax.mailroute.net (Postfix) with ESMTP id 4jYpZJ1sDyz1XM5kD;
+	Tue, 24 Nov 2026 16:44:56 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=acm.org; h=
+	content-transfer-encoding:content-type:content-type:in-reply-to
+	:content-language:references:from:from:subject:subject
+	:user-agent:mime-version:date:date:message-id:received:received;
+	 s=mr01; t=1795538695; x=1798130696; bh=jaMI51BbORS69FqpxFYJrqCg
+	zBf7eHo4MXrQiJASQ5g=; b=bXfYRebIcl3jpMinmMJriYAOYH3QpGhBpim67+KO
+	hUsXjbyktN1rIbXbPNFsz7zPSnQg5i4s1SnQCN8354xtYyESSN/Xosfs1FnXMzXN
+	E2alIDgvHyq1CJoMRV6nrksfneFKLQiQbvMt9aPuPrLT57n9kD3I7OtZ04q3LTaq
+	tFCJYcs4VbbaSkOnhitidGafpOL4TQ0YatBp3Ln9Y/buZYSKNWDWgiwagnpV7Y6g
+	3b+JMEXIiqQUkaFSWW8Yfjtt8efzRu35oG11M4ZtHgorL3g4qx0T8ATwoD1+x4qN
+	Ziw/Kkg9hT7zjbE7p0voHkWJG8YTbJPC9VWRqoVxmsyDfQ==
+X-Virus-Scanned: by MailRoute
+Received: from 011.lax.mailroute.net ([127.0.0.1])
+ by localhost (011.lax [127.0.0.1]) (mroute_mailscanner, port 10029) with LMTP
+ id FaKL6j46rGyn; Tue, 24 Nov 2026 16:44:55 +0000 (UTC)
+Received: from [IPV6:2a00:79e0:2ed2:d:b87d:aea9:8f72:a6cd] (unknown [104.135.182.41])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	(Authenticated sender: bvanassche@acm.org)
+	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4jYpZH0fC5z1XM4Tn;
+	Tue, 24 Nov 2026 16:44:55 +0000 (UTC)
+Message-ID: <d9ef968b-39aa-431d-9c90-5641299d489b@acm.org>
+Date: Tue, 24 Nov 2026 08:44:54 -0800
 X-Mailing-List: linux-sparse@vger.kernel.org
 List-Id: <linux-sparse.vger.kernel.org>
 List-Post: <mailto:linux-sparse@vger.kernel.org>
@@ -87,54 +70,48 @@ List-Unsubscribe: <mailto:linux-sparse+unsubscribe@vger.kernel.org>
 List-Owner: <mailto:linux-sparse+owner@vger.kernel.org>
 Precedence: list
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <awBcWKvDGV8sLcGu@yury>
-Organization: Intel Finland Oy - BIC 0357606-4 - c/o Alberga Business Park, 6
- krs, Bertel Jungin Aukio 5, 02600 Espoo
+User-Agent: Mozilla Thunderbird
+Subject: Re: PATCH 00/73] Support more C23 features
+From: Bart Van Assche <bvanassche@acm.org>
+To: linux-sparse@vger.kernel.org
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+References: <20261109203259.362845-1-bvanassche@acm.org>
+Content-Language: en-US
+In-Reply-To: <20261109203259.362845-1-bvanassche@acm.org>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-On Fri, Nov 20, 2026 at 09:42:32AM -0500, Yury Norov wrote:
-> On Fri, Nov 20, 2026 at 10:42:24AM +0200, Andy Shevchenko wrote:
-> > On Thu, Nov 19, 2026 at 04:22:06PM -0500, Yury Norov wrote:
-> > > On Thu, Nov 19, 2026 at 11:03:53PM +0200, Andy Shevchenko wrote:
-> > > > On Thu, Nov 19, 2026 at 03:37:33PM -0500, Yury Norov wrote:
-> > > > > On Thu, Nov 19, 2026 at 08:15:30PM +0100, Andy Shevchenko wrote:
+On 11/9/26 12:31 PM, Bart Van Assche wrote:
+> If nobody objects I will publish this patch series two weeks from now to
+> the master branch at kernel.org.
 
-...
+This patch series has been published with only one change. The only 
+change that has been made is a robustness improvement for a GitHub
+workflow and can be found below:
 
-> > > > > I guess... Let's keep the patch minimal?
-> > > > > 
-> > > > > > -	mask = BITMAP_LAST_WORD_MASK(nbits);
-> > > > > > -	value &= mask;
-> > > > > > -	offset = start % BITS_PER_LONG;
-> > > > > > -	space = BITS_PER_LONG - offset;
-> > > > > > -	fit = space >= nbits;
-> > > > > 
-> > > > > I don't like this 'fit' thing, and would like to drop it. But
-> > > > > let's find a better motivation to do that?
-> > > > 
-> > > > Why? The fit keeps the check I want to refactor, since it makes it twice
-> > > > the code with that ternary looks ugly and unreadable. This is exactly the
-> > > > chance to kill two birds with one stone.
-> > > 
-> > > That's what I meant regarding the motivational part and minimizing the
-> > > patch.
-> > 
-> > OK. So refactoring bitmap_write() to make it look like bitmap_read() can be
-> > done after your nice below patch.
-> 
-> Sure, I'll take the patch with the tags suggested.
+diff --git a/ci/build-linux-kernel-with-sparse.sh 
+b/ci/build-linux-kernel-with-sparse.sh
+index 7e3505634d95..761de6e1383b 100755
+--- a/ci/build-linux-kernel-with-sparse.sh
++++ b/ci/build-linux-kernel-with-sparse.sh
+@@ -10,7 +10,14 @@ rm -rf linux-kernel
+  if [ -e ../linux-kernel ]; then
+      git clone ../linux-kernel linux-kernel
+  else
+-    git clone --depth=3 
+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git 
+linux-kernel
++    for url in https://github.com/torvalds/linux.git \
++ 
+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git; do
++       if git clone --depth=3 "$url" linux-kernel; then
++           break
++       fi
++       rm -rf linux-kernel
++    done
++    [ -d linux-kernel ]
+  fi
+  cd linux-kernel
+  # Make most __CHECKER__ checks ineffective.
 
-In the Linux Next it uses Link instead of Closes. Perhaps you still have
-a chance to amend that?
-
-> But you're very welcome to continue optimizing it - my gut feeling says we
-> can squeeze a few more percents out of it with just a careful refactoring.
-
-Sure, when I have time to look into this again.
-
--- 
-With Best Regards,
-Andy Shevchenko
-
-
+Bart.
